@@ -1,0 +1,169 @@
+/* V29 – profesyonel görünüm: font, cam (glass) menüler, simetrik düğme/rozetler, bildirimler, oyuncu kutuları, performans.
+   Sahne koordinatları 1690×805. En son yüklenir. */
+:root{
+  --pro-font:'Oswald','Arial Narrow',sans-serif;
+  --pro-text:'Barlow','Outfit',system-ui,sans-serif;
+  --glass-bg:linear-gradient(160deg,rgba(28,72,124,.72),rgba(8,26,52,.82));
+  --glass-border:1px solid rgba(160,205,255,.35);
+  --glass-shadow:0 20px 50px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.18);
+}
+
+/* ---------- performans: süs animasyonları kapalı ---------- */
+body.game-page .particles,body.game-page .background-animation{display:none!important}
+#gameBoard .player-info:not(.active-turn) .turn-fill{animation:none!important}
+
+/* ---------- font ---------- */
+#gameContainer,#gameContainer button,#lobbyOverlay{font-family:var(--pro-text)}
+#gameBoard .player-info .player-name{font:500 17px/1 var(--pro-font)!important;letter-spacing:.4px}
+#gameBoard .mode-badges .mode-badge{font:500 18px/1 var(--pro-font)!important;letter-spacing:.5px}
+#gameContainer :is(#minimumOpenBadge,#pairOpenBadge) .badge-value,#gameContainer #rackScore{font:600 21px/1 var(--pro-font)!important}
+
+/* ---------- taşlar: aralarında yalnızca ince bir çizgi ---------- */
+#gameContainer .cue-wood .cue-row .tile-slot .tile-sprite{width:calc(100% - 2px)!important}
+#compactOpenGroups .grid-table-tile{width:calc(100% - 1px)!important;height:calc(100% - 1px)!important;margin:.5px!important}
+
+/* ---------- işlek işareti: taşın altındaki gri mührün tam üstünde ---------- */
+#gameContainer .tile-sprite .islek-mark{left:50%!important;bottom:9%!important;width:32%!important;height:23%!important;aspect-ratio:auto!important;
+  transform:translateX(-50%)!important;border-radius:50%!important;z-index:4!important;
+  background:radial-gradient(circle,#e3262b 0 18%,#fff 19% 38%,#e3262b 39% 62%,#fff 63% 70%,transparent 71%)!important}
+
+/* ---------- sürükle-bırak: hedef grup ---------- */
+#compactOpenGroups .grid-table-tile.drop-target{box-shadow:0 0 0 2px #9be34a,0 0 12px 2px rgba(155,227,74,.8)!important;z-index:6!important}
+.pointer-ghost{pointer-events:none!important;z-index:10000!important}
+#gameContainer #myLeftDiscard.is-locked{opacity:.55;filter:grayscale(.6)}
+
+/* ---------- işlem düğmeleri: hepsi aynı boyut, iki atık çerçevesinin arasında ortalı ---------- */
+#gameContainer #gameActionPanel.game-action-panel{left:1383px!important;top:206px!important;width:150px!important;display:flex!important;flex-direction:column!important;gap:12px!important;align-items:center!important}
+#gameContainer #gameActionPanel #turnActions{display:flex!important;flex-direction:column!important;gap:12px!important;align-items:center!important;margin:0!important;padding:0!important}
+#gameContainer #gameActionPanel :is(#openHandBtn,#openPairsBtn,#undoDiscardBtn,#finishBtn).action-btn.action-btn{
+  width:150px!important;height:54px!important;min-height:54px!important;margin:0!important;background-size:contain!important;background-position:center!important}
+
+/* ---------- rozetler: seri ve çift, tahtaların dış kenarında aynı yükseklikte ---------- */
+#gameContainer #minimumOpenBadge.minimum-open-badge.minimum-open-badge{left:272px!important;top:212px!important;right:auto!important;bottom:auto!important;width:84px!important;height:31px!important}
+#gameContainer #pairOpenBadge.pair-open-badge.pair-open-badge{left:1300px!important;top:209px!important;right:auto!important;bottom:auto!important;width:66px!important;height:37px!important}
+/* El sayacı: ıstakanın hemen üstünde, isim kutusunun sağında */
+#gameContainer #rackStatus.rack-status.rack-status.rack-status{left:996px!important;top:552px!important;right:auto!important;bottom:auto!important}
+
+/* ---------- dört oyuncu kutusu aynı tasarım (cam, mavi kenar) ---------- */
+#gameBoard .player-info#topPlayerInfo,#gameBoard .player-info#bottomPlayerInfo,#gameBoard .player-info#leftPlayerInfo,#gameBoard .player-info#rightPlayerInfo{
+  background:linear-gradient(180deg,rgba(24,56,98,.95),rgba(9,24,48,.96))!important;border:1px solid rgba(130,185,245,.55)!important;border-radius:10px!important;
+  box-shadow:0 6px 14px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.18)!important}
+#gameBoard .player-info.active-turn{box-shadow:0 0 0 2px #9be34a,0 0 16px 3px rgba(155,227,74,.6)!important}
+/* avatar çerçeveye tam otursun: avatar 36px, çerçeve deliği avatarı %4 kaplar */
+#gameBoard .player-info .avatar-wrapper{width:36px!important;height:36px!important;flex:0 0 36px}
+#gameBoard .player-info .avatar-wrapper img.player-avatar{width:36px!important;height:36px!important;display:block!important}
+#gameBoard .player-info .avatar-wrapper::after{inset:-48%!important}
+
+/* ---------- bildirimler ---------- */
+#gameContainer #gameToast.toast{left:50%!important;right:auto!important;top:74px!important;bottom:auto!important;transform:translateX(-50%)!important;
+  padding:10px 20px!important;border-radius:14px!important;background:var(--glass-bg)!important;border:var(--glass-border)!important;box-shadow:var(--glass-shadow)!important;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff!important;font:500 18px/1.25 var(--pro-text)!important;max-width:760px;z-index:900!important}
+#gameContainer #gameToast .toast-icon{display:none}
+.event-banner{position:absolute;left:50%;top:230px;z-index:950;min-width:420px;padding:16px 34px 18px;text-align:center;pointer-events:none;
+  transform:translate(-50%,-10px) scale(.92);opacity:0;transition:opacity .22s,transform .3s cubic-bezier(.2,1.4,.4,1);
+  background:linear-gradient(160deg,rgba(18,46,86,.9),rgba(6,18,38,.94));border:1px solid rgba(160,205,255,.4);border-radius:18px;
+  box-shadow:0 24px 60px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.18);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.event-banner.show{opacity:1;transform:translate(-50%,0) scale(1)}
+.event-banner .eb-title{font:600 24px/1.1 var(--pro-font);letter-spacing:1.2px;color:#fff}
+.event-banner .eb-value{margin-top:6px;font:700 64px/1 var(--pro-font);letter-spacing:1px}
+.event-banner .eb-note{margin-top:2px;font:500 15px/1 var(--pro-text);color:#b9d3ef;letter-spacing:.5px}
+.event-banner.tone-danger{border-color:rgba(255,120,120,.55)}
+.event-banner.tone-danger .eb-value{color:#ff5a63;text-shadow:0 0 18px rgba(255,60,70,.55)}
+.event-banner.tone-success{border-color:rgba(155,227,74,.55)}
+.event-banner.tone-success .eb-value{color:#a6f05c;text-shadow:0 0 18px rgba(130,230,60,.5)}
+.penalty-float{font-family:var(--pro-font)!important}
+
+/* ---------- cam menüler ---------- */
+#gameContainer #quickMenuPanel.quick-menu-panel,#gameContainer #tableChatPanel .table-chat-body,
+#gameContainer #rulesModal .rules-dialog,#gameContainer .modal .modal-content,#gameContainer #profilePopup .profile-card,#gameContainer .tomato-select-panel{
+  background:var(--glass-bg)!important;border:var(--glass-border)!important;box-shadow:var(--glass-shadow)!important;
+  backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);border-radius:18px!important;color:#eef6ff}
+#gameContainer #quickMenuPanel button{background:rgba(255,255,255,.07)!important;border:1px solid rgba(255,255,255,.14)!important;box-shadow:none!important;
+  font:500 18px/1 var(--pro-font)!important;letter-spacing:.6px;border-radius:12px!important;transition:background .15s}
+#gameContainer #quickMenuPanel button:hover{background:rgba(255,255,255,.16)!important;filter:none}
+#gameContainer #quickMenuPanel button.qm-danger{background:linear-gradient(180deg,rgba(220,60,66,.9),rgba(150,22,28,.9))!important}
+#quickMenuPanel .qm-title,#tableChatPanel .tc-head strong{font:600 15px/1 var(--pro-font)!important;letter-spacing:2.5px}
+#tableChatPanel .tc-head{background:rgba(255,255,255,.06)!important}
+#gameContainer #tableChatPanel #tableChatMessages{background:rgba(0,0,0,.12)!important}
+#gameContainer #tableChatPanel .chat-entry{background:rgba(255,255,255,.08)!important;font-family:var(--pro-text)!important;font-weight:500!important}
+#gameContainer #tableChatPanel #quickPhrases button{background:rgba(255,255,255,.1)!important;border:1px solid rgba(255,255,255,.18)!important;font:500 15px/1 var(--pro-font)!important;letter-spacing:.4px}
+#gameContainer #tableChatPanel #quickPhrases button:hover{background:rgba(255,255,255,.2)!important}
+#gameContainer #tableChatPanel #tableChatInput{background:rgba(0,0,0,.25)!important;border:1px solid rgba(160,205,255,.35)!important}
+#gameContainer .modal{background:rgba(3,12,26,.55)!important;backdrop-filter:blur(3px)}
+#gameContainer .modal .modal-content h2,#gameContainer #rulesModal h2{font:600 30px/1.1 var(--pro-font)!important;letter-spacing:1px}
+#gameContainer #rulesModal{position:fixed;inset:0;z-index:950;display:grid;place-items:center;background:rgba(3,12,26,.55)}
+#gameContainer #rulesModal.hidden{display:none!important}
+#gameContainer #rulesModal .rules-dialog{position:relative;width:min(720px,90%);padding:26px 30px}
+#gameContainer #rulesModal li{font:500 17px/1.45 var(--pro-text);margin:4px 0}
+
+/* ---------- masa bekleme: arkada masa görünsün ---------- */
+#lobbyOverlay.lobby-overlay{background:radial-gradient(ellipse at 50% 45%,rgba(4,16,34,.25),rgba(4,16,34,.62))!important;backdrop-filter:blur(1.5px)}
+body.waiting-table #gameContainer.hidden{display:block!important;pointer-events:none}
+#tableWaitPanel .tw-field{font-family:var(--pro-font)!important;font-weight:500!important;letter-spacing:.6px}
+
+/* Menü düğmeleri cam (önceki kuralları ez) */
+#gameContainer #quickMenuPanel.quick-menu-panel button[role=menuitem]{background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.16)!important;box-shadow:none!important;
+  font:500 18px/1 'Oswald','Arial Narrow',sans-serif!important;letter-spacing:.7px!important;height:50px!important}
+#gameContainer #quickMenuPanel.quick-menu-panel button[role=menuitem]:hover{background:rgba(255,255,255,.18)!important}
+#gameContainer #quickMenuPanel.quick-menu-panel button.qm-danger{background:linear-gradient(180deg,rgba(225,64,70,.92),rgba(150,22,28,.92))!important;border-color:rgba(255,160,160,.4)!important}
+#gameContainer #quickMenuPanel .qm-icon{background-color:rgba(255,255,255,.12)!important}
+
+/* Bekleme ekranı: arkada yalnız masa, ıstaka ve atık yerleri görünsün */
+body.waiting-table #gameContainer :is(#gameActionPanel,#sortSeriesBtn,#sortPairsBtn,.reference-hud,#rackStatus,#turnTimerBar,#returnTakenBtn,#minimumOpenBadge,#pairOpenBadge,#tomatoBtn),
+body.waiting-table #gameBoard .player-info,body.waiting-table #gameBoard .table-center .mode-column{visibility:hidden!important}
+
+/* Çift alanı: seri tahtası gibi ızgara kutularına oturur (6 sütun × 13 satır; her çift 2 kare).
+   Önce ilk sütun yukarıdan aşağı dolar, sonra yandaki sütuna geçer. */
+#gameContainer #openedPairsZone #pairsGrid.pairs-grid{position:absolute!important;inset:0!important;width:auto!important;height:auto!important;padding:0!important;margin:0!important;gap:0!important;
+  display:grid!important;grid-template-columns:repeat(3,1fr)!important;grid-template-rows:repeat(13,1fr)!important;grid-auto-flow:column!important;
+  grid-auto-rows:unset!important;justify-content:stretch!important;align-content:stretch!important;z-index:1}
+#gameContainer #openedPairsZone #pairsGrid .pair-row{width:auto!important;height:auto!important;margin:0!important;padding:0!important;gap:0!important;
+  display:grid!important;grid-template-columns:1fr 1fr!important;min-width:0!important;min-height:0!important}
+#gameContainer #openedPairsZone #pairsGrid .pair-mini-tile{width:calc(100% - 1px)!important;height:calc(100% - 1px)!important;margin:.5px!important;flex:none!important;
+  border-radius:2px!important;background-size:1300% 500%!important;box-shadow:0 1px 2px #06101a77!important}
+/* ---------- OYUN SONUCU (101 Okey Plus düzeni) ----------
+   Başlık + alt bilgi; satırlarda avatar (kazananda taç), isim, durum ve el puanı; sağ sütunda toplam ve KAZANAN etiketi.
+   MASADAN AYRIL solda, YENİ OYUNA BAŞLA sağda: pencerenin iki kenarında, dikeyde tam ortada ve eşit taşmalı.
+   MASAYA GÖZ AT altta ortada sekme. */
+#gameContainer #gameEndModal .modal-content.score-modal{position:relative!important;width:820px!important;max-width:none!important;overflow:visible!important;
+  display:flex!important;flex-direction:column!important;align-items:stretch!important;padding:20px 44px 40px!important;border-radius:22px!important}
+#gameContainer #gameEndModal #winnerText{order:1;margin:0!important;text-align:center;font:600 40px/1 'Oswald','Arial Narrow',sans-serif!important;letter-spacing:1.5px!important;color:#fff!important}
+#gameContainer #gameEndModal #autoRoundNotice{order:2;margin:8px 0 14px!important;text-align:center;font:500 19px/1.2 'Oswald','Arial Narrow',sans-serif!important;letter-spacing:.6px;color:#d9e8f8!important}
+#gameContainer #gameEndModal #finalScores{order:3}
+#gameContainer #gameEndModal .result-history{display:none!important}
+#gameContainer #gameEndModal .result-list{display:flex;flex-direction:column;gap:10px}
+#gameContainer #gameEndModal .result-block{display:grid!important;grid-template-columns:1fr 170px;align-items:center;padding:4px 0!important;border-radius:14px!important;
+  background:linear-gradient(90deg,#2f74d8 0%,#1d4fa8 55%,rgba(14,40,86,.85) 100%)!important;border:1px solid rgba(140,190,255,.35)}
+#gameContainer #gameEndModal .result-block.is-winner{background:linear-gradient(180deg,#0f2342,#0a1a33)!important;border-color:rgba(155,227,74,.45)}
+#gameContainer #gameEndModal .result-block>.result-row{grid-column:1}
+#gameContainer #gameEndModal .result-row{display:grid!important;grid-template-columns:96px 1fr 90px;align-items:center;gap:12px;padding:8px 10px!important}
+#gameContainer #gameEndModal .result-avatar{position:relative;width:78px!important;height:78px!important;flex:none}
+#gameContainer #gameEndModal .result-avatar img{width:78px!important;height:78px!important;border-radius:50%!important;object-fit:cover;border:4px solid #0b1d3a!important;box-shadow:0 0 0 3px #4d7fb8!important;background:#244672}
+#gameContainer #gameEndModal .result-crown{position:absolute;left:-16px;top:-18px;font-size:34px;transform:rotate(-20deg)}
+#gameContainer #gameEndModal .result-info{text-align:left!important;align-items:flex-start}
+#gameContainer #gameEndModal .result-info strong{font:500 26px/1.1 'Oswald','Arial Narrow',sans-serif!important;color:#fff!important;letter-spacing:.4px}
+#gameContainer #gameEndModal .result-row.is-me .result-info strong{color:#ffd670!important}
+#gameContainer #gameEndModal .result-info small{font:500 16px/1.2 'Barlow',sans-serif!important;color:#bcd6f3!important;margin-top:4px}
+#gameContainer #gameEndModal .result-round{font:500 24px/1 'Oswald',sans-serif!important;text-align:center;min-width:0!important}
+#gameContainer #gameEndModal .result-round.good{color:#7dff6a!important}#gameContainer #gameEndModal .result-round.bad{color:#ffffff!important}
+#gameContainer #gameEndModal .result-total{grid-column:2;grid-row:1 / span 2;position:static!important;transform:none!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+#gameContainer #gameEndModal .result-total b{font:600 44px/1 'Oswald',sans-serif;color:#fff}
+#gameContainer #gameEndModal .result-block.is-winner .result-total b{color:#7dff5a}
+#gameContainer #gameEndModal .result-win-label{font:600 24px/1 'Oswald',sans-serif;letter-spacing:1px;color:#7dff5a}
+/* düğmeler: simetrik */
+#gameContainer #gameEndModal .result-actions{display:contents!important}
+#gameContainer #gameEndModal :is(#resultLeaveBtn,#newRoundBtn).round-btn{position:absolute!important;top:50%!important;transform:translateY(-50%)!important;margin:0!important;
+  width:150px!important;height:150px!important;border-radius:50%!important;border:6px solid #0b1d3a!important;box-shadow:0 0 0 4px #4d7fb8,0 10px 22px rgba(0,0,0,.5),inset 0 6px 14px rgba(255,255,255,.35)!important;
+  color:#fff!important;font:600 23px/1.05 'Oswald','Arial Narrow',sans-serif!important;letter-spacing:.6px;text-shadow:0 2px 2px rgba(0,0,0,.45);display:flex!important;align-items:center;justify-content:center;text-align:center;padding:0 12px!important}
+#gameContainer #gameEndModal #resultLeaveBtn{left:-92px!important;background:radial-gradient(circle at 50% 35%,#ff6b5e,#c4161c 70%)!important}
+#gameContainer #gameEndModal #newRoundBtn{right:-92px!important;left:auto!important;background:radial-gradient(circle at 50% 35%,#8be36a,#279c1c 70%)!important}
+#gameContainer #gameEndModal #newRoundBtn.hidden{display:flex!important}
+#gameContainer #gameEndModal #newRoundBtn.is-countdown{cursor:default;filter:saturate(.85)}
+#gameContainer #gameEndModal #newRoundBtn .rb-count{display:block;font:700 44px/1 'Oswald',sans-serif;margin-top:4px}
+#gameContainer #gameEndModal #peekTableBtn.peek-btn{position:absolute!important;left:50%!important;bottom:-24px!important;transform:translateX(-50%)!important;height:48px!important;padding:0 30px!important;
+  border-radius:12px!important;border:2px solid #6fa3dd!important;background:linear-gradient(180deg,#24538c,#163a66)!important;font:600 20px/1 'Oswald',sans-serif!important;letter-spacing:1px;box-shadow:0 8px 16px rgba(0,0,0,.45)!important}
+#gameContainer #gameEndModal :is(#resultLeaveBtn,#newRoundBtn).round-btn{flex-direction:column!important;opacity:1!important}
+#gameContainer #gameEndModal #newRoundBtn.is-countdown,#gameContainer #gameEndModal #newRoundBtn:disabled{filter:none!important;opacity:1!important}
+.event-banner{z-index:850!important}
+#gameContainer #openedPairsZone #pairsGrid.pairs-grid{align-items:stretch!important;justify-items:stretch!important}
+#gameContainer #openedPairsZone #pairsGrid .pair-row{align-self:stretch!important;justify-self:stretch!important;height:100%!important;grid-template-rows:100%!important}

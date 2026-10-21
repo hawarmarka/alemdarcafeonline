@@ -1,0 +1,43 @@
+'use strict';
+const assert = require('node:assert/strict');
+const Game = require('../server/gameLogic');
+const g = new Game(); g.startGame([{name:'a'},{name:'b'},{name:'c'},{name:'d'}]);
+const tiles = g.playerTiles.flat();
+assert.equal(tiles.length,85);
+assert.equal(g.tiles.length,20);
+assert.equal(g.tiles.length + tiles.length + 1, 106);
+assert.equal(g.playerTiles[g.currentPlayer].length,22);
+assert.equal(g.playerTiles[(g.currentPlayer+1)%4].length,21);
+g.okey={color:'Mavi',number:6};
+const t=(color,number,id) => ({id:id||color+number,color,number,isFakeJoker:false});
+assert.equal(g.isValidSequence([t('Kirmizi',12),t('Kirmizi',13),t('Kirmizi',1)]),false,'13->1 not legal');
+assert.equal(g.isValidSet([t('Mavi',8),t('Mavi',8,'copy'),t('Kirmizi',8)]),false,'duplicate suit in per');
+assert(g.isValidSet([t('Mavi',8),t('Kirmizi',8),t('Siyah',8)]));
+assert(g.isValidSequence([t('Kirmizi',7),t('Kirmizi',8),t('Kirmizi',9)]));
+assert(g.isValidSequence([t('Kirmizi',7),t('Mavi',6),t('Kirmizi',9)]),'real okey replaces any number');
+assert.equal(g.getEffectiveTile({id:'fake1',color:'Sahte',isFakeJoker:true}).number,6);
+assert.equal(g.calculateGroupValue([t('Kirmizi',7),t('Kirmizi',8),t('Kirmizi',9)]),24);
+assert.equal(g.calculateGroupValue([t('Kirmizi',7),t('Mavi',7),t('Siyah',7)]),21);
+// Five exact pairs, including duplicates of two physical stones.
+const p=[1,2,3,4,5].flatMap(n=>[t('Kirmizi',n,'a'+n),t('Kirmizi',n,'b'+n)]);
+assert.equal(g.countPairs(p).length,5);
+// Drawn discard must be used, not silently carried in rack.
+g.playerTiles[0]=[t('Kirmizi',2)]; g.playerStates[0].mustOpenThisTurn=true;
+assert.equal(g.discardTile(0,0).penalty,true);
+g.playerStates[0].mustOpenThisTurn=false;
+assert(g.discardTile(0,0));
+// Official scoring for normal end, joker end and no-draw exhaustion.
+g.playerStates.forEach(s=>{s.hasOpened=false;s.openType=null;});
+g.playerStates[1].hasOpened=true;
+g.playerTiles[1]=[t('Siyah',10),t('Kirmizi',12)];
+g.discardPiles[0]=[t('Kirmizi',4)];
+let pts=g.calculatePoints(0,{type:'normal'});
+assert.deepEqual(pts,[-101,22,202,202]);
+g.discardPiles[0]=[t('Mavi',6)];
+pts=g.calculatePoints(0,{type:'normal'});
+assert.deepEqual(pts,[-202,44,404,404]);
+g.discardPiles[0]=[t('Kirmizi',4)];
+pts=g.calculatePoints(0,{type:'instant'});
+assert.deepEqual(pts,[-202,44,404,404]);
+assert.deepEqual(g.calculateExhaustedPoints(),[202,22,202,202]);
+console.log('advanced rules: 106 tiles, 21/22, joker, groups, pairs, discard and scoring passed');

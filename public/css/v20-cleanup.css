@@ -1,0 +1,72 @@
+/* V20 - scoreboard remake + clean numeric badges */
+#gameContainer #scoreboard{
+  top:134px!important; left:76px!important; width:540px!important; height:320px!important;
+  padding:0!important; background:transparent!important; border:0!important; box-shadow:none!important;
+  z-index:260!important; overflow:visible!important;
+}
+#gameContainer #scoreboard.hidden{display:none!important}
+#gameContainer .scoreboard-skin{
+  position:relative; width:100%; height:100%;
+  background:url('/asset/reference/skor.webp') center/100% 100% no-repeat;
+}
+#scoreboardClose{
+  position:absolute; z-index:3; left:-2px; top:88px; width:96px; height:96px; border:0; background:transparent; cursor:pointer;
+}
+.scoreboard-topbox{position:absolute; top:20px; height:41px; border-radius:10px; display:grid; place-items:center; font:900 15px/1 'Outfit',sans-serif; color:#f8fbff; text-align:center; padding:0 10px}
+.scoreboard-topbox.b1{left:94px; width:98px; color:#cfe6ff}
+.scoreboard-topbox.b2{left:210px; width:98px; color:#cfe6ff}
+.scoreboard-topbox.b3{left:326px; width:98px; color:#ecffea}
+.scoreboard-topbox.b4{left:442px; width:98px; color:#fff0f0}
+.scoreboard-player{position:absolute; top:74px; width:82px; display:flex; flex-direction:column; align-items:center}
+.scoreboard-player.p0{left:95px}.scoreboard-player.p1{left:219px}.scoreboard-player.p2{left:341px}.scoreboard-player.p3{left:463px}
+.scoreboard-avatar{width:72px; height:72px; border-radius:50%; object-fit:cover; border:3px solid rgba(123,174,255,.7); background:#244672; box-shadow:0 3px 10px rgba(0,0,0,.35)}
+.scoreboard-name{margin-top:8px; width:82px; text-align:center; font:800 13px/1.1 'Outfit',sans-serif; color:#f7fbff; text-shadow:0 1px 2px rgba(0,0,0,.8); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.scoreboard-grid{position:absolute; top:182px; width:98px; height:102px; display:grid; grid-template-rows:repeat(4,1fr); grid-template-columns:1fr; gap:0}
+.scoreboard-grid.g0{left:95px}.scoreboard-grid.g1{left:211px}.scoreboard-grid.g2{left:327px}.scoreboard-grid.g3{left:443px}
+.scoreboard-cell{display:grid; place-items:center; font:900 17px/1 'Outfit',sans-serif; color:#eef6ff; text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.scoreboard-cell.is-total{color:#ffd670}
+/* score chips near side profiles removed */
+#gameBoard .opponent-area.left .opponent-score-chip,
+#gameBoard .opponent-area.right .opponent-score-chip,
+#gameBoard .opponent-area.top .opponent-score-chip,
+#bottomPlayerScoreChip,
+#refPairCount{display:none!important}
+/* simplify player info labels around side profiles */
+#gameBoard .opponent-area .player-score,
+#gameBoard .player-area.bottom .tile-count-badge{display:none!important}
+/* Keep only 3 meaningful numeric badges: seri, çift, elim */
+#gameContainer #rackStatus.rack-status,
+#gameContainer #minimumOpenBadge.minimum-open-badge,
+#gameContainer #pairOpenBadge.pair-open-badge{
+  display:flex!important; flex-direction:column!important; align-items:center!important; justify-content:center!important;
+  width:92px!important; min-width:92px!important; height:40px!important; min-height:40px!important;
+  border:0!important; border-radius:0!important; color:#fff!important;
+  background:url('/asset/reference/seri-puan.webp') center/100% 100% no-repeat!important;
+  box-shadow:none!important; padding:4px 8px 7px!important; gap:0!important;
+}
+#gameContainer #minimumOpenBadge{top:12px!important; right:12px!important; position:absolute!important}
+#gameContainer #pairOpenBadge{margin:10px auto 8px!important}
+#gameContainer #rackStatus{right:7.25%!important; bottom:211px!important}
+#gameContainer :is(#minimumOpenBadge,#pairOpenBadge,#rackStatus) .badge-caption,
+#gameContainer #rackScoreCaption{
+  position:absolute!important; left:0; right:0; top:-16px!important; text-align:center;
+  color:#d4eaff!important; text-shadow:0 1px 2px #001b44; letter-spacing:.8px;
+  font:900 10px/1 'Outfit',sans-serif!important;
+}
+#gameContainer :is(#minimumOpenBadge,#pairOpenBadge) .badge-value,
+#gameContainer #rackScore{font:900 20px/1 'Outfit',sans-serif!important; color:#fff!important; text-shadow:0 1px 2px #001b44!important}
+#gameContainer #minimumOpenBadge::after,
+#gameContainer #pairOpenBadge::after,
+#gameContainer #rackStatus::after{content:''; position:absolute; left:calc(50% - 7px); bottom:-9px; width:14px; height:10px; background:#2664ca; clip-path:polygon(0 0,100% 0,50% 100%)}
+#gameContainer #minimumOpenBadge::after,#gameContainer #pairOpenBadge::after{left:calc(50% - 7px)}
+#gameContainer #minimumOpenBadge{min-width:92px!important}
+#gameContainer #pairOpenBadge .badge-caption{top:-17px!important}
+/* place chat/menu properly; preserve previous fixes */
+#gameContainer .premium-gamebar{z-index:125!important}
+/* prevent board elements over scoreboard */
+/* ui-layer tüm ekranı kaplar; kendisi tıklama yakalamamalı (yoksa ortadan taş çekilemiyordu). */
+#gameContainer .ui-layer{pointer-events:none!important}
+#gameContainer #scoreboard,#gameContainer .ui-layer .game-status-panel{pointer-events:auto!important}
+#gameContainer .table-center,.game-board .table-center *{z-index:auto}
+
+#gameContainer #pairOpenBadge.pair-open-badge{background:url('/asset/reference/cift-puan.webp') center/100% 100% no-repeat!important}

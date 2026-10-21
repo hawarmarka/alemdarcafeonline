@@ -1,0 +1,941 @@
+/* ============================================================
+   ALEMDAR 101 OKEY · PRO TEMA KATMANI (v1)
+   style.css'ten SONRA yüklenir; hiçbir yapıyı bozmaz, sadece
+   görünümü "101 Okey Plus" seviyesine çeker: sıcak desenli çuha,
+   parlak ahşap ıstaka, derinlik/gölge, kafe ambiyansı (çay).
+   Kaldırmak istersen game.html'den tek <link> satırını sil.
+   ============================================================ */
+
+:root{
+  --pro-gold:#f6cf73;
+  --pro-gold-deep:#b9772f;
+  --pro-wood-top:#e9bd78;
+  --pro-wood-mid:#b07635;
+  --pro-wood-low:#6b3f17;
+  --pro-felt-glow:#2b8aa8;
+  --pro-money:#3fd160;
+}
+
+/* ---- Sayfa zemini: soğuk mavi yerine sıcak kafe ambiyansı ---- */
+body.game-page,
+.game-page{
+  background:
+    radial-gradient(1100px 620px at 50% -8%, #1d5d7e55, transparent 60%),
+    radial-gradient(900px 500px at 90% 108%, #7a4a1e40, transparent 55%),
+    #06223c !important;
+}
+
+/* ============================================================
+   1) MASA ÇUHASI — desenli, derin, sıcak
+   ============================================================ */
+.game-board{
+  /* üstte ince arabesk desen, altta merkezden dışa ışıklı çuha */
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cg fill='none' stroke='%23bfe8ff' stroke-width='1.5' opacity='0.5'%3E%3Cpath d='M70 16c20 0 20 34 0 34s-20-34 0-34z'/%3E%3Cpath d='M70 124c20 0 20-34 0-34s-20 34 0 34z'/%3E%3Cpath d='M16 70c0 20 34 20 34 0s-34-20-34 0z'/%3E%3Cpath d='M124 70c0 20-34 20-34 0s34-20 34 0z'/%3E%3Ccircle cx='70' cy='70' r='6'/%3E%3Ccircle cx='70' cy='70' r='30'/%3E%3Cpath d='M70 40c8 10 8 20 0 30M70 70c10 8 20 8 30 0'/%3E%3C/g%3E%3C/svg%3E")
+      center/150px 150px,
+    radial-gradient(ellipse at 50% 40%, #1c6d8c 0%, #0f5071 46%, #0a3a56 74%, #072a40 100%) !important;
+  border-color:#a9682f !important;
+  outline-color:#5c3315 !important;
+  box-shadow:
+    inset 0 0 0 5px #1a6a9e,
+    inset 0 0 90px #04101fdd,
+    inset 0 14px 40px #00223a66,
+    0 10px 34px #000c !important;
+}
+/* Ortadaki dev filigran yazı: daha zarif ve silik */
+.game-board:before{
+  color:#bfe8ff0d !important;
+  letter-spacing:18px !important;
+  text-shadow:0 2px 10px #0004;
+}
+
+/* ============================================================
+   2) TAŞLAR — fildişi sprite'a derinlik ve yumuşaklık
+   ============================================================ */
+.tile-sprite,.fresh-tile{
+  border-radius:7px !important;
+  box-shadow:
+    0 2px 2px #0003,
+    0 5px 7px #0006,
+    inset 0 1px 0 #fff !important;
+  transition:transform .12s ease, box-shadow .12s ease, filter .12s ease !important;
+}
+.tile-sprite:hover{
+  transform:translateY(-4px) !important;
+  box-shadow:0 10px 16px #0007, inset 0 1px 0 #fff !important;
+  filter:brightness(1.04) !important;
+  z-index:6;
+}
+.tile-sprite.selected{
+  box-shadow:0 12px 18px #0008, 0 0 0 3px var(--pro-gold) !important;
+}
+/* Yuvalar daha sıcak gömük görünsün */
+.tile-slot{
+  background:#2a160826 !important;
+  box-shadow:inset 0 2px 4px #4a2a1066, inset 0 -1px 0 #ffffff14 !important;
+  border-radius:6px !important;
+}
+
+/* Yığın (kapalı taş) ve atılan taş kartları */
+.pile-tile-back{
+  border-radius:7px !important;
+  box-shadow:0 2px 0 #b9ad8e, 0 7px 10px #00152ab0, inset 0 1px 0 #ffffffcc !important;
+}
+.pile-count-badge{
+  background:linear-gradient(#ffd257,#f0a81f) !important;
+  box-shadow:0 2px 6px #0007, inset 0 1px 0 #fff6 !important;
+  border:1px solid #fff2;
+}
+
+/* ============================================================
+   3) GÖSTERGE / ORTA KUMANDA — çerçeveli, sıcak
+   ============================================================ */
+.table-center>.center-content{
+  background:linear-gradient(160deg,#0c3a5ff2,#082a49f2) !important;
+  border:1px solid #d9ae6b8c !important;
+  border-radius:14px !important;
+  box-shadow:0 10px 24px #0007, inset 0 1px 0 #ffffff1f !important;
+  padding:7px 10px !important;
+}
+.area-label,.slot-label{
+  color:#ffe6a6 !important;
+  text-shadow:0 1px 2px #0008;
+}
+
+/* ============================================================
+   4) ISTAKA — parlak, oymalı ahşap
+   ============================================================ */
+.cue-wood{
+  background:
+    linear-gradient(180deg,#ffe4ad55 0%, #0000 14%, #0000 86%, #00000055 100%),
+    linear-gradient(180deg,var(--pro-wood-top) 0%, var(--pro-wood-mid) 42%, var(--pro-wood-low) 100%) !important;
+  border-color:#9a5f26 !important;
+  border-top-color:#f3cd84 !important;
+  border-bottom-color:#5f330f !important;
+  box-shadow:
+    inset 0 3px 2px #ffe8bd,
+    inset 0 -8px 16px #00000055,
+    inset 8px 0 14px -8px #0007,
+    inset -8px 0 14px -8px #0007,
+    0 14px 26px -6px #000a !important;
+}
+/* Ahşaptaki ışık çıtası (iki raf arası) */
+.cue-wood:before{
+  background:linear-gradient(#3c1f0d,#e2ad68 45%,#7a3f16) !important;
+  box-shadow:0 1px 2px #0007, 0 -1px 1px #ffd89a66 !important;
+  height:7px !important;
+}
+
+/* Istaka üstü skor şeridi — altın çerçeve */
+.rack-status{
+  background:linear-gradient(#17457a,#08214a) !important;
+  border:2px solid #e6b86b !important;
+  box-shadow:0 -3px 12px #0008, inset 0 1px 0 #ffffff24 !important;
+}
+.rack-status span:last-child{color:var(--pro-gold) !important}
+
+/* ============================================================
+   5) OYUNCU KARTLARI — çerçeveli, sıra sırası altın parlaklığı,
+      ve KAFE dokunuşu: her oyuncunun yanında çay
+   ============================================================ */
+.player-info{
+  background:linear-gradient(150deg,#1d5090,#0a2550 72%,#081a3c) !important;
+  border:2px solid #cfa765 !important;
+  border-radius:40px !important;
+  box-shadow:0 6px 16px #00172e9c, inset 0 1px 0 #ffffff2e !important;
+}
+.player-info .player-avatar{
+  border:2px solid var(--pro-gold) !important;
+  box-shadow:0 0 0 2px #0a2550, 0 2px 6px #0008 !important;
+}
+.player-info .player-score{color:#ffdf9c !important}
+.player-info.active-turn{
+  border-color:#ffe066 !important;
+  box-shadow:0 0 0 3px #f6cf7355, 0 0 22px #f6e46999, 0 6px 16px #0007 !important;
+}
+
+/* ÇAY bardağı — rakip oyuncuların yanında (kafe ambiyansı) */
+.opponent-area .player-info{position:relative;overflow:visible}
+.opponent-area .player-info::after{
+  content:"";
+  position:absolute;
+  width:30px;height:36px;
+  right:-34px;top:50%;transform:translateY(-50%);
+  background:no-repeat center/contain
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='36' viewBox='0 0 30 36'%3E%3Cellipse cx='15' cy='33' rx='12' ry='2.4' fill='%23000' opacity='.3'/%3E%3Cpath d='M6 7h18l-2.4 22a5.5 5.5 0 0 1-13.2 0Z' fill='%23b5201c'/%3E%3Cpath d='M7.3 8h15.4l-2.1 20.4a4.3 4.3 0 0 1-11.2 0Z' fill='%23e23b2f'/%3E%3Cpath d='M4.5 7h21' stroke='%23f1d08a' stroke-width='2.3' stroke-linecap='round'/%3E%3Crect x='13.4' y='2.5' width='3.2' height='8' rx='1.5' fill='%23d8d8d8'/%3E%3C/svg%3E");
+  filter:drop-shadow(0 3px 3px #0007);
+  pointer-events:none;
+}
+.opponent-area.right .player-info::after{right:auto;left:-34px}
+.opponent-area.top .player-info::after{left:auto;right:-36px}
+/* dikey kartlarda çay sol-alt köşede (referanstaki gibi) */
+.opponent-area.left .player-info::after,
+.opponent-area.right .player-info::after{
+  top:auto !important; bottom:-8px !important; left:-12px !important; right:auto !important;
+  transform:none !important; width:34px !important; height:40px !important;
+}
+
+/* ============================================================
+   6) ÜST BAR — sıcak, altın marka + kahve dokunuşu
+   ============================================================ */
+.premium-gamebar{
+  background:linear-gradient(#123a67ee,#0b2c55ee) !important;
+  border-bottom:2px solid #c6933f !important;
+  box-shadow:0 5px 18px #00142b85, inset 0 1px 0 #ffffff1f !important;
+}
+.gamebar-center{position:relative}
+.gamebar-center b{
+  color:#ffd98a !important;
+  text-shadow:0 2px 3px #000, 0 0 14px #f6cf7340;
+  letter-spacing:.5px;
+}
+/* ALEMDAR CAFE yanına küçük kahve fincanı */
+.gamebar-center b::before{
+  content:"";
+  display:inline-block;width:18px;height:16px;margin-right:8px;vertical-align:-2px;
+  background:no-repeat center/contain
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='16' viewBox='0 0 18 16'%3E%3Cpath d='M1 3h12v6a4 4 0 0 1-4 4H5a4 4 0 0 1-4-4Z' fill='%23f3ead9'/%3E%3Cpath d='M13 4h1.8a2.2 2.2 0 0 1 0 4.4H13' fill='none' stroke='%23f3ead9' stroke-width='1.6'/%3E%3Cpath d='M4 0.4c-.6 1 .6 1.6 0 2.6M8 0.4c-.6 1 .6 1.6 0 2.6' stroke='%23caa96f' stroke-width='1' fill='none' stroke-linecap='round'/%3E%3Crect x='1' y='13.4' width='13' height='2' rx='1' fill='%23caa96f'/%3E%3C/svg%3E");
+}
+.gamebar-chip{
+  border:1px solid #cf9f52 !important;
+  background:linear-gradient(#0e2d55,#0a1f40) !important;
+  box-shadow:inset 0 1px 0 #ffffff1a, 0 3px 7px #0006 !important;
+}
+.gamebar-chip strong{color:#ffe3a3 !important}
+
+/* ============================================================
+   7) SAĞ KUMANDA PANELİ — "admin" hissinden kafe-ahşap hissine
+   ============================================================ */
+.game-action-panel{
+  border:2px solid #b98a45 !important;
+  outline:2px solid #0b2744 !important;
+  background:linear-gradient(166deg,#154a74 0%,#0b2f56 44%,#07203c 100%) !important;
+  box-shadow:0 12px 26px #000b, inset 0 1px 0 #ffd98a33 !important;
+}
+.action-panel-head strong{color:#ffe6a7 !important}
+.action-panel-label{color:#ffd98a !important}
+.action-panel-divider{
+  background:linear-gradient(90deg,transparent,#e6b86b,transparent) !important;
+}
+.game-action-panel .panel-sort-btn{
+  border:1px solid #8fc0ee !important;
+}
+
+/* ============================================================
+   8) ATILAN TAŞ KUTULARI + SOHBET — altın çerçeve uyumu
+   ============================================================ */
+.opponent-discard,.player-discard{
+  border:1px solid #cfa765 !important;
+  box-shadow:0 6px 14px #00192b77, inset 0 1px 0 #ffffff18 !important;
+}
+.discard-label,.opponent-discard-caption{color:#ffe0a0 !important}
+
+.table-chat-panel{
+  border:1px solid #cfa765 !important;
+  box-shadow:0 8px 22px #001b30d0, inset 0 1px 0 #ffffff14 !important;
+}
+.table-chat-toggle{
+  background:linear-gradient(135deg,#2a6fa6,#123563) !important;
+}
+
+/* ============================================================
+   9) SERİ / ÇİFT AÇMA ALANLARI — soğuk gridi yumuşat
+   ============================================================ */
+.opened-tiles-table{
+  background:linear-gradient(130deg,#0e3c5c7a,#0c2f50b0) !important;
+  border:1px solid #cfa76559 !important;
+  box-shadow:inset 0 0 30px #021b36, inset 0 0 0 1px #ffffff0a !important;
+}
+.open-board-header{
+  background:linear-gradient(#143f66,#0b2d50) !important;
+  border-bottom:1px solid #cfa76575 !important;
+}
+.open-board-header .open-board-title{color:var(--pro-gold) !important}
+.opened-pairs-zone{
+  border:1px solid #cfa76585 !important;
+  background:#0a2d4ce8 !important;
+}
+.pair-zone-title{color:var(--pro-gold) !important}
+
+/* Buton genel parlaklık/his */
+.action-btn{letter-spacing:.3px}
+
+
+/* ============================================================
+   10) YERLEŞİM — referans (101 Okey Plus) düzenine hizalama
+   ============================================================ */
+
+/* Board geneli dev "ALEMDAR 101 OKEY" filigranını kaldır (referansta yok) */
+.game-board:before{content:'' !important; display:none !important}
+
+/* --- SERİ / PER AÇMA: iki "101" panelli büyük orta-sol alan --- */
+.opened-tiles-table{
+  left:10.5% !important; right:30.5% !important; top:12% !important; bottom:15.5% !important;
+  background:linear-gradient(180deg, rgba(8,44,74,.34), rgba(7,38,66,.24)) !important;
+  background-size:auto !important;
+  border:1px solid #cfa76560 !important;
+  box-shadow:inset 0 0 40px #021a33, inset 0 0 0 1px #ffffff09 !important;
+  overflow:hidden !important;
+}
+/* SOL "101" paneli (ayrı çerçeveli kutu) */
+.opened-tiles-table::before{
+  display:grid !important; content:'101' !important; place-items:center !important;
+  position:absolute !important; left:1.5% !important; right:auto !important; top:40px !important; bottom:3% !important;
+  width:47% !important; height:auto !important; transform:none !important;
+  font-family:'Outfit',sans-serif !important; font-weight:900 !important;
+  font-size:clamp(34px,5vw,78px) !important; letter-spacing:5px !important;
+  color:#cfe8ff20 !important;
+  background:linear-gradient(180deg, rgba(5,32,56,.35), rgba(5,28,50,.25)) !important;
+  border:1px solid #7fb4d92e !important; border-radius:8px !important;
+  box-shadow:inset 0 0 22px #02152b !important;
+  pointer-events:none !important; z-index:0 !important;
+}
+/* SAĞ "101" paneli (ayrı çerçeveli kutu) */
+.opened-tiles-table::after{
+  display:grid !important; content:'101' !important; place-items:center !important;
+  position:absolute !important; left:51.5% !important; right:1.5% !important; top:40px !important; bottom:3% !important;
+  width:auto !important; height:auto !important; transform:none !important;
+  font-family:'Outfit',sans-serif !important; font-weight:900 !important;
+  font-size:clamp(34px,5vw,78px) !important; letter-spacing:5px !important;
+  color:#cfe8ff20 !important;
+  background:linear-gradient(180deg, rgba(5,32,56,.35), rgba(5,28,50,.25)) !important;
+  border:1px solid #7fb4d92e !important; border-radius:8px !important;
+  box-shadow:inset 0 0 22px #02152b !important;
+  pointer-events:none !important; z-index:0 !important;
+}
+/* açılan gruplar filigranın ÜstÜnde */
+.compact-open-groups{position:relative !important; z-index:2 !important}
+.open-board-header{z-index:4 !important}
+
+/* --- ÇİFT AÇMA: referanstaki gibi DİKEY YUVALI panel --- */
+.opened-pairs-zone{
+  top:12% !important; right:10% !important; bottom:15.5% !important; width:14% !important;
+  border:1px solid #cfa76575 !important;
+  background:linear-gradient(180deg, rgba(8,44,74,.92), rgba(6,33,58,.92)) !important;
+  box-shadow:inset 0 0 0 1px #ffffff0a, 0 10px 26px #00000030 !important;
+}
+/* dikey yuva çizgileri (boşken referanstaki görünüm) */
+.pairs-zone-sections{
+  position:relative !important;
+  background-image:repeating-linear-gradient(90deg,
+    transparent 0, transparent calc(25% - 1px),
+    rgba(150,200,230,.22) calc(25% - 1px), rgba(150,200,230,.22) 25%) !important;
+  background-position:0 0 !important; background-size:100% 100% !important;
+  border-radius:8px !important;
+  box-shadow:inset 0 0 0 1px #ffffff0c !important;
+}
+/* yatay bölme çizgileri ve bölüm numaraları gizlensin → temiz dikey yuvalar */
+.pairs-zone-section{border:0 !important; background:transparent !important; box-shadow:none !important}
+.pairs-zone-section-title{display:none !important}
+
+/* --- GÖSTERGE / ORTA KOLON: iki panel arasında dikey --- */
+.table-center>.center-content{
+  right:25.5% !important; top:50% !important; bottom:auto !important; transform:translateY(-50%) !important;
+  flex-direction:column !important; width:auto !important; max-height:none !important;
+  gap:9px !important; padding:9px 8px !important;
+}
+
+/* ============================================================
+   11) RAKİP KARTLARI — referanstaki gibi SİYAH; sol/sağ DİKEY (portre)
+   ============================================================ */
+.opponent-area.top{top:-20px !important; left:50% !important; transform:translateX(-50%) !important}
+.opponent-area.left{left:2px !important; right:auto !important; top:50% !important; transform:translateY(-50%) !important}
+.opponent-area.right{right:2px !important; left:auto !important; top:50% !important; transform:translateY(-50%) !important}
+
+/* ortak: siyah kart */
+.opponent-area .player-info{
+  background:linear-gradient(180deg,#161616,#000) !important;
+  border:1px solid #2f2f2f !important;
+  border-radius:6px !important;
+  box-shadow:0 8px 20px #0009, inset 0 1px 0 #ffffff12 !important;
+  padding:7px !important;
+}
+.opponent-area .player-info .player-name{color:#fff !important; max-width:none !important}
+.opponent-area .player-info .player-score{color:var(--pro-money) !important; font-weight:800 !important}
+.opponent-area .player-info.active-turn{border-color:#ffe066 !important}
+
+/* SOL & SAĞ → DİKEY: avatar üstte, isim + yeşil para altta */
+.opponent-area.left .player-info,
+.opponent-area.right .player-info{
+  flex-direction:column !important; align-items:center !important; text-align:center !important;
+  width:112px !important; min-width:0 !important; max-width:none !important; gap:5px !important;
+  padding:9px 8px 12px !important;
+}
+.opponent-area.left .player-info .avatar-wrapper,
+.opponent-area.right .player-info .avatar-wrapper{width:92px !important; height:92px !important}
+.opponent-area.left .player-info .player-avatar,
+.opponent-area.right .player-info .player-avatar{
+  width:92px !important; height:92px !important; border-radius:4px !important;
+  border:1px solid #3a3a3a !important; box-shadow:none !important; display:block !important;
+}
+.opponent-area.left .player-info .player-details,
+.opponent-area.right .player-info .player-details{align-items:center !important; overflow:visible !important; width:100% !important}
+
+/* ÜST → yatay siyah kart (avatar sol, isim+para sağ) */
+.opponent-area.top .player-info{
+  flex-direction:row !important; min-width:150px !important; max-width:220px !important; border-radius:6px !important;
+}
+.opponent-area.top .player-info .player-avatar{
+  width:48px !important; height:48px !important; border-radius:4px !important; border:1px solid #3a3a3a !important; box-shadow:none !important;
+}
+
+/* ============================================================
+   12) ATILAN TAŞLAR — dört köşe, temiz yuva (referanstaki gibi)
+   ============================================================ */
+.opponent-discard,.player-discard{
+  position:absolute !important;
+  background:linear-gradient(180deg,#0f2d50,#081d39) !important;
+  border:1px solid #cfa765 !important; border-radius:11px !important;
+  padding:5px 7px !important; z-index:20 !important;
+}
+/* sol rakip atığı → kartının hemen ALTINDA, sol kenarda */
+.opponent-area.left .opponent-discard{
+  left:20px !important; right:auto !important;
+  top:calc(100% + 12px) !important; bottom:auto !important;
+}
+/* sağ rakip atığı → kartının hemen ALTINDA, sağ kenarda */
+.opponent-area.right .opponent-discard{
+  right:20px !important; left:auto !important;
+  top:calc(100% + 12px) !important; bottom:auto !important;
+}
+/* üst rakip atığı → üst oyuncunun hemen soluna, masa içinde */
+.opponent-area.top .opponent-discard{
+  left:auto !important; right:calc(100% + 14px) !important;
+  top:34px !important; bottom:auto !important;
+}
+/* kendi atığım → SAĞ ALT, çektiğim sol → SOL ALT köşe */
+.player-discard.left-discard{left:-118px !important; right:auto !important; bottom:calc(var(--th) + 6px) !important}
+.player-discard.right-discard{right:-118px !important; left:auto !important; bottom:calc(var(--th) + 6px) !important}
+
+
+/* ============================================================
+   v4 — Sadeleştirme + referansa tam oturma
+   ============================================================ */
+
+/* --- GEREKSİZ YAZILAR / KUTULAR kaldırıldı --- */
+.open-board-header{display:none !important}      /* "SERİ / PER AÇMA ALANI" + "Seri için 101+" */
+.pair-zone-title{display:none !important}        /* "ÇİFT AÇMA" */
+.pair-open-badge{display:none !important}        /* "En az 5 çift" */
+.slot-label{display:none !important}             /* "Gösterge" */
+.area-label{display:none !important}             /* "Yığın" / "Atılan" */
+.opponent-discard-caption{display:none !important} /* "ATILAN" */
+.pairs-pager{display:none !important}
+
+/* "101" panelleri header gidince yukarıdan başlasın */
+.opened-tiles-table::before,
+.opened-tiles-table::after{top:4% !important; bottom:4% !important}
+
+/* --- İSTAKA PUANI: tek sade rozet (sadece el puanı) --- */
+.rack-status{
+  gap:0 !important; padding:6px 18px 5px !important;
+  border:2px solid #e6b86b !important; min-width:0 !important;
+}
+#rackCount{display:none !important}
+#rackScore{color:#ffe9b0 !important; font-size:14px !important}
+
+/* --- RAKİP KARTLARI: avatar kartı neredeyse doldursun (referans) --- */
+.opponent-area.left .player-info,
+.opponent-area.right .player-info{width:116px !important; padding:6px 6px 9px !important; gap:4px !important}
+.opponent-area.left .player-info .avatar-wrapper,
+.opponent-area.right .player-info .avatar-wrapper{width:104px !important; height:104px !important}
+.opponent-area.left .player-info .player-avatar,
+.opponent-area.right .player-info .player-avatar{width:104px !important; height:104px !important}
+.opponent-area .player-name{font-size:13px !important}
+.opponent-area .player-score{font-size:12px !important}
+
+/* ============================================================
+   v4 — OYUN İŞLEMLERİ paneli tamamen sadeleşti (kutu yok)
+   ============================================================ */
+.game-action-panel{
+  background:none !important; border:0 !important; outline:0 !important;
+  box-shadow:none !important; backdrop-filter:none !important;
+  top:150px !important; right:18px !important; width:210px !important; gap:12px !important; padding:0 !important;
+}
+/* başlık, durum, etiket, ayraç, yardım yazısı — hepsi gitti */
+.action-panel-head,
+.action-panel-state,
+.action-panel-label,
+.action-panel-divider,
+.action-panel-help,
+#toggleScoreBtn,
+#undoDiscardBtn{display:none !important}
+.action-panel-section{gap:12px !important}
+
+/* --- MODERN BUTONLAR --- */
+.game-action-panel .action-btn{
+  height:54px !important; border-radius:14px !important;
+  font-size:15px !important; font-weight:800 !important; letter-spacing:.3px !important;
+  transition:transform .12s ease, filter .12s ease, box-shadow .12s ease !important;
+}
+.game-action-panel .panel-open-btn{            /* SERİ AÇ / ÇİFT AÇ */
+  background:linear-gradient(180deg,#ffffff,#dfeefc) !important;
+  color:#0e2f52 !important; border:1px solid #ffffff !important;
+  box-shadow:0 8px 18px #0006, inset 0 1px 0 #fff !important;
+}
+.game-action-panel .panel-open-btn:hover:not(:disabled){transform:translateY(-2px) !important; filter:brightness(1.03) !important}
+.game-action-panel .panel-finish-btn{
+  background:linear-gradient(180deg,#9be34a,#2a9412) !important; color:#06260c !important;
+  border:1px solid #c6f28a !important; box-shadow:0 8px 18px #0006, inset 0 1px 0 #ffffff80 !important;
+}
+
+/* --- SERİ DİZ / ÇİFT DİZ → alt köşelere (referanstaki gibi) --- */
+#sortPairsBtn, #sortSeriesBtn{
+  position:fixed !important; inset:auto !important; z-index:80 !important;
+  width:96px !important; min-width:96px !important; height:104px !important; min-height:104px !important;
+  bottom:16px !important; white-space:normal !important; padding:12px 8px !important;
+  display:flex !important; flex-direction:column !important; align-items:center !important; justify-content:center !important; gap:6px !important;
+  border-radius:16px !important; font-size:15px !important; font-weight:900 !important; letter-spacing:.3px !important;
+  color:#fff !important; border:2px solid #7fb0d9 !important;
+  background:linear-gradient(180deg,#1f4f86,#0b2a55) !important;
+  box-shadow:0 10px 22px #000a, inset 0 2px 0 #ffffff26 !important;
+}
+#sortPairsBtn{left:16px !important; right:auto !important}    /* ÇİFT DİZ → SOL ALT */
+#sortSeriesBtn{right:16px !important; left:auto !important}   /* SERİ DİZ → SAĞ ALT */
+#sortPairsBtn:hover, #sortSeriesBtn:hover{filter:brightness(1.12); transform:translateY(-2px)}
+
+/* domates/hediye butonu DİZ butonuyla çakışmasın → yukarı al */
+.tomato-btn{bottom:132px !important; left:18px !important}
+
+/* --- SOHBET: varsayılan kapalı, küçük buton --- */
+.table-chat-panel.collapsed{max-height:46px !important; width:200px !important}
+
+
+/* ============================================================
+   v4.1 — düzeltmeler: çift taşları sığsın, sohbet çakışmasın
+   ============================================================ */
+/* Çift taşları panele sığsın (taşmasın) */
+.opened-pairs-zone .pairs-zone-sections{
+  display:grid !important; grid-template-rows:repeat(3,1fr) !important;
+  height:auto !important; flex:1 1 auto !important; min-height:0 !important; gap:8px !important; overflow:hidden !important;
+}
+.opened-pairs-zone .pairs-zone-section{min-height:0 !important}
+.opened-pairs-zone .pairs-zone-groups{
+  grid-template-columns:repeat(2,1fr) !important; grid-template-rows:repeat(2,1fr) !important;
+  width:100% !important; height:100% !important; gap:3px !important; padding:3px !important;
+}
+.opened-pairs-zone .pair-grid-cell{
+  width:auto !important; height:auto !important; min-width:0 !important; min-height:0 !important;
+  display:grid !important; place-items:center !important;
+}
+.opened-pairs-zone .pair-grid-cell .tile-sprite{
+  width:auto !important; height:84% !important; max-width:90% !important; aspect-ratio:.72 !important;
+}
+
+/* Sohbet kapalıyken sağ ÜSTe (açma butonlarının altına) — SERİ DİZ ile çakışmasın */
+.table-chat-panel.collapsed{
+  top:288px !important; bottom:auto !important; right:18px !important;
+  width:200px !important; max-height:46px !important;
+}
+
+
+/* ============================================================
+   v5 — TAM EKRAN MAVİ DÜZEN + referans birebir
+   ============================================================ */
+
+/* 1) Arka plan: düz mavi + swirl deseni; ahşap çerçeve YOK, tam ekran */
+body.game-page, .game-page{
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cg fill='none' stroke='%236fb8d4' stroke-width='3.5' stroke-linecap='round' opacity='0.4'%3E%3Cpath d='M35 25 C65 25 70 70 35 70 C10 70 12 42 34 42 C44 42 46 54 36 56'/%3E%3Cpath d='M115 80 C85 80 80 125 115 125 C140 125 138 97 116 97 C106 97 104 109 114 111'/%3E%3Cpath d='M95 18 q24 14 9 40'/%3E%3Cpath d='M20 98 q24 14 9 40'/%3E%3C/g%3E%3C/svg%3E") 0 0/150px 150px,
+    radial-gradient(ellipse at 50% 30%, #2f84a6, #216d8c 60%, #185874) !important;
+}
+.game-board{
+  inset:62px 0 150px 0 !important;
+  border:0 !important; outline:0 !important; border-radius:0 !important;
+  background:transparent !important; box-shadow:none !important;
+}
+.game-board:before, .game-board:after{display:none !important}
+.table-settings-line{display:none !important}
+.gamebar-center{display:none !important}
+.premium-gamebar{background:linear-gradient(#0f3a62ee,#0b2c54ee) !important}
+
+/* 2) SERİ/PER + ÇİFT panelleri: koyu teal + grid + çerçeve */
+.opened-tiles-table{
+  left:9% !important; right:45% !important; top:4% !important; bottom:3% !important;
+  border:2px solid #5a9fc2 !important; border-radius:6px !important;
+  background:
+    linear-gradient(to right, #6fb3d41f 1px, transparent 1px),
+    linear-gradient(to bottom, #6fb3d41a 1px, transparent 1px),
+    linear-gradient(180deg,#0e3d52,#0b3447) !important;
+  background-size:34px 34px, 34px 34px, auto !important;
+  box-shadow:inset 0 0 26px #02141f, 0 6px 16px #0006 !important;
+}
+/* iki "101" yarısı (logo) + orta ayraç */
+.opened-tiles-table::before,
+.opened-tiles-table::after{
+  content:'101' !important; display:grid !important; place-items:center !important;
+  position:absolute !important; top:0 !important; bottom:0 !important;
+  font-family:'Outfit',sans-serif !important; font-weight:900 !important; font-style:italic !important;
+  font-size:clamp(40px,6vw,96px) !important; letter-spacing:2px !important;
+  color:#ffffff10 !important; pointer-events:none !important; z-index:0 !important; background:none !important; border:0 !important; box-shadow:none !important;
+}
+.opened-tiles-table::before{left:0 !important; right:auto !important; width:50% !important; border-right:1px solid #6fb3d433 !important}
+.opened-tiles-table::after{left:50% !important; right:0 !important; width:auto !important; transform:none !important}
+.compact-open-groups{position:relative !important; z-index:2 !important; inset:0 !important; padding:10px !important}
+
+.opened-pairs-zone{
+  left:auto !important; right:20% !important; top:4% !important; bottom:3% !important; width:15% !important;
+  border:2px solid #5a9fc2 !important; border-radius:6px !important;
+  background:
+    repeating-linear-gradient(90deg, transparent 0, transparent calc(20% - 1px), #6fb3d433 calc(20% - 1px), #6fb3d433 20%),
+    linear-gradient(to bottom, #6fb3d41a 1px, transparent 1px),
+    linear-gradient(180deg,#0e3d52,#0b3447) !important;
+  background-size:100% 100%, 100% 34px, auto !important;
+  box-shadow:inset 0 0 26px #02141f, 0 6px 16px #0006 !important;
+}
+
+/* 3) ORTA MOD KOLONU (referanstaki gibi) */
+.table-center>.center-content.mode-column{
+  right:37% !important; left:auto !important; top:50% !important; bottom:auto !important; transform:translateY(-50%) !important;
+  display:flex !important; flex-direction:column !important; align-items:center !important; justify-content:flex-start !important;
+  width:76px !important; gap:7px !important; padding:0 !important; background:none !important; border:0 !important; box-shadow:none !important;
+}
+.mode-badges{display:flex; flex-direction:column; gap:5px; width:100%}
+.mode-badge{
+  background:#0b2f52; border:1px solid #2f6a93; color:#eaf4ff;
+  border-radius:7px; padding:6px 4px; text-align:center; font-size:12px; font-weight:800; white-space:nowrap;
+  box-shadow:0 2px 5px #0005, inset 0 1px 0 #ffffff14;
+}
+.mode-badge.green.mode-on{background:linear-gradient(#2f9e4f,#177a34); border-color:#7fe59c; color:#fff}
+.mode-badge.red.mode-on{background:linear-gradient(#c23a4f,#8e1e30); border-color:#f3a0ae; color:#fff}
+.mode-badge.round{background:#0d3a66; border-color:#5a9fc2}
+.mode-column .indicator-section{background:none !important; border:0 !important; padding:0 !important}
+.mode-column .indicator-slot{gap:0 !important}
+.mode-column .tile-placeholder,
+.mode-column .pile-stack{width:56px !important; height:80px !important}
+.mode-column .pile-stack{position:relative}
+.pile-odometer{
+  display:flex; gap:3px; font-family:'Outfit',monospace; font-weight:900; font-size:15px; color:#fff;
+}
+.pile-odometer{letter-spacing:2px; background:#07243f; border:1px solid #3a6f98; border-radius:6px; padding:3px 8px; box-shadow:inset 0 1px 3px #0008}
+
+/* 4) RAKİP KARTLARI: tam kenara, dikey siyah (değişmedi, konum güncelle) */
+.opponent-area.top{top:-48px !important; left:50% !important; transform:translateX(-50%) !important; z-index:65 !important}
+.opponent-area.left{left:6px !important; top:50% !important; transform:translateY(-50%) !important}
+.opponent-area.right{right:6px !important; top:50% !important; transform:translateY(-50%) !important}
+
+/* 5) ATILAN TAŞLAR: profilin hemen üstünde (üst köşe) ve altında */
+.opponent-area.left .opponent-discard{left:24px !important; right:auto !important; top:auto !important; bottom:calc(100% + 10px) !important}
+.opponent-area.right .opponent-discard{right:24px !important; left:auto !important; top:auto !important; bottom:calc(100% + 10px) !important}
+.opponent-area.top .opponent-discard{left:auto !important; right:calc(100% + 14px) !important; top:14px !important; bottom:auto !important}
+
+/* 6) BUTON İKONLARI (taş görselleri) */
+.bticon{display:inline-block; flex:none; background-repeat:no-repeat; background-position:center; background-size:contain}
+.ic-seri, .ic-seridiz{width:40px; height:26px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='46' height='28'%3E%3Cg font-family='Arial' font-weight='bold' font-size='13' text-anchor='middle'%3E%3Crect x='1' y='3' width='13' height='22' rx='2.5' fill='white'/%3E%3Ctext x='7.5' y='18' fill='%23d8232a'%3E1%3C/text%3E%3Crect x='16' y='3' width='13' height='22' rx='2.5' fill='white'/%3E%3Ctext x='22.5' y='18' fill='%231f6fd4'%3E2%3C/text%3E%3Crect x='31' y='3' width='13' height='22' rx='2.5' fill='white'/%3E%3Ctext x='37.5' y='18' fill='%2320242f'%3E3%3C/text%3E%3C/g%3E%3C/svg%3E")}
+.ic-cift{width:30px; height:26px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='28'%3E%3Cg font-family='Arial' font-weight='bold' font-size='13' text-anchor='middle'%3E%3Crect x='1' y='3' width='13' height='22' rx='2.5' fill='white'/%3E%3Ctext x='7.5' y='18' fill='%23d8232a'%3E8%3C/text%3E%3Crect x='17' y='3' width='13' height='22' rx='2.5' fill='white'/%3E%3Ctext x='23.5' y='18' fill='%23d8232a'%3E8%3C/text%3E%3C/g%3E%3C/svg%3E")}
+.ic-ciftdiz{width:30px; height:26px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='28'%3E%3Cg font-family='Arial' font-weight='bold' font-size='13' text-anchor='middle'%3E%3Crect x='1' y='3' width='13' height='22' rx='2.5' fill='white'/%3E%3Ctext x='7.5' y='18' fill='%23d8232a'%3E5%3C/text%3E%3Crect x='17' y='3' width='13' height='22' rx='2.5' fill='white'/%3E%3Ctext x='23.5' y='18' fill='%23d8232a'%3E5%3C/text%3E%3C/g%3E%3C/svg%3E")}
+
+/* 7) SERİ DİZ / ÇİFT DİZ — SİYAH, ıstaka uçlarına bitişik, ikon üstte */
+#sortPairsBtn, #sortSeriesBtn{
+  position:fixed !important; inset:auto !important; bottom:0 !important; z-index:80 !important;
+  width:104px !important; min-width:104px !important; height:150px !important; min-height:150px !important;
+  display:flex !important; flex-direction:column !important; align-items:center !important; justify-content:center !important; gap:8px !important;
+  border-radius:12px 12px 0 0 !important; padding:10px 8px !important;
+  background:linear-gradient(180deg,#2a2a2a,#050505) !important; border:1px solid #444 !important;
+  box-shadow:0 -4px 14px #0008, inset 0 1px 0 #ffffff1a !important;
+  color:#fff !important; font-size:16px !important; font-weight:900 !important; letter-spacing:.5px !important; text-shadow:0 2px 3px #000 !important;
+}
+#sortPairsBtn .btlabel, #sortSeriesBtn .btlabel{line-height:1.05}
+#sortPairsBtn .bticon, #sortSeriesBtn .bticon{width:46px; height:30px}
+#sortPairsBtn{left:max(6px, calc(50% - 560px)) !important; right:auto !important}
+#sortSeriesBtn{right:max(6px, calc(50% - 560px)) !important; left:auto !important}
+
+/* 8) SAĞ KOLON açma/işleme butonları — sadece sırada (turnActions) */
+.game-action-panel{top:120px !important; right:9% !important; width:140px !important; gap:10px !important; background:none !important; border:0 !important; box-shadow:none !important; backdrop-filter:none !important; padding:0 !important}
+.turn-actions{display:flex; flex-direction:column; gap:9px}
+.turn-actions.hidden{display:none !important}
+.game-action-panel .action-btn{
+  height:46px !important; min-height:46px !important; border-radius:10px !important;
+  display:flex !important; align-items:center !important; justify-content:flex-start !important; gap:9px !important; padding:0 12px !important;
+  font-size:15px !important; font-weight:800 !important; letter-spacing:.3px !important; width:100% !important;
+  box-shadow:0 4px 10px #0006, inset 0 1px 0 #ffffff26 !important; border:1px solid #9ac6ec !important;
+}
+.game-action-panel .panel-open-btn{background:linear-gradient(180deg,#ffffff,#d7e8f6) !important; color:#0e2f52 !important; text-shadow:none !important}
+.game-action-panel .panel-aux-btn{background:linear-gradient(180deg,#3f86cf,#1b4f8f) !important; color:#fff !important}
+.game-action-panel .panel-finish-btn{background:linear-gradient(180deg,#9be34a,#2a9412) !important; color:#06260c !important}
+.game-action-panel .action-btn .btlabel{flex:1}
+.game-action-panel .action-btn:hover:not(:disabled){filter:brightness(1.05); transform:translateY(-1px)}
+
+/* 9) Alt çekme/atma kutuları: DİZ butonlarıyla çakışmasın → yukarı al */
+.player-discard.left-discard{left:-150px !important; bottom:calc(var(--th) + 24px) !important}
+.player-discard.right-discard{right:-150px !important; bottom:calc(var(--th) + 24px) !important}
+.tomato-btn{bottom:160px !important; left:12px !important}
+
+/* 10) ÜST SAĞ: sohbet + ayarlar ikonları */
+.table-chat-panel.collapsed{top:17px !important; bottom:auto !important; right:360px !important; left:auto !important; width:auto !important; max-height:44px !important; z-index:95 !important}
+.table-chat-toggle{border-radius:10px !important; padding:10px 14px !important; font-size:0 !important; background:linear-gradient(#143a66,#0a2444) !important; border:1px solid #2f6a93 !important}
+.table-chat-toggle::before{content:'💬'; font-size:18px}
+
+
+/* ============================================================
+   v6 — IZGARA YERLEŞİMİ: taşlar çizgilerin içine otursun
+   ============================================================ */
+/* Seri/Per: iki 13x13 ızgara board */
+.compact-open-groups{
+  position:absolute !important; inset:6px !important; display:flex !important; gap:0 !important; padding:0 !important;
+  overflow:hidden !important; z-index:2 !important; flex-direction:row !important; flex-wrap:nowrap !important;
+}
+.sboard{
+  flex:1 1 0 !important; min-width:0 !important; height:100% !important;
+  display:grid !important; grid-template-columns:repeat(13, 1fr) !important; grid-template-rows:repeat(13, 1fr) !important;
+  background-image:
+    linear-gradient(to right, #7fc0e026 1px, transparent 1px),
+    linear-gradient(to bottom, #7fc0e01f 1px, transparent 1px) !important;
+  background-size: calc(100%/13) calc(100%/13) !important;
+}
+.sboard + .sboard{border-left:1px solid #7fc0e04d !important}
+/* ızgara arka planını opened-tiles-table'dan kaldır (artık sboard'da) */
+.opened-tiles-table{background:linear-gradient(180deg,#0e3d52,#0b3447) !important; background-size:auto !important}
+
+/* Hücreye oturan küçük taş */
+.grid-table-tile{
+  width:100% !important; height:100% !important; min-width:0 !important; min-height:0 !important;
+  border-radius:2px !important; box-shadow:0 1px 2px #0006 !important; cursor:pointer !important;
+  background-size:1300% 500% !important; align-self:stretch !important; justify-self:stretch !important;
+}
+.grid-table-tile::after{display:none !important}
+.grid-table-tile:hover{filter:brightness(1.08) !important; z-index:3 !important}
+
+/* Çift: ızgarada dikey dolum (5 sütun x 12 satır küçük hücre) */
+.opened-pairs-zone .pairs-grid{
+  position:absolute !important; inset:8px !important;
+  display:grid !important; grid-template-columns:repeat(5, 1fr) !important; grid-template-rows:repeat(12, 1fr) !important;
+  gap:0 !important;
+  background-image:
+    linear-gradient(to right, #7fc0e026 1px, transparent 1px),
+    linear-gradient(to bottom, #7fc0e01f 1px, transparent 1px) !important;
+  background-size: calc(100%/5) calc(100%/12) !important;
+}
+/* çift panelindeki eski dikey-slot arka planını kaldır */
+.opened-pairs-zone{
+  background:linear-gradient(180deg,#0e3d52,#0b3447) !important; background-size:auto !important;
+}
+
+
+/* ============================================================
+   v7 — çift yan yana + 4 köşe atılan taş + sağ üst düzen
+   ============================================================ */
+/* ÇİFT: her çift YAN YANA 2 taş, çiftler alt alta; sütun dolunca yana sarar */
+.opened-pairs-zone .pairs-grid{
+  position:absolute !important; inset:12px 10px !important;
+  display:flex !important; flex-direction:column !important; flex-wrap:wrap !important;
+  align-content:flex-start !important; justify-content:flex-start !important; gap:7px 12px !important; background:none !important;
+}
+.pair-row{display:flex !important; gap:2px !important}
+.pair-mini-tile{
+  width:31px !important; height:43px !important; min-width:0 !important; min-height:0 !important;
+  border-radius:3px !important; box-shadow:0 1px 2px #0006 !important; background-size:1300% 500% !important;
+}
+.pair-mini-tile::after{display:none !important}
+.opened-pairs-zone{
+  background:
+    linear-gradient(to right, #7fc0e022 1px, transparent 1px),
+    linear-gradient(to bottom, #7fc0e01c 1px, transparent 1px),
+    linear-gradient(180deg,#0e3d52,#0b3447) !important;
+  background-size: 33px 50px, 33px 50px, auto !important;
+}
+
+/* ============================================================
+   4 ATILAN TAŞ — dört köşe (sabit), "Çek/At" yazısı YOK, kutu yok
+   ============================================================ */
+.discard-label{display:none !important}
+/* sol rakip atığı gereksiz (çek zaten sol oyuncunun yığını) → gizle */
+.opponent-area.left .opponent-discard{display:none !important}
+
+#discardLayer{position:absolute !important; inset:0 !important; pointer-events:none !important; z-index:40 !important}
+#discardLayer > *{pointer-events:auto !important}
+#topDiscard, #rightDiscard, #leftDiscard, #myLeftDiscard, #myRightDiscard{
+  position:absolute !important; inset:auto !important; z-index:40 !important;
+  background:none !important; border:0 !important; box-shadow:none !important; padding:0 !important;
+  min-width:0 !important; display:flex !important; align-items:center !important; justify-content:center !important;
+  flex-direction:column !important; gap:0 !important;
+}
+/* 4 köşe (tahtaya göre): Kaan sol-üst, Ece sağ-üst, çek sol-alt, kendi atık sağ-alt */
+#topDiscard   {top:10px !important;  left:14px !important;  right:auto !important; bottom:auto !important}
+#rightDiscard {top:10px !important;  right:14px !important; left:auto !important;  bottom:auto !important}
+#myLeftDiscard{bottom:12px !important; left:14px !important;  right:auto !important; top:auto !important}
+#myRightDiscard{bottom:12px !important; right:14px !important; left:auto !important;  top:auto !important}
+#leftDiscard{display:none !important}  /* sol rakip atığı çek ile aynı → gizli */
+
+/* atılan taş görünümü: temiz beyaz, okunur boyut (referanstaki gibi) */
+.opponent-discard-tiles, .discard-tiles{
+  width:50px !important; height:70px !important; position:relative !important;
+  background:#fff !important; border:2px solid #d9d9d9 !important; border-radius:7px !important;
+  box-shadow:0 3px 6px #0006 !important; display:flex !important; align-items:center !important; justify-content:center !important; overflow:hidden !important;
+}
+.opponent-discard-tiles .tile-sprite, .discard-tiles .tile-sprite{
+  width:50px !important; height:70px !important; border-radius:6px !important; box-shadow:none !important; position:static !important; background-size:1300% 500% !important;
+}
+.discard-tiles .discard-stacked{position:absolute !important; bottom:0 !important; left:0 !important}
+
+/* ============================================================
+   SAĞ ÜST düzen: açma butonları hizalı, tek genişlik
+   ============================================================ */
+.game-action-panel{top:120px !important; right:14px !important; width:150px !important; align-items:stretch !important}
+.turn-actions{width:100% !important}
+.game-action-panel .action-btn{justify-content:center !important; text-align:center !important}
+
+
+/* ============================================================
+   v8 — ıstaka taşması, butonlar, yan profiller, çift orantı, el puanı
+   ============================================================ */
+/* 1) ISTAKA tam alta (taşma yok); oyun alanı ıstakanın üstünde biter */
+.game-board{inset:62px 0 192px 0 !important}
+.player-area.bottom{position:fixed !important; left:50% !important; bottom:0 !important; top:auto !important; transform:translateX(-50%) !important}
+#sortPairsBtn, #sortSeriesBtn{height:172px !important; min-height:172px !important}
+
+/* 2) SERİ AÇ / ÇİFT AÇ / GERİ TOPLA / TAŞLARI İŞLE: dikdörtgen, sağda dikey ortada */
+.game-action-panel{top:50% !important; bottom:auto !important; right:56px !important; transform:translateY(-50%) !important; width:170px !important; align-items:stretch !important}
+.turn-actions{width:100% !important; gap:11px !important}
+.game-action-panel .action-btn{height:50px !important; min-height:50px !important; border-radius:12px !important; justify-content:center !important}
+
+/* 3) EL PUANI: profil ortada kalsın, puan sağına kaysın */
+.rack-status{
+  left:auto !important; right:calc(50% - 230px) !important; transform:none !important;
+  bottom:calc(100% + 16px) !important; border-radius:999px !important; padding:6px 16px 5px !important;
+}
+
+/* 4) YAN PROFİLLER (Buse/Ece): ince dikey bar, isim dikey — kurumsal */
+.opponent-area.left .player-info,
+.opponent-area.right .player-info{
+  flex-direction:column !important; align-items:center !important; gap:6px !important;
+  width:48px !important; min-width:0 !important; padding:6px 4px 10px !important; min-height:190px !important;
+  border-radius:8px !important;
+}
+.opponent-area.left .player-info .avatar-wrapper,
+.opponent-area.right .player-info .avatar-wrapper{width:40px !important; height:40px !important}
+.opponent-area.left .player-info .player-avatar,
+.opponent-area.right .player-info .player-avatar{width:40px !important; height:40px !important; border-radius:4px !important}
+.opponent-area.left .player-info .player-name,
+.opponent-area.right .player-info .player-name{
+  writing-mode:vertical-rl !important; text-orientation:mixed !important; transform:rotate(180deg) !important;
+  max-width:none !important; font-size:13px !important; letter-spacing:.3px !important; margin-top:2px !important;
+}
+.opponent-area.left .player-info .player-score,
+.opponent-area.right .player-info .player-score{display:none !important}
+.opponent-area.left .player-info::after,
+.opponent-area.right .player-info::after{display:none !important}
+
+/* 5) ÇİFT alanı: orantılı, çizgiler taşla uyumlu, küçülmeden */
+.opened-pairs-zone{
+  right:20% !important; width:13% !important; top:4% !important; bottom:3% !important;
+  background:
+    linear-gradient(to right, #7fc0e022 1px, transparent 1px),
+    linear-gradient(to bottom, #7fc0e01c 1px, transparent 1px),
+    linear-gradient(180deg,#0e3d52,#0b3447) !important;
+  background-size: 50% 72px, 50% 72px, auto !important;
+}
+.opened-pairs-zone .pairs-grid{
+  position:absolute !important; inset:10px 8px !important;
+  display:flex !important; flex-direction:column !important; flex-wrap:wrap !important;
+  align-content:flex-start !important; justify-content:flex-start !important; gap:0 !important; background:none !important;
+}
+.pair-row{display:flex !important; gap:0 !important; height:72px !important}
+.pair-mini-tile{
+  width:calc((100% ) ) !important;
+  width:46px !important; height:64px !important; min-width:0 !important; min-height:0 !important; margin:4px 2px !important;
+  border-radius:4px !important; box-shadow:0 1px 2px #0006 !important; background-size:1300% 500% !important;
+}
+.pair-mini-tile::after{display:none !important}
+
+/* 6) Hediye (tomato) butonu kaldırıldı → profil popup'ında */
+.tomato-btn{display:none !important}
+
+/* 7) Atılan taşlar: DİZ sütunlarıyla aynı hizada (ıstaka uçları) */
+#topDiscard   {left:max(10px, calc(50% - 533px)) !important; top:8px !important; right:auto !important; bottom:auto !important}
+#myLeftDiscard{left:max(10px, calc(50% - 533px)) !important; bottom:10px !important; right:auto !important; top:auto !important}
+#rightDiscard {right:max(10px, calc(50% - 533px)) !important; top:8px !important; left:auto !important; bottom:auto !important}
+#myRightDiscard{right:max(10px, calc(50% - 533px)) !important; bottom:10px !important; left:auto !important; top:auto !important}
+
+
+/* ============================================================
+   v8b — Oyuncu profili popup'ı
+   ============================================================ */
+.profile-popup{position:fixed !important; inset:0 !important; z-index:600 !important;
+  display:flex !important; align-items:center !important; justify-content:center !important;
+  background:#000a !important; backdrop-filter:blur(4px) !important}
+.profile-popup.hidden{display:none !important}
+.profile-card{position:relative; width:min(320px,92vw); background:linear-gradient(160deg,#16436f,#0a2545);
+  border:2px solid #c6933f; border-radius:18px; padding:22px 20px; text-align:center; box-shadow:0 20px 50px #000b}
+.profile-close{position:absolute; right:12px; top:10px; width:32px; height:32px; border-radius:8px;
+  background:#1a406b; border:1px solid #75a8d6; color:#fff; font-size:20px; cursor:pointer}
+.profile-popup-avatar{width:88px; height:88px; border-radius:12px; object-fit:cover;
+  border:3px solid #f6cf73; box-shadow:0 4px 12px #0007; background:#0f2855}
+.profile-card h3{margin:12px 0 4px; font-size:21px; color:#fff}
+.profile-stats{display:flex; justify-content:center; gap:10px; margin:14px 0 18px}
+.profile-stats > div{flex:1; background:#07233f; border:1px solid #2f6a93; border-radius:10px; padding:9px 4px}
+.profile-stats span{display:block; font-size:10px; color:#9fc3df; letter-spacing:.3px; text-transform:uppercase}
+.profile-stats strong{display:block; font-size:17px; color:#ffe19f; margin-top:3px}
+.profile-gift-label{font-size:13px; font-weight:800; color:#ffd98a; margin-bottom:10px}
+.profile-gifts{display:flex; justify-content:center; gap:8px; flex-wrap:wrap}
+.profile-gifts button{width:46px; height:46px; font-size:24px; border-radius:10px;
+  background:#0e3156; border:1px solid #3a6f98; cursor:pointer; transition:transform .1s, filter .1s}
+.profile-gifts button:hover{transform:translateY(-2px); filter:brightness(1.2); border-color:#f6cf73}
+
+
+/* ============================================================
+   v10 — TEMA KANCALARI (hepsi theme-config.css'ten ayarlanır)
+   Buraya DOKUNMA. Ayarları css/theme-config.css'ten değiştir.
+   ============================================================ */
+
+/* Arka plan: resim koyarsan (--th-bg-image) her şeyin üstünü kaplar */
+body.game-page, .game-page{
+  background:
+    var(--th-bg-image, none),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cg fill='none' stroke='%236fb8d4' stroke-width='3.5' stroke-linecap='round' opacity='0.4'%3E%3Cpath d='M35 25 C65 25 70 70 35 70 C10 70 12 42 34 42 C44 42 46 54 36 56'/%3E%3Cpath d='M115 80 C85 80 80 125 115 125 C140 125 138 97 116 97 C106 97 104 109 114 111'/%3E%3Cpath d='M95 18 q24 14 9 40'/%3E%3Cpath d='M20 98 q24 14 9 40'/%3E%3C/g%3E%3C/svg%3E") 0 0/150px 150px,
+    radial-gradient(ellipse at 50% 30%, var(--th-bg-color-center,#2f84a6), var(--th-bg-color-mid,#216d8c) 60%, var(--th-bg-color-edge,#185874)) !important;
+  background-size: var(--th-bg-image-size, cover), 150px 150px, auto !important;
+  background-repeat: no-repeat, repeat, no-repeat !important;
+}
+
+/* Oyun alanı üst/alt boşluğu (ölçek) */
+.game-board{ inset: var(--th-board-top,62px) 0 var(--th-board-bottom,150px) 0 !important; }
+
+/* SERİ / PER alanı: konum + boyut + arka plan (resim veya renk) */
+.opened-tiles-table{
+  left:var(--th-seri-left,9%) !important; right:var(--th-seri-right,45%) !important;
+  top:var(--th-seri-top,4%) !important; bottom:var(--th-seri-bottom,3%) !important;
+  border:var(--th-seri-border-w,2px) solid var(--th-seri-border,#5a9fc2) !important;
+  background:
+    var(--th-seri-image, none),
+    linear-gradient(180deg, var(--th-seri-bg1,#0e3d52), var(--th-seri-bg2,#0b3447)) !important;
+  background-size: var(--th-seri-image-size, cover), auto !important;
+  background-repeat: no-repeat, no-repeat !important;
+}
+
+/* SERİ ızgara çizgileri: kolon/satır sayısı + çizgi kalınlığı + renk */
+.sboard{
+  grid-template-columns:repeat(var(--th-grid-cols,13), 1fr) !important;
+  grid-template-rows:repeat(var(--th-grid-rows,13), 1fr) !important;
+  background-image:
+    linear-gradient(to right, var(--th-grid-line-color,#7fc0e026) var(--th-grid-line,1px), transparent var(--th-grid-line,1px)),
+    linear-gradient(to bottom, var(--th-grid-line-color,#7fc0e01f) var(--th-grid-line,1px), transparent var(--th-grid-line,1px)) !important;
+  background-size: calc(100% / var(--th-grid-cols,13)) calc(100% / var(--th-grid-rows,13)) !important;
+}
+
+/* SERİ içindeki taş boyutu (köşe yuvarlaklığı) */
+.grid-table-tile{ border-radius:var(--th-grid-tile-radius,2px) !important; }
+
+/* ÇİFT alanı: konum + boyut + arka plan (resim veya çizgiler) */
+.opened-pairs-zone{
+  right:var(--th-cift-right,20%) !important; width:var(--th-cift-width,13%) !important;
+  top:var(--th-cift-top,4%) !important; bottom:var(--th-cift-bottom,3%) !important;
+  border:var(--th-cift-border-w,0px) solid var(--th-cift-border,#5a9fc2) !important;
+  background:
+    var(--th-cift-image,
+      linear-gradient(to right, var(--th-grid-line-color,#7fc0e022) var(--th-grid-line,1px), transparent var(--th-grid-line,1px)),
+      linear-gradient(to bottom, var(--th-grid-line-color,#7fc0e01c) var(--th-grid-line,1px), transparent var(--th-grid-line,1px))
+    ),
+    linear-gradient(180deg, var(--th-cift-bg1,#0e3d52), var(--th-cift-bg2,#0b3447)) !important;
+  background-size: var(--th-cift-grid-w,50%) var(--th-cift-grid-h,72px), var(--th-cift-grid-w,50%) var(--th-cift-grid-h,72px), auto !important;
+  background-repeat: repeat, repeat, no-repeat !important;
+}
+
+/* ÇİFT taş boyutu */
+.pair-row{ height:calc(var(--th-pair-tile-h,64px) + 8px) !important; }
+.pair-mini-tile{ width:var(--th-pair-tile-w,46px) !important; height:var(--th-pair-tile-h,64px) !important; }
+
+/* Orta mod kolonu konumu */
+.table-center>.center-content.mode-column{ right:var(--th-mode-right,37%) !important; width:var(--th-mode-width,76px) !important; }
+
+/* Sağdaki açma butonları konumu */
+.game-action-panel{ right:var(--th-actions-right,56px) !important; width:var(--th-actions-width,170px) !important; }

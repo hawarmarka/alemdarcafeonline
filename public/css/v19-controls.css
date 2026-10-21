@@ -1,0 +1,128 @@
+/* ALEMDAR 101 - V19 / kontrol tekleştirme + skor yerleşimi
+   En son yüklenen stil; önceki sürümlerin çakışan kurallarını bastırır. */
+
+/* Üstte SADECE var olan sohbet görseli ve var olan aşağı ok butonu kalır. */
+#gameContainer .premium-gamebar{z-index:125!important}
+#gameContainer .premium-gamebar .gamebar-right{position:relative!important;display:flex!important;gap:8px!important;align-items:flex-start!important;pointer-events:auto!important;}
+#gameContainer .premium-gamebar #gamebarLeaveBtn{
+  width:77px!important;min-width:77px!important;height:53px!important;min-height:53px!important;
+  padding:0!important;margin:0!important;cursor:pointer!important;
+  background:url('/asset/reference/ayarlar.webp') center/100% 100% no-repeat!important;
+  border:0!important;box-shadow:none!important;color:transparent!important;font-size:0!important;
+  transition:filter .13s ease!important;
+}
+#gameContainer .premium-gamebar #gamebarLeaveBtn:hover{filter:brightness(1.13)}
+#gameContainer .premium-gamebar #gamebarLeaveBtn[aria-expanded='true']{filter:brightness(1.18)}
+/* Mevcut mesaj görseli menünün yanı başında durur; ikinci bir sohbet tuşu yaratılmaz. */
+#gameContainer #tableChatPanel.table-chat-panel.collapsed{
+  top:10px!important;bottom:auto!important;right:calc(9.2% + 84px)!important;left:auto!important;
+  width:77px!important;height:53px!important;max-height:53px!important;z-index:128!important;
+  border:0!important;background:transparent!important;box-shadow:none!important;
+  overflow:visible!important;
+}
+#gameContainer #tableChatPanel.collapsed #toggleTableChat{
+  width:77px!important;height:53px!important;min-height:53px!important;
+  background:url('/asset/reference/mesaj.webp') center/100% 100% no-repeat!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;
+  font-size:0!important;color:transparent!important;cursor:pointer!important;
+}
+#gameContainer #tableChatPanel:not(.collapsed){
+  top:71px!important;right:9.2%!important;left:auto!important;bottom:auto!important;
+  z-index:135!important;
+}
+/* Menü doğrudan eski ayarlar/aşağı ok butonunun altından açılır. */
+#gameContainer .premium-gamebar #quickMenuPanel.quick-menu-panel{
+  display:flex;flex-direction:column;gap:7px;position:absolute!important;
+  top:61px!important;right:0!important;left:auto!important;width:254px!important;
+  padding:11px!important;border:1px solid #4b9ed4!important;border-radius:13px!important;
+  background:linear-gradient(155deg,#154674 0%,#071d37 100%)!important;
+  box-shadow:0 13px 30px #001427dd,inset 0 1px 0 #ffffff22!important;
+  z-index:200!important;pointer-events:auto!important;
+}
+#gameContainer .premium-gamebar #quickMenuPanel.hidden{display:none!important}
+#gameContainer .premium-gamebar #quickMenuPanel button{
+  display:flex!important;align-items:center!important;width:100%!important;
+  min-height:42px!important;max-height:none!important;padding:9px 12px!important;
+  text-align:left!important;border:1px solid #4d80b6!important;border-radius:9px!important;
+  background:linear-gradient(#1d538c,#0d3159)!important;color:#fff!important;
+  font:800 14px/1.3 'Outfit',system-ui,sans-serif!important;
+  white-space:normal!important;cursor:pointer!important;margin:0!important;
+}
+#gameContainer .premium-gamebar #quickMenuPanel button:hover{filter:brightness(1.16)!important}
+
+/* Tekrar eden alt oyuncu puanı kaldırıldı: toplam, üst sol HUD ve Skor menüsünde. */
+#gameBoard .player-area.bottom .own-score-chip,#bottomPlayerScoreChip{display:none!important}
+/* Yan oyuncuların değerleri açma sayacı DEĞİL, sunucudan gelen toplam skordur. */
+#gameBoard .opponent-area.left .opponent-score-chip,
+#gameBoard .opponent-area.right .opponent-score-chip{
+  position:absolute!important;top:73px!important;
+  width:76px!important;min-width:76px!important;height:34px!important;
+  border:0!important;padding:3px 7px 6px!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  color:#fff!important;font:900 18px/1 'Outfit',system-ui,sans-serif!important;
+  background:url('/asset/reference/puan-badge.webp') center/100% 100% no-repeat!important;
+  filter:drop-shadow(0 2px 3px #0006);z-index:50!important;
+}
+#gameBoard .opponent-area.left .opponent-score-chip{left:65px!important;right:auto!important}
+#gameBoard .opponent-area.right .opponent-score-chip{right:65px!important;left:auto!important}
+#gameBoard .opponent-area.left .opponent-score-chip:before,
+#gameBoard .opponent-area.right .opponent-score-chip:before{
+  content:'SKOR';position:absolute;top:-17px;left:0;right:0;text-align:center;
+  color:#dbeaff;letter-spacing:1px;text-shadow:0 1px 2px #000b;
+  font:800 10px/1 'Outfit',system-ui,sans-serif;
+}
+/* Oklar oyuncunun profil çubuğunu gösterir. */
+#gameBoard .opponent-area.left .opponent-score-chip:after{
+  content:''!important;position:absolute!important;top:12px!important;left:-9px!important;right:auto!important;
+  transform:none!important;width:10px!important;height:11px!important;
+  background:#2466c0!important;clip-path:polygon(100% 0,100% 100%,0 50%)!important;
+}
+#gameBoard .opponent-area.right .opponent-score-chip:after{
+  content:''!important;position:absolute!important;top:12px!important;right:-9px!important;left:auto!important;
+  transform:none!important;width:10px!important;height:11px!important;
+  background:#2466c0!important;clip-path:polygon(0 0,100% 50%,0 100%)!important;
+}
+
+/* Gerçek hesaplanan seri açma puanı, SERİ DİZ düğmesinin hemen solunda. */
+#gameContainer #rackStatus.rack-status{
+  position:absolute!important;left:auto!important;top:auto!important;
+  right:7.25%!important;bottom:211px!important;
+  transform:none!important;display:flex!important;align-items:center!important;justify-content:center!important;
+  width:92px!important;min-width:92px!important;height:38px!important;min-height:38px!important;
+  padding:4px 9px 7px!important;margin:0!important;gap:0!important;
+  border:0!important;border-radius:0!important;
+  background:url('/asset/reference/seri-puan.webp') center/100% 100% no-repeat!important;
+  box-shadow:none!important;z-index:91!important;pointer-events:none!important;
+}
+#gameContainer #rackScore{
+  font:900 19px/1 'Outfit',system-ui,sans-serif!important;color:#fff!important;
+  text-shadow:0 1px 2px #001b44!important;text-align:center!important;
+}
+#gameContainer #rackScoreCaption{
+  position:absolute!important;left:0;right:0;top:-17px!important;
+  text-align:center;color:#d4eaff;letter-spacing:.8px;
+  font:900 10px/1 'Outfit',system-ui,sans-serif!important;
+  text-shadow:0 1px 2px #001b44;
+}
+#gameContainer #rackStatus:after{
+  content:''!important;position:absolute;left:calc(50% - 7px);right:auto;bottom:-9px;top:auto;
+  width:14px;height:10px;background:#2664ca;
+  clip-path:polygon(0 0,100% 0,50% 100%);
+}
+#gameContainer #rackCount{display:none!important}
+/* Buton altındaki gereksiz uzun açıklamayı göstermiyoruz. */
+#gameContainer #actionHelp{display:none!important}
+/* Modal gerçekten açılabilir olsun. */
+#rulesModal{position:fixed!important;inset:0!important;background:#03172bdc!important;
+  display:grid!important;place-items:center!important;z-index:260!important;padding:18px!important}
+#rulesModal.hidden{display:none!important}
+#rulesModal .rules-dialog{
+  position:relative;max-width:740px;width:min(740px,94vw);
+  max-height:90vh;overflow:hidden;padding:24px 26px;border-radius:17px;
+  border:2px solid #b98e49;background:linear-gradient(#123c62,#071e3a);
+  color:#f1f6ff;box-shadow:0 20px 60px #0009;
+}
+#rulesModal h2{margin:4px 30px 10px;color:#ffe29b;font:900 26px/1.2 'Outfit',system-ui,sans-serif}
+#rulesModal .rules-scroll{height:min(58vh,450px);overflow:auto;line-height:1.5;color:#e7effb;}
+#rulesModal .rules-scroll li{margin-bottom:7px}
+#rulesModal .rules-close{position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:7px;border:1px solid #7daee7;background:#234e89;color:white;cursor:pointer}

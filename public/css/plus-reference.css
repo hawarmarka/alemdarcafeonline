@@ -1,0 +1,459 @@
+/* ===============================================================
+   ALEMDAR CAFE 101 · GÖRSEL PAKETİ ENTEGRASYONU · V15
+   OKEY RESİM.zip içindeki kullanıcı varlıklarından oluşturuldu.
+   Sadece görünüm, konum ve erişilebilir etkileşim; server hamleleri korunur.
+   En son yüklenen katmandır: dağınık v6-v14 kurallarını geçersiz kılar.
+   =============================================================== */
+:root{
+  --tw: clamp(55px, 4.2vw, 71px);
+  --th: calc(var(--tw) * 1.325);
+  --rack-gap: 0px;
+  --plus-rack-width: calc(16 * var(--tw) + 44px);
+  --plus-rack-height: calc(2 * var(--th) + 19px);
+}
+html,body.game-page{margin:0;min-height:100%;}
+body.game-page{
+  min-height:750px !important; height:100vh !important;
+  overflow-x:auto !important; overflow-y:auto !important;
+  background: radial-gradient(ellipse at 51% 44%, #297fa5 2%,#1e6587 59%, #103b58 100%) !important;
+}
+.game-page .background-animation,.game-page .particles{display:none !important}
+#gameContainer.game-container{
+  position:relative !important; width:100% !important; min-width:1500px !important;
+  min-height:750px !important; height:100vh !important;
+}
+/* Görseldeki mavi çiçekli halı: küçük tekrar eden çizim, yazı veya hayali taş yok. */
+#gameContainer:before{
+  content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='164' height='164' viewBox='0 0 164 164'%3E%3Cg fill='none' stroke='%23051c32' stroke-opacity='.17' stroke-width='2.4'%3E%3Cpath d='M-20 52c40-34 82-22 80 9-2 29-40 30-43 10-2-13 14-19 20-8M84-22c-34 38-20 80 10 78 27-3 30-36 10-40-12-2-17 12-8 17M175 105c-39-34-82-18-78 11 4 27 41 26 42 8 0-13-16-17-20-6M60 185c24-42 12-77-16-73-30 5-24 41-8 42 15 2 20-14 8-17'/%3E%3Cpath d='M3 4c45 2 47 27 56 43M155 4c-48 5-38 36-54 46M15 148c41-9 29-41 47-51M147 154c-34-9-34-39-51-50'/%3E%3Ccircle cx='82' cy='82' r='16'/%3E%3Cpath d='M82 58c10 12 19 12 28 25-12 5-15 14-27 23-10-13-17-17-27-23 14-10 18-18 26-25z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size:164px 164px;background-repeat:repeat;opacity:.8;
+}
+#gameContainer .premium-gamebar{
+  position:absolute !important;z-index:95 !important;left:0;right:0;top:0;
+  height:67px !important;min-height:0 !important;border:0 !important;box-shadow:none !important;
+  background:transparent !important;padding:10px 9.2% 0 !important;
+  align-items:flex-start !important;justify-content:flex-end !important;pointer-events:none;
+}
+.premium-gamebar .gamebar-profile,.premium-gamebar .gamebar-center,.premium-gamebar .gamebar-chip{display:none !important}
+.premium-gamebar .gamebar-right{gap:8px;pointer-events:auto}
+.premium-gamebar #gamebarLeaveBtn{
+  height:47px !important;width:78px !important;min-width:0;padding:0 8px !important;
+  border:0 !important;border-radius:9px !important;
+  background:url('/asset/reference/ayarlar.webp') center/100% 100% no-repeat !important;
+  color:transparent !important;font-size:0 !important;box-shadow:none !important;
+  text-shadow:none !important;
+}
+.premium-gamebar #gamebarLeaveBtn:after{content:''}
+.reference-hud{position:absolute;z-index:94;inset:10px auto auto 9.2%;display:flex;align-items:center;gap:12px;pointer-events:none}
+.reference-hud-score,.reference-hud-time{
+  height:52px;display:flex;align-items:center;gap:10px;background:linear-gradient(#071d30dd,#06182ae8);
+  border:1px solid #142c44;border-radius:8px;box-shadow:0 3px 10px #001b2c88,inset 0 1px 0 #ffffff18;
+  padding:0 14px 0 4px;min-width:147px;
+}
+.reference-hud .hud-coin,.reference-hud-time>span{display:grid;place-items:center;font-size:32px;width:46px;height:45px;filter:drop-shadow(0 2px 2px #0009)}
+.reference-hud strong{font-size:25px;font-weight:900;color:#f9fbff;letter-spacing:-.6px;font-variant-numeric:tabular-nums}
+.reference-hud-score-btn{
+  position:fixed;right:19.7%;top:13px;width:146px;height:50px;
+  color:white;background:linear-gradient(#6ac62b,#249e12 70%,#147309);border:2px solid #a9e67c;
+  border-radius:9px;box-shadow:0 3px 7px #0008,inset 0 2px #fff6;font-weight:900;
+  pointer-events:auto;cursor:pointer;
+}
+.reference-hud-score-btn:hover,.reference-hud-score-btn.is-active{filter:brightness(1.14)}
+/* Görseldeki iki 13x13 seri ızgarası / ortadaki ince mod kolonu / sağdaki çift alanı. */
+#gameBoard.game-board{
+  position:absolute !important;left:0 !important;right:0 !important;
+  top:70px !important;bottom:calc(2 * var(--th) + 89px) !important;
+  width:auto !important;height:auto !important;min-height:345px;
+  border:0 !important;outline:0 !important;border-radius:0 !important;
+  box-shadow:none !important;background:transparent !important;
+  overflow:visible !important;
+}
+#gameBoard:before,#gameBoard:after{display:none !important}
+#openedTilesTable.opened-tiles-table{
+  position:absolute !important;left:18.9% !important;right:auto !important;
+  top:0 !important;bottom:0 !important;width:43.3% !important;height:100% !important;
+  border:0 !important;border-radius:7px !important;
+  box-shadow:inset 0 0 26px #01102199 !important;
+  background:linear-gradient(90deg,#082743,#0c304d 50%,#082743) !important;
+  overflow:hidden !important;pointer-events:none !important;
+}
+#openedTilesTable:before{display:none !important}
+#openedTilesTable:after{display:none !important}
+#openedTilesTable .open-board-header{display:none !important}
+#compactOpenGroups.compact-open-groups{
+  position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;
+  display:flex !important;flex-direction:row !important;gap:0 !important;
+  padding:0 !important;overflow:hidden !important;
+  z-index:2 !important;pointer-events:auto !important;
+}
+#compactOpenGroups .sboard{
+  flex:1 1 50% !important;width:50% !important;min-width:0 !important;height:100% !important;
+  position:relative;display:grid !important;grid-template-columns:repeat(13,minmax(0,1fr)) !important;
+  grid-template-rows:repeat(13,minmax(0,1fr)) !important;align-content:stretch;
+  background-image:linear-gradient(90deg,#689db425 1px,transparent 1px),linear-gradient(#689db420 1px,transparent 1px) !important;
+  background-size:calc(100% / 13) calc(100% / 13) !important;
+}
+#compactOpenGroups .sboard + .sboard{border-left:1px solid #b5d1da55 !important}
+#compactOpenGroups .sboard:before{
+  content:'101';position:absolute;top:34%;left:0;right:0;pointer-events:none;
+  text-align:center;font:bold 110px/1 system-ui,sans-serif;letter-spacing:-9px;
+  color:#9ac7d00d;text-shadow:1px 4px 0 #90c0d01a;
+}
+#compactOpenGroups .sboard:after{
+  content:'PLUS';position:absolute;top:50%;left:10%;right:10%;pointer-events:none;
+  background:#b8d6da16;color:#b6d1e01c;clip-path:polygon(0 4%,100% 0,95% 50%,100% 100%,0 96%,6% 50%);
+  font-size:44px;font-weight:1000;letter-spacing:7px;text-align:center;line-height:54px;
+}
+#compactOpenGroups .grid-table-tile{
+  position:relative;z-index:3;width:100% !important;height:100% !important;
+  border-radius:2px !important;box-shadow:0 1px 2px #06101a77 !important;
+  cursor:pointer !important;min-width:0 !important;min-height:0 !important;
+  background-size:1300% 500% !important;transform:none !important;
+}
+/* Çift açma: kullanıcı görselindeki gibi yan yana, yukarıdan aşağıya. */
+#openedPairsZone.opened-pairs-zone{
+  position:absolute !important;top:0 !important;bottom:0 !important;left:69.3% !important;right:auto !important;
+  width:10% !important;height:100% !important;min-height:0 !important;
+  border:0 !important;border-radius:6px !important;box-shadow:inset 0 0 22px #0008 !important;
+  background:linear-gradient(90deg,#082540,#0c314d,#06243d) !important;
+  padding:0 !important;display:block !important;overflow:hidden !important;
+}
+#openedPairsZone:before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(90deg,#80a4bc29 1px,transparent 1px),linear-gradient(#80a4bc20 1px,transparent 1px);
+  background-size:calc(100% / 6) calc(100% / 13);z-index:0;
+}
+#openedPairsZone .pair-zone-title,#openedPairsZone .pair-open-badge,#openedPairsZone #pairsPager{display:none !important}
+#openedPairsZone #pairsGrid.pairs-grid{
+  position:absolute !important;inset:0 !important;
+  display:flex !important;flex-direction:column !important;flex-wrap:wrap !important;
+  gap:0 !important;align-content:flex-start !important;align-items:flex-start !important;
+  justify-content:flex-start !important;overflow:hidden !important;
+}
+#openedPairsZone .pair-row{
+  height:calc((100% / 13)) !important;min-height:0 !important;
+  width:calc(100% / 3) !important;display:flex !important;gap:0 !important;
+  align-items:stretch !important; flex:0 0 calc(100% / 13) !important;
+}
+#openedPairsZone .pair-row .pair-mini-tile{
+  width:50% !important;height:100% !important;min-width:0 !important;min-height:0 !important;
+  flex:0 0 50% !important;max-width:none !important;box-shadow:0 1px 2px #06101a77 !important;
+  border-radius:1px !important;margin:0 !important;background-size:1300% 500% !important;
+}
+#gameBoard .reference-pairs-count{
+  position:absolute;z-index:34;top:32px;left:79%;height:44px;width:55px;
+  display:grid;place-items:center;color:#fff;font-size:21px;font-weight:900;
+  font-variant-numeric:tabular-nums;text-shadow:0 1px 2px #000;
+  background:url('/asset/reference/cift-puan.webp') center/100% 100% no-repeat;
+  pointer-events:none;
+}
+/* Ortadaki mod satırları, gösterge ve taş çekme yuvası */
+#gameBoard .table-center{position:absolute !important;inset:0 !important;pointer-events:none !important;z-index:16 !important}
+#gameBoard .table-center>.center-content.mode-column{
+  position:absolute !important;left:62.8% !important;right:auto !important;top:0 !important;bottom:auto !important;
+  transform:none !important;width:5.9% !important;height:auto !important;
+  background:none !important;border:0 !important;border-radius:0 !important;
+  padding:0 !important;box-shadow:none !important;
+  display:flex !important;flex-direction:column !important;align-items:stretch !important;
+  justify-content:flex-start !important;gap:9px !important;pointer-events:auto !important;
+}
+#gameBoard .mode-badges{display:flex !important;flex-direction:column !important;gap:5px !important;width:100% !important;margin:0 0 16px !important}
+#gameBoard .mode-badge{
+  display:flex !important;justify-content:center;align-items:center;
+  height:41px !important;min-height:41px !important;padding:2px 3px !important;
+  border-radius:7px !important;border:1px solid #092237 !important;
+  color:#fff !important;font-size:18px !important;white-space:nowrap;font-weight:750 !important;
+  background:linear-gradient(#0c3e5d,#06283e) !important;
+  box-shadow:0 1px 3px #00121e9c !important;
+}
+#gameBoard .mode-badge.green{background:linear-gradient(#30a96f,#0e6248) !important}
+#gameBoard .mode-badge.red{background:linear-gradient(#c54750,#79242b) !important}
+#gameBoard .mode-badge.round{background:linear-gradient(#11465e,#0b324b) !important}
+#gameBoard .indicator-section,#gameBoard .pile-section{
+  position:relative;margin:0 auto !important;padding:0 !important;
+  display:flex !important;align-items:center !important;justify-content:center !important;
+  border:0 !important;background:none !important;box-shadow:none !important;
+}
+#gameBoard .indicator-slot{display:flex !important;align-items:center !important;justify-content:center !important}
+#gameBoard .indicator-slot .tile-placeholder{
+  width:70px !important;height:95px !important;min-width:0 !important;
+  background:url('/asset/reference/tas-cekme.webp') center/100% 100% no-repeat !important;
+  border:0 !important;border-radius:0 !important;box-shadow:none !important;overflow:hidden !important;
+}
+#gameBoard .indicator-slot .tile-placeholder>.table-tile{
+  width:74% !important;height:84% !important;box-shadow:none !important;border-radius:4px !important;
+}
+#gameBoard #drawPile.pile-stack{
+  width:70px !important;height:95px !important;min-width:0 !important;
+  border:0 !important;background:url('/asset/reference/tas-cekme.webp') center/100% 100% no-repeat !important;
+  cursor:pointer !important;filter:drop-shadow(0 1px 3px #0007);
+}
+#gameBoard #drawPile .pile-tile-back{
+  position:absolute;left:18% !important;top:14% !important;width:64% !important;height:71% !important;
+  border-radius:4px !important;border:1px solid #c5ced4 !important;
+  background:linear-gradient(160deg,#fff,#e6e6e9 80%) !important;
+  box-shadow:inset 0 2px 2px #fff,0 1px 2px #0005 !important;
+  transform:none !important;
+}
+#gameBoard #drawPile .pile-tile-back:nth-child(1),#gameBoard #drawPile .pile-tile-back:nth-child(2){display:none !important}
+#gameBoard #drawPile .pile-tile-back:after{display:none !important}
+#gameBoard #drawPile .pile-count-badge{
+  z-index:5;top:auto !important;bottom:17% !important;right:34% !important;
+  padding:1px 5px !important;color:#181b25 !important;font-size:16px !important;
+  background:#d9dbdf !important;border:0 !important;border-radius:50% !important;
+  box-shadow:0 1px 3px #0004 !important;
+}
+#gameBoard .pile-odometer{display:none !important}
+/* Üst, sol, sağ, alt profil yerleri -- referanstaki koordinatları kullanır. */
+#gameBoard .opponent-area.top{
+  position:absolute !important;top:-60px !important;left:48.6% !important;right:auto !important;
+  transform:translateX(-50%) !important;width:226px !important;height:53px !important;z-index:60 !important;
+}
+#gameBoard .opponent-area.left,#gameBoard .opponent-area.right{
+  position:absolute !important;top:120px !important;transform:none !important;
+  height:268px !important;width:56px !important;z-index:37 !important;
+}
+#gameBoard .opponent-area.left{left:8.3% !important;right:auto !important}
+#gameBoard .opponent-area.right{right:9.2% !important;left:auto !important}
+#gameBoard .opponent-area .player-info,#gameBoard .player-info.self{
+  position:relative !important;margin:0 !important;
+  background:url('/asset/reference/profil.webp') center/100% 100% no-repeat !important;
+  box-shadow:none !important;border:0 !important;border-radius:0 !important;
+  padding:5px 8px !important;display:flex !important;align-items:center !important;gap:8px !important;
+}
+#gameBoard .opponent-area.top .player-info{width:226px !important;min-width:0 !important;height:52px !important;flex-direction:row !important}
+#gameBoard .opponent-area.left .player-info,#gameBoard .opponent-area.right .player-info{
+  width:56px !important;min-width:0 !important;height:268px !important;min-height:0 !important;
+  flex-direction:column !important;justify-content:flex-start !important;gap:5px !important;
+  background:url('/asset/reference/profil-dikey.webp') center/100% 100% no-repeat !important;
+  padding:4px 5px 6px !important;
+}
+#gameBoard .opponent-area .player-info:after{display:none !important}
+#gameBoard .opponent-area .avatar-wrapper{width:43px !important;height:43px !important;min-width:0 !important;flex:none !important}
+#gameBoard .opponent-area .player-avatar{
+  display:block;width:100% !important;height:100% !important;border:0 !important;border-radius:4px !important;
+  box-shadow:none !important;object-fit:cover !important;
+}
+#gameBoard .opponent-area .player-name{
+  font-size:14px !important;color:#fafcff !important;max-width:146px !important;
+  text-shadow:0 1px 3px #000 !important;font-weight:800 !important;
+}
+#gameBoard .opponent-area.left .player-name,#gameBoard .opponent-area.right .player-name{
+  writing-mode:vertical-rl !important;text-orientation:mixed !important;
+  transform:none !important;font-size:14px !important;max-height:203px !important;max-width:none !important;
+  white-space:nowrap !important;
+}
+#gameBoard .opponent-area.left .player-details,#gameBoard .opponent-area.right .player-details{
+  display:flex !important;align-items:center !important;justify-content:flex-start !important;
+  min-height:0 !important;width:100% !important;overflow:hidden !important;
+}
+#gameBoard .opponent-area .player-score{display:none !important}
+#gameBoard .opponent-area .player-turn-clock{bottom:-7px !important;width:85% !important;left:8% !important;height:5px !important}
+#gameBoard .opponent-area.left .player-turn-clock,#gameBoard .opponent-area.right .player-turn-clock{
+  left:0 !important;top:6% !important;bottom:auto !important;width:4px !important;height:88% !important;
+}
+#gameBoard .opponent-score-chip{
+  position:absolute;right:-67px;top:-18px;
+  z-index:2;min-width:67px;height:36px;display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:21px;font-weight:900;font-variant-numeric:tabular-nums;
+  background:url('/asset/reference/puan-badge.webp') center/100% 100% no-repeat;
+  padding:3px 12px 7px;filter:drop-shadow(0 2px 3px #0005);
+}
+#gameBoard .opponent-area.right .opponent-score-chip{right:auto;left:-76px}
+#gameBoard .opponent-area.top .opponent-score-chip{display:none}
+#gameBoard .player-area.bottom{
+  position:absolute !important;left:50% !important;right:auto !important;
+  bottom:calc(-1 * (2 * var(--th) + 82px)) !important;
+  transform:translateX(-50%) !important;
+  width:var(--plus-rack-width) !important;max-width:none !important;
+  height:var(--plus-rack-height) !important;z-index:55 !important;
+  display:flex !important;align-items:flex-end !important;justify-content:center !important;
+}
+#gameBoard .cue-container{
+  position:relative !important; width:var(--plus-rack-width) !important;
+  min-width:var(--plus-rack-width) !important;max-width:none !important;
+}
+#gameBoard .cue-wood{
+  position:relative !important;display:grid !important;
+  width:var(--plus-rack-width) !important;height:var(--plus-rack-height) !important;
+  min-height:0 !important;max-width:none !important;box-sizing:border-box !important;
+  padding:5px 20px 6px !important;gap:4px !important;
+  grid-template-rows:var(--th) var(--th) !important;
+  border:0 !important;border-radius:0 !important;box-shadow:none !important;
+  background:url('/asset/reference/istaka.webp') center/100% 100% no-repeat !important;
+}
+#gameBoard .cue-wood:before{display:none !important}
+#gameBoard .cue-row{
+  display:grid !important;grid-template-columns:repeat(16,var(--tw)) !important;
+  width:max-content !important;height:var(--th) !important;min-height:0 !important;
+  margin:0 auto !important;padding:0 !important;gap:0 !important;z-index:2 !important;
+}
+#gameBoard .tile-slot{width:var(--tw) !important;height:var(--th) !important;
+  background:transparent !important;box-shadow:none !important;border-radius:0 !important;
+  touch-action:none !important;min-width:0 !important;min-height:0 !important;
+}
+#gameBoard .cue-row .tile-sprite{
+  width:var(--tw) !important;height:var(--th) !important;
+  max-width:none !important;min-width:0 !important;min-height:0 !important;
+  border-radius:4px !important;box-shadow:0 1px 2px #00152a66 !important;
+  background-size:1300% 500% !important;
+}
+#gameBoard .cue-row .tile-sprite.selected{transform:translateY(-9px) !important;z-index:9 !important}
+#gameBoard .cue-row .tile-sprite:hover{transform:translateY(-5px) !important;z-index:8 !important}
+#gameBoard .player-info.self{
+  position:absolute !important;top:auto !important;bottom:calc(100% + 1px) !important;
+  left:50% !important;right:auto !important;transform:translateX(-50%) !important;
+  width:274px !important;min-width:0 !important;height:54px !important;z-index:31 !important;
+}
+#gameBoard .player-info.self .avatar-wrapper{width:42px !important;height:42px !important;flex:none !important}
+#gameBoard .player-info.self .player-avatar{border:0 !important;border-radius:3px !important;width:100%;height:100%;object-fit:cover}
+#gameBoard .player-info.self .player-name{font-size:16px !important;color:#fff !important;max-width:160px !important}
+#gameBoard .player-info.self #bottomTileCount{display:none !important}
+#gameBoard .player-area.bottom .own-score-chip{display:none !important}
+#gameBoard .rack-status{
+  position:absolute !important;bottom:calc(100% + 8px) !important;top:auto !important;
+  right:18% !important;left:auto !important;transform:none !important;
+  min-width:89px !important;width:auto !important;height:43px !important;
+  margin:0 !important;padding:3px 14px 7px !important;
+  background:url('/asset/reference/seri-puan.webp') center/100% 100% no-repeat !important;
+  border:0 !important;border-radius:0 !important;box-shadow:none !important;
+  align-items:center;justify-content:center;gap:0 !important;
+  color:#fff !important;font-size:20px !important;
+}
+#gameBoard #rackCount{display:none !important}
+#gameBoard #rackScore{color:white !important;font-size:19px !important;text-shadow:0 1px 2px #000 !important}
+/* Dört atılan taş, taş çekme ve atma alanlarına gerçek pointer olayları bağlı kalır. */
+#discardLayer{position:absolute !important;inset:0 !important;z-index:42 !important;pointer-events:none !important}
+#discardLayer > *{position:absolute !important;pointer-events:auto !important;z-index:2 !important}
+#discardLayer #leftDiscard{display:none !important}
+#discardLayer #topDiscard{top:11px !important;left:10% !important;right:auto !important;bottom:auto !important}
+#discardLayer #rightDiscard{top:11px !important;right:11% !important;left:auto !important;bottom:auto !important}
+#discardLayer #myLeftDiscard{top:auto !important;bottom:-45px !important;left:10% !important;right:auto !important}
+#discardLayer #myRightDiscard{top:auto !important;bottom:-45px !important;right:11% !important;left:auto !important}
+#discardLayer :is(#topDiscard,#rightDiscard,#myLeftDiscard,#myRightDiscard){
+  min-width:0 !important;width:68px !important;height:87px !important;
+  background:url('/asset/reference/tas-atma.webp') center/100% 100% no-repeat !important;
+  border:0 !important;border-radius:0 !important;padding:6px !important;box-shadow:none !important;
+  display:flex !important;align-items:center !important;justify-content:center !important;
+}
+#discardLayer :is(.opponent-discard-tiles,.discard-tiles){
+  width:51px !important;height:70px !important;min-width:0 !important;
+  display:block !important;background:transparent !important;
+  border:0 !important;border-radius:3px !important;overflow:visible !important;
+  box-shadow:none !important;position:relative !important;
+}
+#discardLayer .tile-sprite{
+  width:51px !important;height:70px !important;min-width:0 !important;
+  position:absolute !important;inset:auto 0 0 0 !important;
+  border-radius:3px !important;background-size:1300% 500% !important;
+  box-shadow:none !important;transform:none !important;
+}
+#discardLayer .empty-pile-text,#discardLayer .opponent-empty{display:none !important}
+#discardLayer .discard-label,#discardLayer .opponent-discard-caption{display:none !important}
+/* Kullanıcının resmindeki mavi yan dizme butonları; DOM'da taşınsa bile sabit. */
+#sortPairsBtn,#sortSeriesBtn{
+  position:absolute !important;top:auto !important;bottom:14px !important;
+  display:block !important;width:95px !important;min-width:95px !important;
+  height:195px !important;min-height:195px !important;
+  padding:0 !important;border:0 !important;border-radius:0 !important;
+  background-color:transparent !important;background-size:100% 100% !important;
+  background-repeat:no-repeat !important;background-position:center !important;
+  box-shadow:none !important;outline-offset:2px !important;transition:filter .12s ease !important;
+  overflow:visible !important;color:transparent !important;font-size:0 !important;z-index:85 !important;
+}
+#sortPairsBtn{left:9% !important;right:auto !important;background-image:url('/asset/reference/cift-diz.webp') !important}
+#sortSeriesBtn{right:9% !important;left:auto !important;background-image:url('/asset/reference/seri-diz.webp') !important}
+#sortPairsBtn>* ,#sortSeriesBtn>*{visibility:hidden !important}
+#sortPairsBtn:hover:not(:disabled),#sortSeriesBtn:hover:not(:disabled){filter:brightness(1.11) !important;transform:translateY(-2px) !important}
+/* Aktif oyuncuda seri aç/çift aç/işle, kural kontrolü sunucuda. */
+#gameActionPanel.game-action-panel{
+  position:absolute !important;left:79.7% !important;right:auto !important;
+  top:235px !important;bottom:auto !important;transform:none !important;
+  width:112px !important;min-width:0 !important;
+  padding:0 !important;border:0 !important;box-shadow:none !important;
+  background:none !important;z-index:55 !important;display:flex !important;flex-direction:column !important;gap:7px !important;
+}
+#gameActionPanel .turn-actions{display:flex !important;flex-direction:column !important;gap:6px !important}
+#gameActionPanel .turn-actions.hidden{display:none !important}
+#gameActionPanel :is(#openHandBtn,#openPairsBtn,#undoDiscardBtn,#finishBtn){
+  display:block !important;width:112px !important;min-width:0 !important;height:47px !important;min-height:47px !important;
+  padding:0 !important;border:0 !important;border-radius:0 !important;box-shadow:none !important;
+  background-position:center !important;background-repeat:no-repeat !important;background-size:100% 100% !important;
+  background-color:transparent !important;text-align:center !important;transform:none !important;
+  color:transparent !important;font-size:0 !important;white-space:normal;
+}
+#gameActionPanel #openHandBtn{background-image:url('/asset/reference/seri-ac.webp') !important}
+#gameActionPanel #openPairsBtn{background-image:url('/asset/reference/cift-ac.webp') !important}
+#gameActionPanel #undoDiscardBtn{background-image:url('/asset/reference/geri-topla.webp') !important}
+#gameActionPanel #finishBtn{background-image:url('/asset/reference/taslari-isle.webp') !important}
+#gameActionPanel :is(#openHandBtn,#openPairsBtn,#undoDiscardBtn,#finishBtn)>*{visibility:hidden !important}
+#gameActionPanel .action-btn.hidden{display:none !important}
+#gameActionPanel .action-btn.action-unavailable{opacity:.77;filter:grayscale(.25)}
+#gameActionPanel :is(#openHandBtn,#openPairsBtn,#undoDiscardBtn,#finishBtn):hover:not(:disabled){filter:brightness(1.13) !important}
+/* Kontrol panelindeki diz butonları JS tarafından sayfa konteynerine taşınır. */
+#gameActionPanel :is(#sortPairsBtn,#sortSeriesBtn){display:none !important}
+/* Skor tablosu görseli masayı örtmeden üstten açılır. */
+#gameContainer #scoreboard.stats-panel{
+  position:absolute !important;top:73px !important;right:9% !important;left:auto !important;
+  z-index:101 !important;width:230px !important;min-width:0 !important;
+  background:#071b34ef url('/asset/reference/skor.webp') center top/100% 100% no-repeat !important;
+  border:1px solid #126da2 !important;border-radius:10px !important;box-shadow:0 9px 25px #0009 !important;
+  padding:36px 13px 13px !important;
+}
+#scoreboard .panel-header{display:none !important}
+#scoreboard .stat-row{background:#09213ab8;border-bottom:1px solid #7b98b044;padding:7px 5px;font-size:12px}
+#scoreboard .stat-score{color:#fff;font-size:14px}
+#gameContainer .game-status-panel{display:none !important}
+#tableOptions.table-settings-line{display:none !important}
+/* Sohbet ikon görseli; sohbet açıldığında aynı tıklanabilir düğme kalır. */
+#tableChatPanel.table-chat-panel.collapsed{
+  position:absolute !important;top:10px !important;bottom:auto !important;
+  right:14.3% !important;left:auto !important;
+  width:73px !important;height:53px !important;max-height:53px !important;
+  border:0 !important;background:transparent !important;box-shadow:none !important;
+  z-index:99 !important;overflow:visible !important;
+}
+#tableChatPanel.collapsed #toggleTableChat{
+  display:block !important;width:73px !important;height:53px !important;
+  min-height:0 !important;font-size:0 !important;
+  border:0 !important;border-radius:0 !important;
+  background:url('/asset/reference/mesaj.webp') center/100% 100% no-repeat !important;
+  padding:0 !important;box-shadow:none !important;
+}
+#tableChatPanel.collapsed #toggleTableChat:before{display:none !important}
+#tableChatPanel.collapsed #toggleTableChat>*{display:none !important}
+#tableChatPanel:not(.collapsed){position:absolute !important;z-index:103 !important;top:70px !important;
+  right:10% !important;bottom:auto !important;width:300px !important;max-height:310px !important;
+  border:1px solid #4e9fd2 !important;border-radius:12px !important;overflow:hidden !important;background:#0a2b4bfa !important;
+}
+#tableChatPanel:not(.collapsed) .table-chat-toggle{font-size:12px !important;min-height:44px !important}
+#tableChatPanel:not(.collapsed) .table-chat-toggle:before{display:none !important}
+#tableChatPanel:not(.collapsed) .table-chat-body{height:245px !important}
+/* Modaller, profil popup'ı, masa sohbeti ve bildirimler görünür kalır. */
+#gameEndModal,#openHandModal,#openPairsModal,#profilePopup,#gameToast{z-index:110 !important}
+#gameContainer #gameToast{z-index:160 !important}
+#lobbyOverlay .lobby-container{background-image:linear-gradient(#123a64c9,#081b37e8),url('/asset/reference/bekleme.webp');background-size:cover,100% auto;background-repeat:no-repeat}
+@media(max-width:1550px){
+  /* Dar masa ekranlarında taşları küçültmeyiz: yatay kaydırma korunur. */
+  #gameContainer.game-container{min-width:1500px !important}
+  .reference-hud-score-btn{position:absolute;right:auto;left:1030px;top:4px}
+}
+/* Son görsel kontrolü: taşların altında referanstaki açık gri mühür. */
+#gameBoard .cue-row .tile-sprite:not(.tile-white-back):after,
+#gameBoard #indicatorTile .tile-sprite:not(.tile-white-back):after,
+#discardLayer .tile-sprite:not(.tile-white-back):after,
+#compactOpenGroups .grid-table-tile:not(.tile-white-back):after,
+#pairsGrid .pair-mini-tile:not(.tile-white-back):after{
+  content:'' !important;display:block !important;position:absolute !important;
+  bottom:9% !important;left:50% !important;right:auto !important;top:auto !important;
+  transform:translateX(-50%) !important;
+  width:32% !important;height:23% !important;min-height:0 !important;
+  border-radius:50% !important;
+  background:radial-gradient(circle at 42% 42%,#f1f1f2,#d4d5d8 72%,#bcc0c4) !important;
+  box-shadow:inset 0 1px 4px #9994,0 1px 0 #fff6 !important;
+  pointer-events:none !important;
+}
+#compactOpenGroups .grid-table-tile:not(.tile-white-back):after,
+#pairsGrid .pair-mini-tile:not(.tile-white-back):after{
+  height:20% !important;bottom:6% !important;box-shadow:inset 0 0 1px #9ca1a8 !important;
+}

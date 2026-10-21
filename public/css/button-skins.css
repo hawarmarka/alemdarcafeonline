@@ -1,0 +1,65 @@
+/*
+  ========================================================
+  BUTON RESIMLERI  -  kendi resimlerini buradan baglarsin
+  ========================================================
+
+  NASIL YAPILIR (cok basit):
+
+  1) Resmini  public/asset/buttons/  klasorune at.
+     (PNG onerilir; seffaf arka plan guzel durur.)
+
+  2) Asagida degistirmek istedigin butonu bul. Her butonun
+     ALTINDA 2 satir vardir ve bu 2 satir su an KAPALIDIR
+     (satirin basi ile sonu yorum icine alinmistir).
+
+  3) O 2 satiri ACMAK icin: her satirin EN BASINDAKI
+     "slash + yildiz + bosluk" ile EN SONUNDAKI
+     "bosluk + yildiz + slash" kismini sil.
+     (Ornegi asagida SERI AC butonunda ACIK halde gosterdim;
+      digerleri kapali. Bir butonu ayni o sekle getir.)
+
+  4) Tirnak icindeki dosya adini, attigin resmin adiyla ayni yap.
+
+  5) Kaydet  ->  Coolify'da yeniden deploy.
+
+  O kadar. Buton artik senin resmin olur; yazisi otomatik gizlenir.
+  Dokunmadigin butonlar eski (yazili) halinde kalir.
+
+  KAPATMAK istersen: actigin 2 satiri tekrar yorum icine al
+  (basina  slash-yildiz-bosluk , sonuna  bosluk-yildiz-slash ).
+
+  OLCU IPUCU (zorunlu degil):
+  - Sag taraf (SERI AC, CIFT AC, GERI TOPLA, TASLARI ISLE): en-boy yaklasik 170 x 50
+  - Kose (SERI DIZ, CIFT DIZ): en-boy yaklasik 104 x 172
+  ========================================================
+*/
+
+
+/* ========== SERI AC ========== */
+/* #openHandBtn{ background-image:url("/asset/buttons/seri-ac.png") !important; background-size:100% 100% !important; background-repeat:no-repeat !important; background-position:center !important; border:0 !important; box-shadow:none !important; } */
+/* #openHandBtn > *{ visibility:hidden !important; } */
+
+
+/* ========== CIFT AC ========== */
+/* #openPairsBtn{ background-image:url("/asset/buttons/cift-ac.png") !important; background-size:100% 100% !important; background-repeat:no-repeat !important; background-position:center !important; border:0 !important; box-shadow:none !important; } */
+/* #openPairsBtn > *{ visibility:hidden !important; } */
+
+
+/* ========== GERI TOPLA ========== */
+/* #undoDiscardBtn{ background-image:url("/asset/buttons/geri-topla.png") !important; background-size:100% 100% !important; background-repeat:no-repeat !important; background-position:center !important; border:0 !important; box-shadow:none !important; } */
+/* #undoDiscardBtn > *{ visibility:hidden !important; } */
+
+
+/* ========== TASLARI ISLE ========== */
+/* #finishBtn{ background-image:url("/asset/buttons/taslari-isle.png") !important; background-size:100% 100% !important; background-repeat:no-repeat !important; background-position:center !important; border:0 !important; box-shadow:none !important; } */
+/* #finishBtn > *{ visibility:hidden !important; } */
+
+
+/* ========== SERI DIZ ========== */
+/* #sortSeriesBtn{ background-image:url("/asset/buttons/seri-diz.png") !important; background-size:100% 100% !important; background-repeat:no-repeat !important; background-position:center !important; border:0 !important; box-shadow:none !important; } */
+/* #sortSeriesBtn > *{ visibility:hidden !important; } */
+
+
+/* ========== CIFT DIZ ========== */
+/* #sortPairsBtn{ background-image:url("/asset/buttons/cift-diz.png") !important; background-size:100% 100% !important; background-repeat:no-repeat !important; background-position:center !important; border:0 !important; box-shadow:none !important; } */
+/* #sortPairsBtn > *{ visibility:hidden !important; } */

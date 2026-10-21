@@ -1,0 +1,88 @@
+/* V27 – düzen: işlem düğmeleri atık yerleriyle çakışmasın, sohbet paneli ve ayarlar menüsü. En son yüklenir. */
+
+/* İşlem düğmeleri: sağ üst atık çerçevesinin (y 86–171) altından başlar, sağ alt çerçevenin (y 484) üstünde biter */
+#gameContainer #gameActionPanel.game-action-panel{top:190px!important;left:1380px!important}
+
+/* ---------- Masa sohbeti ---------- */
+#gameContainer #tableChatPanel.table-chat-panel{position:absolute!important;left:1365px!important;top:10px!important;right:auto!important;bottom:auto!important;
+  width:76px!important;height:45px!important;padding:0!important;margin:0!important;background:none!important;border:0!important;box-shadow:none!important;
+  overflow:visible!important;z-index:600!important;transform:none!important}
+#gameContainer #tableChatPanel #toggleTableChat{position:absolute!important;left:0!important;top:0!important;margin:0!important}
+#gameContainer #tableChatPanel .table-chat-body{position:absolute!important;top:58px!important;right:-90px!important;left:auto!important;bottom:auto!important;
+  width:480px!important;height:440px!important;max-height:none!important;padding:0!important;margin:0!important;
+  display:grid!important;grid-template-columns:1fr 150px;grid-template-rows:44px 1fr 58px;gap:0;overflow:hidden!important;
+  background:linear-gradient(180deg,#123a66 0%,#0a2244 100%)!important;border:2px solid #3f7fc4!important;border-radius:16px!important;
+  box-shadow:0 18px 40px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.15)!important;opacity:1!important;visibility:visible!important;
+  animation:chatIn .18s ease-out}
+#gameContainer #tableChatPanel.collapsed .table-chat-body{display:none!important}
+@keyframes chatIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+#tableChatPanel .tc-head{grid-column:1 / -1;display:flex;align-items:center;justify-content:space-between;padding:0 10px 0 16px;
+  background:linear-gradient(180deg,#1d5a9c,#154a85);border-bottom:1px solid rgba(255,255,255,.12)}
+#tableChatPanel .tc-head strong{color:#fff;font:900 16px/1 'Outfit',sans-serif;letter-spacing:1.5px}
+#tableChatPanel .tc-close{width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,255,255,.3);background:rgba(0,0,0,.2);color:#fff;font:700 15px/1 'Outfit',sans-serif;cursor:pointer}
+#tableChatPanel .tc-close:hover{background:rgba(255,255,255,.15)}
+#gameContainer #tableChatPanel #tableChatMessages{grid-column:1;grid-row:2;overflow-y:auto!important;padding:10px 12px!important;margin:0!important;height:auto!important;max-height:none!important;
+  background:rgba(0,0,0,.18)!important;border:0!important;display:flex;flex-direction:column;gap:6px}
+#gameContainer #tableChatPanel .chat-entry{padding:7px 10px!important;border-radius:10px!important;background:rgba(255,255,255,.07)!important;color:#e8f2ff!important;
+  font:600 14px/1.3 'Outfit',sans-serif!important;word-break:break-word;margin:0!important}
+#gameContainer #tableChatPanel .chat-entry strong{color:#ffd670!important}
+#gameContainer #tableChatPanel .table-chat-intro{color:#9fc3ea!important;font:600 12px/1.3 'Outfit',sans-serif!important;opacity:.8;padding:2px 2px 6px}
+#gameContainer #tableChatPanel #quickPhrases.quick-phrases{grid-column:2;grid-row:2;display:flex!important;flex-direction:column;gap:7px;padding:10px 10px!important;
+  border-left:1px solid rgba(255,255,255,.1);overflow-y:auto}
+#gameContainer #tableChatPanel #quickPhrases button{flex:0 0 auto!important;width:100%;padding:10px 6px!important;font-size:14px!important}
+#gameContainer #tableChatPanel #tableChatForm.table-chat-form{grid-column:1 / -1;grid-row:3;display:flex!important;gap:8px;align-items:center;padding:8px 10px!important;margin:0!important;
+  border-top:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.2)}
+#gameContainer #tableChatPanel #tableChatInput{flex:1;height:40px!important;border-radius:10px!important;border:1px solid #3f7fc4!important;background:#081a33!important;color:#fff!important;
+  padding:0 12px!important;font:600 15px/1 'Outfit',sans-serif!important}
+#gameContainer #tableChatPanel #tableChatForm button{width:auto!important;min-width:84px;height:40px!important;border-radius:10px!important;border:0!important;cursor:pointer;
+  background:linear-gradient(180deg,#8be36a,#279c1c)!important;color:#fff!important;font:900 15px/1 'Outfit',sans-serif!important;font-size:0!important}
+#gameContainer #tableChatPanel #tableChatForm button::after{content:'GÖNDER';font:900 15px/1 'Outfit',sans-serif;letter-spacing:.5px}
+
+/* ---------- Ayarlar menüsü ---------- */
+#gameContainer #quickMenuPanel.quick-menu-panel{position:absolute!important;top:62px!important;right:0!important;left:auto!important;width:270px!important;padding:10px!important;
+  background:linear-gradient(180deg,#123a66,#0a2244)!important;border:2px solid #3f7fc4!important;border-radius:16px!important;
+  box-shadow:0 18px 40px rgba(0,0,0,.55)!important;display:flex!important;flex-direction:column;gap:8px;z-index:700!important;animation:chatIn .18s ease-out}
+#gameContainer #quickMenuPanel.quick-menu-panel.hidden{display:none!important}
+#quickMenuPanel .qm-title{color:#9fc3ea;font:900 13px/1 'Outfit',sans-serif;letter-spacing:2px;padding:4px 6px 2px}
+#gameContainer #quickMenuPanel button{display:flex!important;align-items:center;gap:12px;width:100%!important;height:52px!important;padding:0 12px!important;margin:0!important;
+  border-radius:12px!important;border:1px solid rgba(255,255,255,.12)!important;background:linear-gradient(180deg,#1f5592,#173f70)!important;
+  color:#fff!important;font:800 17px/1 'Outfit',sans-serif!important;text-align:left;cursor:pointer;box-shadow:0 3px 0 #0b2547!important}
+#gameContainer #quickMenuPanel button:hover{filter:brightness(1.12)}
+#gameContainer #quickMenuPanel button:active{transform:translateY(2px);box-shadow:0 1px 0 #0b2547!important}
+#gameContainer #quickMenuPanel button.qm-danger{background:linear-gradient(180deg,#d8383f,#a71c22)!important;box-shadow:0 3px 0 #6d1014!important}
+#quickMenuPanel .qm-icon{flex:0 0 32px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.14) center/18px 18px no-repeat;border:1px solid rgba(255,255,255,.2)}
+#quickMenuPanel .qm-score{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Crect x='3' y='12' width='4' height='9' rx='1'/%3E%3Crect x='10' y='6' width='4' height='15' rx='1'/%3E%3Crect x='17' y='9' width='4' height='12' rx='1'/%3E%3C/svg%3E")}
+#quickMenuPanel .qm-sound{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M4 9h4l5-4v14l-5-4H4z'/%3E%3Cpath d='M16 8a5 5 0 0 1 0 8' stroke='white' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")}
+#quickMenuPanel .is-muted .qm-sound{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M4 9h4l5-4v14l-5-4H4z'/%3E%3Cpath d='M16 9l5 6M21 9l-5 6' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")}
+#quickMenuPanel .qm-rules{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M6 3h9l4 4v14H6z' opacity='.95'/%3E%3Cpath d='M9 11h7M9 15h7M9 7h4' stroke='%23173f70' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E")}
+#quickMenuPanel .qm-leave{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 4H5v16h5'/%3E%3Cpath d='M14 8l4 4-4 4M18 12H9'/%3E%3C/svg%3E")}
+#gameContainer .gamebar-right{position:relative}
+
+/* Skor tablosu: isim avatarın altında okunaklı etiket (daireye binmesin) */
+#gameContainer #scoreboard .sbi-name{top:45.5%!important;height:5.6%!important;width:14%!important;margin-left:2%;border-radius:999px;
+  background:rgba(4,18,42,.92);border:1px solid rgba(120,170,230,.45);font-size:12px!important;padding:0 6px;z-index:2}
+
+/* ---------- Alemdar Cafe markası (masa) ---------- */
+/* Masa zemini filigranı: "101 PLUS" yerine Alemdar Cafe logosu */
+#compactOpenGroups .sboard:before{content:''!important;position:absolute!important;left:12%!important;right:12%!important;top:30%!important;bottom:30%!important;
+  background:url('/asset/ui/alemdar-logo.svg') center/contain no-repeat!important;opacity:.07!important;filter:grayscale(1) brightness(2.2)!important;text-shadow:none!important}
+#compactOpenGroups .sboard:after{content:none!important;display:none!important}
+/* Istaka: üst rafta kazınmış logo, alt rafta oda adı (videodaki "İDDİALILAR" gibi) */
+#gameContainer .cue-container .cue-wood{background:url('/asset/ui/alemdar-engrave.svg') center 10px/220px auto no-repeat,url('/asset/ui/istaka.png') center/100% 100% no-repeat!important}
+#gameContainer .cue-container .cue-wood.cue-wood::before{display:block!important;content:attr(data-room)!important;position:absolute!important;left:0!important;right:0!important;
+  top:auto!important;bottom:14px!important;height:auto!important;background:none!important;text-align:center;pointer-events:none;
+  font:700 54px/1 'Oswald','Arial Narrow',sans-serif!important;letter-spacing:3px;color:rgba(110,50,0,.32)!important;text-shadow:0 1px 0 rgba(255,225,160,.35),0 -1px 0 rgba(60,25,0,.25)!important}
+
+/* ---------- OKEY taşı ---------- */
+.tile-sprite.real-okey{position:relative}
+.tile-sprite .okey-star{position:absolute;right:5%;top:4%;width:30%;aspect-ratio:1;pointer-events:none;z-index:3;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 1.8l3 6.6 7.2.8-5.4 4.9 1.5 7.1L12 17.6l-6.3 3.6 1.5-7.1L1.8 9.2 9 8.4z' fill='%23ffc61a' stroke='%23a86a00' stroke-width='1.3'/%3E%3C/svg%3E") center/contain no-repeat;
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}
+/* Istakada yardımlı masada: joker yüzü (beyaz zemin, büyük altın yıldız, OKEY yazısı) */
+.tile-sprite.okey-joker{background-image:none!important;background:linear-gradient(180deg,#fffdf6,#efe8d6)!important}
+.tile-sprite.okey-joker .okey-star{left:14%;right:14%;top:12%;width:auto}
+.tile-sprite.okey-joker::after{content:'OKEY'!important;position:absolute;left:0;right:0;bottom:12%;text-align:center;font:900 clamp(9px,1.05vw,15px)/1 'Outfit',sans-serif;color:#b0281f;letter-spacing:.5px;background:none!important;border:0!important;width:auto!important;height:auto!important;top:auto!important}
+/* Masada: yerine geçtiği taş olarak, köşede küçük yıldız ve altın kenar */
+.tile-sprite.okey-on-table{box-shadow:0 0 0 2px #ffc61a,0 1px 2px #06101a77!important}
+.tile-sprite.okey-on-table .okey-star{width:42%;right:-12%;top:-14%}
+.tile-sprite.tile-white-back::after{display:none}

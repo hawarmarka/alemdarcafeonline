@@ -1,0 +1,73 @@
+/*
+  ============================================================
+  TEMA AYARLARI  -  oyundaki her seyi buradan ayarla
+  ============================================================
+
+  Burada SADECE degerleri degistirirsin. Kod bilmene gerek yok.
+  - Renk degistirmek icin:  #RRGGBB  seklinde yeni renk yaz.
+  - Boyut/konum degistirmek icin:  sayi + px  ya da  yuzde (%)  yaz.
+  - RESIM koymak icin:  ilgili satirda  none  yazan yeri
+        url("/asset/theme/DOSYA.png")   ile degistir
+        (resmi once public/asset/theme/ klasorune at).
+
+  Her satirin sonundaki aciklama (yildizli kisim), ne ise yaradigini anlatir.
+  Degistirdikten sonra kaydet -> Coolify'da yeniden deploy.
+
+  (Butonlarin resmini degistirmek icin ayri dosya: button-skins.css)
+  ============================================================
+*/
+
+:root{
+
+  /* ---------- ARKA PLAN ---------- */
+  --th-bg-image: none;                 /* tum ekran arka plan RESMI. Ornek: url("/asset/theme/arkaplan.png") */
+  --th-bg-image-size: cover;           /* resim nasil otursun: cover (kapla) / contain / 100% 100% */
+  --th-bg-color-center: #2f84a6;       /* arka plan rengi - ortasi (resim yoksa gorunur) */
+  --th-bg-color-mid:    #216d8c;       /* arka plan rengi - orta halka */
+  --th-bg-color-edge:   #185874;       /* arka plan rengi - kenar */
+
+  /* ---------- OYUN ALANI OLCEGI ---------- */
+  --th-board-top:    62px;             /* ust bardan sonraki bosluk */
+  --th-board-bottom: 150px;            /* alttaki istaka icin birakilan bosluk */
+
+  /* ---------- SERI / PER ACMA ALANI ---------- */
+  --th-seri-left:   9%;                /* sol kenardan uzaklik */
+  --th-seri-right:  45%;               /* sag kenardan uzaklik (buyuk = daha dar alan) */
+  --th-seri-top:    4%;                /* ust */
+  --th-seri-bottom: 3%;                /* alt */
+  --th-seri-image:  none;              /* seri alani arka plan RESMI. Ornek: url("/asset/theme/seri.png") */
+  --th-seri-image-size: cover;         /* resim oturma sekli */
+  --th-seri-bg1:    #0e3d52;           /* seri alani rengi (ust) - resim yoksa */
+  --th-seri-bg2:    #0b3447;           /* seri alani rengi (alt) */
+  --th-seri-border: #5a9fc2;           /* seri alani cerceve rengi */
+  --th-seri-border-w: 2px;             /* seri alani cerceve kalinligi */
+
+  /* ---------- IZGARA CIZGILERI (seri alani ici) ---------- */
+  --th-grid-cols: 13;                  /* yatay kutu sayisi (cizgi sikligi). NOT: 13 degeri oyun yerlesimine uygundur. */
+  --th-grid-rows: 13;                  /* dikey kutu sayisi */
+  --th-grid-line: 1px;                 /* cizgi kalinligi */
+  --th-grid-line-color: #7fc0e026;     /* cizgi rengi (sondaki 2 hane saydamlik: 26 = soluk) */
+  --th-grid-tile-radius: 2px;          /* alana konan taslarin kose yuvarlakligi */
+
+  /* ---------- CIFT ACMA ALANI ---------- */
+  --th-cift-right:  20%;               /* sag kenardan uzaklik (konum) */
+  --th-cift-width:  13%;               /* genislik */
+  --th-cift-top:    4%;
+  --th-cift-bottom: 3%;
+  --th-cift-image:  none;              /* cift alani arka plan RESMI. Ornek: url("/asset/theme/cift.png") */
+  --th-cift-bg1:    #0e3d52;           /* cift alani rengi (ust) */
+  --th-cift-bg2:    #0b3447;           /* cift alani rengi (alt) */
+  --th-cift-border: #5a9fc2;           /* cift alani cerceve rengi */
+  --th-cift-border-w: 0px;             /* cift alani cerceve kalinligi (0 = cerceve yok) */
+  --th-cift-grid-w: 50%;               /* cift alani ic cizgi araligi (yatay) */
+  --th-cift-grid-h: 72px;              /* cift alani ic cizgi araligi (dikey) */
+  --th-pair-tile-w: 46px;              /* cift tasi genisligi */
+  --th-pair-tile-h: 64px;              /* cift tasi yuksekligi */
+
+  /* ---------- KONUMLAR ---------- */
+  --th-mode-right:    37%;             /* ortadaki mod kolonu (Esli/Yardimli/gosterge) yatay konumu */
+  --th-mode-width:    76px;            /* mod kolonu genisligi */
+  --th-actions-right: 56px;            /* sagdaki SERI AC / CIFT AC butonlarinin sag kenardan uzakligi */
+  --th-actions-width: 170px;           /* o butonlarin genisligi */
+
+}

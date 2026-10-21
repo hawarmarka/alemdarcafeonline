@@ -1,0 +1,140 @@
+/* V25 – 101 Okey Plus videosundan: sıra ekranı, süre çubuğu, düğmeler, panel göstergeleri, sohbet balonu, oyun sonucu.
+   Koordinatlar 1690×805 sahneye göredir. En son yüklenir. */
+
+/* ---------- Sıra sende: üst bilgi ve rakip panelleri gizlenir, uzun süre çubuğu görünür ---------- */
+body.my-turn #gameContainer .reference-hud,
+body.my-turn #gameBoard #topPlayerInfo,
+body.my-turn #gameBoard #leftPlayerInfo,
+body.my-turn #gameBoard #rightPlayerInfo{opacity:0!important;pointer-events:none!important;transition:opacity .25s}
+#gameContainer .reference-hud,#gameBoard .player-info{transition:opacity .25s}
+#turnTimerBar{position:absolute;left:195px;top:14px;width:1160px;height:34px;z-index:130;display:flex;align-items:center;gap:10px;
+  padding:0 16px 0 8px;border-radius:17px;background:linear-gradient(180deg,#0d2440,#091a30);border:2px solid #2c5a8c;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.6),0 2px 6px rgba(0,0,0,.35);pointer-events:none}
+#turnTimerBar.hidden{display:none}
+#turnTimerBar .ttb-clock{width:22px;height:22px;border-radius:50%;border:2px solid #9fb8d6;position:relative;flex:0 0 22px}
+#turnTimerBar .ttb-clock::before{content:'';position:absolute;left:8px;top:3px;width:2px;height:7px;background:#9fb8d6;border-radius:1px}
+#turnTimerBar .ttb-clock::after{content:'';position:absolute;left:8px;top:8px;width:6px;height:2px;background:#9fb8d6;border-radius:1px}
+#turnTimerBar .ttb-track{position:relative;flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,.12)}
+#turnTimerBar .ttb-fill{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:linear-gradient(90deg,#7ccf2e,#a8e34a);transition:width .1s linear}
+#turnTimerBar .ttb-knob{position:absolute;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:#c9f36c;box-shadow:0 0 8px #a8e34a;transition:left .1s linear}
+#turnTimerBar.is-low .ttb-fill{background:linear-gradient(90deg,#e0312f,#ff6b4a)}
+#turnTimerBar.is-low .ttb-knob{background:#ff8a6b;box-shadow:0 0 10px #ff4a3a;animation:knobPulse .6s ease-in-out infinite alternate}
+@keyframes knobPulse{to{transform:scale(1.35)}}
+
+/* ---------- İşlem düğmeleri: Okey Plus'taki beyaz parlak düğmeler, yalnızca sıranda ---------- */
+#gameContainer #gameActionPanel.game-action-panel{left:1384px!important;right:auto!important;top:160px!important;width:140px!important}
+#gameContainer #gameActionPanel :is(#openHandBtn,#openPairsBtn,#undoDiscardBtn,#finishBtn).action-btn{
+  width:136px!important;height:56px!important;min-height:56px!important;margin:0 0 14px!important;border-radius:12px!important;
+  background:linear-gradient(180deg,#ffffff 0%,#eef3f8 55%,#cdd8e4 100%)!important;border:1px solid #9fb2c6!important;
+  color:#152638!important;text-shadow:none!important;font:900 19px/1 'Outfit',sans-serif!important;letter-spacing:.3px;
+  box-shadow:0 4px 0 #7f93a8,0 8px 14px rgba(0,0,0,.4),inset 0 1px 0 #fff!important}
+#gameContainer #gameActionPanel .action-btn .btlabel{color:#152638!important;font-size:19px!important}
+#gameContainer #gameActionPanel :is(#openHandBtn,#openPairsBtn,#undoDiscardBtn,#finishBtn).action-btn:active{box-shadow:0 1px 0 #7f93a8,0 3px 6px rgba(0,0,0,.4)!important}
+#gameContainer #gameActionPanel #finishBtn.action-btn{background:linear-gradient(180deg,#f3ffe6 0%,#d9f5b8 55%,#a9dc72 100%)!important;border-color:#87b955!important;box-shadow:0 4px 0 #5f8c32,0 8px 14px rgba(0,0,0,.4),inset 0 1px 0 #fff!important}
+#gameContainer #gameActionPanel #undoDiscardBtn.action-btn{background:linear-gradient(180deg,#ffffff 0%,#eef3f8 55%,#cdd8e4 100%)!important;border-color:#9fb2c6!important;box-shadow:0 4px 0 #7f93a8,0 8px 14px rgba(0,0,0,.4),inset 0 1px 0 #fff!important}
+#gameContainer #gameActionPanel .action-btn.is-unavailable{filter:none!important;opacity:1!important;
+  background:linear-gradient(180deg,#9fb3c8,#7f96ae)!important;border-color:#6d8299!important;box-shadow:0 3px 0 #556a80,0 6px 10px rgba(0,0,0,.3)!important}
+#gameContainer #gameActionPanel .action-btn.is-unavailable .btlabel{color:#e9f0f7!important}
+#gameContainer #gameActionPanel .action-btn .bticon{transform:scale(1.05)}
+
+/* ---------- Yandan alınan taş: sol köşede GERİ BIRAK kartı ---------- */
+#returnTakenBtn{position:absolute;left:169px;top:276px;width:80px;height:180px;z-index:140;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px 6px;
+  border:2px solid #c9d6e3;border-radius:14px;background:linear-gradient(180deg,#ffffff,#dfe7ef);
+  box-shadow:0 8px 16px rgba(0,0,0,.45);animation:rtIn .25s ease-out}
+#returnTakenBtn.hidden{display:none}
+#returnTakenBtn::after{content:'';position:absolute;bottom:-12px;left:50%;margin-left:-11px;border:11px solid transparent;border-bottom:0;border-top-color:#dfe7ef;filter:drop-shadow(0 2px 0 #c9d6e3)}
+#returnTakenBtn .rt-tile{display:block;width:52px;height:70px}
+#returnTakenBtn .rt-tile .tile-sprite{width:52px!important;height:70px!important;position:relative!important;left:auto!important;top:auto!important}
+#returnTakenBtn .rt-label{font:900 19px/1.05 'Outfit',sans-serif;color:#152638;text-align:center}
+#returnTakenBtn:hover{filter:brightness(1.05)}
+@keyframes rtIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ---------- Panel göstergeleri: açılış puanı taşları ve ceza ---------- */
+.open-type-icon{display:none!important}
+.open-score-tiles{position:absolute;z-index:6;display:flex;gap:1px;pointer-events:none;filter:drop-shadow(0 2px 2px rgba(0,0,0,.45))}
+.open-score-tiles.hidden{display:none}
+.open-score-tiles span{width:15px;height:21px;border-radius:3px;background:linear-gradient(180deg,#fff,#e8e4da);border:1px solid #b9b3a5;
+  display:grid;place-items:center;font:900 12px/1 'Outfit',sans-serif;color:#d8232a}
+.open-score-tiles span:nth-child(2){transform:translateY(-2px)}
+#leftPlayerInfo .open-score-tiles{left:30px;top:-24px}
+#rightPlayerInfo .open-score-tiles{left:-34px;top:-24px}
+#topPlayerInfo .open-score-tiles{left:-52px;top:14px}
+#bottomPlayerInfo .open-score-tiles{left:-54px;top:16px}
+.panel-penalty{position:absolute;z-index:6;pointer-events:none;font:900 26px/1 'Outfit',sans-serif;color:#ff5a6e;text-shadow:0 2px 3px rgba(0,0,0,.6);letter-spacing:-.5px}
+.panel-penalty:empty{display:none}
+#bottomPlayerInfo .panel-penalty{right:44px;top:12px}
+#topPlayerInfo .panel-penalty{right:44px;top:12px}
+#leftPlayerInfo .panel-penalty,#rightPlayerInfo .panel-penalty{left:50%;bottom:-30px;transform:translateX(-50%)}
+
+/* El sayacı: açmadan önce mavi, açtıktan sonra kırmızı (elde kalan ceza) */
+#gameContainer #rackStatus.rack-status.is-open{filter:hue-rotate(152deg) saturate(1.6) brightness(.95)}
+
+/* ---------- Sohbet: konuşma balonu ve hazır cümleler ---------- */
+.chat-bubble{position:absolute;z-index:40;max-width:190px;padding:7px 12px;border-radius:14px;background:#fff;color:#1b2533;
+  font:700 15px/1.2 'Outfit',sans-serif;box-shadow:0 4px 10px rgba(0,0,0,.35);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  pointer-events:none;animation:bubbleIn .2s ease-out,bubbleOut .4s ease-in 4.1s forwards}
+#leftPlayerInfo .chat-bubble{left:62px;top:8px}
+#rightPlayerInfo .chat-bubble{right:62px;top:8px}
+#topPlayerInfo .chat-bubble{left:50%;top:60px;transform:translateX(-50%)}
+#bottomPlayerInfo .chat-bubble{left:50%;bottom:62px;transform:translateX(-50%)}
+@keyframes bubbleIn{from{opacity:0;scale:.6}to{opacity:1;scale:1}}
+@keyframes bubbleOut{to{opacity:0}}
+.quick-phrases{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px 0}
+.quick-phrases button{flex:1 1 30%;padding:7px 6px;border-radius:9px;border:1px solid #4d86c4;background:linear-gradient(180deg,#2f79c8,#1b559b);
+  color:#fff;font:800 13px/1 'Outfit',sans-serif;cursor:pointer}
+.quick-phrases button:hover{filter:brightness(1.12)}
+
+/* ---------- Oyun sonucu ---------- */
+#gameEndModal.peeking{display:none!important}
+#gameEndModal .score-modal{width:min(820px,92vw)!important;padding:20px 26px 22px!important;border-radius:20px!important;
+  background:linear-gradient(180deg,#14335a,#0c2142)!important;border:2px solid #4a8bd0!important;box-shadow:0 20px 60px rgba(0,0,0,.6)!important}
+#gameEndModal #winnerText{font:900 34px/1 'Outfit',sans-serif!important;color:#fff!important;letter-spacing:1px;margin:0 0 6px!important;text-align:center}
+#gameEndModal .auto-round-notice{text-align:center;color:#cfe2f7!important;font:700 15px/1.3 'Outfit',sans-serif!important;margin:4px 0 14px!important}
+.result-list{display:flex;flex-direction:column;gap:10px}
+.result-block{position:relative;border-radius:14px;background:rgba(0,0,0,.28);padding:6px 120px 6px 8px}
+.result-block.is-winner{background:linear-gradient(90deg,rgba(56,120,200,.55),rgba(20,52,100,.4))}
+.result-row{display:flex;align-items:center;gap:14px;padding:6px 4px}
+.result-row.is-me .result-info strong{color:#ffd670}
+.result-avatar{position:relative;width:58px;height:58px;flex:0 0 58px}
+.result-avatar img{width:58px;height:58px;border-radius:50%;object-fit:cover;border:3px solid #2a4f7c;background:#244672}
+.result-crown{position:absolute;left:-12px;top:-14px;font-size:26px;transform:rotate(-18deg);filter:drop-shadow(0 2px 2px rgba(0,0,0,.5))}
+.result-info{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.result-info strong{color:#fff;font:800 20px/1.1 'Outfit',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.result-info small{color:#9fc3ea;font:600 13px/1 'Outfit',sans-serif}
+.result-round{font:900 20px/1 'Outfit',sans-serif;min-width:70px;text-align:right}
+.result-round.good{color:#6ff09a}.result-round.bad{color:#ff9c9c}
+.result-total{position:absolute;right:18px;top:50%;transform:translateY(-50%);font:900 34px/1 'Outfit',sans-serif;color:#fff}
+.result-block.is-winner .result-total{color:#7dff5a}
+.result-history{display:flex;flex-direction:column;gap:3px;margin-top:12px;color:#9fc3ea;font:600 12px/1.3 'Outfit',sans-serif}
+.result-actions{display:flex;align-items:center;justify-content:center;gap:26px;margin-top:16px}
+.round-btn{width:118px;height:118px;border-radius:50%;cursor:pointer;color:#fff;font:900 19px/1.05 'Outfit',sans-serif;text-shadow:0 2px 2px rgba(0,0,0,.45);
+  border:5px solid #1b2f4d;box-shadow:0 0 0 3px #4d7fb8,0 8px 18px rgba(0,0,0,.5),inset 0 4px 10px rgba(255,255,255,.35)}
+.round-btn.red{background:radial-gradient(circle at 50% 35%,#ff6b5e,#c4161c 70%)}
+.round-btn.green{background:radial-gradient(circle at 50% 35%,#8be36a,#279c1c 70%)}
+.round-btn.hidden{display:none}
+.round-btn:hover{filter:brightness(1.08)}
+.peek-btn{padding:12px 22px;border-radius:12px;border:2px solid #6fa3dd;background:linear-gradient(180deg,#24538c,#163a66);color:#fff;font:900 16px/1 'Outfit',sans-serif;cursor:pointer}
+.peek-return{position:absolute;left:50%;bottom:220px;transform:translateX(-50%);z-index:500;padding:12px 26px;border-radius:12px;border:2px solid #6fa3dd;
+  background:linear-gradient(180deg,#24538c,#163a66);color:#fff;font:900 17px/1 'Outfit',sans-serif;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.5)}
+
+/* Düzeltmeler: kullanılamayan düğme (gri-mavi, beyaz yazı), ikonlar, ceza yeri, boş atık yerleri */
+#gameContainer #gameActionPanel :is(#openHandBtn,#openPairsBtn,#undoDiscardBtn,#finishBtn).action-btn.is-unavailable{
+  background:linear-gradient(180deg,#a9bccf,#8299b1)!important;border-color:#6d8299!important;
+  box-shadow:0 3px 0 #556a80,0 6px 10px rgba(0,0,0,.3)!important}
+#gameContainer #gameActionPanel :is(#openHandBtn,#openPairsBtn,#undoDiscardBtn,#finishBtn).action-btn.is-unavailable .btlabel{color:#f2f6fa!important;text-shadow:0 1px 1px rgba(0,0,0,.35)!important}
+#gameContainer #gameActionPanel :is(#openHandBtn,#openPairsBtn).action-btn .bticon{display:inline-block!important;visibility:visible!important;width:34px!important;height:26px!important;
+  background-size:contain!important;background-repeat:no-repeat!important;background-position:center!important;flex:0 0 34px}
+#gameContainer #gameActionPanel #openHandBtn .bticon{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='46' height='28'%3E%3Cg font-family='Arial' font-weight='bold' font-size='12' text-anchor='middle'%3E%3Crect x='2' y='4' width='13' height='21' rx='2.5' fill='white' stroke='%23999' stroke-width='.8' transform='rotate(-10 8 14)'/%3E%3Ctext x='8.5' y='19' fill='%23d8232a' transform='rotate(-10 8 14)'%3E1%3C/text%3E%3Crect x='16' y='2' width='13' height='21' rx='2.5' fill='white' stroke='%23999' stroke-width='.8'/%3E%3Ctext x='22.5' y='17' fill='%231b78d6'%3E2%3C/text%3E%3Crect x='30' y='4' width='13' height='21' rx='2.5' fill='white' stroke='%23999' stroke-width='.8' transform='rotate(10 36 14)'/%3E%3Ctext x='36.5' y='19' fill='%23d8232a' transform='rotate(10 36 14)'%3E3%3C/text%3E%3C/g%3E%3C/svg%3E")!important}
+#gameContainer #gameActionPanel #openPairsBtn .bticon{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='28'%3E%3Cg font-family='Arial' font-weight='bold' font-size='13' text-anchor='middle'%3E%3Crect x='3' y='2' width='14' height='22' rx='2.5' fill='white' stroke='%23999' stroke-width='.8' transform='rotate(-8 10 13)'/%3E%3Ctext x='9.5' y='18' fill='%23d8232a' transform='rotate(-8 10 13)'%3E5%3C/text%3E%3Crect x='18' y='3' width='14' height='22' rx='2.5' fill='white' stroke='%23999' stroke-width='.8' transform='rotate(6 25 14)'/%3E%3Ctext x='25' y='19' fill='%23d8232a' transform='rotate(6 25 14)'%3E5%3C/text%3E%3C/g%3E%3C/svg%3E")!important}
+#bottomPlayerInfo .panel-penalty{right:64px;top:10px}
+/* Boş atık yeri: koyu yarı saydam kare (Okey Plus) */
+#discardLayer .opponent-discard-tiles:has(.opponent-empty),
+#discardLayer .discard-tiles:has(.empty-pile-text){background:rgba(4,22,44,.35)!important;border:2px solid rgba(255,255,255,.08)!important;border-radius:10px!important;box-shadow:inset 0 2px 6px rgba(0,0,0,.35)!important;background-image:none!important}
+#discardLayer .opponent-empty,#discardLayer .empty-pile-text{opacity:0!important}
+#gameContainer #gameActionPanel :is(#openHandBtn,#openPairsBtn,#undoDiscardBtn,#finishBtn).action-btn{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;gap:8px!important;padding:0 10px!important}
+#gameContainer #gameActionPanel :is(#openHandBtn,#openPairsBtn,#undoDiscardBtn,#finishBtn).action-btn .btlabel,
+#gameContainer #gameActionPanel :is(#openHandBtn,#openPairsBtn).action-btn .bticon{position:static!important;transform:none!important;margin:0!important;left:auto!important;top:auto!important}
+#gameContainer #gameActionPanel .action-btn .btlabel{white-space:nowrap!important}
+#gameContainer #gameActionPanel :is(#openHandBtn,#openPairsBtn).action-btn .btlabel{font-size:18px!important}
+.peek-return{bottom:auto!important;top:470px!important}

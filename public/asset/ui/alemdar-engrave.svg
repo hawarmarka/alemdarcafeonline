@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 110">
+  <!-- Istakaya kazınmış logo: ahşap üstünde koyu, yarı saydam oyma görünümü -->
+  <g fill="none" stroke="#7a3d06" stroke-opacity=".38" stroke-width="5">
+    <rect x="40" y="6" width="220" height="74" rx="16"/>
+  </g>
+  <path d="M10 52 Q150 34 290 52 L290 86 Q150 68 10 86 Z" fill="#7a3d06" fill-opacity=".22" stroke="#7a3d06" stroke-opacity=".38" stroke-width="3"/>
+  <text x="150" y="78" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="34" fill="#6a3204" fill-opacity=".42" letter-spacing="2">ALEMDAR</text>
+  <text x="150" y="104" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="18" fill="#6a3204" fill-opacity=".42" letter-spacing="6">CAFE</text>
+  <path d="M132 18 h36 l-4 24 q-2 7 -10 7 h-8 q-8 0 -10 -7 z" fill="#6a3204" fill-opacity=".35"/>
+</svg>

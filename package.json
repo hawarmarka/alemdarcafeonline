@@ -1,0 +1,25 @@
+{
+  "name": "alemdar-cafe-101-okey",
+  "version": "2.0.0",
+  "description": "Alemdar Cafe 101 Okey - cok oyunculu, botlu 101 okey",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node server/index.js",
+    "test": "node tests/gameLogic.test.js && node tests/advanced.test.js && node tests/accounts.test.js && node tests/v10Board.test.js && node tests/v10Server.test.js && node tests/v19Controls.test.js && node tests/v22Rules.test.js && node tests/penalties.test.js && node tests/botSimulation.test.js && node tests/okeyFuzz.test.js && node tests/hostBots.test.js && node tests/v33Rules.test.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2"
+  },
+  "keywords": [
+    "okey",
+    "game",
+    "multiplayer"
+  ],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=22"
+  }
+}

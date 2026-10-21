@@ -1,0 +1,11 @@
+﻿node_modules
+.git
+.claude
+*.zip
+data
+.test-data
+tests
+docs
+*.md
+!README.md
+BASLAT-WINDOWS.bat

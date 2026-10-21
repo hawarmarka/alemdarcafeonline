@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8"><link rel="icon" href="/asset/ui/alemdar-logo.svg" type="image/svg+xml">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alemdar Cafe · 101 Okey - Oyun</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/alemdar-pro.css">
+    <link rel="stylesheet" href="css/button-skins.css">
+    <link rel="stylesheet" href="css/theme-config.css">
+    <link rel="stylesheet" href="css/plus-reference.css?v=17">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;900&family=Oswald:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/v17-fixes.css?v=17">
+    <link rel="stylesheet" href="css/v18-refresh.css?v=18">
+    <link rel="stylesheet" href="css/v19-controls.css?v=19">
+    <link rel="stylesheet" href="css/v20-cleanup.css?v=22">
+    <link rel="stylesheet" href="css/v21-layout-tune.css?v=22">
+    <link rel="stylesheet" href="css/v23-plus-match.css?v=27">
+    <link rel="stylesheet" href="css/v24-modern.css?v=7">
+    <link rel="stylesheet" href="css/v25-plus-turn.css?v=4">
+    <link rel="stylesheet" href="css/v26-ui-assets.css?v=7">
+    <link rel="stylesheet" href="css/v27-tidy.css?v=6">
+    <link rel="stylesheet" href="css/transitions.css?v=1">
+    <link rel="stylesheet" href="css/v28-polish.css?v=2">
+    <link rel="stylesheet" href="css/v29-pro.css?v=6">
+    <script src="js/transitions.js?v=1"></script>
+</head>
+
+<body class="game-page">
+    <div id="rotateHint" role="alert"><div class="rotate-phone"></div><div>Daha rahat oynamak için telefonunu yan çevir</div><small>101 Okey yatay ekranda oynanır</small></div>
+    <div class="background-animation"></div>
+
+    <!-- Floating Particles -->
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <!-- 🏠 LOBİ BEKLEME EKRANI -->
+    <div id="lobbyOverlay" class="lobby-overlay">
+        <!-- Masa ilk giriş bekleme paneli (asset/ui/masa-bekleme.png) -->
+        <div id="tableWaitPanel" role="status" aria-live="polite">
+            <div class="tw-field tw-top" id="twTop">------</div>
+            <button type="button" class="tw-copy" id="twCopy" title="Oda kodunu kopyala">Kopyala</button>
+            <div class="tw-field tw-a" id="twTeam">Tek</div>
+            <div class="tw-field tw-b" id="twRounds">4 El</div>
+            <div class="tw-field tw-c" id="twAssist">Yardımlı</div>
+            <div class="tw-field tw-d" id="twStack">Katlamasız</div>
+            <div class="tw-field tw-status" id="twStatus">Oyuncular bekleniyor…</div>
+            <button type="button" class="tw-leave" id="twLeave" title="Masadan ayrıl" aria-label="Masadan ayrıl"></button>
+            <div class="tw-players" id="twPlayers"></div>
+            <div class="tw-host hidden" id="twHostBar"><button type="button" id="twAddBot">🤖 BOT EKLE</button><button type="button" id="twStartBots">▶ BOTLARLA BAŞLAT</button></div>
+        </div>
+        <div class="lobby-container">
+            <div class="lobby-header">
+                <h1>🎴 101 Okey</h1>
+                <p id="lobbyStatusText">Oyuncular bekleniyor...</p>
+            </div>
+
+            <div class="lobby-room-code">
+                <div class="lobby-room-code-label">Oda Kodu</div>
+                <div id="lobbyRoomCode" class="lobby-room-code-value">------</div>
+                <button id="lobbyCopyBtn" class="lobby-room-code-copy">
+                    📋 Kopyala
+                </button>
+            </div>
+
+            <div id="lobbyTeamBadge" class="lobby-team-badge hidden">
+                👥 Takım Modu Aktif
+            </div>
+
+            <div class="lobby-players">
+                <h3>Oyuncular <span id="lobbyPlayerCount" class="lobby-players-count">(0/4)</span></h3>
+                <div id="lobbyPlayersGrid" class="lobby-players-grid">
+                    <div class="lobby-player-slot empty" data-slot="0">
+                        <span class="position-icon">⬇️</span>
+                        <span class="player-name">Bekleniyor...</span>
+                    </div>
+                    <div class="lobby-player-slot empty" data-slot="1">
+                        <span class="position-icon">➡️</span>
+                        <span class="player-name">Bekleniyor...</span>
+                    </div>
+                    <div class="lobby-player-slot empty" data-slot="2">
+                        <span class="position-icon">⬆️</span>
+                        <span class="player-name">Bekleniyor...</span>
+                    </div>
+                    <div class="lobby-player-slot empty" data-slot="3">
+                        <span class="position-icon">⬅️</span>
+                        <span class="player-name">Bekleniyor...</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lobby-waiting">
+                <div class="spinner"></div>
+                <span>4 oyuncu bekleniyor...</span>
+            </div>
+
+            <div id="lobbyConnectionAlert" class="lobby-connection-alert hidden" role="alert"></div>
+            <button id="lobbyHomeBtn" class="lobby-home-btn hidden" type="button">Ana Sayfaya Dön / Yeni Masa Aç</button>
+            <button id="lobbyLeaveBtn" class="lobby-leave-btn">Odadan Ayrıl</button>
+        </div>
+    </div>
+
+    <div id="gameContainer" class="game-container hidden">
+        <header class="premium-gamebar">
+            <div class="gamebar-profile"><img id="gamebarAvatar" src="/asset/avatars/alibicim.png" alt="Profil"><div><strong id="gamebarName">Oyuncu</strong><small id="gamebarLevel">Seviye 1 · 0 XP</small></div></div>
+            <div class="gamebar-center"><b>ALEMDAR CAFE</b><span id="gamebarMode">KLASİK · KATLAMASIZ</span></div>
+            <div class="gamebar-right"><div class="gamebar-chip"><small>ODA KODU</small><strong id="gamebarRoom">------</strong></div><div class="gamebar-chip"><small>OYUN MODU</small><strong id="gamebarAssist">Yardımlı</strong></div><button id="gamebarLeaveBtn" class="gamebar-leave" type="button" title="Masa menüsü" aria-label="Masa menüsünü aç" aria-controls="quickMenuPanel" aria-expanded="false">Menü</button>
+            <div id="quickMenuPanel" class="quick-menu-panel hidden" role="menu" aria-label="Masa işlemleri">
+                <div class="qm-title">MENÜ</div>
+                <button id="menuToggleScore" type="button" role="menuitem"><span class="qm-icon qm-score" aria-hidden="true"></span><span class="qm-label">Skor Tablosu</span></button>
+                <button id="menuToggleSound" type="button" role="menuitem"><span class="qm-icon qm-sound" aria-hidden="true"></span><span class="qm-label">Sesi Kapat</span></button>
+                <button id="menuShowRules" type="button" role="menuitem"><span class="qm-icon qm-rules" aria-hidden="true"></span><span class="qm-label">Oyun Kuralları</span></button>
+                <button id="menuLeaveTable" type="button" role="menuitem" class="qm-danger"><span class="qm-icon qm-leave" aria-hidden="true"></span><span class="qm-label">Masadan Ayrıl</span></button>
+            </div></div>
+        </header>
+        <!-- Referans görünüm: gerçek skor ve masa zamanı; sunucunun oyun durumundan beslenir. -->
+        <div class="reference-hud" aria-label="Oyun bilgileri">
+            <div class="reference-hud-score" title="Kendi toplam puanın"><span class="hud-coin" aria-hidden="true">🪙</span><strong id="refHudScore">0</strong></div>
+            <div class="reference-hud-time" title="Oturum süresi"><span aria-hidden="true">🕒</span><strong id="refHudClock">00:00:00</strong></div>
+            <button type="button" id="toggleScoreTop" class="reference-hud-score-btn" title="Skor tablosunu aç / kapat">🏆 SKOR</button>
+        </div>
+        <!-- Üst Bilgi Çubuğu -->
+        <!-- UI Katmanı (Absolute) -->
+        <div class="ui-layer">
+            <!-- Sol Üst: Skor Tablosu -->
+            <div id="scoreboard" class="stats-panel glass-panel">
+                <button id="scoreboardClose" class="scoreboard-close" type="button" title="Kapat" aria-label="Skor tablosunu kapat"></button>
+                <div id="scoreList" class="stats-list scoreboard-skin">
+                    <!-- JS ile özel skor şablonu doldurur -->
+                </div>
+            </div>
+
+            <!-- Sağ Üst: Oyun Durumu -->
+            <div class="game-status-panel glass-panel">
+                <button id="leaveTableBtn" type="button" class="leave-table-btn" title="Masadan ayrıl">🚪 Ayrıl</button>
+                <div id="turnIndicator" class="status-item">
+                    <span class="label">Sıra:</span>
+                    <span id="currentPlayerName" class="value">-</span>
+                </div>
+                <div class="divider"></div>
+                <div class="status-item">
+                    <span class="label">Kalan:</span>
+                    <span id="pileCount" class="value">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Oyun Tahtası -->
+        <div id="tableOptions" class="table-settings-line">Tek · Yardımlı · Katlamasız · 1/4 El</div>
+        <div class="game-board" id="gameBoard">
+            <!-- Masa Ortası (Center) -->
+            <div class="table-center">
+                <div class="center-content mode-column">
+                    <!-- Mod rozetleri (referanstaki orta kolon) -->
+                    <div class="mode-badges">
+                        <div class="mode-badge" id="modeTeam">Tek</div>
+                        <div class="mode-badge green" id="modeAssist">Yardımlı</div>
+                        <div class="mode-badge red" id="modeStack">Katlamasız</div>
+                        <div class="mode-badge round" id="modeRound">1/4 El</div>
+                    </div>
+                    <!-- Gösterge -->
+                    <div class="indicator-section">
+                        <div class="indicator-slot" title="Gösterge">
+                            <div id="indicatorTile" class="tile-placeholder"></div>
+                        </div>
+                    </div>
+                    <!-- Taş çekme yeri (arkası dönük) -->
+                    <div class="pile-section">
+                        <div id="drawPile" class="pile-stack" title="Taş Çek">
+                            <div class="pile-tile-back"></div>
+                            <div class="pile-tile-back"></div>
+                            <div class="pile-tile-back"></div>
+                            <span class="pile-count-badge" id="pileCountCenter">0</span>
+                        </div>
+                    </div>
+                    <!-- Kalan taş sayacı -->
+                    <div class="pile-odometer" id="pileOdometer" aria-label="Kalan taş">0 0 0</div>
+                    <!-- JS için gerekli, gizli -->
+                    <div class="discard-section" style="display:none"><div id="discardPile" class="discard-stack"><div class="discard-placeholder">Atılan</div></div></div>
+                </div>
+
+                <!-- Tek ortak seri/per açma alanı: referans görseldeki gibi bitişik ve alt alta -->
+                <div id="openedTilesTable" class="opened-tiles-table" aria-label="Seri ve per açma alanı">
+                    <div class="open-board-header">
+                        <strong class="open-board-title">SERİ / PER AÇMA ALANI</strong>
+                    </div>
+                    <div id="compactOpenGroups" class="compact-open-groups"></div>
+                    <div id="seriesOverflow" class="series-overflow hidden"></div>
+                </div>
+                <!-- Üç sabit 2x2 çift alanı: bir sayfada 6 çift / 12 taş -->
+                <aside id="openedPairsZone" class="opened-pairs-zone" aria-label="Çift açma alanı">
+                    <strong class="pair-zone-title">ÇİFT AÇMA</strong>
+                    <div id="pairsGrid" class="pairs-grid"></div>
+                    <div id="pairsPager" class="pairs-pager hidden"><button type="button" id="pairsPrev" aria-label="Önceki çiftler">‹</button><span id="pairsPageText">1 / 1</span><button type="button" id="pairsNext" aria-label="Sonraki çiftler">›</button></div>
+                </aside>
+                <div id="refPairCount" class="reference-pairs-count" aria-label="Masada açılan çift sayısı">0</div>
+                <!-- Açılış rozetleri: yalnızca masada açılış varsa görünür (seri alanının solunda, çift alanının sağında) -->
+                <strong id="minimumOpenBadge" class="minimum-open-badge" style="display:none !important"><span class="badge-caption">SERİ AÇ</span><span class="badge-value">0</span></strong>
+                <div id="pairOpenBadge" class="pair-open-badge" style="display:none !important"><span class="badge-caption">ÇİFT AÇ</span><span class="badge-value">0</span></div>
+            </div>
+
+            <!-- Üst Rakip (Top) -->
+            <div class="opponent-area top">
+                <div class="opponent-discard" id="topDiscard"><div class="opponent-discard-caption">ATILAN TAŞ</div><div class="opponent-discard-tiles" id="topDiscardTiles"></div></div>
+                <div id="topPlayerInfo" class="player-info" data-position="top">
+                    <div class="avatar-wrapper">
+                        <img id="topPlayerAvatar" class="player-avatar" src="" alt="Avatar" style="display:none">
+                        <div class="turn-badge"></div>
+                    </div>
+                    <div class="player-details">
+                        <span class="player-name" id="topPlayerName">-</span>
+                        <span class="player-score">Puan: 0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sol Rakip (Left) -->
+            <div class="opponent-area left"><span id="leftPlayerScoreChip" class="opponent-score-chip" title="Sol oyuncunun toplam skoru">0</span>
+                <div class="opponent-discard" id="leftDiscard"><div class="opponent-discard-caption">ATILAN TAŞ</div><div class="opponent-discard-tiles" id="otherLeftDiscardTiles"></div></div>
+                <div id="leftPlayerInfo" class="player-info" data-position="left">
+                    <div class="avatar-wrapper">
+                        <img id="leftPlayerAvatar" class="player-avatar" src="" alt="Avatar" style="display:none">
+                        <div class="turn-badge"></div>
+                    </div>
+                    <div class="player-details">
+                        <span class="player-name" id="leftPlayerName">-</span>
+                        <span class="player-score">Puan: 0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sağ Rakip (Right) -->
+            <div class="opponent-area right"><span id="rightPlayerScoreChip" class="opponent-score-chip" title="Sağ oyuncunun toplam skoru">0</span>
+                <div class="opponent-discard" id="rightDiscard"><div class="opponent-discard-caption">ATILAN TAŞ</div><div class="opponent-discard-tiles" id="otherRightDiscardTiles"></div></div>
+                <div id="rightPlayerInfo" class="player-info" data-position="right">
+                    <div class="avatar-wrapper">
+                        <img id="rightPlayerAvatar" class="player-avatar" src="" alt="Avatar" style="display:none">
+                        <div class="turn-badge"></div>
+                    </div>
+                    <div class="player-details">
+                        <span class="player-name" id="rightPlayerName">-</span>
+                        <span class="player-score">Puan: 0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alt Oyuncu (Kullanıcı) ve Istaka -->
+            <div class="player-area bottom">
+                <!-- Sol Atık (Çekebileceğim) -->
+                <div class="player-discard left-discard" id="myLeftDiscard">
+                    <div class="discard-label">⬅ Çek</div>
+                    <div class="discard-tiles" id="leftDiscardTiles">
+                        <!-- Soldaki oyuncunun attıkları -->
+                    </div>
+                </div>
+
+                <!-- Istaka Yapısı -->
+                <div class="cue-container">
+                    <div class="rack-status" id="rackStatus" title="Seri açma puanı"><span id="rackScoreCaption">AÇMA</span><span id="rackScore">0</span><span id="rackCount" class="hidden">Taş: 0</span></div>
+                    <div class="cue-wood">
+                        <!-- Üst Raf -->
+                        <div id="playerHandTop" class="cue-row top-row" data-row="0">
+                            <!-- Taşlar buraya -->
+                        </div>
+                        <!-- Alt Raf -->
+                        <div id="playerHandBottom" class="cue-row bottom-row" data-row="1">
+                            <!-- Taşlar buraya -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sağ Atık (Attıklarım) -->
+                <div class="player-discard right-discard" id="myRightDiscard">
+                    <div class="discard-label">At ➡</div>
+                    <div class="discard-tiles" id="rightDiscardTiles">
+                        <!-- Benim attıklarım -->
+                    </div>
+                </div>
+
+                <div id="bottomPlayerInfo" class="player-info self" data-position="bottom">
+                    <div class="avatar-wrapper">
+                        <img id="bottomPlayerAvatar" class="player-avatar" src="" alt="Avatar" style="display:none">
+                        <div class="turn-badge"></div>
+                    </div>
+                    <div class="player-details">
+                        <span class="player-name" id="bottomPlayerName">Sen</span>
+                        <span class="tile-count-badge" id="bottomTileCount">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Oyun komutları sunucunun mevcut oyun mantığına bağlıdır. -->
+        <aside id="gameActionPanel" class="game-action-panel" aria-label="Oyun işlemleri">
+            <div class="action-panel-state" style="display:none"><span id="actionStateDot" class="action-state-dot"></span><span id="actionStatus"></span></div>
+            <!-- Sadece sıra sana gelince görünür -->
+            <div id="turnActions" class="turn-actions">
+                <button id="openCentralBtn" class="action-btn open-central hidden" title="Seri açmayı göster">⬆ Ana Yerde Aç</button>
+                <button id="openHandBtn" type="button" aria-label="Seri aç" class="action-btn panel-open-btn" title="Geçerli perleri seçerek aç"><span class="bticon ic-seri"></span><span class="btlabel">SERİ AÇ</span></button>
+                <button id="openPairsBtn" type="button" aria-label="Çift aç" class="action-btn panel-open-btn" title="En az 5 çiftle aç"><span class="bticon ic-cift"></span><span class="btlabel">ÇİFT AÇ</span></button>
+                <button id="undoDiscardBtn" type="button" aria-label="Geri topla" class="action-btn panel-aux-btn hidden" title="Bu tur masaya indirdiklerini ıstakaya geri topla"><span class="btlabel">GERİ TOPLA</span></button>
+                <button id="finishBtn" type="button" aria-label="Taşları işle" class="action-btn panel-finish-btn hidden" disabled title="İşlenebilen bütün taşları masaya işle"><span class="btlabel">HIZLI İŞLE</span></button>
+            </div>
+            <button id="sortSeriesBtn" type="button" class="action-btn panel-sort-btn" title="Taşları seri/per olarak düzenle"><span class="bticon ic-seridiz"></span><span class="btlabel">SERİ DİZ</span></button>
+            <button id="sortPairsBtn" type="button" class="action-btn panel-sort-btn" title="Aynı taşları çift olarak düzenle"><span class="bticon ic-ciftdiz"></span><span class="btlabel">ÇİFT DİZ</span></button>
+            <button id="toggleScoreBtn" type="button" class="action-btn panel-aux-btn hidden" title="Skor tablosu">📊 SKOR</button>
+            <p id="actionHelp" class="action-panel-help" style="display:none"></p>
+        </aside>
+
+        <!-- Masa içi sohbet: yalnızca bu odanın dört oyuncusu görebilir. -->
+        <section id="tableChatPanel" class="table-chat-panel collapsed" aria-label="Masa sohbeti">
+            <button id="toggleTableChat" class="table-chat-toggle" type="button" aria-expanded="false">💬 MASA SOHBETİ <span id="chatUnread" class="hidden"></span><span id="chatArrow">⌃</span></button>
+            <div class="table-chat-body"><div class="tc-head"><strong>MASA SOHBETİ</strong><button type="button" id="closeTableChat" class="tc-close" aria-label="Sohbeti kapat">✕</button></div>
+                <div id="tableChatMessages" class="table-chat-messages" role="log" aria-live="polite"><div class="table-chat-intro">Yalnızca masadaki dört kişi mesajları görür.</div></div>
+                <div id="quickPhrases" class="quick-phrases"><button type="button">Selamlar</button><button type="button">Bol şanslar!</button><button type="button">Tebrikler!</button><button type="button">Teşekkürler</button><button type="button">Seri lütfen!</button><button type="button">El nasıl?</button></div><form id="tableChatForm" class="table-chat-form"><input id="tableChatInput" type="text" maxlength="200" autocomplete="off" placeholder="Masaya mesaj yaz..." aria-label="Mesaj"/><button type="submit" aria-label="Gönder">➤</button></form>
+            </div>
+        </section>
+        <!-- 🍅 Domates Fırlatma Butonu -->
+        <button id="tomatoBtn" class="tomato-btn" title="Arkadaşına ücretsiz hediye gönder">🎁 <span id="tomatoCounter" class="tomato-counter">5</span></button>
+
+        <!-- Oyuncu profili popup'ı: profile tıklayınca açılır -->
+        <div id="profilePopup" class="profile-popup hidden">
+            <div class="profile-card">
+                <button id="profileClose" class="profile-close" aria-label="Kapat">×</button>
+                <img id="profilePopupAvatar" class="profile-popup-avatar" src="" alt="">
+                <h3 id="profilePopupName">-</h3>
+                <div class="profile-stats">
+                    <div><span>Seviye</span><strong id="profileLevel">-</strong></div>
+                    <div><span>Elindeki Taş</span><strong id="profileTiles">-</strong></div>
+                    <div><span>Durum</span><strong id="profileState">-</strong></div>
+                </div>
+                <div class="profile-gift-label">🎁 Hediye Gönder</div>
+                <div id="profileGiftIcons" class="profile-gifts">
+                    <button data-gift="🎁">🎁</button><button data-gift="💐">💐</button><button data-gift="☕">☕</button><button data-gift="❤️">❤️</button><button data-gift="🌹">🌹</button><button data-gift="😘">😘</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Domates Hedef Seçimi -->
+        <div id="tomatoSelectOverlay" class="tomato-select-overlay hidden">
+            <div class="tomato-select-panel">
+                <h3>🎁 Hediye Gönder</h3>
+                <p>Önce hediye sonra oyuncu seç. Bu hediyeler ücretsiz ve semboliktir.</p><div class="gift-icons" id="giftIcons"><button data-gift="🎁" class="selected">🎁</button><button data-gift="💐">💐</button><button data-gift="☕">☕</button><button data-gift="❤️">❤️</button><button data-gift="🌹">🌹</button><button data-gift="😘">😘</button></div>
+                <div id="targetButtons" class="target-buttons">
+                    <!-- Hedefler JS ile doldurulacak -->
+                </div>
+                <button id="cancelThrowBtn" class="cancel-throw-btn">Vazgeç</button>
+            </div>
+        </div>
+        <div id="openedTilesPanel" class="opened-tiles-panel hidden">
+            <h4>📖 Açılmış Taşlar</h4>
+            <div id="openedTilesList" class="opened-tiles-list">
+                <!-- Açılmış gruplar buraya -->
+            </div>
+        </div>
+
+        <!-- El Açma Modal -->
+        <div id="openHandModal" class="modal hidden">
+            <div class="modal-content open-hand-modal">
+                <h2>📖 El Aç</h2>
+                <p class="open-hand-info">Taşları seçip «Grup Ekle» ile seri veya per oluştur. Sunucu puanı doğrular.</p>
+
+                <div class="open-hand-score">
+                    Seçilen Puan: <span id="selectedScore">0</span> / 101
+                    <div class="score-bar">
+                        <div id="scoreProgress" class="score-progress"></div>
+                    </div>
+                </div>
+
+                <div id="selectedGroupsDisplay" class="selected-groups-display">
+                    <!-- Seçilen gruplar buraya -->
+                </div>
+
+                <div class="open-hand-instructions">
+                    <p>💡 Grup için en az 3 taş seç. Ayrı grupları ekledikten sonra açmayı onayla.</p>
+                    <p>• <strong>Seri:</strong> Aynı renk, ardışık sayılar (örn: 🔵5-6-7)</p>
+                    <p>• <strong>Per:</strong> Farklı renk, aynı sayı (örn: 🔴7-🔵7-⚫7)</p>
+                </div>
+
+                <div class="open-hand-tiles" id="openHandTiles">
+                    <!-- Seçilebilir taşlar -->
+                </div>
+
+                <div class="open-hand-actions">
+                    <button id="addGroupBtn" class="btn btn-secondary" disabled>➕ Grup Ekle</button>
+                    <button id="confirmOpenBtn" class="btn btn-primary" disabled>✅ El Aç</button>
+                    <button id="cancelOpenBtn" class="btn btn-danger">❌ İptal</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Çift açma: önce çiftler önizlenir, sonra sunucuya hamle gönderilir. -->
+        <div id="openPairsModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="openPairsTitle">
+            <div class="modal-content pairs-modal">
+                <h2 id="openPairsTitle">🀄 ÇİFT AÇMA</h2>
+                <p id="pairsCountText">Elinizdeki çiftler hesaplanıyor...</p>
+                <div id="pairPreview" class="pair-preview"></div>
+                <p class="pair-help">Açabilmek için aynı renk ve aynı sayıdan en az <strong>5 çift</strong> gerekir. Gerçek okey çift sayılmaz.</p>
+                <div class="open-hand-actions">
+                    <button id="confirmPairsBtn" type="button" class="btn btn-primary">✅ 5 ÇİFTİ AÇ</button>
+                    <button id="cancelPairsBtn" type="button" class="btn btn-danger">İPTAL</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Oyun Sonu Modal -->
+        <div id="gameEndModal" class="modal hidden">
+            <div class="modal-content score-modal">
+                <h2 id="winnerText">🎉 Kazanan!</h2>
+                <div id="finalScores" class="final-scores"></div>
+                <p id="autoRoundNotice" class="auto-round-notice">5 saniye sonra yeni el otomatik başlayacak.</p>
+                <div class="result-actions">
+                    <button id="resultLeaveBtn" type="button" class="round-btn red">MASADAN<br>AYRIL</button>
+                    <button id="peekTableBtn" type="button" class="peek-btn">MASAYA GÖZ AT</button>
+                    <button id="newRoundBtn" type="button" class="round-btn green hidden">YENİ<br>OYUNA<br>BAŞLA</button>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="rulesModal" class="hidden" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+            <div class="rules-dialog">
+                <button id="closeRulesModal" class="rules-close" type="button" aria-label="Kuralları kapat">×</button>
+                <h2 id="rulesTitle">Eşli 101 Turnuva Kuralları</h2>
+                <div class="rules-scroll">
+                    <p>Bu özet, masa içinde başlıca kuralları hızlıca kontrol etmek içindir.</p>
+                    <ul>
+                        <li>Her oyuncuya 21 taş, oyuna başlayana 22 taş verilir.</li>
+                        <li>12-13-1 dizisi geçerli bir seri değildir.</li>
+                        <li>Gösterge oyun içinde kullanılmaz; sahte okey gösterge çiftine sayılmaz.</li>
+                        <li>Seri açılışı en az 101 puan, çift açılışı en az 5 çift gerektirir.</li>
+                        <li>Bir oyuncu aynı elde hem seri hem çift açamaz.</li>
+                        <li>Yandan alınan taşı aynı tur açmada kullanmak gerekir. Açamayacak oyuncunun yandan taş çekmesi yasaktır.</li>
+                        <li>El, bir bitiş taşı atılmadan tamamlanmış sayılmaz.</li>
+                        <li>İşlek veya okey atan oyunculara ilgili ceza uygulanır.</li>
+                        <li>Eşli maç ve bitiş çarpanları oda kurallarına göre hesaplanmalıdır.</li>
+                    </ul>
+                    <p>Bu özet turnuva kurallarının tamamı değildir. Oyun içi işlemlerde geçerli kural denetimini sunucu yapar.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="turnTimerBar" class="turn-timer-bar hidden" aria-hidden="true"><span class="ttb-clock"></span><div class="ttb-track"><div class="ttb-fill"></div><span class="ttb-knob"></span></div></div>
+        <button id="returnTakenBtn" type="button" class="return-taken hidden" title="Yandan aldığın taşı geri bırak"><span class="rt-tile"></span><span class="rt-label">GERİ<br>BIRAK</span></button>
+        <div id="connectionBanner" class="connection-banner hidden" role="status">Bağlantı koptu; tekrar bağlanıyor...</div>
+        <!-- Bildirim Toast -->
+        <div id="gameToast" class="toast hidden">
+            <span class="toast-icon">ℹ️</span>
+            <span class="toast-message"></span>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/meldSolver.js?v=22"></script>
+    <script src="js/tableGrid.js?v=2"></script>
+    <script src="js/game.js?v=43"></script>
+    <script src="js/stage-fit.js?v=18"></script>
+</body>
+
+</html>

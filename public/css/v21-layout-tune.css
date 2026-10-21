@@ -1,0 +1,76 @@
+/* V21 – align numeric badges closer to PLUS reference */
+/* hide verbose captions; keep only values visible */
+#gameContainer #minimumOpenBadge .badge-caption,
+#gameContainer #pairOpenBadge .badge-caption,
+#gameContainer #rackScoreCaption{display:none!important}
+
+#gameContainer #minimumOpenBadge.minimum-open-badge,
+#gameContainer #pairOpenBadge.pair-open-badge,
+#gameContainer #rackStatus.rack-status{
+  position:absolute!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  width:76px!important;min-width:76px!important;height:34px!important;min-height:34px!important;
+  padding:2px 10px 6px!important;
+  color:#fff!important;font:900 17px/1 'Outfit',sans-serif!important;
+  text-shadow:0 1px 2px rgba(0,0,0,.8)!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;
+  background:url('/asset/reference/puan-badge.webp') center/100% 100% no-repeat!important;
+}
+#gameContainer #minimumOpenBadge::after,
+#gameContainer #pairOpenBadge::after,
+#gameContainer #rackStatus::after{display:none!important}
+#gameContainer #minimumOpenBadge .badge-value,
+#gameContainer #pairOpenBadge .badge-value,
+#gameContainer #rackScore{font:900 17px/1 'Outfit',sans-serif!important;color:#fff!important}
+
+/* seri aç değeri – sağ üstte, referanstaki küçük mavi kutu gibi */
+#gameContainer #minimumOpenBadge{
+  top:89px!important;
+  right:168px!important;
+  left:auto!important;
+  z-index:44!important;
+}
+/* çift aç değeri – seri açın altında, profil tarafına yakın */
+#gameContainer #pairOpenBadge{
+  top:170px!important;
+  right:122px!important;
+  margin:0!important;
+  z-index:44!important;
+}
+/* kendi elimdeki puan – alt orta/sağ, referanstaki 108 kutusu gibi */
+#gameContainer #rackStatus{
+  top:auto!important;
+  bottom:209px!important;
+  right:21.6%!important;
+  left:auto!important;
+  z-index:44!important;
+}
+
+/* remove ELIMDE text-y feel from bottom chip entirely */
+#gameContainer #rackStatus[title]{cursor:default}
+
+/* optional: bring side score chips back if needed later, but keep subtle by default */
+#gameBoard .opponent-area.left .opponent-score-chip,
+#gameBoard .opponent-area.right .opponent-score-chip,
+#gameBoard .opponent-area.top .opponent-score-chip,
+#bottomPlayerScoreChip{display:none!important}
+
+/* better alignment for right action buttons / values */
+#gameBoard .right-actions,
+#gameBoard .action-buttons-column{position:relative!important}
+
+/* keep control panel numbers from overlapping buttons */
+#gameContainer #minimumOpenBadge,
+#gameContainer #pairOpenBadge{pointer-events:none!important}
+
+/* V22 – yardımlı masada işlek taş işareti (Okey Plus'taki kırmızı hedef) */
+.tile-sprite .islek-mark{
+  position:absolute;left:50%;bottom:9%;width:26%;aspect-ratio:1;transform:translateX(-50%);
+  border-radius:50%;pointer-events:none;z-index:2;
+  background:radial-gradient(circle,#e3262b 0 22%,#fff 23% 42%,#e3262b 43% 64%,transparent 65%);
+}
+
+/* V22 – rozetler Okey Plus yerleşiminde: seri değeri seri alanının solunda,
+   çift sayısı çift alanının sağında, el puanı ıstakanın sağ üstünde. */
+#gameContainer #minimumOpenBadge{top:105px!important;left:237px!important;right:auto!important}
+#gameContainer #pairOpenBadge{top:38px!important;left:1340px!important;right:auto!important}

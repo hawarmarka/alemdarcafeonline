@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 300" role="img" aria-label="Alemdar Cafe">
+  <defs>
+    <linearGradient id="plate" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a3519"/><stop offset="1" stop-color="#2c170a"/></linearGradient>
+    <linearGradient id="letters" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff6e2"/><stop offset="1" stop-color="#e3cfa6"/></linearGradient>
+    <linearGradient id="ribbon" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e2363d"/><stop offset=".55" stop-color="#b3191f"/><stop offset="1" stop-color="#7d0e12"/></linearGradient>
+    <linearGradient id="ribbonDark" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8f1217"/><stop offset="1" stop-color="#560a0d"/></linearGradient>
+    <linearGradient id="cup" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c8743a"/><stop offset=".6" stop-color="#8a4518"/><stop offset="1" stop-color="#5a2a0c"/></linearGradient>
+    <linearGradient id="plaque" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3d6"/><stop offset="1" stop-color="#d9bf8c"/></linearGradient>
+    <filter id="sh" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#000" flood-opacity=".45"/></filter>
+  </defs>
+  <!-- tabela -->
+  <rect x="62" y="14" width="396" height="214" rx="40" fill="url(#plate)" stroke="#f3e2bf" stroke-width="9" filter="url(#sh)"/>
+  <rect x="78" y="30" width="364" height="182" rx="30" fill="none" stroke="#7a4a24" stroke-width="5"/>
+  <!-- fincanın iki yanında okey taşları ve yıldızlar (oyun kafe) -->
+  <g filter="url(#sh)">
+    <g transform="rotate(-16 150 104)"><rect x="118" y="52" width="64" height="88" rx="10" fill="url(#letters)" stroke="#3a210d" stroke-width="5"/><text x="150" y="112" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="48" fill="#c8202a">10</text><circle cx="150" cy="126" r="6" fill="#cdbf9f"/></g>
+    <g transform="rotate(16 370 104)"><rect x="338" y="52" width="64" height="88" rx="10" fill="url(#letters)" stroke="#3a210d" stroke-width="5"/><text x="370" y="112" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="48" fill="#1b5fb8">1</text><circle cx="370" cy="126" r="6" fill="#cdbf9f"/></g>
+  </g>
+  <g fill="#ffd34a" stroke="#7a4a07" stroke-width="2.5">
+    <path d="M104 48 l5 10 11 2 -8 8 2 11 -10 -5 -10 5 2 -11 -8 -8 11 -2z"/>
+    <path d="M416 48 l5 10 11 2 -8 8 2 11 -10 -5 -10 5 2 -11 -8 -8 11 -2z"/>
+  </g>
+  <!-- kahve fincanı (ortada) -->
+  <g filter="url(#sh)">
+    <path d="M226 64 q-6 -14 4 -26 q10 -12 0 -26" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="5" stroke-linecap="round"/>
+    <path d="M262 64 q-6 -14 4 -26 q10 -12 0 -26" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="5" stroke-linecap="round"/>
+    <path d="M206 72 h96 l-10 70 q-4 18 -24 18 h-28 q-20 0 -24 -18 z" fill="url(#cup)" stroke="#3a1c08" stroke-width="5"/>
+    <path d="M300 86 q30 0 28 24 q-2 22 -32 22" fill="none" stroke="#3a1c08" stroke-width="12"/>
+    <path d="M300 86 q30 0 28 24 q-2 22 -32 22" fill="none" stroke="#9a5222" stroke-width="6"/>
+    <ellipse cx="254" cy="74" rx="48" ry="9" fill="#3b1b07"/>
+    <ellipse cx="254" cy="166" rx="74" ry="11" fill="#f1e4c8" stroke="#3a1c08" stroke-width="4"/>
+  </g>
+  <!-- kurdele -->
+  <path d="M18 150 l70 -8 -18 34 18 34 -70 6 22 -34z" fill="url(#ribbonDark)" stroke="#3a0608" stroke-width="4"/>
+  <path d="M502 150 l-70 -8 18 34 -18 34 70 6 -22 -34z" fill="url(#ribbonDark)" stroke="#3a0608" stroke-width="4"/>
+  <path d="M60 132 Q260 104 460 132 L460 206 Q260 178 60 206 Z" fill="url(#ribbon)" stroke="#3a0608" stroke-width="5" filter="url(#sh)"/>
+  <path d="M70 140 Q260 114 450 140" fill="none" stroke="#ff8a8f" stroke-opacity=".55" stroke-width="3"/>
+  <text x="260" y="186" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="56" fill="#fffaf0" stroke="#4a080b" stroke-width="7" paint-order="stroke" letter-spacing="2">ALEMDAR</text>
+  <!-- CAFE levhası -->
+  <rect x="190" y="222" width="140" height="50" rx="14" fill="url(#plaque)" stroke="#3a210d" stroke-width="6" filter="url(#sh)"/>
+  <text x="260" y="261" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="34" fill="#6b1a10" letter-spacing="5">CAFE</text>
+</svg>

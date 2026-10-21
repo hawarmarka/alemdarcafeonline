@@ -1,0 +1,11 @@
+/* Alemdar Cafe – taş geçişi (lobi ve masa ortak) */
+/* ---------- taş geçişi ---------- */
+#tileTransition{position:fixed;inset:0;z-index:99999;pointer-events:none;overflow:hidden}
+#tileTransition.tt-cover,#tileTransition.tt-uncover{pointer-events:auto}
+#tileTransition i{position:absolute;left:var(--x);top:var(--y);width:17vw;height:13vw;margin:-6.5vw 0 0 -8.5vw;border-radius:1.6vw;
+  background:linear-gradient(155deg,#ffffff 0%,#f3f1ec 50%,#dedad1 100%);box-shadow:0 .6vw 0 #c8c3b6,0 1.4vw 2.4vw rgba(0,0,0,.35);
+  opacity:0;transform:translate(var(--fx),var(--fy)) rotate(var(--r)) scale(.6);transition:transform .52s cubic-bezier(.2,.85,.25,1) var(--d),opacity .3s var(--d)}
+#tileTransition.tt-cover i{opacity:1;transform:translate(0,0) rotate(var(--r)) scale(1)}
+#tileTransition.tt-instant i{transition:none!important}
+#tileTransition.tt-uncover i{opacity:0;transform:translate(calc(var(--fx) * -1),calc(var(--fy) * -1)) rotate(calc(var(--r) * 2)) scale(.6)}
+
