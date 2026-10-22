@@ -42,7 +42,8 @@ Akış: istemci `socket.emit(olay)` gönderir. Sunucu doğrular, durumu değişt
 - Yorumlar ve kullanıcıya görünen metinler Türkçe. Mevcut kod stiline uyulmalı.
 - Oyun kuralı değişikliği yalnızca sunucuda yapılır. İstemci sadece öneri ve gösterim yapar. `meldSolver.js` her iki tarafta da kullanıldığı için oradaki değişiklik ikisini birden etkiler.
 - Dosyalar 500 satırın altında tutulmalı. `server/index.js` (1295 satır) ve `public/js/game.js` (~1600 satır) bu sınırı zaten aşıyor, Faz 4'te bölünecek.
-- `alemdarcafeonline/` klasörü kök dizinin **birebir kopyası**: dosya hash'leri aynı ve içinde `.git` var. Hangisinin asıl olduğuna karar verilmeli (bkz. Faz 0). O karara kadar düzenleme **yalnızca bir yerde** yapılmalı.
+- **Asıl klasör bu kök klasör (`OKEY YENİ`)** ve GitHub'daki `hawarmarka/alemdarcafeonline` deposuna (`main` dalı) bağlı (2026-10-23). `alemdarcafeonline/` alt klasörü değişikliklerden önceki eski kopya; `.gitignore`'da, depoya girmez. Artık düzenlenmemeli, silinebilir.
+- Git: sistemde PATH'te yok, GitHub Desktop'un git'i kullanılabilir: `C:\Users\HAWAR\AppData\Local\GitHubDesktop\app-3.6.7\resources\app\git\cmd\git.exe`. GitHub'a göndermek (push) Coolify'da yeni sürüm yayınlatabilir; göndermeden önce kullanıcıya sorulmalı.
 
 ---
 
@@ -110,8 +111,8 @@ Akış: istemci `socket.emit(olay)` gönderir. Sunucu doğrular, durumu değişt
 Her madde bitince `[x]` yapın ve ilgili tabloya "✅ yapıldı" notu düşün. Her fazın sonunda `npm test`.
 
 ### Faz 0 — Hazırlık (yarım gün)
-- [ ] Asıl çalışma klasörüne karar ver: kök mü, `alemdarcafeonline/` mi? Diğerini sil veya arşivle. (T6)
-- [ ] Git kur ve mevcut hali ilk commit olarak kaydet (geri dönüş noktası).
+- [x] Asıl çalışma klasörü kök klasör (2026-10-23). `.git` kopyadan köke alındı; kopya klasör yerinde duruyor, silinmesi kullanıcıya bırakıldı. (T6)
+- [x] Bu oturumdaki bütün değişiklikler yerel commit olarak kaydedildi (`2189fa5`). GitHub'a henüz gönderilmedi.
 - [ ] Ölçüm altyapısı: sunucuya event-loop gecikmesi ölçümü (`perf_hooks.monitorEventLoopDelay`) ekle, `/health` içinde p99 değerini göster. İstemcide geliştirme modunda FPS sayacı.
 
 ### Faz 1 — Sunucu gecikmesi (en büyük kazanç, 1-2 gün)
@@ -142,6 +143,8 @@ Her madde bitince `[x]` yapın ve ilgili tabloya "✅ yapıldı" notu düşün. 
 - [x] Ek (2026-10-23): İstemcide sıra hamleleri (`MOVE_EVENTS`) sunucu cevap verene kadar tekrar gönderilmiyor. Çift tıklama ve hızlı dokunuş artık "zaten taş aldınız" gibi hatalar üretmiyor (5 sn güvenlik süresi var). Kendi profilinde hediye düğmeleri gizli.
 - [x] S8 (2026-10-23): Süresi dolan oturumlar 6 saatte bir siliniyor.
 - [ ] S3: `snapshot`'tan değişmeyen alanları çıkar, `seq` numarası ekle (S2 sonrası mesaj zaten ~3 KB, öncelik düşük).
+
+Canlı kural testi (2026-10-23, tarayıcıda, gerçek düğmeler/fonksiyonlarla): seri açma (+60 sn), geri toplama (101 ceza), işleme ve bir gruba turda en fazla 2 taş, masadaki okeyi alma, yerden alma zorunluluğu + GERİ BIRAK + aynı taşı tekrar alamama, işlek ve okey atma cezası, çift açma penceresi (el puanı ×2), eli bitirme. Hepsi beklendiği gibi çalıştı. Ayrıca 3 ellik eşli ve katlamalı otomatik maç oynandı, ortasında sayfa yenilendi (aynı el ve ıstaka dizilimi geri geldi). Sonuç: 0 hata, 0 JS hatası, takılma yok. Test aracı `debugSetup` (yalnızca `OKEY_DEBUG=1`) artık `reset`, `pairsOpponent` ve `myGroups` alıyor.
 
 Doğrulama (2026-10-23): `tests/v34Stability.test.js` yukarıdakileri test ediyor. Ayrıca tarayıcıda 2 ellik tam maç otomatik oynandı: her turda taş çekme 4 kez, atma 2 kez art arda basıldı. Sonuç: 0 hata mesajı, 0 JS hatası, takılma yok. Bir el seri açılarak oynandı. "YENİ OYUNA BAŞLA" yeni masaya oturttu.
 
