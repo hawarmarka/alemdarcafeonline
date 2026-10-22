@@ -32,7 +32,7 @@ function fire(room,key){const t=room[key];if(!t)return false;const cb=t._onTimeo
 function tileCount(room){
   const g=room.game;
   return g.tiles.length+1+g.playerTiles.flat().length+g.discardPiles.flat().length+
-    g.playerStates.flatMap(s=>s.openedGroups).flat().length;
+    g.playerStates.flatMap(s=>[...s.openedGroups,...(s.extraPairs||[])]).flat().length;
 }
 let rounds=0,wins=0,okeySwaps=0;
 const MATCHES=Number(process.env.SIM_MATCHES)||40;

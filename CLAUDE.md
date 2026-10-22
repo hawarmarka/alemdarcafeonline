@@ -153,6 +153,8 @@ Ek (2026-10-23, kullanıcı isteği):
 - Sürüklerken tutulan taşın yeri soluk (`drag-source`), kopya tam opak ve gerçek boyutta. Bırakınca taş yeni yuvasına kayarak oturuyor.
 - Elle işlemede uçan taşın ekranı kaplama hatası giderildi. Sebep: `.grid-table-tile{width:100%!important}` sayfa gövdesinde ekran genişliği oluyordu; `flyTile` ölçüleri artık `!important` ile veriyor.
 - Hazır avatarlar artık çizim SVG `av01..av10.svg` (eski fotoğraflar silindi, kayıtlı eski adlar varsayılana döner). Profil penceresinde seçilebiliyor, botlar rastgele birini alıyor.
+- Kural: seri açmış oyuncu, masada çift açan biri varsa elindeki okeysiz çiftleri ÇİFT AÇ ile çift panosuna indirebilir (`laySeriesPairs`, `state.extraPairs`; seri gruplarından ayrı tutulur, istemciye `extraPairs` olarak gider). Botlar da aynı kuralı kullanır.
+- Istaka düzeni: desteden çekilip bir yuvaya bırakılan taş için kaydırma yalnızca aynı rafta ve en yakın boş yuvaya kadar yapılır. Boş yuvaya bırakılan taş için hiçbir taş oynamaz. Hatırlanan "eski yer" (GERİ TOPLA için) tek taş çekişinde kullanılmaz. Önceden ilk boş yuvaya kadar her şey kayıyordu.
 - Hediye albümü: 12 hediye (`GIFTS` istemcide, `GIFT_IDS` sunucuda, ikisi aynı olmalı). Her hediyenin alıcıya ve diğerlerine okunan esprili cümlesi var (`speechSynthesis`, ses kapalıysa okunmaz).
 
 Doğrulama (2026-10-23): `tests/v34Stability.test.js` yukarıdakileri test ediyor. Ayrıca tarayıcıda 2 ellik tam maç otomatik oynandı: her turda taş çekme 4 kez, atma 2 kez art arda basıldı. Sonuç: 0 hata mesajı, 0 JS hatası, takılma yok. Bir el seri açılarak oynandı. "YENİ OYUNA BAŞLA" yeni masaya oturttu.

@@ -81,5 +81,27 @@ try {
   d.receive('startWithBots');
   _testing.finishRound(room3, null, { type: 'exhausted' });
   assert.match(room3.lastRoundResult.champion, / & /);
-  console.log('v34Stability: güvenli olaylar, bot hata kurtarma, olay sınırı, misafir adı, şampiyon ve takım adı geçti');
+  // 7) Seri açan oyuncu, masada çift açan varsa okeysiz çiftlerini çift panosuna indirebilir; yoksa indiremez.
+  const e = new FakeSocket(fakeIO);
+  e.receive('joinGame', { mode: 'create', playerName: 'Ece', token: token('e'), roundLimit: 1 });
+  const room4 = rooms.get(e.last('joinedGame').code);
+  e.receive('startWithBots');
+  const g4 = room4.game, me = 0;
+  const isOk = t => g4.isOkey(t);
+  const pool = g4.tiles.filter(t => !t.isFakeJoker && !isOk(t));
+  const twin = pool.find(t => pool.some(u => u !== t && u.color === t.color && u.number === t.number));
+  const pairTiles = [twin, pool.find(u => u !== twin && u.color === twin.color && u.number === twin.number)];
+  const singles = pool.filter(t => !pairTiles.includes(t) && !(t.color === twin.color && t.number === twin.number)).slice(0, 2);
+  g4.tiles = g4.tiles.filter(t => !pairTiles.includes(t) && !singles.includes(t)).concat(g4.playerTiles[me]);
+  g4.playerTiles[me] = [...pairTiles, ...singles];
+  Object.assign(g4.playerStates[me], { hasOpened: true, openType: 'normal', openedGroups: [] });
+  g4.currentPlayer = me; g4.hasDrawn = true; _testing.beginTurn(room4);
+  e.receive('openWithPairs');
+  assert.match(e.last('gameError').message, /çift açan olmadığı/, 'masada çift açan yokken seri açan çift indiremez');
+  g4.playerStates[1].openType = 'pairs'; g4.playerStates[1].hasOpened = true;
+  e.receive('openWithPairs');
+  assert.equal(g4.playerStates[me].extraPairs.length, 1, 'çift, çift panosuna inmeli');
+  assert.equal(g4.playerTiles[me].length, 2, 'elde iki tek taş kalmalı');
+  assert.equal(e.last('gameState').extraPairs[me].length, 1, 'istemciye extraPairs gitmeli');
+  console.log('v34Stability: güvenli olaylar, bot hata kurtarma, olay sınırı, misafir adı, şampiyon ve takım adı, seri açanın çift indirmesi geçti');
 } finally { console.error = quietErrors; }

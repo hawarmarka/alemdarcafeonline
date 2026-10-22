@@ -36,6 +36,7 @@ class GameLogic {
             openScore: 0,           // Açılış skoru
             mustOpenThisTurn: false, // Yerden alınan taşı bu tur masaya indirmek zorundadır
             drawnFromDiscardTile: null,
+            extraPairs: [],          // Seri açanın, masada çift açan varken indirdiği çiftler
         };
     }
 

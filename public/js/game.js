@@ -189,6 +189,7 @@ socket.on('disconnect', () => {
 });
 socket.on('gameError', d => {
     rollbackDiscard(); moveAnswered(); // sunucu atışı reddettiyse taş ıstakaya geri döner (sebebi aşağıda gösterilir)
+    pendingDrawDropSlot = null; // reddedilen çekişin bırakma yuvası sonraki çekişe kalmasın
     const message = String(d?.message || 'İşlem gerçekleştirilemedi.');
     if (!state && /oturum bulunamadı|oda kapandı|oturum geçersiz|masada değilsiniz/i.test(message)) {
         sessionStorage.removeItem('okeySession');
@@ -305,23 +306,29 @@ function restoreSlots(incomingTiles) {
     slots.forEach((tile, i) => { if (tile && !valid.has(tile.id)) leftRackSlots.set(tile.id, i); });
     slots = slots.map(tile => tile && valid.has(tile.id) ? valid.get(tile.id) : null);
     const already = new Set(slots.filter(Boolean).map(t => t.id));
+    // Tek taş çekilip bir yuvaya bırakıldıysa bırakılan yer geçerlidir; hatırlanan eski yer (GERİ TOPLA için) kullanılmaz.
+    const droppedDraw = pendingDrawDropSlot != null && incomingTiles.filter(t => !already.has(t.id)).length === 1;
     for (const tile of incomingTiles) {
-        const home = leftRackSlots.get(tile.id);
+        const home = droppedDraw ? null : leftRackSlots.get(tile.id);
         if (!already.has(tile.id) && home != null && !slots[home]) { slots[home] = tile; already.add(tile.id); }
         leftRackSlots.delete(tile.id);
     }
     const incomingExtras = incomingTiles.filter(t => !already.has(t.id));
     if (incomingExtras.length === 1) pendingFly.newTileId = incomingExtras[0].id; // çekilen taş animasyonu için
     if (pendingDrawDropSlot != null && incomingExtras.length === 1) {
+        // Çekilen taş bırakıldığı yuvaya konur. Yuva doluysa yalnızca AYNI raftaki en yakın boş yuvaya kadar
+        // olan taşlar birer kayar; raf doluysa hiçbir taş kaydırılmaz (önceden ıstakanın ilk boş yuvasına kadar
+        // her şey kayıyor, raflar arası taşıyor ve düzen bozuluyordu).
         const desired = Math.max(0, Math.min(SLOTS - 1, pendingDrawDropSlot));
-        const free = slots.findIndex(t => !t);
-        if (free !== -1 && free !== desired) {
-            if (free > desired) {
-                for (let i = free; i > desired; i--) slots[i] = slots[i - 1];
-            } else {
-                for (let i = free; i < desired; i++) slots[i] = slots[i + 1];
+        if (slots[desired]) {
+            const rowStart = Math.floor(desired / ROW_WIDTH) * ROW_WIDTH, rowEnd = rowStart + ROW_WIDTH - 1;
+            let free = -1;
+            for (let d = 1; d < ROW_WIDTH && free < 0; d++) {
+                if (desired + d <= rowEnd && !slots[desired + d]) free = desired + d;
+                else if (desired - d >= rowStart && !slots[desired - d]) free = desired - d;
             }
-            slots[desired] = null;
+            if (free > desired) { for (let i = free; i > desired; i--) slots[i] = slots[i - 1]; slots[desired] = null; }
+            else if (free >= 0) { for (let i = free; i < desired; i++) slots[i] = slots[i + 1]; slots[desired] = null; }
         }
         if (!slots[desired]) {
             slots[desired] = incomingExtras[0];
@@ -1050,7 +1057,11 @@ function changed(part, sig) {
     return true;
 }
 const idsSig = list => (list || []).map(t => t?.id || '-').join(',');
-const tableSig = () => (state.openedGroups || []).map((groups, owner) => (state.players?.[owner]?.openType || '') + ':' + (groups || []).map(idsSig).join('/')).join('|');
+const tableSig = () => (state.openedGroups || []).map((groups, owner) => (state.players?.[owner]?.openType || '') + ':' + (groups || []).map(idsSig).join('/')
+    + '+' + (state.extraPairs?.[owner] || []).map(idsSig).join('/')).join('|');
+// Seri açmış oyuncu, masada çift açan biri varsa okeysiz çiftlerini çift panosuna indirebilir (sunucu: laySeriesPairs).
+const pairsOpenerOnTable = () => (state?.players || []).some((p, i) => i !== state.playerIndex && p.openType === 'pairs');
+const naturalPairs = () => findAvailablePairs().filter(p => !p.some(t => !t.isFakeJoker && t.color === state.okey?.color && t.number === state.okey?.number));
 // Aynı metni tekrar yazmak da DOM'u değiştirir (stil hesabı tetikler); yalnızca farklıysa yaz.
 function setText(el, value) { if (el && el.textContent !== String(value)) el.textContent = value; }
 function renderRack() {
@@ -1223,6 +1234,8 @@ function renderGroups() {
             if (pairMode) pairs.push({owner, groupIndex, tiles});
             else normal.push({owner, groupIndex, tiles});
         });
+        // Seri açanın indirdiği çiftler de çift panosunda görünür.
+        (state.extraPairs?.[owner] || []).forEach((tiles, k) => pairs.push({ owner, groupIndex: 'x' + k, tiles }));
     });
     // SERİ/PER: iki 13x13 ızgara board; her grup ızgara hücrelerine oturur (tableGrid)
     const boards = [0, 1].map(i => { const b = document.createElement('div'); b.className = 'sboard'; b.dataset.board = i; compact?.append(b); return b; });
@@ -1275,7 +1288,8 @@ $('pairsNext').addEventListener('click', () => { pairsPage += 1; if(state)render
 // kind: 'normal' (seri/per) veya 'pairs' (çift). Açmış oyuncu kendi türünde yeni grup indirebilir.
 function getOpenBlockReason(kind) {
     if (!state || finished) return 'Oyun henüz başlamadı veya el tamamlandı.';
-    if (kind && state.myOpenType && state.myOpenType !== kind) return state.myOpenType === 'pairs' ? 'Çift açtınız; yalnızca çift indirip açık serilere taş işleyebilirsiniz.' : 'Seri/per ile açtınız; çift indiremezsiniz.';
+    const seriesLayingPairs = kind === 'pairs' && state.myOpenType === 'normal' && pairsOpenerOnTable();
+    if (kind && state.myOpenType && state.myOpenType !== kind && !seriesLayingPairs) return state.myOpenType === 'pairs' ? 'Çift açtınız; yalnızca çift indirip açık serilere taş işleyebilirsiniz.' : 'Seri/per ile açtınız; masada çift açan olmadığı için çift indiremezsiniz.';
     if (!canPlay()) return 'Sıra size geldiğinde el açabilirsiniz.';
     if (!state.hasDrawn) return 'Önce ortadan veya soldan bir taş çekmelisiniz.';
     return '';
@@ -1301,7 +1315,9 @@ function renderActions() {
     }
     if (ready && !getOpenBlockReason('pairs')) {
         const pairCount = findAvailablePairs().length;
-        canPairs = opened === 'pairs' ? pairCount > 0 && state.tiles.length > 2 : pairCount >= (state.minimumPairs || 5);
+        canPairs = opened === 'pairs' ? pairCount > 0 && state.tiles.length > 2
+            : opened === 'normal' ? naturalPairs().length > 0 && state.tiles.length > 2
+            : pairCount >= (state.minimumPairs || 5);
     }
     const canProcess = ready && state.assisted && !!opened && state.tiles.length > 1 && state.tiles.some(isIslekTile);
     // Okey Plus: sıra sendeyken işlem düğmeleri ve üstte süre çubuğu çıkar, rakip panelleri gizlenir.
@@ -1385,6 +1401,11 @@ function findAvailablePairs(tiles = state?.tiles) {
     // Çift açmış oyuncu: yeni çiftleri doğrudan indir (sunucu elde 1 taş bırakır).
     if (state.myOpenType === 'pairs') {
         if (!findAvailablePairs().length) return toast('İndirilecek yeni çiftiniz yok.', true);
+        return action('openWithPairs');
+    }
+    // Seri açmışsın ve masada çift açan var: okeysiz çiftlerin doğrudan çift panosuna iner.
+    if (state.myOpenType === 'normal') {
+        if (!naturalPairs().length || state.tiles.length <= 2) return toast('İndirilecek çiftin yok (elde bitiş taşı kalmalı).', true);
         return action('openWithPairs');
     }
     const pairs = findAvailablePairs();

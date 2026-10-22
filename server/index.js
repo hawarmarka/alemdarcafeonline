@@ -249,6 +249,19 @@ function selectPairsToLay(game, index, requiredTile) {
     return pairs.slice(0, maxPairs);
 }
 
+// Seri açmış oyuncu, masada çift açan biri varsa elindeki okeysiz çiftleri çift panosuna indirebilir.
+// Bu çiftler seri gruplarından ayrı (extraPairs) tutulur; elde bitirmek için en az bir taş kalır.
+function anyPairsOpener(game, except) { return game.playerStates.some((s, i) => i !== except && s.openType === 'pairs'); }
+function laySeriesPairs(room, index) {
+    const game = room.game, state = game.playerStates[index], hand = game.playerTiles[index];
+    const laid = game.countPairs(hand, false).slice(0, Math.floor((hand.length - 1) / 2));
+    if (!laid.length) return laid;
+    const picked = state.drawnFromDiscardTile;
+    state.extraPairs = [...(state.extraPairs || []), ...laid]; // yeni dizi: GERİ TOPLA anlık görüntüsü bozulmasın
+    removeSelected(game, index, new Set(laid.flat().map(t => t.id)));
+    if (picked && laid.some(p => p.some(t => t.id === picked.id))) applySidePickup(room, index, picked);
+    return laid;
+}
 // Botun bu eldeki planı: seri mi çift mi. Açtıysa açtığı türdür; açmadıysa elindeki çift sayısı
 // ve seri puanına bakar (4+ çift ve zayıf seri → çift; 5+ çift her zaman çift).
 function botPlan(game, index) {
@@ -266,7 +279,7 @@ function unseenTileCounts(game, index) {
     const counts = new Map();
     for (const color of ['Kirmizi', 'Yesil', 'Mavi', 'Siyah']) for (let n = 1; n <= 13; n++) counts.set(`${color}:${n}`, 2);
     counts.set('F', 2);
-    const seen = [...game.playerTiles[index], ...game.discardPiles.flat(), ...game.playerStates.flatMap(s => s.openedGroups.flat()), game.indicator].filter(Boolean);
+    const seen = [...game.playerTiles[index], ...game.discardPiles.flat(), ...game.playerStates.flatMap(s => [...s.openedGroups.flat(), ...(s.extraPairs || []).flat()]), game.indicator].filter(Boolean);
     for (const t of seen) { const k = key(t); if (counts.has(k)) counts.set(k, Math.max(0, counts.get(k) - 1)); }
     return counts;
 }
@@ -445,6 +458,8 @@ function botProcessOpenMoves(room, index) {
             if (target) attachTileToGroup(room, index, target, okeyTile);
         }
     }
+    // Seri açmış bot da masada çift açan varken elindeki çiftleri indirir (elde kalan ceza azalır).
+    if (game.playerStates[index].openType === 'normal' && anyPairsOpener(game, index)) laySeriesPairs(room, index);
 }
 function runBotTurn(room, index) {
     const game = room.game;
@@ -537,6 +552,7 @@ function snapshot(room, index) {
         hasDrawn: game.hasDrawn, indicator: game.indicator, okey: game.okey,
         pileCount: game.getRemainingTileCount(),
         openedGroups: game.playerStates.map(s => s.openedGroups),
+        extraPairs: game.playerStates.map(s => s.extraPairs || []),
         discards: game.discardPiles, myOpenType: game.playerStates[index].openType,
         mustOpenThisTurn: !!game.playerStates[index].mustOpenThisTurn,
         canRetract: canRetract(room, index) && turnChanged(room, index),
@@ -1164,7 +1180,13 @@ io.on('connection', socket => {
         const state = game.playerStates[index];
         // Çift açmış oyuncu sonraki turlarda yeni çiftlerini indirebilir.
         if (state.hasOpened) {
-            if (state.openType !== 'pairs') return issue(socket, 'Seri/per ile açtığınız için çift indiremezsiniz.');
+            if (state.openType !== 'pairs') {
+                if (!anyPairsOpener(game, index)) return issue(socket, 'Seri/per ile açtınız; masada çift açan olmadığı için çift indiremezsiniz.');
+                const laid = laySeriesPairs(room, index);
+                if (!laid.length) return issue(socket, 'İndirilecek çift yok (bitirmek için elde bir taş kalmalı).');
+                broadcastGame(room);
+                return socket.emit('actionSuccess', { message: `${laid.length} çift, çift panosuna indirildi.` });
+            }
             const extra = selectPairsToLay(game, index, state.drawnFromDiscardTile);
             if (extra === null) return issue(socket, 'Yerden çekilen taş çiftte kullanılmalı; yerden geri bırakabilirsiniz.');
             if (!extra.length) return issue(socket, 'İndirilecek yeni çift yok (elde atılacak bir taş kalmalı).');
@@ -1322,7 +1344,7 @@ io.on('connection', socket => {
         };
         // reset: masadaki bütün açılışlar ve atıklar desteye döner, oyuncu durumları sıfırlanır (her senaryo temiz başlasın).
         if (data?.reset) {
-            game.tiles.unshift(...game.playerStates.flatMap(s => s.openedGroups.flat()), ...game.discardPiles.flat());
+            game.tiles.unshift(...game.playerStates.flatMap(s => [...s.openedGroups.flat(), ...(s.extraPairs || []).flat()]), ...game.discardPiles.flat());
             game.playerStates = game.playerStates.map(() => game.createPlayerState());
             game.discardPiles = [[], [], [], []]; game.deadDiscards = {}; game.addLog = null; game.returnedLeft = null;
             room.turnSnap = null; room.minimumOpenScore = 101; room.minimumPairs = 5;
