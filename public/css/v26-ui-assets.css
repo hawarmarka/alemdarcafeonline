@@ -7,10 +7,10 @@
   border:0!important;border-radius:0!important;box-shadow:none!important;
   background-color:transparent!important;background-size:100% 100%!important;background-repeat:no-repeat!important;background-position:center!important;
   filter:drop-shadow(0 4px 5px rgba(0,0,0,.35));transition:transform .1s,filter .15s}
-#gameContainer #gameActionPanel #openHandBtn.action-btn{background-image:url('/asset/ui/seri-ac.png')!important;height:52px!important}
-#gameContainer #gameActionPanel #openPairsBtn.action-btn{background-image:url('/asset/ui/cift-ac.png')!important;height:47px!important}
-#gameContainer #gameActionPanel #undoDiscardBtn.action-btn{background-image:url('/asset/ui/geri-topla.png')!important;height:57px!important}
-#gameContainer #gameActionPanel #finishBtn.action-btn{background-image:url('/asset/ui/taslari-isle.png')!important;height:57px!important}
+#gameContainer #gameActionPanel #openHandBtn.action-btn{background-image:url('/asset/ui/seri-ac.webp')!important;height:52px!important}
+#gameContainer #gameActionPanel #openPairsBtn.action-btn{background-image:url('/asset/ui/cift-ac.webp')!important;height:47px!important}
+#gameContainer #gameActionPanel #undoDiscardBtn.action-btn{background-image:url('/asset/ui/geri-topla.webp')!important;height:57px!important}
+#gameContainer #gameActionPanel #finishBtn.action-btn{background-image:url('/asset/ui/taslari-isle.webp')!important;height:57px!important}
 #gameContainer #gameActionPanel :is(#openHandBtn,#openPairsBtn,#undoDiscardBtn,#finishBtn).action-btn>*{
   position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important}
 #gameContainer #gameActionPanel :is(#openHandBtn,#openPairsBtn,#undoDiscardBtn,#finishBtn).action-btn:hover{filter:drop-shadow(0 4px 5px rgba(0,0,0,.35)) brightness(1.06)}
@@ -19,23 +19,23 @@
   background-color:transparent!important;filter:grayscale(.85) brightness(.78) drop-shadow(0 3px 4px rgba(0,0,0,.3))!important;box-shadow:none!important;border:0!important}
 #gameContainer #gameActionPanel :is(#openHandBtn,#openPairsBtn,#undoDiscardBtn,#finishBtn).action-btn.is-unavailable{
   background-image:var(--ui-btn)!important}
-#gameContainer #gameActionPanel #openHandBtn.action-btn.is-unavailable{--ui-btn:url('/asset/ui/seri-ac.png')}
-#gameContainer #gameActionPanel #openPairsBtn.action-btn.is-unavailable{--ui-btn:url('/asset/ui/cift-ac.png')}
-#gameContainer #gameActionPanel #undoDiscardBtn.action-btn.is-unavailable{--ui-btn:url('/asset/ui/geri-topla.png')}
-#gameContainer #gameActionPanel #finishBtn.action-btn.is-unavailable{--ui-btn:url('/asset/ui/taslari-isle.png')}
+#gameContainer #gameActionPanel #openHandBtn.action-btn.is-unavailable{--ui-btn:url('/asset/ui/seri-ac.webp')}
+#gameContainer #gameActionPanel #openPairsBtn.action-btn.is-unavailable{--ui-btn:url('/asset/ui/cift-ac.webp')}
+#gameContainer #gameActionPanel #undoDiscardBtn.action-btn.is-unavailable{--ui-btn:url('/asset/ui/geri-topla.webp')}
+#gameContainer #gameActionPanel #finishBtn.action-btn.is-unavailable{--ui-btn:url('/asset/ui/taslari-isle.webp')}
 
 /* ---------- SERİ DİZ / ÇİFT DİZ ---------- */
 #gameContainer #sortSeriesBtn.action-btn,#gameContainer #sortPairsBtn.action-btn{
   width:94px!important;height:174px!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;
   background-color:transparent!important;background-size:100% 100%!important;background-repeat:no-repeat!important;filter:drop-shadow(0 6px 8px rgba(0,0,0,.4))}
-#gameContainer #sortSeriesBtn.action-btn{background-image:url('/asset/ui/seri-diz.png')!important}
-#gameContainer #sortPairsBtn.action-btn{background-image:url('/asset/ui/cift-diz.png')!important}
+#gameContainer #sortSeriesBtn.action-btn{background-image:url('/asset/ui/seri-diz.webp')!important}
+#gameContainer #sortPairsBtn.action-btn{background-image:url('/asset/ui/cift-diz.webp')!important}
 #gameContainer #sortSeriesBtn.action-btn>*,#gameContainer #sortPairsBtn.action-btn>*{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important}
 #gameContainer #sortSeriesBtn.action-btn:active,#gameContainer #sortPairsBtn.action-btn:active{transform:translateY(3px)}
 
 /* ---------- Istaka ---------- */
 #gameContainer .cue-container .cue-wood{
-  background:url('/asset/ui/istaka.png') center/100% 100% no-repeat!important;border:0!important;border-radius:0!important;
+  background:url('/asset/ui/istaka.webp') center/100% 100% no-repeat!important;border:0!important;border-radius:0!important;
   box-shadow:none!important;filter:drop-shadow(0 10px 14px rgba(0,0,0,.45));padding:6px 32px 12px!important;gap:10px!important}
 #gameContainer .cue-wood .cue-row::after{display:none!important}
 #gameContainer .cue-wood .tile-slot:empty{box-shadow:none!important}
@@ -44,40 +44,40 @@
 /* ---------- Sağ üst: mesaj ve ayarlar ---------- */
 #gameContainer #toggleTableChat.table-chat-toggle{
   width:76px!important;height:45px!important;padding:0!important;border:0!important;box-shadow:none!important;color:transparent!important;font-size:0!important;
-  background:url('/asset/ui/mesaj.png') center/100% 100% no-repeat!important}
+  background:url('/asset/ui/mesaj.webp') center/100% 100% no-repeat!important}
 #gameContainer #toggleTableChat #chatArrow{display:none!important}
 #gameContainer #toggleTableChat #chatUnread{font-size:12px!important;color:#fff!important;position:absolute;right:-4px;top:-4px}
 #gameContainer #gamebarLeaveBtn.gamebar-leave{
   width:78px!important;height:40px!important;padding:0!important;border:0!important;box-shadow:none!important;color:transparent!important;font-size:0!important;
-  background:url('/asset/ui/ayarlar.png') center/100% 100% no-repeat!important}
+  background:url('/asset/ui/ayarlar.webp') center/100% 100% no-repeat!important}
 
 /* ---------- Sayı rozetleri ---------- */
-#gameContainer #minimumOpenBadge.minimum-open-badge{background:url('/asset/ui/seri-sayi.png') center/100% 100% no-repeat!important;width:84px!important;height:31px!important;padding:0 10px 0 0!important}
-#gameContainer #pairOpenBadge.pair-open-badge{background:url('/asset/ui/cift-sayi.png') center/100% 100% no-repeat!important;width:66px!important;height:37px!important;padding:0 0 0 8px!important}
-#gameContainer #rackStatus.rack-status.rack-status{background:url('/asset/ui/el-sayi.png') center/100% 100% no-repeat!important;width:84px!important;height:36px!important;padding:0 0 6px!important}
+#gameContainer #minimumOpenBadge.minimum-open-badge{background:url('/asset/ui/seri-sayi.webp') center/100% 100% no-repeat!important;width:84px!important;height:31px!important;padding:0 10px 0 0!important}
+#gameContainer #pairOpenBadge.pair-open-badge{background:url('/asset/ui/cift-sayi.webp') center/100% 100% no-repeat!important;width:66px!important;height:37px!important;padding:0 0 0 8px!important}
+#gameContainer #rackStatus.rack-status.rack-status{background:url('/asset/ui/el-sayi.webp') center/100% 100% no-repeat!important;width:84px!important;height:36px!important;padding:0 0 6px!important}
 #gameContainer :is(#minimumOpenBadge,#pairOpenBadge) .badge-value,#gameContainer #rackScore{font:900 20px/1 'Outfit',sans-serif!important;color:#fff!important;text-shadow:0 1px 2px rgba(0,0,0,.7)!important}
 
 /* ---------- Orta sütun mod rozetleri: Tek / Yardımlı (yeşil) / Katlamalı (kırmızı) / El ---------- */
-#gameBoard .mode-badges .mode-badge{background:url('/asset/ui/mod-rozet.png') center/100% 100% no-repeat!important;border:0!important;box-shadow:none!important;
+#gameBoard .mode-badges .mode-badge{background:url('/asset/ui/mod-rozet.webp') center/100% 100% no-repeat!important;border:0!important;box-shadow:none!important;
   color:#e8f2ff!important;text-shadow:0 1px 2px rgba(0,0,0,.7)!important}
 #gameBoard .mode-badges .mode-badge.green{filter:hue-rotate(-75deg) saturate(1.4) brightness(1.05)}
 #gameBoard .mode-badges .mode-badge.red{filter:hue-rotate(150deg) saturate(1.5) brightness(.95)}
 
 /* ---------- Deste ve boş atık yerleri ---------- */
-#gameBoard #drawPile.pile-stack{background:url('/asset/ui/tas-cekme.png') center/100% 100% no-repeat!important;border:0!important;box-shadow:none!important}
+#gameBoard #drawPile.pile-stack{background:url('/asset/ui/tas-cekme.webp') center/100% 100% no-repeat!important;border:0!important;box-shadow:none!important}
 #gameBoard #drawPile .pile-tile-back{display:none!important}
 #gameBoard #drawPile .pile-count-badge{position:absolute!important;left:50%!important;top:auto!important;bottom:18%!important;transform:translateX(-50%)!important;
   background:none!important;border:0!important;box-shadow:none!important;color:#3b4a5c!important;font:900 17px/1 'Outfit',sans-serif!important}
 #discardLayer .opponent-discard-tiles:has(.opponent-empty),
-#discardLayer .discard-tiles:has(.empty-pile-text){background:url('/asset/ui/tas-atma.png') center/100% 100% no-repeat!important;border:0!important;box-shadow:none!important}
+#discardLayer .discard-tiles:has(.empty-pile-text){background:url('/asset/ui/tas-atma.webp') center/100% 100% no-repeat!important;border:0!important;box-shadow:none!important}
 
 /* ---------- Oyuncu isim panelleri (yatay olanlar) ---------- */
 #gameBoard #topPlayerInfo.player-info,#gameBoard #bottomPlayerInfo.player-info{
-  background:url('/asset/ui/profil-kutusu.png') center/100% 100% no-repeat!important;border:0!important;box-shadow:none!important}
+  background:url('/asset/ui/profil-kutusu.webp') center/100% 100% no-repeat!important;border:0!important;box-shadow:none!important}
 
 /* ---------- GERİ BIRAK kartı: taş üstteki boşluğa oturur ---------- */
 #returnTakenBtn{width:84px!important;height:179px!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;
-  background:url('/asset/ui/geri-birak.png') center/100% 100% no-repeat!important;filter:drop-shadow(0 6px 8px rgba(0,0,0,.45));display:block!important}
+  background:url('/asset/ui/geri-birak.webp') center/100% 100% no-repeat!important;filter:drop-shadow(0 6px 8px rgba(0,0,0,.45));display:block!important}
 #returnTakenBtn.hidden{display:none!important}
 #returnTakenBtn::after{display:none!important}
 #returnTakenBtn .rt-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
@@ -86,7 +86,7 @@
 
 /* ---------- Skor tablosu: görsel üstüne yerleşim (1000×457 oranı) ---------- */
 #gameContainer #scoreboard.stats-panel.stats-panel{width:760px!important;height:347px!important;padding:0!important;
-  background:url('/asset/ui/skor-tablosu.png') center/100% 100% no-repeat!important;border:0!important;border-radius:0!important;box-shadow:none!important;overflow:visible!important}
+  background:url('/asset/ui/skor-tablosu.webp') center/100% 100% no-repeat!important;border:0!important;border-radius:0!important;box-shadow:none!important;overflow:visible!important}
 #gameContainer #scoreboard .scoreboard-skin{position:absolute!important;inset:0!important;padding:0!important;background:none!important}
 #gameContainer #scoreboard #scoreboardClose{left:1.5%!important;right:auto!important;top:30%!important;width:17%!important;height:40%!important;border-radius:50%!important;background:transparent!important;border:0!important}
 #gameContainer #scoreboard #scoreboardClose::before{content:''!important}
@@ -102,7 +102,7 @@
 /* ---------- Masa ilk giriş bekleme paneli ---------- */
 #lobbyOverlay.lobby-overlay .lobby-container{display:none!important}
 #lobbyOverlay.lobby-overlay{background:radial-gradient(circle at 50% 40%,rgba(10,40,80,.55),rgba(3,14,30,.85))!important}
-#tableWaitPanel{position:relative;width:min(760px,94vw);aspect-ratio:960/420;background:url('/asset/ui/masa-bekleme.png') center/100% 100% no-repeat;filter:drop-shadow(0 18px 40px rgba(0,0,0,.6))}
+#tableWaitPanel{position:relative;width:min(760px,94vw);aspect-ratio:960/420;background:url('/asset/ui/masa-bekleme.webp') center/100% 100% no-repeat;filter:drop-shadow(0 18px 40px rgba(0,0,0,.6))}
 #tableWaitPanel .tw-field{position:absolute;display:grid;place-items:center;color:#fff;font:900 clamp(12px,2.3vw,19px)/1.1 'Outfit',sans-serif;text-shadow:0 1px 2px rgba(0,0,0,.7);text-align:center;padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #tableWaitPanel .tw-top{left:36.7%;top:11.9%;width:40%;height:16.2%;font-size:clamp(14px,2.8vw,24px);color:#ffd670;letter-spacing:2px}
 #tableWaitPanel .tw-a{left:35.5%;top:33.3%;width:19.8%;height:13.8%}
@@ -126,10 +126,10 @@
 #gameContainer #gameActionPanel :is(#openHandBtn,#openPairsBtn,#undoDiscardBtn,#finishBtn).action-btn.is-unavailable{
   background-size:100% 100%!important;background-repeat:no-repeat!important;background-position:center!important;background-color:transparent!important;
   border:0!important;box-shadow:none!important;width:150px!important;animation:none!important}
-#gameContainer #gameActionPanel #openHandBtn.action-btn.action-btn{background-image:url('/asset/ui/seri-ac.png')!important}
-#gameContainer #gameActionPanel #openPairsBtn.action-btn.action-btn{background-image:url('/asset/ui/cift-ac.png')!important}
-#gameContainer #gameActionPanel #undoDiscardBtn.action-btn.action-btn{background-image:url('/asset/ui/geri-topla.png')!important}
-#gameContainer #gameActionPanel #finishBtn.action-btn.action-btn{background-image:url('/asset/ui/taslari-isle.png')!important}
+#gameContainer #gameActionPanel #openHandBtn.action-btn.action-btn{background-image:url('/asset/ui/seri-ac.webp')!important}
+#gameContainer #gameActionPanel #openPairsBtn.action-btn.action-btn{background-image:url('/asset/ui/cift-ac.webp')!important}
+#gameContainer #gameActionPanel #undoDiscardBtn.action-btn.action-btn{background-image:url('/asset/ui/geri-topla.webp')!important}
+#gameContainer #gameActionPanel #finishBtn.action-btn.action-btn{background-image:url('/asset/ui/taslari-isle.webp')!important}
 #gameContainer #gameActionPanel :is(#openHandBtn,#openPairsBtn,#undoDiscardBtn,#finishBtn).action-btn .bticon,
 #gameContainer #gameActionPanel :is(#openHandBtn,#openPairsBtn,#undoDiscardBtn,#finishBtn).action-btn .btlabel{display:none!important}
 

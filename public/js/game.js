@@ -18,7 +18,11 @@ async function refreshGameProfile() {
     } catch (_) {}
 }
 refreshGameProfile();
-const avatarSrc = a => String(a || '').startsWith('data:image/') ? a : a === 'default.svg' || !a ? '/asset/avatar-default.svg' : '/asset/avatars/' + (['alibicim.png','egefitness.png','james.jpg','lvblc5.jpg'].includes(a) ? a : 'default.svg');
+// Sunucu yüklenen resimleri /api/avatar/<id> adresiyle gönderir; sunucu yeniden başladıysa resim bulunamaz, varsayılana dönülür.
+document.addEventListener('error', e => { if (e.target.tagName === 'IMG' && e.target.src.includes('/api/avatar/')) e.target.src = '/asset/avatar-default.svg'; }, true);
+const avatarSrc = a => String(a || '').startsWith('data:image/') || /^\/api\/avatar\/[\w-]{22}$/.test(a) ? a : a === 'default.svg' || !a ? '/asset/avatar-default.svg' : '/asset/avatars/' + (['alibicim.png','egefitness.png','james.jpg','lvblc5.jpg'].includes(a) ? webpAvatar(a) : 'default.svg');
+// Hazır avatarların adları (hesaplarda/tarayıcıda kayıtlı) aynı kalır; küçültülmüş WebP sürümü gösterilir.
+function webpAvatar(a) { return a === 'lvblc5.jpg' ? a : a.replace(/\.(png|jpe?g)$/, '.webp'); }
 if (!session?.token || !session?.roomCode) window.location.replace('/?oturum=yok');
 const SLOTS = 32, ROW_WIDTH = 16; // Üstte 16, altta 16 YER; oyun yine 21/22 taş dağıtır
 const spriteRows = { Mavi: 0, Siyah: 1, Kirmizi: 2, Yesil: 3, Sahte: 4 };
@@ -108,6 +112,8 @@ function renderOpenStatusBadges(){
 function renderFancyScoreboard(){
     const board = $('scoreList');
     if (!board || !state) return;
+    if (!changed('scoreboard', JSON.stringify([state.roundHistory, state.roundsCompleted, finished, state.playerIndex, state.teamMode, state.roundLimit,
+        state.assisted, state.stackingMode, (state.players || []).map(p => [p.name, p.avatar])]))) return;
     // Skor tablosu görseli (asset/ui/skor-tablosu.png) üstüne yerleşim; değerler görseldeki kutulara oturur.
     board.replaceChildren();
     const el = (cls, text, style) => { const e = document.createElement('div'); e.className = cls; if (text != null) e.textContent = text; Object.assign(e.style, style || {}); return e; };
@@ -116,23 +122,32 @@ function renderFancyScoreboard(){
         .forEach((text, i) => board.append(el('sbi-chip', text, { left: colLeft[i] + '%' })));
     const history = Array.isArray(state.roundHistory) ? state.roundHistory : [];
     const current = state.roundsCompleted || 0;
-    for (let seat = 0; seat < 4; seat++) {
+    // Eşli oyunda takım arkadaşları yan yana durur (0-2, 1-3); her satırda o elin TAKIM puanı ve takım toplamı yazar,
+    // iki arkadaşın sütunu aynı değeri gösterir. Tekli oyunda her oyuncu kendi puanını toplar.
+    const order = state.teamMode ? [0, 2, 1, 3] : [0, 1, 2, 3];
+    const partner = seat => (seat + 2) % 4;
+    const roundValue = (r, seat) => { const row = history[r]; if (!row || row[seat] == null) return null;
+        return state.teamMode ? (row[seat] || 0) + (row[partner(seat)] || 0) : row[seat]; };
+    order.forEach((seat, col) => {
         const p = state.players?.[seat];
-        const av = el('sbi-avatar', null, { left: (colLeft[seat] + 2.9) + '%' });
+        const av = el('sbi-avatar', null, { left: (colLeft[col] + 2.9) + '%' });
         const img = document.createElement('img'); img.src = avatarSrc(p?.avatar); img.alt = p?.name || '';
         av.append(img); board.append(av);
-        board.append(el('sbi-name' + (seat === state.playerIndex ? ' is-me' : ''), shortenName(p?.name || '-', 12), { left: colLeft[seat] + '%' }));
+        const label = state.teamMode ? `T${seat % 2 + 1} · ${shortenName(p?.name || '-', 8)}` : shortenName(p?.name || '-', 12);
+        board.append(el('sbi-name' + (seat === state.playerIndex ? ' is-me' : ''), label, { left: colLeft[col] + '%' }));
         let running = 0;
         for (let r = 0; r < 4; r++) {
             const top = (55.8 + r * 9.6) + '%';
-            const v = history[r]?.[seat];
+            const v = roundValue(r, seat);
             if (v != null) running += v;
             const live = r === current && !finished;
-            board.append(el('sbi-cell ' + (v == null ? 'empty' : v < 0 ? 'good' : 'bad'), v == null ? (live ? '…' : '') : String(v), { left: (colLeft[seat] + 0.1) + '%', top }));
-            board.append(el('sbi-cell total' + (v == null ? ' empty' : ''), v == null ? '' : String(running), { left: (colLeft[seat] + 9) + '%', top }));
+            board.append(el('sbi-cell ' + (v == null ? 'empty' : v < 0 ? 'good' : 'bad'), v == null ? (live ? '…' : '') : String(v), { left: (colLeft[col] + 0.1) + '%', top }));
+            board.append(el('sbi-cell total' + (v == null ? ' empty' : ''), v == null ? '' : String(running), { left: (colLeft[col] + 9) + '%', top }));
         }
-    }
-    board.title = 'Her oyuncu için: sol sütun o elin puanı, sağ sütun toplam. En düşük toplam kazanır.';
+    });
+    board.title = state.teamMode
+        ? 'Eşli: her takımın sol sütunu o elin takım puanı, sağ sütunu takım toplamı. En düşük toplam kazanır.'
+        : 'Her oyuncu için: sol sütun o elin puanı, sağ sütun toplam. En düşük toplam kazanır.';
 }
 // Istaka düzeni el numarasıyla saklanır; sayfa yenilense de aynı eldeki düzen korunur.
 function saveRack() { try { sessionStorage.setItem('okeyRack_' + session.roomCode, JSON.stringify({ r: state?.roundId, ids: slots.map(t => t?.id || null) })); } catch {} }
@@ -144,10 +159,19 @@ function toast(message, isError = false) {
     clearTimeout(toast.timer);
     toast.timer = setTimeout(() => el.classList.add('hidden'), 4000);
 }
+// Sıra hamleleri sunucu cevap verene kadar (gameState / gameError / gameFinished) tekrar gönderilmez:
+// çift tıklama veya hızlı dokunuş iki istek ve "zaten taş aldınız" gibi gereksiz hatalar üretmesin.
+const MOVE_EVENTS = new Set(['drawTile', 'discardTile', 'openHand', 'openWithPairs', 'addToGroup', 'processAll', 'retractTurn', 'undoDiscardDraw', 'finishGame']);
+let moveInFlight = 0;
 function action(event, data = {}) {
     if (!socket.connected) return toast('Bağlantı yok, tekrar bağlanmayı bekleyin.', true);
+    if (MOVE_EVENTS.has(event)) {
+        if (moveInFlight && Date.now() - moveInFlight < 5000) return;
+        moveInFlight = Date.now();
+    }
     socket.emit(event, data);
 }
+const moveAnswered = () => { moveInFlight = 0; };
 function joinGameSocket() {
     if (session?.token) socket.emit('rejoinRoom', { roomCode: session.roomCode, token: session.token });
 }
@@ -161,10 +185,12 @@ socket.on('connect', () => {
     joinGameSocket();
 });
 socket.on('disconnect', () => {
+    rollbackDiscard('Bağlantı koptu, atılan taş geri alındı.'); moveAnswered();
     $('connectionBanner').classList.remove('hidden');
     if (!state && session?.roomCode) showLobbyProblem('Sunucu bağlantısı kesildi. Tekrar bağlantı kurulması bekleniyor.');
 });
 socket.on('gameError', d => {
+    rollbackDiscard(); moveAnswered(); // sunucu atışı reddettiyse taş ıstakaya geri döner (sebebi aşağıda gösterilir)
     const message = String(d?.message || 'İşlem gerçekleştirilemedi.');
     if (!state && /oturum bulunamadı|oda kapandı|oturum geçersiz|masada değilsiniz/i.test(message)) {
         sessionStorage.removeItem('okeySession');
@@ -250,12 +276,13 @@ let lobbyWait = { count: 0, botFillAt: 0 };
 function updateWaitStatus() {
     const el = $('twStatus'); if (!el) return;
     const left = Math.ceil((lobbyWait.botFillAt - Date.now()) / 1000);
-    if (lobbyWait.count >= 4) el.textContent = 'Oyun başlıyor…';
-    else if (lobbyWait.botFillAt && left > 0) el.textContent = `${4 - lobbyWait.count} oyuncu bekleniyor · ${left} sn sonra bilgisayar oyuncuları katılacak`;
-    else if (lobbyWait.isPrivate) el.textContent = lobbyWait.isHost
+    // Her 500 ms çalışır; metin değişmediyse DOM'a dokunmaz.
+    if (lobbyWait.count >= 4) setText(el, 'Oyun başlıyor…');
+    else if (lobbyWait.botFillAt && left > 0) setText(el, `${4 - lobbyWait.count} oyuncu bekleniyor · ${left} sn sonra bilgisayar oyuncuları katılacak`);
+    else if (lobbyWait.isPrivate) setText(el, lobbyWait.isHost
         ? `${4 - lobbyWait.count} koltuk boş · Arkadaşlarına masa kodunu gönder veya bot ekle`
-        : `${4 - lobbyWait.count} koltuk boş · Masayı açan kişi bot ekleyebilir`;
-    else el.textContent = `${4 - lobbyWait.count} oyuncu bekleniyor…`;
+        : `${4 - lobbyWait.count} koltuk boş · Masayı açan kişi bot ekleyebilir`);
+    else setText(el, `${4 - lobbyWait.count} oyuncu bekleniyor…`);
 }
 setInterval(updateWaitStatus, 500);
 $('twLeave').addEventListener('click', leave);
@@ -264,6 +291,7 @@ $('twStartBots').addEventListener('click', () => action('startWithBots'));
 $('twCopy').addEventListener('click', () => $('lobbyCopyBtn').click());
 socket.on('lobbyUpdate', data => { if (!data.started && !state && !finished) showLobby(data); });
 socket.on('roundCancelled', d => {
+    settleDiscard(); moveAnswered();
     finished = false; state = null; slots = Array(SLOTS).fill(null);
     sessionStorage.removeItem('okeyRack_' + session.roomCode);
     $('gameEndModal').classList.add('hidden');
@@ -333,6 +361,7 @@ function restoreSlots(incomingTiles) {
     saveRack();
 }
 socket.on('gameState', data => {
+    settleDiscard(); moveAnswered();
     if (!state || state.roundId !== data.roundId || finished) {
         if (!state || state?.roundId !== data.roundId) {
             slots = Array(SLOTS).fill(null); autoRack = true; autoRackMode = 'series'; flippedTiles.clear(); lastRackSignature = ''; pairsPage = 0; pendingDrawDropSlot = null; tableSlots.clear(); leftRackSlots.clear();
@@ -344,10 +373,10 @@ socket.on('gameState', data => {
     }
     updateLastOpenInfo(data);
     state = data;
-    $('gamebarRoom').textContent = state.roomCode;
-    $('gamebarAssist').textContent = state.assisted ? 'Yardımlı' : 'Yardımsız';
-    $('gamebarMode').textContent = (state.teamMode ? 'TAKIM' : 'TEK') + ' · ' + (state.assisted ? 'YARDIMLI' : 'YARDIMSIZ') + ' · ' + (state.stackingMode ? 'KATLAMALI' : 'KATLAMASIZ') + ` · EL ${(state.roundsCompleted || 0) + 1}/${state.roundLimit || 4}`;
-    document.getElementById('tableOptions').textContent = `${state.teamMode ? 'Takım' : 'Tek'} · ${state.assisted ? 'Yardımlı' : 'Yardımsız'} · ${state.stackingMode ? `Katlamalı · Açılış ${state.minimumOpenScore}+` : 'Katlamasız'} · ${(state.roundsCompleted || 0) + 1}/${state.roundLimit} El`;
+    setText($('gamebarRoom'), state.roomCode);
+    setText($('gamebarAssist'), state.assisted ? 'Yardımlı' : 'Yardımsız');
+    setText($('gamebarMode'), (state.teamMode ? 'TAKIM' : 'TEK') + ' · ' + (state.assisted ? 'YARDIMLI' : 'YARDIMSIZ') + ' · ' + (state.stackingMode ? 'KATLAMALI' : 'KATLAMASIZ') + ` · EL ${(state.roundsCompleted || 0) + 1}/${state.roundLimit || 4}`);
+    setText($('tableOptions'), `${state.teamMode ? 'Takım' : 'Tek'} · ${state.assisted ? 'Yardımlı' : 'Yardımsız'} · ${state.stackingMode ? `Katlamalı · Açılış ${state.minimumOpenScore}+` : 'Katlamasız'} · ${(state.roundsCompleted || 0) + 1}/${state.roundLimit} El`);
     syncTurnClock(data);
     $('sortSeriesBtn').disabled = false;
     $('sortPairsBtn').disabled = false;
@@ -398,6 +427,7 @@ socket.on('penalty', data => {
 let lastCompletedRound = 0;
 let nextRoundCountdown = null;
 socket.on('gameFinished', data => {
+    settleDiscard(); moveAnswered();
     lastCompletedRound = data.completedRounds;
     $('lobbyOverlay').classList.add('hidden');
     $('gameContainer').classList.remove('hidden');
@@ -466,7 +496,11 @@ function renderRoundScores(data) {
     container.append(list);
     if (history.length > 1 || data.roundLimit > 1) {
         const mini = el('div', 'result-history');
-        history.forEach((r, k) => mini.append(el('span', '', `${k + 1}. el: ` + data.players.map((p, i) => `${shortenName(p.name, 8)} ${r?.[i] ?? 0}`).join(' · '))));
+        // Eşli oyunda el geçmişi takım toplamıyla yazılır.
+        const line = r => data.teamMode
+            ? [[0, 2], [1, 3]].map(g => `${g.map(i => shortenName(data.players[i]?.name, 6)).join(' + ')} ${g.reduce((n, i) => n + (r?.[i] || 0), 0)}`).join(' · ')
+            : data.players.map((p, i) => `${shortenName(p.name, 8)} ${r?.[i] ?? 0}`).join(' · ');
+        history.forEach((r, k) => mini.append(el('span', '', `${k + 1}. el: ` + line(r))));
         container.append(mini);
     }
     return;
@@ -497,32 +531,46 @@ function syncTurnClock(data) {
     if (key !== turnClockKey) { turnClockKey=key; turnClockEnd=Date.now()+(data.turnRemainingMs ?? turnDurationMs); }
     updateTurnClock();
 }
+// Süre göstergeleri tarayıcının animasyon motoruyla akar (transform / clip-path: layout yok).
+// JS yalnızca sıra, görünürlük veya aktif oyuncu değişince animasyonu baştan kurar.
+let turnAnimKey = '', turnAnims = [], turnLowTimer = null;
 function updateTurnClock() {
-    const left=Math.max(0,turnClockEnd-Date.now()), fraction=Math.min(1,left/turnDurationMs);
+    const bar = $('turnTimerBar');
+    const barOn = !!bar && !bar.classList.contains('hidden') && !finished;
+    const panels = [...document.querySelectorAll('#gameBoard .player-info')];
+    const active = finished ? null : panels.find(el => el.classList.contains('active-turn'));
+    const key = `${turnClockKey}|${barOn}|${active?.id || ''}`;
+    if (key === turnAnimKey) return;
+    turnAnimKey = key;
+    turnAnims.forEach(a => a.cancel()); turnAnims = [];
+    clearTimeout(turnLowTimer);
+    const fills = panels.map(el => {
+        let fill = el.querySelector('.turn-fill');
+        if (!fill) { fill = document.createElement('span'); fill.className = 'turn-fill'; el.prepend(fill); }
+        fill.classList.remove('is-low');
+        fill.style.clipPath = 'inset(0 100% 0 0)'; // sırası olmayan kutu boş (aktif kutuda animasyon bunu ezer)
+        return fill;
+    });
+    bar?.classList.remove('is-low');
+    const left = Math.max(0, turnClockEnd - Date.now()), fraction = Math.min(1, left / turnDurationMs);
+    const run = (el, frames) => { if (el && left > 0) turnAnims.push(el.animate(frames, { duration: left, easing: 'linear', fill: 'forwards' })); };
     // Sıra sendeyken üstteki uzun süre çubuğu (son 10 saniyede kırmızıya döner)
-    const bar=$('turnTimerBar');
-    if (bar && !bar.classList.contains('hidden')) {
-        bar.querySelector('.ttb-fill').style.width=`${100*fraction}%`;
-        bar.querySelector('.ttb-knob').style.left=`${100*fraction}%`;
-        bar.classList.toggle('is-low', left<10000);
+    if (barOn) {
+        run(bar.querySelector('.ttb-fill'), [{ transform: `scaleX(${fraction})` }, { transform: 'scaleX(0)' }]);
+        run(bar.querySelector('.ttb-rail'), [{ transform: `translateX(${(fraction - 1) * 100}%)` }, { transform: 'translateX(-100%)' }]);
     }
     // Okey Plus sıra göstergesi: aktif oyuncunun kutusu yeşille dolu, süre bittikçe boşalır
-    document.querySelectorAll('#gameBoard .player-info').forEach(el => {
-        let fill=el.querySelector('.turn-fill');
-        if(!fill){fill=document.createElement('span');fill.className='turn-fill';el.prepend(fill);}
-        const on=el.classList.contains('active-turn') && !finished;
-        fill.style.setProperty('--turn-left', on ? fraction.toFixed(3) : '0');
-        fill.classList.toggle('is-low', on && left<10000);
-    });
-    document.querySelectorAll('.player-info').forEach(el => {
-        const track=el.querySelector('.player-turn-clock');
-        if (!track) return;
-        const active=el.classList.contains('active-turn') && !finished;
-        track.classList.toggle('hidden', !active);
-        if (active) { track.querySelector('.player-turn-fill').style.width = `${100*fraction}%`; track.querySelector('.player-turn-seconds').textContent = `${Math.ceil(left/1000)} sn`; }
-    });
+    // (üst/alt kutu sağdan sola, sol/sağ kutu aşağıdan yukarı).
+    const activeFill = active ? fills[panels.indexOf(active)] : null;
+    if (activeFill) {
+        const vertical = active.id === 'leftPlayerInfo' || active.id === 'rightPlayerInfo';
+        const inset = p => vertical ? `inset(0 0 ${p}% 0 round 6px)` : `inset(0 ${p}% 0 0 round 6px)`;
+        run(activeFill, [{ clipPath: inset((1 - fraction) * 100) }, { clipPath: inset(100) }]);
+    }
+    const setLow = () => { if (barOn) bar.classList.add('is-low'); activeFill?.classList.add('is-low'); };
+    if (left < 10000) setLow(); else turnLowTimer = setTimeout(setLow, left - 10000);
 }
-setInterval(updateTurnClock, 100);
+setInterval(updateTurnClock, 1000); // güvenlik ağı: değişiklik yoksa hiçbir şey yapmaz
 // YENİ OYUNA BAŞLA: maç bittiğinde aynı modda yeni masaya otomatik katıl.
 $('newRoundBtn').addEventListener('click', () => {
     if ($('newRoundBtn').dataset.finished === 'true') {
@@ -564,7 +612,7 @@ $('tomatoBtn').addEventListener('click', () => {
 });
 $('cancelThrowBtn').addEventListener('click', () => $('tomatoSelectOverlay').classList.add('hidden'));
 function seatToRelativePos(seatIndex){ const positions=['bottom','right','top','left']; return positions[(seatIndex - state.playerIndex + 4) % 4]; }
-function showGiftEffect(seatIndex, kind, text){ if(!state) return; const pos=seatToRelativePos(seatIndex); const host=$(pos + 'PlayerInfo'); if(!host) return; const float=document.createElement('div'); float.className='gift-float'; float.innerHTML=`<span class="gift-float-kind">${kind}</span><small>${text}</small>`; host.append(float); setTimeout(()=>float.remove(),2800);}
+function showGiftEffect(seatIndex, kind, text){ if(!state) return; const pos=seatToRelativePos(seatIndex); const host=$(pos + 'PlayerInfo'); if(!host) return; const float=document.createElement('div'); float.className='gift-float'; const k=document.createElement('span'); k.className='gift-float-kind'; k.textContent=kind; const t=document.createElement('small'); t.textContent=text; float.append(k,t); host.append(float); setTimeout(()=>float.remove(),2800);}
 socket.on('giftSent', data => {
     const kiss = data.kind === '😘';
     lastGifts[data.toIndex] = data.kind;
@@ -629,46 +677,76 @@ function pointerStart(e, from, element) {
     drag = { from, startX: e.clientX, startY: e.clientY, tile: element, width:bounds.width, height:bounds.height, pointerId: e.pointerId, ghost: null };
     element.setPointerCapture?.(e.pointerId);
 }
+// Sürükleme akıcılığı: taş transform ile taşınır (layout yok) ve kare başına en fazla bir kez çizilir;
+// masa taşlarının konumu sürükleme başında bir kez ölçülür, hareket sırasında yeniden ölçülmez.
 function pointerMove(e) {
     if (!drag || e.pointerId !== drag.pointerId) return;
-    const dx = e.clientX - drag.startX, dy = e.clientY - drag.startY;
-    if (!drag.ghost && Math.hypot(dx, dy) > 8) {
+    drag.x = e.clientX; drag.y = e.clientY;
+    if (!drag.ghost && Math.hypot(drag.x - drag.startX, drag.y - drag.startY) > 8) {
         drag.ghost = drag.tile.cloneNode(true);
         drag.ghost.classList.add('pointer-ghost');
-        drag.ghost.style.pointerEvents = 'none';
+        Object.assign(drag.ghost.style, { pointerEvents: 'none', left: '0', top: '0', willChange: 'transform' });
+        placeGhost();
         document.body.append(drag.ghost);
     }
-    if (drag.ghost) {
-        drag.ghost.style.left = e.clientX - drag.width/2 + 'px';
-        drag.ghost.style.top = e.clientY - drag.height/2 + 'px';
-        // Istakadan sürüklenen taş masadaki bir grubun üstüne/yakınına gelince o grup parlar
-        if (typeof drag.from === 'number') highlightDropGroup(findDropGroup(e.clientX, e.clientY));
-    }
+    if (drag.ghost && !drag.frame) drag.frame = requestAnimationFrame(paintDrag);
+}
+function placeGhost() {
+    drag.ghost.style.transform = `translate3d(${drag.x - drag.width / 2}px, ${drag.y - drag.height / 2}px, 0) scale(1.06) rotate(-2deg)`;
+}
+function paintDrag() {
+    if (!drag?.ghost) return;
+    drag.frame = 0;
+    placeGhost();
+    // Istakadan sürüklenen taş masadaki bir grubun üstüne/yakınına gelince o grup parlar
+    if (typeof drag.from === 'number') highlightDropGroup(findDropGroup(drag.x, drag.y, true));
+}
+// Masa ve masa taşlarının ekran konumları; masa yeniden çizilince (renderGroups) sıfırlanır.
+function dropTileRects() {
+    if (drag && drag.tableRects) return drag.tableRects;
+    const rects = { box: $('compactOpenGroups')?.getBoundingClientRect() || null,
+        tiles: [...document.querySelectorAll('#compactOpenGroups .grid-table-tile')].map(el => ({ el, r: el.getBoundingClientRect() })) };
+    if (drag) drag.tableRects = rects;
+    return rects;
 }
 // Bırakılan noktadaki ya da en yakın (1,5 taş mesafesindeki) masa grubu ve eklenecek kenar (sol/sağ).
-function findDropGroup(x, y) {
-    const hit = document.elementFromPoint(x, y);
-    let tile = hit?.closest?.('.grid-table-tile');
-    if (!tile && hit?.closest?.('#compactOpenGroups')) {
+// fast: sürüklerken her karede DOM isabet testi (elementFromPoint, sayfayı yeniden hesaplatır) yerine
+// ölçülmüş dikdörtgenler kullanılır; bırakma anında gerçek isabet testi yapılır.
+function findDropGroup(x, y, fast = false) {
+    const inside = r => r && x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+    let hitTile, inTable;
+    if (fast) {
+        const m = dropTileRects();
+        hitTile = m.tiles.find(({ r }) => inside(r))?.el || null;
+        inTable = !!hitTile || inside(m.box);
+    } else {
+        const hit = document.elementFromPoint(x, y);
+        hitTile = hit?.closest?.('.grid-table-tile') || null;
+        inTable = !!hitTile || !!hit?.closest?.('#compactOpenGroups');
+    }
+    let tile = hitTile;
+    const all = inTable ? dropTileRects().tiles : null;
+    if (!tile && all) {
         let best = null, bestD = Infinity;
-        document.querySelectorAll('#compactOpenGroups .grid-table-tile').forEach(t => {
-            const r = t.getBoundingClientRect();
+        for (const { el, r } of all) {
             const dx = Math.max(r.left - x, 0, x - r.right), dy = Math.max(r.top - y, 0, y - r.bottom);
             const d = Math.hypot(dx, dy), limit = r.width * 1.5;
-            if (d < bestD && d <= limit) { best = t; bestD = d; }
-        });
+            if (d < bestD && d <= limit) { best = el; bestD = d; }
+        }
         tile = best;
     }
     if (!tile) return null;
-    const tiles = [...document.querySelectorAll(`#compactOpenGroups .grid-table-tile[data-owner="${tile.dataset.owner}"][data-group="${tile.dataset.group}"]`)];
-    const rects = tiles.map(t => t.getBoundingClientRect());
-    const mid = (Math.min(...rects.map(r => r.left)) + Math.max(...rects.map(r => r.right))) / 2;
-    return { tile, tiles, position: x < mid ? 'left' : 'right', onOkey: hit?.closest?.('.grid-table-tile') === tile && tile.classList.contains('real-okey') };
+    const members = all.filter(({ el }) => el.dataset.owner === tile.dataset.owner && el.dataset.group === tile.dataset.group);
+    const mid = (Math.min(...members.map(m => m.r.left)) + Math.max(...members.map(m => m.r.right))) / 2;
+    return { tile, tiles: members.map(m => m.el), position: x < mid ? 'left' : 'right', onOkey: hitTile === tile && tile.classList.contains('real-okey') };
 }
 let lastDropTiles = [];
 function highlightDropGroup(target) {
+    const next = target ? target.tiles : [];
+    // Aynı grup üstünde gezinirken sınıfları tekrar değiştirme (her karede stil hesabı olmasın).
+    if (next.length === lastDropTiles.length && next.every((t, i) => t === lastDropTiles[i])) return;
     lastDropTiles.forEach(t => t.classList.remove('drop-target'));
-    lastDropTiles = target ? target.tiles : [];
+    lastDropTiles = next;
     lastDropTiles.forEach(t => t.classList.add('drop-target'));
 }
 function pointerEnd(e) {
@@ -676,6 +754,8 @@ function pointerEnd(e) {
     const from = drag.from;
     const moved = !!drag.ghost;
     const target = document.elementFromPoint(e.clientX, e.clientY);
+    const dropGroup = moved && typeof from === 'number' ? findDropGroup(e.clientX, e.clientY) : null;
+    if (drag.frame) cancelAnimationFrame(drag.frame);
     drag.ghost?.remove();
     drag = null;
     if (!moved) {
@@ -686,7 +766,6 @@ function pointerEnd(e) {
     }
     const slot = target?.closest('.tile-slot');
     const throwZone = target?.closest('#rightDiscardTiles, #myRightDiscard');
-    const dropGroup = typeof from === 'number' ? findDropGroup(e.clientX, e.clientY) : null;
     highlightDropGroup(null);
     if (typeof from === 'number') {
         if (slot) moveRack(from, Number(slot.dataset.slot));
@@ -701,7 +780,7 @@ function bindPointer(el, from) {
     el.addEventListener('pointerdown', e => pointerStart(e, from, el));
     el.addEventListener('pointermove', pointerMove);
     el.addEventListener('pointerup', pointerEnd);
-    el.addEventListener('pointercancel', () => { drag?.ghost?.remove(); drag = null; highlightDropGroup(null); });
+    el.addEventListener('pointercancel', () => { if (drag?.frame) cancelAnimationFrame(drag.frame); drag?.ghost?.remove(); drag = null; highlightDropGroup(null); });
 }
 function draw(fromDiscard) {
     if (!canPlay() || state.hasDrawn) return toast('Taş çekme sırası sizde değil veya zaten taş aldınız.', true);
@@ -714,10 +793,44 @@ function draw(fromDiscard) {
 function discard(tileId) {
     if (!tileId) return toast('Önce bir taş seçin.', true);
     if (!canPlay() || !state.hasDrawn) return toast('Önce sıranız gelmeli ve taş çekmiş olmalısınız.', true);
+    if (moveInFlight && Date.now() - moveInFlight < 5000) return; // önceki hamlenin cevabı bekleniyor
+    // Sunucu zaten reddeder; sormadan hemen söyle (gidip gelen istek ve bekleme olmasın).
+    if (state.mustOpenThisTurn) return toast('Yerden aldığın taşı açılışta veya işlemekte kullanmalısın; istersen GERİ BIRAK.', true);
     const src = document.querySelector(`.cue-row .tile-sprite[data-tile-id="${CSS.escape(tileId)}"]`);
     if (src) pendingFly.discard = { id: tileId, rect: src.getBoundingClientRect(), at: Date.now() };
+    // Yerden alınan taş kullanılmadıysa sunucu reddedecek; o durumda iyimser gösterim yapma (titreme olmasın).
+    if (socket.connected && !state.mustOpenThisTurn) applyOptimisticDiscard(tileId);
     action('discardTile', { tileId });
 }
+// İyimser arayüz: atılan taş sunucu cevabını beklemeden ıstakadan kalkar, atık alanına uçar ve sıra
+// sonraki oyuncuya geçmiş görünür. Sunucu reddederse, bağlantı koparsa veya cevap gelmezse eski hale dönülür.
+// Sunucudan gelen her gameState gerçek durumdur ve bu geçici görünümün yerini alır.
+let pendingDiscard = null;
+function applyOptimisticDiscard(tileId) {
+    const slot = slots.findIndex(t => t?.id === tileId), tile = slots[slot] || state.tiles.find(t => t.id === tileId);
+    if (!tile) return;
+    pendingDiscard = { state, slots: [...slots], selected, clockKey: turnClockKey, clockEnd: turnClockEnd, clockMs: turnDurationMs };
+    const me = state.playerIndex;
+    state = { ...state, tiles: state.tiles.filter(t => t.id !== tileId), hasDrawn: false, currentPlayer: (me + 1) % 4, canRetract: false,
+        discards: state.discards.map((p, s) => s === me ? [...p, tile] : p),
+        players: state.players.map((p, s) => s === me ? { ...p, tileCount: Math.max(0, p.tileCount - 1) } : p) };
+    if (slot >= 0) slots[slot] = null;
+    selected = null;
+    // Sıradaki oyuncunun göstergesi tam süreyle başlar; sunucunun gerçek süresi gelince düzeltilir.
+    turnClockKey = 'optimistic'; turnClockEnd = Date.now() + turnDurationMs;
+    render();
+    pendingDiscard.timer = setTimeout(() => rollbackDiscard('Sunucu yanıt vermedi, taş geri alındı.'), 8000);
+}
+function rollbackDiscard(message) {
+    if (!pendingDiscard) return;
+    clearTimeout(pendingDiscard.timer);
+    ({ state, slots, selected } = pendingDiscard);
+    turnClockKey = pendingDiscard.clockKey; turnClockEnd = pendingDiscard.clockEnd; turnDurationMs = pendingDiscard.clockMs;
+    pendingDiscard = null;
+    render();
+    if (message) toast(message, true);
+}
+function settleDiscard() { if (pendingDiscard) { clearTimeout(pendingDiscard.timer); pendingDiscard = null; } }
 // ---------- Taş hareket animasyonları ----------
 // Hedef taşın bir kopyası sayfanın üst katmanında kaynaktan hedefe kayar; hedef bu sırada gizli kalır.
 const pendingFly = { draw: null, discard: null, place: null, newTileId: null };
@@ -774,15 +887,16 @@ function runPendingFlights() {
 }
 function canPlay() { return state && !finished && state.currentPlayer === state.playerIndex; }
 function updateIndicator() {
-    $('indicatorTile').replaceChildren(state.indicator ? miniTile(state.indicator) : document.createTextNode('-'));
+    if (changed('indicator', [state.roundId, state.indicator?.id || '', state.okey?.color, state.okey?.number].join('#')))
+        $('indicatorTile').replaceChildren(state.indicator ? miniTile(state.indicator) : document.createTextNode('-'));
     // Orta mod kolonu (referanstaki gibi) + kalan taş sayacı
-    const setMode = (id, text, on) => { const el = $(id); if (!el) return; el.textContent = text; el.classList.toggle('mode-on', !!on); };
+    const setMode = (id, text, on) => { const el = $(id); if (!el) return; setText(el, text); el.classList.toggle('mode-on', !!on); };
     setMode('modeTeam', state.teamMode ? 'Eşli' : 'Tek', state.teamMode);
     setMode('modeAssist', state.assisted ? 'Yardımlı' : 'Yardımsız', state.assisted);
     setMode('modeStack', state.stackingMode ? 'Katlamalı' : 'Katlamasız', state.stackingMode);
     setMode('modeRound', `${(state.roundsCompleted || 0) + 1}/${state.roundLimit || 4} El`, false);
     const odo = $('pileOdometer');
-    if (odo) odo.textContent = String(state.pileCount ?? 0).padStart(3, '0').split('').join(' ');
+    setText(odo, String(state.pileCount ?? 0).padStart(3, '0').split('').join(' '));
 }
 function getScore(group) {
     if (group.length < 3) return 0;
@@ -858,7 +972,21 @@ function isIslekTile(tile) {
     return (state.openedGroups || []).some((groups, owner) => state.players?.[owner]?.openType !== 'pairs' &&
         (groups || []).some(g => OkeyMelds.isValidGroup([...g, tile], state.okey)));
 }
+// Parça parça çizim: her bölümün girdisinden bir imza üretilir; imza aynıysa o bölümün DOM'una dokunulmaz.
+// (Önceden rakibin her hamlesinde ıstaka, masa, atıklar ve skor tablosu baştan oluşturuluyordu.)
+const renderSigs = new Map();
+function changed(part, sig) {
+    if (renderSigs.get(part) === sig) return false;
+    renderSigs.set(part, sig);
+    return true;
+}
+const idsSig = list => (list || []).map(t => t?.id || '-').join(',');
+const tableSig = () => (state.openedGroups || []).map((groups, owner) => (state.players?.[owner]?.openType || '') + ':' + (groups || []).map(idsSig).join('/')).join('|');
+// Aynı metni tekrar yazmak da DOM'u değiştirir (stil hesabı tetikler); yalnızca farklıysa yaz.
+function setText(el, value) { if (el && el.textContent !== String(value)) el.textContent = value; }
 function renderRack() {
+    if (!changed('rack', [state?.roundId, idsSig(slots), idsSig(state?.tiles), selected, state?.assisted, state?.okey?.color, state?.okey?.number,
+        state?.myOpenType, autoRackMode, state?.minimumPairs, [...flippedTiles].sort().join(','), state?.assisted ? tableSig() : ''].join('#'))) return;
     const top = $('playerHandTop'), bottom = $('playerHandBottom');
     top.replaceChildren(); bottom.replaceChildren();
     for (let i = 0; i < SLOTS; i++) {
@@ -890,9 +1018,11 @@ function renderRack() {
     $('rackStatus').classList.toggle('is-open', !!state?.myOpenType); // açtıktan sonra kırmızı (elde kalan)
     if (state?.myOpenType) {
         const isWild = t => !t.isFakeJoker && t.color === state.okey?.color && t.number === state.okey?.number;
-        const left = state.tiles.reduce((n, t) => n + (isWild(t) ? 101 : fakeBaseNumber(t)), 0);
+        // Çift açan oyuncunun elde kalan cezası iki katı yazılır (sunucu da el sonunda böyle hesaplar).
+        const pairs = state.myOpenType === 'pairs';
+        const left = state.tiles.reduce((n, t) => n + (isWild(t) ? 101 : fakeBaseNumber(t)), 0) * (pairs ? 2 : 1);
         $('rackScore').textContent = String(left);
-        $('rackStatus').title = 'Elde kalan taşların toplamı (el biterse yazılacak ceza)';
+        $('rackStatus').title = pairs ? 'Elde kalan taşların toplamı × 2 (çift açtın; el biterse yazılacak ceza)' : 'Elde kalan taşların toplamı (el biterse yazılacak ceza)';
     } else if (autoRackMode === 'pairs') {
         // Çift dizili ıstakada sayaç çift sayısını gösterir.
         $('rackScore').textContent = findAvailablePairs().length + ' çift';
@@ -911,15 +1041,15 @@ function renderPlayers() {
         const pos = positions[relative];
         const player = state.players[i];
         if (!player) continue;
-        $(pos + 'PlayerName').textContent = (player.isBot ? '🤖 ' : '') + (relative === 0 ? player.name + ' (Sen)' : player.name + (player.connected ? '' : ' ⏳'));
+        setText($(pos + 'PlayerName'), (player.isBot ? '🤖 ' : '') + (relative === 0 ? player.name + ' (Sen)' : player.name + (player.connected ? '' : ' ⏳')));
         const avatar = $(pos + 'PlayerAvatar');
         const playerAvatarSrc = avatarSrc(player.avatar);
         if (avatar.getAttribute('src') !== playerAvatarSrc) avatar.src = playerAvatarSrc;
         const frameWrap = avatar.closest('.avatar-wrapper');
         if (frameWrap) frameWrap.className = 'avatar-wrapper frame-' + (['gold','silver','royal','emerald','neon','rose'].includes(player.frame) ? player.frame : 'gold');
-        avatar.style.display = 'block';
+        if (avatar.style.display !== 'block') avatar.style.display = 'block';
         const info = $(pos + 'PlayerInfo');
-        info.dataset.seat = i;
+        if (info.dataset.seat !== String(i)) info.dataset.seat = i;
         info.classList.toggle('active-turn', state.currentPlayer === i);
         if (!info.querySelector('.player-turn-clock')) {
             const clock = document.createElement('div'); clock.className='player-turn-clock';
@@ -928,14 +1058,12 @@ function renderPlayers() {
             clock.append(fill, seconds); info.append(clock);
         }
         if (pos === 'bottom') {
-            $('gamebarName').textContent = player.name;
+            setText($('gamebarName'), player.name);
             if ($('gamebarAvatar').getAttribute('src') !== playerAvatarSrc) $('gamebarAvatar').src = playerAvatarSrc;
-            $('gamebarLevel').textContent = 'Seviye ' + (player.level || 1);
+            setText($('gamebarLevel'), 'Seviye ' + (player.level || 1));
         }
-        const tileEl = $(pos + 'TileCount');
-        if (tileEl) tileEl.textContent = player.tileCount;
-        const score = info.querySelector('.player-score');
-        if (score) score.textContent = player.hasOpened ? ((player.openType === 'pairs' ? 'Çift Açtı' : 'Açtı')) : 'Kapalı';
+        setText($(pos + 'TileCount'), player.tileCount);
+        setText(info.querySelector('.player-score'), player.hasOpened ? ((player.openType === 'pairs' ? 'Çift Açtı' : 'Açtı')) : 'Kapalı');
         // Okey Plus: açan oyuncunun panelinde 55 (çift) / 123 (seri) ikonu, yanında son aldığı hediye.
         // Okey Plus: açılış puanı minik taşlarla (141 → 1·4·1); çift açılışta çift sayısı iki taşla (5·5).
         let icon = info.querySelector('.open-score-tiles');
@@ -946,26 +1074,29 @@ function renderPlayers() {
             icon.replaceChildren(...digits.map(d => { const s = document.createElement('span'); s.textContent = d; return s; }));
         }
         icon.classList.toggle('hidden', !digits.length);
-        icon.title = player.openType === 'pairs' ? `${player.openPairs} çift açtı` : player.openType ? `${player.openScore} ile seri açtı` : '';
+        const iconTitle = player.openType === 'pairs' ? `${player.openPairs} çift açtı` : player.openType ? `${player.openScore} ile seri açtı` : '';
+        if (icon.title !== iconTitle) icon.title = iconTitle;
         // Bu eldeki cezalar isim panelinde kırmızı
         let pen = info.querySelector('.panel-penalty');
         if (!pen) { pen = document.createElement('span'); pen.className = 'panel-penalty'; info.append(pen); }
-        pen.textContent = player.roundPenalty ? String(player.roundPenalty) : '';
-        pen.title = player.roundPenalty ? `Bu eldeki ceza: ${player.roundPenalty}` : '';
+        setText(pen, player.roundPenalty ? String(player.roundPenalty) : '');
+        const penTitle = player.roundPenalty ? `Bu eldeki ceza: ${player.roundPenalty}` : '';
+        if (pen.title !== penTitle) pen.title = penTitle;
         let gift = info.querySelector('.player-gift-badge');
         if (!gift) { gift = document.createElement('span'); gift.className = 'player-gift-badge'; info.append(gift); }
         if (gift.textContent !== (lastGifts[i] || '')) gift.textContent = lastGifts[i] || '';
     }
-    $('currentPlayerName').textContent = state.players[state.currentPlayer]?.name || '-';
+    setText($('currentPlayerName'), state.players[state.currentPlayer]?.name || '-');
     $('turnIndicator').classList.toggle('my-turn', canPlay());
-    $('pileCount').textContent = state.pileCount;
-    $('pileCountCenter').textContent = state.pileCount;
+    setText($('pileCount'), state.pileCount);
+    setText($('pileCountCenter'), state.pileCount);
     const selfPlayer = state.players[state.playerIndex];
-    if ($('refHudScore') && selfPlayer) $('refHudScore').textContent = Number(playerTotalScore(state.playerIndex)).toLocaleString('tr-TR');
+    if (selfPlayer) setText($('refHudScore'), Number(playerTotalScore(state.playerIndex)).toLocaleString('tr-TR'));
     renderFancyScoreboard();
     renderOpenStatusBadges();
 }
 function showDiscards(container, pile, clickable) {
+    if (!changed('discard:' + container, [state.roundId, idsSig(pile.slice(-8)), pile.length, clickable].join('#'))) return;
     const el = $(container);
     el.replaceChildren();
     // Display actual chronological stack; each tile offsets upwards but remains tile sized.
@@ -981,6 +1112,7 @@ function showDiscards(container, pile, clickable) {
     if (!pile.length) { const p = document.createElement('span'); p.className = 'empty-pile-text'; p.textContent = 'Boş'; el.append(p); }
 }
 function showOpponentDiscard(pos, pile) {
+    if (!changed('opp:' + pos, [state.roundId, pile[pile.length - 1]?.id || ''].join('#'))) return;
     const element=$(pos==='top' ? 'topDiscardTiles' : ('other'+pos[0].toUpperCase()+pos.slice(1)+'DiscardTiles'));element.replaceChildren();
     if (pile.length) { const tile=miniTile(pile[pile.length-1]);element.append(tile); }
     else { const empty=document.createElement('span');empty.className='opponent-empty';empty.textContent='—';element.append(empty); }
@@ -1012,6 +1144,7 @@ function initializeTableCells() {
     tableCellsCreated = true;
 }
 function renderGroups() {
+    if (!changed('groups', [state.roundId, state.okey?.color, state.okey?.number, tableSig(), (state.players || []).map(p => p.name).join(',')].join('#'))) return;
     const compact = $('compactOpenGroups');
     if (compact) compact.replaceChildren();
     const normal = [], pairs = [];
@@ -1065,6 +1198,7 @@ function renderGroups() {
     }
     if ($('pairsPager')) $('pairsPager').classList.add('hidden');
     if ($('refPairCount')) $('refPairCount').textContent = String(pairs.length);
+    if (drag) drag.tableRects = null; // sürükleme sürerken masa değişti: konumlar yeniden ölçülsün
 }
 $('pairsPrev').addEventListener('click', () => { pairsPage = Math.max(0, pairsPage - 1); if(state)renderGroups(); });
 $('pairsNext').addEventListener('click', () => { pairsPage += 1; if(state)renderGroups(); });
@@ -1579,6 +1713,8 @@ if (!socketAvailable) {
         set('profileState', pl.hasOpened ? 'Açtı' : 'Kapalı');
         const img = document.getElementById('profilePopupAvatar');
         if (img && typeof avatarSrc === 'function') img.src = avatarSrc(pl.avatar);
+        // Kendi profiline hediye gönderilemez (sunucu reddediyordu); düğmeler gizlenir.
+        document.getElementById('profileGiftIcons')?.classList.toggle('hidden', seat === state.playerIndex);
         pop.classList.remove('hidden');
     }
     const closeBtn = document.getElementById('profileClose');

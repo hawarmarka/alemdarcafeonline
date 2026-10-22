@@ -68,7 +68,7 @@
   background:url('/asset/ui/alemdar-logo.svg') center/contain no-repeat!important;opacity:.07!important;filter:grayscale(1) brightness(2.2)!important;text-shadow:none!important}
 #compactOpenGroups .sboard:after{content:none!important;display:none!important}
 /* Istaka: üst rafta kazınmış logo, alt rafta oda adı (videodaki "İDDİALILAR" gibi) */
-#gameContainer .cue-container .cue-wood{background:url('/asset/ui/alemdar-engrave.svg') center 10px/220px auto no-repeat,url('/asset/ui/istaka.png') center/100% 100% no-repeat!important}
+#gameContainer .cue-container .cue-wood{background:url('/asset/ui/alemdar-engrave.svg') center 10px/220px auto no-repeat,url('/asset/ui/istaka.webp') center/100% 100% no-repeat!important}
 #gameContainer .cue-container .cue-wood.cue-wood::before{display:block!important;content:attr(data-room)!important;position:absolute!important;left:0!important;right:0!important;
   top:auto!important;bottom:14px!important;height:auto!important;background:none!important;text-align:center;pointer-events:none;
   font:700 54px/1 'Oswald','Arial Narrow',sans-serif!important;letter-spacing:3px;color:rgba(110,50,0,.32)!important;text-shadow:0 1px 0 rgba(255,225,160,.35),0 -1px 0 rgba(60,25,0,.25)!important}

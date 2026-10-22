@@ -30,6 +30,11 @@ const styles = {
     }
 };
 
+// LOG_LEVEL=debug: oyun olayları (taş atma, el başlama) da yazılır. Production'da varsayılan 'info':
+// her hamlede senkron stdout yazımı olmasın. game/debug yalnızca debug seviyesinde çalışır.
+const VERBOSE = (process.env.LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'info' : 'debug')).toLowerCase() === 'debug';
+const quiet = () => {};
+
 class Logger {
     static getTimestamp() {
         const now = new Date();
@@ -78,5 +83,7 @@ class Logger {
         this.divider();
     }
 }
+
+if (!VERBOSE) Logger.game = Logger.debug = quiet;
 
 module.exports = Logger;

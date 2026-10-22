@@ -8,7 +8,11 @@ let selectedAvatar = localStorage.getItem('okeyPlayerAvatar') || 'default.svg';
 let selectedFrame = localStorage.getItem('okeyPlayerFrame') || 'gold';
 let selectedIstaka = localStorage.getItem('okeyPlayerIstaka') || 'istaka.jpg';
 const builtins = ['default.svg', 'alibicim.png', 'egefitness.png', 'james.jpg', 'lvblc5.jpg'];
-const avatarSrc = a => a?.startsWith('data:image/') ? a : a === 'default.svg' || !a ? '/asset/avatar-default.svg' : '/asset/avatars/' + (builtins.includes(a) ? a : builtins[0]);
+// Sunucu yüklenen resimleri /api/avatar/<id> adresiyle gönderir; bulunamazsa varsayılana dönülür.
+document.addEventListener('error', e => { if (e.target.tagName === 'IMG' && e.target.src.includes('/api/avatar/')) e.target.src = '/asset/avatar-default.svg'; }, true);
+const avatarSrc = a => a?.startsWith('data:image/') || /^\/api\/avatar\/[\w-]{22}$/.test(a || '') ? a : a === 'default.svg' || !a ? '/asset/avatar-default.svg' : '/asset/avatars/' + webpAvatar(builtins.includes(a) ? a : builtins[0]);
+// Hazır avatarların adları (hesaplarda/tarayıcıda kayıtlı) aynı kalır; küçültülmüş WebP sürümü gösterilir.
+function webpAvatar(a) { return a === 'lvblc5.jpg' ? a : a.replace(/\.(png|jpe?g)$/, '.webp'); }
 function toast(message) { const node = $('errorToast'); node.querySelector('.toast-message').textContent = message; node.classList.remove('hidden'); clearTimeout(toast.timer); toast.timer = setTimeout(() => node.classList.add('hidden'), 5000); }
 async function api(url, body, method = 'POST') {
   const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + authToken }, ...(method !== 'GET' ? { body: JSON.stringify(body || {}) } : {}) });

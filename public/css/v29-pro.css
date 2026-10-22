@@ -29,7 +29,14 @@ body.game-page .particles,body.game-page .background-animation{display:none!impo
 
 /* ---------- sürükle-bırak: hedef grup ---------- */
 #compactOpenGroups .grid-table-tile.drop-target{box-shadow:0 0 0 2px #9be34a,0 0 12px 2px rgba(155,227,74,.8)!important;z-index:6!important}
-.pointer-ghost{pointer-events:none!important;z-index:10000!important}
+.pointer-ghost{pointer-events:none!important;z-index:10000!important;transition:none!important}
+
+/* ---------- süre göstergeleri: JS Web Animations ile transform/clip-path animasyonu (layout yok) ---------- */
+#turnTimerBar .ttb-fill{width:100%;transform-origin:left center;transition:none}
+#turnTimerBar .ttb-rail{position:absolute;inset:0;pointer-events:none}
+#turnTimerBar .ttb-rail .ttb-knob{left:100%;transition:none}
+#gameBoard #topPlayerInfo .turn-fill,#gameBoard #bottomPlayerInfo .turn-fill{width:calc(100% - 6px)}
+#gameBoard #leftPlayerInfo .turn-fill,#gameBoard #rightPlayerInfo .turn-fill{height:calc(100% - 6px)}
 #gameContainer #myLeftDiscard.is-locked{opacity:.55;filter:grayscale(.6)}
 
 /* ---------- işlem düğmeleri: hepsi aynı boyut, iki atık çerçevesinin arasında ortalı ---------- */
@@ -38,9 +45,11 @@ body.game-page .particles,body.game-page .background-animation{display:none!impo
 #gameContainer #gameActionPanel :is(#openHandBtn,#openPairsBtn,#undoDiscardBtn,#finishBtn).action-btn.action-btn{
   width:150px!important;height:54px!important;min-height:54px!important;margin:0!important;background-size:contain!important;background-position:center!important}
 
-/* ---------- rozetler: seri ve çift, tahtaların dış kenarında aynı yükseklikte ---------- */
-#gameContainer #minimumOpenBadge.minimum-open-badge.minimum-open-badge{left:272px!important;top:212px!important;right:auto!important;bottom:auto!important;width:84px!important;height:31px!important}
-#gameContainer #pairOpenBadge.pair-open-badge.pair-open-badge{left:1300px!important;top:209px!important;right:auto!important;bottom:auto!important;width:66px!important;height:37px!important}
+/* ---------- rozetler: seri ve çift, üst atık kutularının yanında, tahtaların dış kenarında aynı yükseklikte ---------- */
+#gameContainer #minimumOpenBadge.minimum-open-badge.minimum-open-badge{left:272px!important;top:52px!important;right:auto!important;bottom:auto!important;width:84px!important;height:31px!important}
+#gameContainer #pairOpenBadge.pair-open-badge.pair-open-badge{left:1300px!important;top:115px!important;right:auto!important;bottom:auto!important;width:66px!important;height:37px!important}
+/* Istakanın alt rafındaki oda adı kazıması kaldırıldı: gölgesi alt satırın üstünde boydan boya şeffaf bir şerit çiziyordu */
+#gameContainer .cue-container .cue-wood.cue-wood.cue-wood::before{display:none!important}
 /* El sayacı: ıstakanın hemen üstünde, isim kutusunun sağında */
 #gameContainer #rackStatus.rack-status.rack-status.rack-status{left:996px!important;top:552px!important;right:auto!important;bottom:auto!important}
 

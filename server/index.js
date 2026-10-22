@@ -7,6 +7,7 @@ const { Server } = require('socket.io');
 const path = require('path');
 const GameLogic = require('./gameLogic');
 const Accounts = require('./accounts');
+const Avatars = require('./avatars');
 const Melds = require('../public/js/meldSolver');
 const app = express();
 app.disable('x-powered-by');
@@ -22,13 +23,15 @@ function limitAuth(req, res, next) {
   if (item.n > 12) return res.status(429).json({ error: 'Çok fazla deneme. Bir dakika bekleyin.' });
   next();
 }
+// Süresi geçen deneme sayaçları silinir; yoksa her yeni IP harita büyüdükçe bellekte kalırdı.
+setInterval(() => { const now = Date.now(); for (const [ip, item] of authHits) if (item.until < now) authHits.delete(ip); }, 60000).unref();
 function authReq(req) { return Accounts.fromToken((req.headers.authorization || '').replace(/^Bearer /i, '')); }
-app.post('/api/register', limitAuth, (req, res) => {
-  try { res.json(Accounts.register(req.body?.username, req.body?.password)); }
+app.post('/api/register', limitAuth, async (req, res) => {
+  try { res.json(await Accounts.register(req.body?.username, req.body?.password)); }
   catch (e) { res.status(400).json({ error: e.message }); }
 });
-app.post('/api/login', limitAuth, (req, res) => {
-  try { res.json(Accounts.login(req.body?.username, req.body?.password)); }
+app.post('/api/login', limitAuth, async (req, res) => {
+  try { res.json(await Accounts.login(req.body?.username, req.body?.password)); }
   catch (e) { res.status(401).json({ error: e.message }); }
 });
 app.get('/api/me', (req, res) => {
@@ -49,6 +52,12 @@ app.post('/api/avatar', (req, res) => {
   catch (e) { res.status(400).json({ error: e.message }); }
 });
 app.post('/api/logout', (req, res) => { Accounts.logout((req.headers.authorization || '').replace(/^Bearer /i, '')); res.json({ ok: true }); });
+// Adres resmin içerik hash'i olduğu için içerik hiç değişmez: tarayıcı bir kez indirip saklar.
+app.get('/api/avatar/:id', (req, res) => {
+  const item = Avatars.get(req.params.id);
+  if (!item) return res.status(404).end();
+  res.set({ 'Content-Type': item.type, 'Cache-Control': 'public, max-age=31536000, immutable', 'X-Content-Type-Options': 'nosniff' }).send(item.data);
+});
 // Görseller/CSS/JS ?v= ile sürümlendiği için önbelleğe alınabilir; HTML her zaman taze gelsin.
 app.use(express.static(path.join(__dirname, '..', 'public'), {
     maxAge: process.env.NODE_ENV === 'production' ? '7d' : 0,
@@ -112,6 +121,12 @@ function addBotToRoom(room, seatIndex = room.players.length) {
     else if (!('team1' in room.scores)) room.scores = { team1: 0, team2: 0 };
     return bot;
 }
+// Oyun başlamadan ayrılan oyuncunun skor satırı da silinir (yoksa 0 puanla şampiyon görünebiliyordu).
+function removeSeats(room, shouldRemove) {
+    const gone = room.players.filter(shouldRemove);
+    room.players = room.players.filter(p => !shouldRemove(p));
+    if (!room.teamMode) for (const p of gone) delete room.scores[p.name];
+}
 function ensureBotFill(room, delay = BOT_FILL_DELAY_MS) {
     if (!room || room.started || room.matchEnded) return;
     // Arkadaşlarla açılan özel masada botları masayı açan kişi ekler (otomatik doldurma yok).
@@ -119,16 +134,16 @@ function ensureBotFill(room, delay = BOT_FILL_DELAY_MS) {
     if (room.botFillTimer) clearTimeout(room.botFillTimer);
     if (room.players.length >= 4) return;
     room.botFillAt = Date.now() + delay;
-    room.botFillTimer = setTimeout(() => {
+    room.botFillTimer = setTimeout(guardedTimer(room, 'Bot doldurma', () => {
         room.botFillTimer = null;
         if (room.started || room.matchEnded) return;
         // Oyun başlamadan bağlantısı kopan oyuncular koltuğu kilitlemesin (yoksa oyun hiç başlamazdı).
-        if (!room.game) room.players = room.players.filter(p => p.isBot || p.socketId);
+        if (!room.game) removeSeats(room, p => !p.isBot && !p.socketId);
         if (!room.players.some(p => !p.isBot)) { deleteIfEmpty(room); return; }
         while (room.players.length < 4) addBotToRoom(room);
         lobby(room);
         if (room.players.length === 4) newRound(room);
-    }, delay);
+    }), delay);
     room.botFillTimer.unref?.();
     lobby(room); // bekleyenlere geri sayımı bildir
 }
@@ -271,12 +286,10 @@ function seriesOuts(game, index, candidates) {
     const result = new Map();
     for (const cand of candidates) {
         const rest = hand.filter(t => t.id !== cand.id);
-        const base = Melds.solve(rest, game.okey).score;
+        // Kalan elin çözümü bir kez yapılır, her deneme taşı için yalnızca o taşı içeren gruplar denenir.
+        const gains = Melds.probeGains(rest, game.okey, types.map(x => x.tile));
         let expected = 0;
-        for (const { k, tile } of types) {
-            const gain = Melds.solve([...rest, tile], game.okey).score - base;
-            if (gain > 0) expected += gain * counts.get(k);
-        }
+        types.forEach(({ k }, i) => { if (gains[i] > 0) expected += gains[i] * counts.get(k); });
         result.set(cand.id, expected);
     }
     return result;
@@ -288,6 +301,7 @@ function seriesOuts(game, index, candidates) {
 // - eşitlikte: açmadan önce DÜŞÜK taş atılır (yüksek taş 101'e ulaştırır, açmayanın cezası zaten sabit 202),
 //   açtıktan sonra YÜKSEK taş atılır (elde kalan ceza azalır).
 const DANGER_WEIGHT = Number(process.env.BOT_DANGER_WEIGHT) || 20;
+const tileKind = t => t.isFakeJoker ? 'F' : `${t.color}:${t.number}`;
 function chooseBotDiscard(room, index) {
     const game = room.game;
     const hand = game.playerTiles[index];
@@ -325,6 +339,9 @@ function chooseBotDiscard(room, index) {
         if (a.color === b.color && Math.abs(a.number - b.number) <= 2) return n + (Math.abs(a.number - b.number) === 1 ? 3 : 2);
         if (a.color !== b.color && a.number === b.number) return n + 3; return n; }, 0); };
     if (!state.hasOpened && plan === 'series' && smart && candidates.length > 1) {
+        // Aynı türden iki taşın sonucu aynıdır (eşitlikte küçük id seçilir), biri yeterli.
+        const seen = new Set();
+        candidates = [...candidates].sort((a, b) => a.id.localeCompare(b.id)).filter(t => !seen.has(tileKind(t)) && seen.add(tileKind(t)));
         const outs = seriesOuts(game, index, candidates);
         if (outs) return candidates.sort((a, b) => (outs.get(b.id) - danger(b) * DANGER_WEIGHT) - (outs.get(a.id) - danger(a) * DANGER_WEIGHT) || usefulness(a) - usefulness(b) || game.getTileValue(a) - game.getTileValue(b) || a.id.localeCompare(b.id))[0];
     }
@@ -568,6 +585,20 @@ function stopTurn(room) {
     room.botTurnTimer = null;
     room.turnDeadline = 0;
 }
+// Zamanlayıcıda beklenmeyen bir hata oluşursa sunucu çökmez ve masa donmaz:
+// önce sıradaki oyuncu için otomatik hamle denenir, o da olmazsa el iptal edilip yeniden başlatılır.
+function recoverRoom(room, label, err) {
+    console.error(`[${room.code}] ${label} hatası:`, err);
+    try { if (room.started && room.game) { timeoutMove(room); return; } }
+    catch (err2) { console.error(`[${room.code}] otomatik hamle de başarısız:`, err2); }
+    try {
+        abandonRound(room, 'Teknik bir sorun oluştu; el yeniden başlatılıyor.');
+        newRound(room);
+    } catch (err3) { console.error(`[${room.code}] el yeniden başlatılamadı:`, err3); }
+}
+function guardedTimer(room, label, fn) {
+    return () => { try { fn(); } catch (err) { recoverRoom(room, label, err); } };
+}
 function beginTurn(room) {
     stopTurn(room);
     if (!room.started || !room.game) return;
@@ -575,17 +606,17 @@ function beginTurn(room) {
     const turnMs = turnMsFor(room);
     room.turnDeadline = Date.now() + turnMs;
     const deadline = room.turnDeadline, roundId = room.roundId, player = room.game.currentPlayer;
-    room.turnTimer = setTimeout(() => {
+    room.turnTimer = setTimeout(guardedTimer(room, 'Sıra süresi', () => {
         if (!room.started || room.roundId !== roundId || room.turnDeadline !== deadline || room.game.currentPlayer !== player) return;
         timeoutMove(room);
-    }, turnMs);
+    }), turnMs);
     room.turnTimer.unref?.();
     const actor = room.players[player];
     if (actor?.isBot) {
-        room.botTurnTimer = setTimeout(() => {
+        room.botTurnTimer = setTimeout(guardedTimer(room, 'Bot hamlesi', () => {
             if (!room.started || room.roundId !== roundId || room.game?.currentPlayer !== player || !room.players[player]?.isBot) return;
             runBotTurn(room, player);
-        }, BOT_THINK_MS + Math.floor(Math.random() * 1300)); // insan gibi değişken düşünme süresi (1,2–2,5 sn)
+        }), BOT_THINK_MS + Math.floor(Math.random() * 1300)); // insan gibi değişken düşünme süresi (1,2–2,5 sn)
         room.botTurnTimer.unref?.();
     }
 }
@@ -599,10 +630,10 @@ function extendTurnAfterOpening(room, index) {
     room.turnDurationMs = turnMsFor(room) + OPEN_EXTRA_MS;
     room.turnDeadline = Date.now() + remaining + OPEN_EXTRA_MS;
     const deadline = room.turnDeadline, roundId = room.roundId;
-    room.turnTimer = setTimeout(() => {
+    room.turnTimer = setTimeout(guardedTimer(room, 'Sıra süresi', () => {
         if (!room.started || room.roundId !== roundId || room.turnDeadline !== deadline || room.game.currentPlayer !== index) return;
         timeoutMove(room);
-    }, remaining + OPEN_EXTRA_MS);
+    }), remaining + OPEN_EXTRA_MS);
     room.turnTimer.unref?.();
 }
 function fillMissingSeatsWithBots(room) {
@@ -696,17 +727,21 @@ function finishRound(room, winnerIndex, result) {
     broadcastGame(room);
     room.started = false;
     // Kazanan = en az toplam ceza puanı alan oyuncu / takım.
-    const standings = Object.entries(scores).sort((a,b) => a[1]-b[1]);
+    // Yalnızca masadaki oyuncular/takımlar sıralanır; takım şampiyonu "team1" değil oyuncu adlarıyla gösterilir.
+    const name = i => room.players[i]?.name || '-';
+    const standings = (room.teamMode
+        ? [[scores.team1 || 0, `${name(0)} & ${name(2)}`], [scores.team2 || 0, `${name(1)} & ${name(3)}`]]
+        : room.players.map(p => [scores[p.name] || 0, p.name])).sort((a, b) => a[0] - b[0]);
     room.lastRoundResult = {
         winner: winnerIndex,
         winnerName: winnerIndex === null ? 'Deste bitti' : room.players[winnerIndex].name,
         points: roundTotalPoints, roundHistory: room.roundHistory, players: summary(room), teamMode: room.teamMode, assisted: room.assisted, stackingMode: room.stackingMode, scores, completedRounds: room.completedRounds, roundLimit: room.roundLimit,
-        matchEnded: room.matchEnded, champion: room.matchEnded ? standings[0]?.[0] : null
+        matchEnded: room.matchEnded, champion: room.matchEnded ? standings[0]?.[1] : null
     };
     io.to(room.code).emit('gameFinished', room.lastRoundResult);
     // Skor tablosu tam 5 saniye görünür; ardından bütün oyuncular aynı anda yeni ele geçer.
     if (!room.matchEnded) {
-        room.nextRoundTimer = setTimeout(() => {
+        room.nextRoundTimer = setTimeout(guardedTimer(room, 'Yeni el', () => {
             room.nextRoundTimer = null;
             if (!room.started && !room.matchEnded) {
                 fillMissingSeatsWithBots(room);
@@ -715,7 +750,7 @@ function finishRound(room, winnerIndex, result) {
                     if (!newRound(room)) io.to(room.code).emit('roundWaiting', {message:'Yeni el için oyuncular veya botlar hazırlanıyor.'});
                 }
             }
-        }, 5000);
+        }), 5000);
         room.nextRoundTimer.unref?.();
     }
 }
@@ -826,7 +861,7 @@ function playerLeave(socket, deliberate = false) {
         lobby(room);
         if (room.started) broadcastGame(room);
         const oldToken = player.token;
-        const timeout = setTimeout(() => {
+        const timeout = setTimeout(guardedTimer(room, 'Bağlantı kopması', () => {
             if (!rooms.has(room.code)) return;
             const seat = room.players.findIndex(p => p.token === oldToken);
             if (seat < 0) return;
@@ -849,12 +884,12 @@ function playerLeave(socket, deliberate = false) {
                 broadcastGame(room);
                 if (room.game?.currentPlayer === seat) beginTurn(room);
             } else {
-                room.players.splice(seat, 1);
+                removeSeats(room, p => p === missing);
                 lobby(room);
                 ensureBotFill(room);
                 deleteIfEmpty(room);
             }
-        }, 60000);
+        }), 60000);
         timeout.unref?.();
         return;
     }
@@ -876,18 +911,37 @@ function playerLeave(socket, deliberate = false) {
         broadcastGame(room);
         if (room.game?.currentPlayer === index) beginTurn(room);
     } else {
-        room.players.splice(index, 1);
+        removeSeats(room, p => p === player);
         lobby(room);
         ensureBotFill(room);
         deleteIfEmpty(room);
     }
     socket.emit('leftGame');
 }
+// Socket başına olay hız sınırı (token bucket): normal oyun saniyede birkaç olay üretir; seli keser.
+const EVENT_BURST = 30, EVENT_REFILL_PER_SEC = 15;
+function allowEvent(socket) {
+    const now = Date.now(), b = socket.data.bucket ||= { tokens: EVENT_BURST, at: now };
+    b.tokens = Math.min(EVENT_BURST, b.tokens + (now - b.at) / 1000 * EVENT_REFILL_PER_SEC); b.at = now;
+    if (b.tokens < 1) return false;
+    b.tokens -= 1; return true;
+}
 io.on('connection', socket => {
+    // Her olay korunur: hatalı bir istek sunucuyu (ve bütün masaları) düşürmez, yalnızca o oyuncuya hata döner.
+    const rawOn = socket.on.bind(socket);
+    socket.on = (event, handler) => rawOn(event, (...args) => {
+        if (event !== 'disconnect' && !allowEvent(socket)) {
+            if (Date.now() - (socket.data.slowWarnAt || 0) > 2000) { socket.data.slowWarnAt = Date.now(); issue(socket, 'Çok hızlı işlem yapıyorsunuz, biraz yavaşlayın.'); }
+            return;
+        }
+        try { handler(...args); }
+        catch (err) { console.error(`Socket olayı hatası (${event}):`, err); issue(socket, 'İşlem gerçekleştirilemedi, tekrar deneyin.'); }
+    });
     socket.on('joinGame', data => {
         if (socket.data.roomCode) return issue(socket, 'Zaten bir odadasınız.');
         const account = Accounts.fromToken(data?.authToken);
-        const name = account ? account.username : String(data?.playerName || '').trim().slice(0, 20);
+        // Misafir adında yalnızca harf, rakam, boşluk ve _ . - kalır (HTML/script enjeksiyonu olmasın).
+        const name = account ? account.username : String(data?.playerName || '').replace(/[^\p{L}\p{N} _.-]/gu, '').replace(/\s+/g, ' ').trim().slice(0, 20);
         const token = String(data?.token || '');
         if (!name || !/^[\w-]{20,120}$/.test(token)) return issue(socket, 'İsim veya oyuncu oturumu geçersiz.');
         const mode = data?.mode;
@@ -907,7 +961,8 @@ io.on('connection', socket => {
         } else return issue(socket, 'Bir giriş şekli seçin.');
         if (room.started || room.game || room.matchEnded || room.players.length >= 4) return issue(socket, 'Oda dolu veya oyun başlamış.');
         if (room.players.some(p => p.name.toLowerCase() === name.toLowerCase())) return issue(socket, 'Bu odada aynı isim zaten var.');
-        const avatar = account?.avatar || (['default.svg','alibicim.png', 'egefitness.png', 'james.jpg', 'lvblc5.jpg'].includes(data.avatar) || (typeof data.avatar === 'string' && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]{1,90000}$/.test(data.avatar)) ? data.avatar : 'default.svg');
+        // Mesajlarda resmin kendisi değil kısa adresi gider (Avatars.ref).
+        const avatar = Avatars.ref(account?.avatar || (Avatars.BUILTIN.includes(data.avatar) || (typeof data.avatar === 'string' && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]{1,90000}$/.test(data.avatar)) ? data.avatar : 'default.svg'));
         room.players.push({ token, socketId: socket.id, name, avatar, frame: account?.frame || (['gold','silver','royal','emerald','neon','rose'].includes(data?.frame) ? data.frame : 'gold'), accountId: account?.id || null, level: Accounts.cleanUser(account)?.level || 1 });
         socket.join(room.code);
         socket.data.roomCode = room.code;
@@ -977,7 +1032,8 @@ io.on('connection', socket => {
         lobby(room);
         newRound(room);
     });
-    socket.on('leaveGame', () => playerLeave(socket, true));    socket.on('throwTomato', data => {
+    socket.on('leaveGame', () => playerLeave(socket, true));
+    socket.on('throwTomato', data => {
         const { room, index } = getRoomAndSeat(socket);
         if (!room || index < 0 || !room.started) return issue(socket, 'Masada değilsiniz.');
         const target = Number(data?.target);
@@ -1240,11 +1296,14 @@ io.on('connection', socket => {
         const { room, index } = getRoomAndSeat(socket);
         if (!room || index < 0 || room.started) return;
         if (room.matchEnded) return issue(socket, 'Maç bitti. Yeni masa açmalısınız.');
-        if (room.players.length !== 4 || room.players.some(p => !p.socketId)) return issue(socket, 'Yeni el için 4 bağlı oyuncu gerekli.');
+        // Botların socket'i yoktur; yalnızca bağlantısı kopmuş gerçek oyuncular yeni eli bekletir.
+        if (room.players.length !== 4 || room.players.some(p => !p.socketId && !p.isBot)) return issue(socket, 'Yeni el için 4 bağlı oyuncu gerekli.');
         room.nextRoundReady ||= new Set();
         room.nextRoundReady.add(room.players[index].token);
-        io.to(room.code).emit('nextRoundReady', {ready:room.nextRoundReady.size,total:4});
-        if (room.nextRoundReady.size === 4) newRound(room);
+        // Botlar her zaman hazırdır; bütün gerçek oyuncular hazır olunca yeni el başlar.
+        const humans = room.players.filter(p => !p.isBot);
+        io.to(room.code).emit('nextRoundReady', { ready: humans.filter(p => room.nextRoundReady.has(p.token)).length, total: humans.length });
+        if (humans.every(p => room.nextRoundReady.has(p.token))) newRound(room);
     });
     // Yalnızca geliştirme testi: OKEY_DEBUG=1 ile açılır. Elini ve bir rakibin açık gruplarını kurar.
     // Taşlar destede/ellerde gerçekten bulunan fiziksel taşlardan alınır; 106 taş korunur.
@@ -1259,18 +1318,30 @@ io.on('connection', socket => {
             const own = game.playerTiles[fromSeat], k = own.findIndex(pred);
             return k >= 0 ? own.splice(k, 1)[0] : null;
         };
+        // reset: masadaki bütün açılışlar ve atıklar desteye döner, oyuncu durumları sıfırlanır (her senaryo temiz başlasın).
+        if (data?.reset) {
+            game.tiles.unshift(...game.playerStates.flatMap(s => s.openedGroups.flat()), ...game.discardPiles.flat());
+            game.playerStates = game.playerStates.map(() => game.createPlayerState());
+            game.discardPiles = [[], [], [], []]; game.deadDiscards = {}; game.addLog = null; game.returnedLeft = null;
+            room.turnSnap = null; room.minimumOpenScore = 101; room.minimumPairs = 5;
+        }
         const counts = game.playerTiles.map(h => h.length);
         const buildHand = (seat, list) => {
             game.tiles.unshift(...game.playerTiles[seat].splice(0));
             game.playerTiles[seat] = (list || []).map(s => take(spec(s), seat)).filter(Boolean);
         };
         if (data?.hand) buildHand(index, data.hand);
-        if (data?.opponentGroups) {
-            const opp = (index + 1) % 4, st = game.playerStates[opp];
-            game.tiles.unshift(...st.openedGroups.flat()); // önceki test gruplarını desteye geri koy
-            const groups = data.opponentGroups.map(g => g.map(s => take(spec(s), opp)).filter(Boolean));
-            Object.assign(st, { hasOpened: true, openType: 'normal', openScore: groups.reduce((n, g) => n + game.calculateGroupValue(g), 0), openedGroups: groups.map(g => game.arrangeGroup(g)) });
-        }
+        // Bir koltuğu verilen gruplarla "açmış" yapar (önceki test grupları desteye geri konur).
+        const openFor = (seat, list, type) => {
+            const st = game.playerStates[seat];
+            game.tiles.unshift(...st.openedGroups.flat());
+            const groups = list.map(g => g.map(s => take(spec(s), seat)).filter(Boolean));
+            Object.assign(st, { hasOpened: true, openType: type, openScore: type === 'pairs' ? 0 : groups.reduce((n, g) => n + game.calculateGroupValue(g), 0),
+                openPairs: type === 'pairs' ? groups.length : 0, openedGroups: type === 'pairs' ? groups : groups.map(g => game.arrangeGroup(g)) });
+        };
+        if (data?.opponentGroups) openFor((index + 1) % 4, data.opponentGroups, 'normal');
+        if (data?.pairsOpponent) openFor((index + 2) % 4, data.pairsOpponent, 'pairs');
+        if (data?.myGroups) openFor(index, data.myGroups, 'normal');
         // Diğer ellerin taş sayısını desteden tamamla (106 taş korunur).
         game.playerTiles.forEach((h, i) => { if (i !== index) while (h.length < counts[i] - (i === (index + 1) % 4 && data?.opponentGroups ? data.opponentGroups.flat().length : 0) && game.tiles.length) h.push(game.tiles.pop()); });
         if (data?.leftDiscard) { const t = take(spec(data.leftDiscard), index); if (t) game.discardPiles[(index + 3) % 4].push(t); game.deadDiscards = {}; }
@@ -1284,11 +1355,11 @@ const PORT = Number(process.env.PORT) || 3000;
 httpServer.listen(PORT, '0.0.0.0', () => console.log(`Alemdar Cafe 101 Okey sunucusu: ${PORT}`));
 // Coolify yeni sürüme geçerken SIGTERM gönderir: oyunculara haber ver, bağlantıları kapat, hızlı çık.
 function shutdown(signal) {
-    console.log(` alındı, sunucu kapanıyor...`);
+    console.log(`${signal} alındı, sunucu kapanıyor...`);
     io.emit('tableChatMessage', { from: 'Sistem', message: 'Sunucu güncelleniyor. Birkaç saniye içinde tekrar bağlanın.', at: Date.now() });
     io.close();
     httpServer.close(() => process.exit(0));
     setTimeout(() => process.exit(0), 3000).unref();
 }
 if (require.main === module || process.env.NODE_ENV === 'production') { process.once('SIGTERM', () => shutdown('SIGTERM')); process.once('SIGINT', () => shutdown('SIGINT')); }
-module.exports = { app, httpServer, rooms, _testing: { timeoutMove, beginTurn, stopTurn, extendTurnAfterOpening, turnMsFor, fillMissingSeatsWithBots, finishRound, newRound } };
+module.exports = { app, httpServer, rooms, _testing: { seriesOuts, timeoutMove, beginTurn, stopTurn, extendTurnAfterOpening, turnMsFor, fillMissingSeatsWithBots, finishRound, newRound } };

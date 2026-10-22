@@ -1,0 +1,173 @@
+# Alemdar Cafe 101 Okey — Proje Rehberi ve Düzeltme Planı
+
+Bu dosya, projede çalışacak herkesin (insan veya Claude) önce okuması gereken rehberdir.
+Son inceleme: 2026-10-22. Bütün testler geçiyordu (`npm test`, 12 dosya).
+
+---
+
+## 1. Karar: Baştan yazma, buradan devam et
+
+**Baştan yazmayın.** Gerekçe:
+
+- Oyun kuralları sunucuda yetkili (server-authoritative) ve doğru kurulmuş: istemcinin gönderdiği taş nesnelerine veya puanlara güvenilmiyor, her hamle sunucuda doğrulanıyor.
+- 101 kurallarının çoğu (katlamalı, çift açma, okey alma, işlek ceza, geri topla, yerden alma zorunluluğu) yazılmış ve testli. `botSimulation` testi 160 eli 106 taş bütünlüğüyle oynuyor.
+- Takılma ve gecikmenin sebebi seçilen dil ya da framework değil. Sebep aşağıda listelenen belirli kod noktaları ve hepsi yerinde düzeltilebilir.
+- Go, Redis, React/Next.js, Pixi.js **şu aşamada gerekli değil** (bkz. Bölüm 6).
+
+Önce Faz 1 ve Faz 2 yapılmalı, sonra telefonda ölçülmeli. Pixi.js ancak ölçümden sonra hâlâ takılma varsa düşünülmeli.
+
+---
+
+## 2. Mimari özeti
+
+| Katman | Teknoloji | Dosyalar |
+|---|---|---|
+| Sunucu | Node.js ≥22.13, Express 4, Socket.IO 4, düz JavaScript (CommonJS) | `server/index.js` (oda, tur, bot, tüm socket olayları), `server/gameLogic.js` (taş, doğrulama, puan), `server/accounts.js` (hesap/oturum, yerleşik `node:sqlite`), `server/avatars.js` (yüklenen profil resimleri, `/api/avatar/<id>`), `server/logger.js` |
+| Ortak | Seri/per çözücü, hem tarayıcıda hem sunucuda çalışır. `probeGains` botun hızlı "çıkış" hesabı | `public/js/meldSolver.js` |
+| İstemci | Düz HTML/CSS/JS, derleme adımı yok, DOM tabanlı çizim | `public/game.html` + `public/js/game.js` (masa), `public/index.html` + `public/js/main.js` (lobi), `public/js/tableGrid.js`, `stage-fit.js`, `transitions.js` |
+| Veri | `data/accounts.db` (SQLite, `DATA_DIR` ile değişir). Eski `accounts.json` ilk açılışta bir kez aktarılır ve yedek olarak bırakılır. Masalar ve misafir avatarları yalnızca RAM'de | — |
+| Dağıtım | Dockerfile (node:22-alpine), Coolify, port 3000, `/health` | `Dockerfile`, `BASLAT-WINDOWS.bat` |
+
+Akış: istemci `socket.emit(olay)` gönderir. Sunucu doğrular, durumu değiştirir ve `broadcastGame()` ile **her oyuncuya o oyuncunun tam görüntüsünü** (`snapshot`) yollar. İstemci `gameState` gelince `render()` ile her şeyi yeniden çizer.
+
+---
+
+## 3. Çalışma kuralları
+
+- Değişiklikten sonra mutlaka `npm test` çalıştırılmalı (13 dosya). Testlerin hepsi geçmeden iş bitmiş sayılmaz.
+- Yeni bir socket hamlesi eklenirse istemcide `MOVE_EVENTS` listesine de eklenmeli. Sunucu bu hamleye her durumda `gameState` veya `gameError` ile cevap vermeli, yoksa istemci 5 sn boyunca yeni hamle göndermez.
+- Yeni bir oda zamanlayıcısı `guardedTimer(room, ad, fn)` ile kurulmalı.
+- Testler `DATA_DIR` değişkenine bakar. Gerçek hesap dosyası bozulmasın diye testleri geçici bir klasörle çalıştırın: `$env:DATA_DIR="$env:TEMP\okey-test-data"; npm test`
+- Statik dosyalar `?v=N` ile sürümleniyor (`game.html` içindeki `<script src="js/game.js?v=43">`). JS veya CSS değişince **v numarası artırılmalı**, yoksa production'da 7 günlük önbellek eski dosyayı gösterir.
+- Yorumlar ve kullanıcıya görünen metinler Türkçe. Mevcut kod stiline uyulmalı.
+- Oyun kuralı değişikliği yalnızca sunucuda yapılır. İstemci sadece öneri ve gösterim yapar. `meldSolver.js` her iki tarafta da kullanıldığı için oradaki değişiklik ikisini birden etkiler.
+- Dosyalar 500 satırın altında tutulmalı. `server/index.js` (1295 satır) ve `public/js/game.js` (~1600 satır) bu sınırı zaten aşıyor, Faz 4'te bölünecek.
+- `alemdarcafeonline/` klasörü kök dizinin **birebir kopyası**: dosya hash'leri aynı ve içinde `.git` var. Hangisinin asıl olduğuna karar verilmeli (bkz. Faz 0). O karara kadar düzenleme **yalnızca bir yerde** yapılmalı.
+
+---
+
+## 4. Bulunan sorunlar (öncelik sırasıyla)
+
+Önem dereceleri: 🔴 kritik · 🟠 yüksek · 🟡 orta · ⚪ düşük/temizlik
+
+### 4.1 Sunucu: gecikme ve takılma yapanlar
+
+| # | Önem | Yer | Sorun | Etkisi | Çözüm |
+|---|---|---|---|---|---|
+| S1 ✅ | 🔴 | `server/index.js:259-283`, `327-330` | Bot taş seçerken `seriesOuts()` her aday taş için ~30 farklı taşla `Melds.solve` çağırıyor. **Ölçüm: tur başına ortalama 41 ms, en kötü 108 ms** ve bu süre boyunca event loop tamamen bloke. | Node tek iş parçacığında çalışır. Bot bu hesabı yaparken **bütün masalardaki** oyuncuların hamleleri bekler. 50 botlu masada sunucu saniyenin büyük kısmını bununla geçirir ve herkes gecikme hisseder. | (a) Sonuçları el+tür anahtarıyla önbelleğe al. (b) Adayları önce ucuz `usefulness` puanıyla 4-5 taşa indir, pahalı hesabı yalnızca onlara yap. (c) Gerekirse bot hesabını `worker_threads` ile ayrı iş parçacığına taşı. Hedef: tur başına <5 ms. |
+| S2 ✅ | 🔴 | `server/index.js:490-500` (`summary`), `910`; `server/accounts.js:65` | Oyuncu avatarı base64 data-URI olarak saklanıyor (misafirde 90 KB'a, hesapta 180 KB'a kadar) ve `summary()` her `gameState` ve `lobbyUpdate` mesajına 4 oyuncunun avatarını **her seferinde** ekliyor. | Her taş çekme veya atmada oyuncu başına **yüzlerce KB'a kadar** veri gidebiliyor. Mobil ağda gecikmenin bir numaralı adayı bu. | Avatarı bir kez yükle, sunucuda dosya olarak sakla (`/avatars/<id>.webp`) ve mesajda yalnızca URL veya kısa id gönder. Avatar bilgisini `gameState` içinden çıkar, sadece oyuncu katılınca gönder. |
+| S3 | 🟠 | `server/index.js:510-534` | Her hamlede tam snapshot gidiyor: bütün atık yığınları, bütün açık gruplar, `roundHistory`, skorlar, oyuncu listesi. | Gereksiz bant genişliği. İstemci de her seferinde her şeyi yeniden çizmek zorunda kalıyor (bkz. İ2). | Kısa vadede S2'yi çöz, `snapshot`'tan değişmeyen alanları çıkar. Orta vadede olay bazlı küçük mesajlara geç (`tileDiscarded {seat, tile}`, `tileDrawn {seat}`) ve tam snapshot'ı yalnızca bağlanınca/yeniden bağlanınca gönder. Her durum mesajına sıra numarası (`seq`) koy. |
+| S4 ✅ | 🔴 | `server/accounts.js:10-20` | Her kayıt, giriş, çıkış, avatar/çerçeve değişikliği ve **her el sonunda her oyuncu için** (`award`) bütün hesap veritabanı `writeFileSync` ile baştan yazılıyor. | Senkron disk yazımı event loop'u durdurur. Kullanıcı sayısı arttıkça dosya büyür, takılma da uzar. | SQLite'a (`better-sqlite3`, tek dosya, kurulum yok) veya PostgreSQL'e geç. Ara çözüm: asenkron yazma ve 2 saniyelik toplu yazma (debounce). |
+| S5 ✅ | 🟠 | `server/accounts.js:24` | Şifre hash'i `crypto.scryptSync` ile hesaplanıyor. Her giriş/kayıt event loop'u bloke ediyor (bu makinede ölçüm: ~27 ms; Coolify sunucusunun zayıf CPU'sunda daha uzun). | Aynı anda birçok kişi giriş yaparsa oyundaki herkes takılır. | `crypto.scrypt` (asenkron, callback/promise) kullan. |
+| S6 ✅ | 🟡 | `server/gameLogic.js:110-112`, `210` | Her el başında ve **her atılan taşta** `console.log` yapılıyor. Okey ve gösterge de loglanıyor. | Linux'ta pipe'a yazılan stdout senkron olduğu için gereksiz yük. Okeyin loglara düşmesi ayrıca bilgi sızıntısı. | Production'da `Logger.game`/`debug` kapat (`LOG_LEVEL` env). Okey/gösterge logunu kaldır. |
+| S7 ✅ | 🟡 | `server/index.js:16-24` | `authHits` haritası hiç temizlenmiyor. | Uzun süre açık kalan sunucuda bellek sızıntısı (küçük ama sürekli). | `setInterval` ile süresi geçen kayıtları sil. |
+| S8 | 🟡 | `server/accounts.js:46` | Süresi dolmuş oturumlar `db.sessions` içinde sonsuza kadar kalıyor. | Dosya büyür, S4'ü kötüleştirir. | Başlangıçta ve günde bir süresi dolanları sil. |
+| S9 | 🟡 | — | Statik dosyalar için sıkıştırma (gzip/brotli) yok. | 330 KB CSS ve büyük JS sıkıştırılmadan gidiyor. İlk açılış yavaş. | Reverse proxy (Coolify/Traefik) sıkıştırma yapıyorsa doğrula, yapmıyorsa `compression` middleware ekle. |
+
+### 4.2 Sunucu: hata ve güvenlik riskleri
+
+| # | Önem | Yer | Sorun | Çözüm |
+|---|---|---|---|---|
+| H1 ✅ | 🔴 | `server/accounts.js:8` | `accounts.json` okunamaz veya bozuksa hata sessizce yutuluyor ve `db` boş başlıyor. **İlk `save()` çağrısı bütün hesapları siliyor.** | Dosya var ama parse edilemiyorsa sunucu başlamasın (veya `.bak` yedeğe dönsün). Her yazımdan önce yedek al. SQLite'a geçince sorun kökten çözülür. |
+| H2 ✅ | 🟠 | `server/index.js:890` + `public/js/game.js:567` | Misafir oyuncu adı hiçbir karakter kontrolünden geçmiyor (sadece 20 karakterle kesiliyor). `showGiftEffect` bu adı `innerHTML` ile sayfaya basıyor. **HTML/JS enjeksiyonu (XSS) mümkün.** Oturum token'ı `localStorage`'da tuttuğu için (`game.js:8`) çalınabilir. | Sunucuda misafir adını hesap adıyla aynı kurala bağla: `/^[\p{L}\p{N}_ -]{2,20}$/u`. İstemcide `innerHTML` yerine `textContent` kullan (`game.js:567`). Diğer `innerHTML` kullanımları (`game.js:415,418`, `main.js:284,288`) sabit metin, ama gözden geçirilmeli. |
+| H3 | 🟠 | `server/index.js:1286-1292` | Masalar yalnızca RAM'de. Her deploy veya çökme **devam eden bütün oyunları siliyor**. | Kısa vadede deploy'u oyun az iken yap. Orta vadede her hamleden sonra oda durumunu (JSON) SQLite'a veya Redis'e yaz, açılışta geri yükle. Redis'in gerçekten gerekli olduğu yer burası ve çoklu sunucu durumu. |
+| H4 | 🟡 | `server/index.js:686`, `751`, `915` | Skorlar oyuncu **adına** göre tutuluyor (`room.scores[name]`). Koltuk/indeks yerine ad kullanmak; yeniden adlandırma, bot devri ve aynı ada yakın isimlerde kırılgan. | Skoru koltuk indeksine göre tut (`scores[seat]`). |
+| H5 | 🟡 | `server/gameLogic.js:67-72` | Karıştırma `Math.random` ile yapılıyor. | Kriptografik olarak tahmin edilebilir değil ama adil dağıtım için `crypto.randomInt` kullanmak doğrusu. |
+| H6 | 🟡 | `public/js/meldSolver.js:60` | Arama 65.000 adımda kesiliyor ve kesilince **sessizce 0 puan** dönüyor. | Nadir ellerde bot/öneri yanlış karar verebilir. Kesilince o ana kadarki en iyi sonucu döndür, ya da kesme olduğunu işaretle. |
+| H7 | ⚪ | `server/index.js:1287` | Kapanış logu `${signal}` yerine boş yazıyor: `` ` alındı, sunucu kapanıyor...` `` | `` `${signal} alındı...` `` yap. |
+| H8 | ⚪ | `server/index.js:1243` | Elle "yeni el" isteği `room.players.some(p => !p.socketId)` kontrolü yüzünden botlu masada hiç çalışmıyor (botların `socketId`'si yok). Otomatik 5 saniyelik geçiş bunu gizliyor. | `!p.socketId && !p.isBot` yap. |
+| H9 | ⚪ | `server/index.js:980` | İki socket olayı (`leaveGame`, `throwTomato`) aynı satırda. | Ayrı satırlara böl. |
+| H10 | ⚪ | Oyun olayları | Sohbet dışındaki socket olaylarında hız sınırı yok. | Socket başına basit bir token-bucket ekle (örn. saniyede 20 olay). |
+
+### 4.3 İstemci: akıcılık (60 FPS) sorunları
+
+| # | Önem | Yer | Sorun | Çözüm |
+|---|---|---|---|---|
+| İ1 ✅ | 🔴 | `public/js/game.js:632-647`, `649-673` | Sürüklenen taş `style.left/top` ile taşınıyor. Bu, **her fare/parmak hareketinde** layout (sayfa düzeni) hesaplatır. Aynı olayda `findDropGroup` → `elementFromPoint` + bütün masa taşları için `querySelectorAll` + `getBoundingClientRect` çalışıyor. | `transform: translate3d(x,y,0)` kullan, ghost'a `will-change: transform` ver. Hareketi `requestAnimationFrame` ile kare başına bir kez işle. Masa grubu dikdörtgenlerini sürükleme başında bir kez ölçüp önbelleğe al, hareket sırasında sadece bu önbellekle hesapla. |
+| İ2 ✅ | 🟠 | `public/js/game.js:1138-1153`, `861-884`, `1014-1068`, `108-136` | Her `gameState` mesajında (yani herhangi bir oyuncunun her hamlesinde) ıstakanın 32 yuvası, masadaki bütün gruplar, skor tablosu ve atık yığınları **sıfırdan yeniden oluşturuluyor**, olay dinleyicileri de tekrar bağlanıyor. | Değişmeyen parçayı yeniden çizme: her bölüm için bir imza (ör. id listesi) tut, imza aynıysa atla. Istakada taş elemanlarını id ile sakla ve sadece yer değiştir. Olay dinleyicisini her taşa değil kapsayıcıya bir kez bağla (event delegation). |
+| İ3 ✅ | 🟠 | `public/js/game.js:500-525` | `updateTurnClock` her 100 ms'de `querySelectorAll` çalıştırıyor ve süre çubuklarının `width`/`left` değerini değiştiriyor, bu da layout tetikler. | Süre çubuğunu tek seferlik CSS animasyonu yap (`transform: scaleX`, `animation-duration = kalan süre`). JS sadece sıra değişince çalışsın. Saniye yazısı için 1 sn'lik güncelleme yeterli. |
+| İ3b | 🟡 | `public/js/game.js:871`, `856-860` | `renderRack` her taş için `isIslekTile` çağırıyor. Bu da her masa grubu için `isValidGroup` çalıştırıyor (taş × grup × 2). | El+masa imzasıyla önbelleğe al. |
+| İ4 ✅ (ölçüldü, gerek yok) | 🟠 | `public/css/` | 20 CSS dosyası (~330 KB), `game.html` 19 ayrı stylesheet yüklüyor. `v17-fixes.css`'ten `v29-pro.css`'e kadar üst üste yamalar, **3109 adet `!important`**, 277 `box-shadow`, 93 `filter`, 15 `backdrop-filter`. | Tarayıcı her değişiklikte çok pahalı stil hesabı yapıyor. Özellikle `backdrop-filter` ve büyük `filter`/`box-shadow` mobil GPU'da kare düşürür. Yamaları tek bir temiz dosyada birleştir, ölü kuralları at, hareket eden elemanlarda `backdrop-filter`/büyük gölge kullanma. |
+| İ5 ✅ | 🟡 | `public/asset/` | Büyük PNG'ler: `ui/skor-tablosu.png` 623 KB, `ui/istaka.png` 523 KB, `ui/masa-bekleme.png` 474 KB, `avatars/alibicim.png` 437 KB. | WebP/AVIF'e çevir ve gerçek gösterim boyutuna küçült. Toplamda ~2 MB kazanç, ilk açılış ve bellek iyileşir. |
+| İ6 ✅ | 🟡 | `public/js/game.js:706-720` | İyimser (optimistic) arayüz yok. Taş çekme/atma sunucudan cevap gelene kadar görünmüyor, ağ gecikmesi doğrudan hissediliyor. | Taş atınca taşı hemen atık alanına uçur ve ıstakadan kaldır. Sunucu `gameError` dönerse geri al. Istaka içi taşıma zaten yerel. |
+| İ7 | ⚪ | `public/js/game.js:1504-1508` | Saniyelik oturum sayacı ayrı bir `setInterval`. | İ3 ile birleştir. |
+
+### 4.4 Temizlik ve ölü kod
+
+| # | Yer | Not |
+|---|---|---|
+| T1 | `server/roomManager.js` | Hiçbir yerde kullanılmıyor. Silinebilir. |
+| T2 | `server/gameLogic.js:411-641` | `openHand`, `openWithPairs`, `addToTableGroup`, `checkFinish`, `checkInstantFinish`, `backtrackGroups`, `canFinishWithPairs`, `tableGroups` kullanılmıyor (gerçek mantık `index.js` içinde). Silinmeli ki iki farklı kural kaynağı oluşmasın. |
+| T3 | `public/js/game.js:474-492` | `renderRoundScoresTable` çağrılmıyor. |
+| T4 | `public/js/game.js:1179` | `findAvailablePairs` kapanışı ile `showPairsModal` aynı satırda (`}function`). |
+| T5 | Testler | Test çıktısı oyun loglarıyla dolu (S6 ile birlikte çözülür). |
+| T6 | Kök dizin | Git deposu değil, depo `alemdarcafeonline/.git` altında. Tek kaynağa inilmeli. |
+
+---
+
+## 5. Yol haritası (yapılacaklar listesi)
+
+Her madde bitince `[x]` yapın ve ilgili tabloya "✅ yapıldı" notu düşün. Her fazın sonunda `npm test`.
+
+### Faz 0 — Hazırlık (yarım gün)
+- [ ] Asıl çalışma klasörüne karar ver: kök mü, `alemdarcafeonline/` mi? Diğerini sil veya arşivle. (T6)
+- [ ] Git kur ve mevcut hali ilk commit olarak kaydet (geri dönüş noktası).
+- [ ] Ölçüm altyapısı: sunucuya event-loop gecikmesi ölçümü (`perf_hooks.monitorEventLoopDelay`) ekle, `/health` içinde p99 değerini göster. İstemcide geliştirme modunda FPS sayacı.
+
+### Faz 1 — Sunucu gecikmesi (en büyük kazanç, 1-2 gün)
+- [x] S1 (2026-10-22): `seriesOuts` artık `Melds.probeGains` kullanıyor. Kalan el bir kez çözülüyor, her deneme taşı için yalnızca o taşı içeren gruplar deneniyor. Aynı türden adaylar bir kez hesaplanıyor. **Bot kararları eskisiyle birebir aynı** (3200 adayda fark 0, `okeyFuzz` testi bunu her çalıştırmada doğruluyor). Ölçüm (150 maç, ~12.500 bot turu): ortalama 11,1 → 4,0 ms, p95 51 → 17 ms, p99 91 → 28 ms, en kötü 412 → 107 ms. Not: "en iyi N adayı hesapla" kısa listesi denendi, kaliteyi ölçülebilir biçimde değiştirmediği ama davranışı değiştirdiği için eklenmedi. Daha fazla hız gerekirse ilk aday odur.
+- [x] S2 (2026-10-22): `server/avatars.js` resmi içerik hash'iyle bir kez saklıyor, mesajlarda `/api/avatar/<id>` gidiyor (1 yıllık `immutable` önbellek). 2 profil resimli masada `gameState` 159,6 KB → 3,4 KB, `lobbyUpdate` 157,4 KB → 1,1 KB. Misafir resimleri RAM'de (64 MB sınırı, en eski silinir). Sunucu yeniden başlarsa misafir resmi 404 olur ve istemci varsayılan avatara döner. Hesap resimleri veritabanından tekrar yüklenir.
+- [x] S4 + H1 (2026-10-22): Hesaplar `node:sqlite` ile `accounts.db`'de (ek paket yok, Node ≥22.13). Her işlem tek satır yazıyor. `accounts.json` ilk açılışta aktarılıp yedek olarak bırakılıyor. Bozuksa dosyaya dokunulmuyor ve hiçbir hesap silinmiyor, düzeltilince tekrar deneniyor. Açılışta süresi dolan oturumlar siliniyor (S8'in bir kısmı).
+- [x] S5 (2026-10-22): `crypto.scrypt` (asenkron). `register`/`login` artık Promise döndürüyor, API rotaları `await` ediyor. Test, giriş sürerken event loop'un serbest kaldığını ve aynı adla eşzamanlı iki kayıtta yalnızca birinin başarılı olduğunu doğruluyor.
+- [x] S6 (2026-10-22): `LOG_LEVEL` desteği (`server/logger.js`). `NODE_ENV=production` (Dockerfile'da açık) iken varsayılan `info`, yani `Logger.game`/`debug` sessiz. Hata ayıklamak için `LOG_LEVEL=debug`. Okey/gösterge logu kaldırıldı.
+- [x] S7 (2026-10-22): `authHits` her dakika temizleniyor.
+- [ ] S8: Kalan kısım: sunucu uzun süre açık kalırsa süresi dolan oturumların periyodik silinmesi (açılışta silme yapılıyor).
+
+### Faz 2 — İstemci akıcılığı (2-3 gün)
+- [x] İ1 (2026-10-22): Sürüklenen taş `translate3d` ile taşınıyor ve kare başına bir kez (`requestAnimationFrame`) çiziliyor. Masa taşlarının konumu sürükleme başında bir kez ölçülüyor, masa yeniden çizilirse sıfırlanıyor. Sürükleme sırasında `elementFromPoint` yerine bu ölçülmüş dikdörtgenler kullanılıyor; tek başına kare başına 0,7 ms tutuyordu. Bırakma anında gerçek DOM isabet testi yapılıyor. Vurgu sınıfları yalnızca hedef grup değişince güncelleniyor. Ölçüm (masaüstü Chrome, 150 kare): kare başına JS işi 1,15 ms → 0,13 ms.
+- [x] İ3 (2026-10-22): Üst süre çubuğu (`scaleX` + ray `translateX`) ve oyuncu paneli dolgusu (`clip-path`) Web Animations API ile akıyor. JS yalnızca sıra, görünürlük veya aktif oyuncu değişince animasyonu kuruyor; son 10 saniye uyarısı tek bir `setTimeout`. 100 ms'lik `setInterval` ve sürekli `width`/`left` geçişleri (her karede layout) kaldırıldı. Güvenlik için 1 sn'lik kontrol kaldı, değişiklik yoksa hiçbir şey yapmıyor. Gizli `.player-turn-clock` artık güncellenmiyor.
+- [x] İ2 (2026-10-22): `game.js` içinde `changed(bölüm, imza)` var. Istaka, masa grupları, atık yığınları, gösterge ve skor tablosu girdileri değişmediyse DOM'a dokunulmuyor. Sık güncellenen metinler `setText` ile yalnızca farklıysa yazılıyor. Ölçüm (masaüstü Chrome, `render()` + layout): değişiklik yok 3,1 → 0,07 ms; rakip taş attı 3,6 → 1,6 ms (uçuş animasyonu dahil); masada grup değişti 2,4 ms (masa ve işlek işaretleri için ıstaka yeniden çiziliyor). **Yeni kural:** bir bölümün çiziminde kullanılan yeni bir değer eklenirse o bölümün imzasına da eklenmeli, yoksa ekran güncellenmez. Event delegation yapılmadı: ıstaka artık yalnızca değişince yeniden kuruluyor, kazancı küçük kaldı.
+- [x] İ6 (2026-10-22): Taş atma iyimser (`applyOptimisticDiscard`). Taş hemen ıstakadan kalkıp atık alanına uçuyor ve sıra sonraki oyuncuya geçmiş görünüyor. Sunucudan gelen `gameState` gerçek durumu yazıyor. `gameError`, bağlantı kopması veya 8 sn cevapsızlıkta eski hale dönülüyor. Yerden alınan taş henüz kullanılmadıysa iyimser gösterim yapılmıyor (sunucu zaten reddeder). Taş çekme iyimser değil: desteden gelecek taş bilinmiyor. Yerden çekme ileride yapılabilir.
+- [ ] Gerçek bir orta seviye Android telefonda Chrome DevTools Performance kaydıyla ölç. Sürüklemede 60 FPS hedefi.
+
+### Faz 3 — Güvenlik ve sağlamlık (1 gün)
+- [x] H2 (2026-10-23): Misafir adında yalnızca harf/rakam/boşluk/`_.-` kalıyor. Hediye bildirimi `textContent` ile yazılıyor.
+- [x] H4 (2026-10-23), farklı çözümle: skorlar hâlâ ada göre ama gerçek hata giderildi. Oyundan önce ayrılan oyuncunun 0 puanlık satırı kalıp maç sonunda "şampiyon" görünebiliyordu. Artık `removeSeats` satırı siliyor ve şampiyon yalnızca masadakiler arasından seçiliyor. Takım modunda şampiyon `team1` yerine "A & B" adlarıyla yazılıyor.
+- [x] H5 (2026-10-23): Karıştırma ve başlayan oyuncu `crypto.randomInt` ile.
+- [x] H6: Ölçüldü, sorun değil. 6000 elde arama sınırı bir kez bile devreye girmedi ve sonuç değişmedi (sınırsız en kötü 9 ms). Kod değişmedi.
+- [x] H7, H9 (2026-10-23).
+- [x] H8 (2026-10-23): Elle "yeni el" isteği botları hazır sayıyor. Bütün gerçek oyuncular hazır olunca el başlıyor.
+- [x] H10 (2026-10-23): Socket başına token bucket (30 anlık, saniyede 15). Fazlası işlenmiyor, 2 saniyede bir uyarı gidiyor.
+- [x] Ek (2026-10-23): Socket olay işleyicileri `try/catch` ile sarılı; hatalı bir istek sunucuyu düşürmüyor, oyuncuya hata dönüyor. Bütün oda zamanlayıcıları (`guardedTimer`) hata verirse `recoverRoom` devreye giriyor: önce otomatik hamle deneniyor, olmazsa el iptal edilip yeniden başlatılıyor. Masa donmuyor.
+- [x] Ek (2026-10-23): İstemcide sıra hamleleri (`MOVE_EVENTS`) sunucu cevap verene kadar tekrar gönderilmiyor. Çift tıklama ve hızlı dokunuş artık "zaten taş aldınız" gibi hatalar üretmiyor (5 sn güvenlik süresi var). Kendi profilinde hediye düğmeleri gizli.
+- [x] S8 (2026-10-23): Süresi dolan oturumlar 6 saatte bir siliniyor.
+- [ ] S3: `snapshot`'tan değişmeyen alanları çıkar, `seq` numarası ekle (S2 sonrası mesaj zaten ~3 KB, öncelik düşük).
+
+Doğrulama (2026-10-23): `tests/v34Stability.test.js` yukarıdakileri test ediyor. Ayrıca tarayıcıda 2 ellik tam maç otomatik oynandı: her turda taş çekme 4 kez, atma 2 kez art arda basıldı. Sonuç: 0 hata mesajı, 0 JS hatası, takılma yok. Bir el seri açılarak oynandı. "YENİ OYUNA BAŞLA" yeni masaya oturttu.
+
+### Faz 4 — Kod düzeni (2-3 gün, davranış değişmeden)
+- [ ] `server/index.js`'i böl: `rooms.js` (oda/koltuk), `turns.js` (süre/tur), `bot.js` (bot kararları), `moves.js` (socket hamleleri), `http.js` (API).
+- [ ] `public/js/game.js`'i böl: `rack.js`, `table.js`, `drag.js`, `hud.js`, `net.js`.
+- [ ] T1-T4 ölü kodu sil.
+- [x] İ5 (2026-10-23): Oyunda gerçekten yüklenen PNG'ler WebP'ye çevrildi (tarayıcının kendi kodlayıcısıyla, boyut aynı, kalite 0,9; taş sprite'ı 0,95). Hazır avatarlar 256 px'e küçültüldü. 3,2 MB → 393 KB (%88). Oyun sayfası artık hiç PNG indirmiyor. Taşlar, ıstaka ve skor tablosu ekranda kontrol edildi. Hazır avatarların **kayıtlı adları** (`alibicim.png` vb.) değişmedi; hesaplarda ve tarayıcıda bu adlar duruyor. `webpAvatar()` gösterirken `.webp` sürümünü kullanıyor. Eski PNG'ler (3,2 MB) silinmedi: eski önbellekli CSS'ler hâlâ onları isteyebilir, birkaç hafta sonra silinebilir.
+- [x] İ4 (2026-10-23): Ölçüldü; dosyalarda değişiklik yapılmadı. O an hiçbir elemana uymayan 576 kural (%34) tarayıcıda geçici olarak silindi: tam stil hesabı 5,5 → 5,9 ms, yani fark yok. Oyundaki gerçek stil+layout işi (sıra değişince `body.my-turn`) 0,9 ms. Oyun sırasında sürekli çalışan tek ana iş parçacığı animasyonu, aktif paneldeki küçük `fillSparkle` (boyama alanı küçük). Sonuç: CSS oyun akıcılığında darboğaz değil. Kural silmek veya birleştirmek görünümü bozma riski taşıyor ve kazancı yok. Birleştirme yalnızca ilk açılışta 18 isteği 1'e indirir; bunun yerine production'da gzip/brotli açık mı kontrol edilmeli (S9).
+- [ ] İsteğe bağlı: JSDoc tipleri + `// @ts-check` ile TypeScript'in faydasını derleme adımı eklemeden al.
+
+### Faz 5 — Büyüme (sadece ihtiyaç olunca)
+- [ ] H3: Oda durumunu kalıcılaştır (SQLite/Redis), deploy'da oyun kaybolmasın.
+- [ ] Birden fazla sunucu gerekirse: Redis + `@socket.io/redis-adapter`, odaları sunucuya sabitle (sticky session).
+- [ ] Ölçüm hâlâ istemci tarafında takılma gösteriyorsa: yalnızca masa/ıstaka alanını Pixi.js'e taşı. Lobi ve menüler HTML kalabilir.
+
+---
+
+## 6. Teknoloji önerileri neden şimdilik gerekli değil
+
+| Öneri | Karar | Neden |
+|---|---|---|
+| Go | Gerekli değil | Okey sıra tabanlı, saniyede birkaç olay var. Node binlerce masayı taşır. Asıl sorun event loop'u bloke eden kod (S1, S4, S5). Go'ya geçmek bunları çözmez, sadece yeniden yazdırır. |
+| TypeScript | İsteğe bağlı | Hız kazandırmaz, bakım kolaylığı sağlar. Faz 4'te `@ts-check` ile kademeli geçilebilir. |
+| Socket.IO yerine saf `ws` | Gerekli değil | Kazanç birkaç ms. Socket.IO'nun otomatik yeniden bağlanması mobilde değerli. |
+| React / Next.js | Gerekli değil | Next.js SEO ve sayfa yönlendirme için. Oyun ekranına faydası yok, ek yük getirir. |
+| Pixi.js / Phaser | Ölçümden sonra karar | 106 taşlık bir masa, doğru yazılmış DOM/CSS ile 60 FPS çalışır. Önce İ1-İ4 yapılmalı. |
+| Redis | Şimdilik gerekli değil | Masalar zaten RAM'de ve bu Redis'ten hızlı. Gerekli olduğu durumlar: deploy'da oyunların korunması (H3) ve çoklu sunucu (Faz 5). |
+| PostgreSQL / SQLite | **Gerekli** | S4 ve H1. Tek sunucu için SQLite yeterli ve en basit seçenek. Sosyal özellikler (arkadaş listesi, geçmiş) büyürse PostgreSQL'e geçilir. |

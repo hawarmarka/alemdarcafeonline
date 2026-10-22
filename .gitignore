@@ -8,3 +8,6 @@ data/
 Thumbs.db
 *.log
 *.zip
+# Ruflo yerel verisi ve eski kopya klasör (asıl klasör burası)
+.claude-flow/
+alemdarcafeonline/

@@ -1,6 +1,7 @@
 // 101 Okey - Tam Kural Entegrasyonu
 // Resmi kurallar: yerden alma, çift açma, taş işleme, puanlama, elden bitirme
 
+const crypto = require('crypto');
 const Logger = require('./logger');
 
 class GameLogic {
@@ -63,10 +64,10 @@ class GameLogic {
         this.tiles.push({ color: 'Sahte', number: 0, isJoker: false, isFakeJoker: true, id: 'Sahte-2' });
     }
 
-    // Taşları karıştır
+    // Taşları karıştır (kriptografik rastgelelik: dağıtım tahmin edilemez)
     shuffleTiles() {
         for (let i = this.tiles.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
+            const j = crypto.randomInt(i + 1);
             [this.tiles[i], this.tiles[j]] = [this.tiles[j], this.tiles[i]];
         }
     }
@@ -92,7 +93,7 @@ class GameLogic {
 
         // Tamamen rastgele dağıtım: karıştırılmış desteden başlayana 22, diğerlerine 21 taş.
         // (Önceki sürüm güçlü elleri seçiyordu; bu yüzden herkes ilk turda açabiliyordu.)
-        this.currentPlayer = Math.floor(Math.random() * 4);
+        this.currentPlayer = crypto.randomInt(4);
         this.playerTiles = Array.from({ length: 4 }, (_, i) => this.tiles.splice(-(i === this.currentPlayer ? 22 : 21)));
         this.playerStates=Array.from({length:4},()=>this.createPlayerState());
         this.tableGroups=[];
@@ -107,9 +108,8 @@ class GameLogic {
         // Her oyuncunun yerden aldığı taşlar (botlar rakibin ne topladığını takip eder)
         this.pickLog = [[], [], [], []];
 
+        // Gösterge/okey loglanmaz: oyun sürerken loglara erişen biri eli öğrenebilirdi.
         Logger.game(`Oyun başladı! Dağıtıcı: ${players[this.currentPlayer].name}`);
-        Logger.debug(`Gösterge: ${this.indicator.color} ${this.indicator.number}`);
-        Logger.debug(`OKEY: ${this.okey.color} ${this.okey.number}`);
     }
 
     // Oyuncu taşlarını getir

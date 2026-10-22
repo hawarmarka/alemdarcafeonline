@@ -5,7 +5,7 @@
     <meta charset="UTF-8"><link rel="icon" href="/asset/ui/alemdar-logo.svg" type="image/svg+xml">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alemdar Cafe · 101 Okey - Oyun</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=2">
     <link rel="stylesheet" href="css/alemdar-pro.css">
     <link rel="stylesheet" href="css/button-skins.css">
     <link rel="stylesheet" href="css/theme-config.css">
@@ -19,11 +19,11 @@
     <link rel="stylesheet" href="css/v23-plus-match.css?v=27">
     <link rel="stylesheet" href="css/v24-modern.css?v=7">
     <link rel="stylesheet" href="css/v25-plus-turn.css?v=4">
-    <link rel="stylesheet" href="css/v26-ui-assets.css?v=7">
-    <link rel="stylesheet" href="css/v27-tidy.css?v=6">
+    <link rel="stylesheet" href="css/v26-ui-assets.css?v=8">
+    <link rel="stylesheet" href="css/v27-tidy.css?v=7">
     <link rel="stylesheet" href="css/transitions.css?v=1">
     <link rel="stylesheet" href="css/v28-polish.css?v=2">
-    <link rel="stylesheet" href="css/v29-pro.css?v=6">
+    <link rel="stylesheet" href="css/v29-pro.css?v=10">
     <script src="js/transitions.js?v=1"></script>
 </head>
 
@@ -111,7 +111,7 @@
 
     <div id="gameContainer" class="game-container hidden">
         <header class="premium-gamebar">
-            <div class="gamebar-profile"><img id="gamebarAvatar" src="/asset/avatars/alibicim.png" alt="Profil"><div><strong id="gamebarName">Oyuncu</strong><small id="gamebarLevel">Seviye 1 · 0 XP</small></div></div>
+            <div class="gamebar-profile"><img id="gamebarAvatar" src="/asset/avatar-default.svg" alt="Profil"><div><strong id="gamebarName">Oyuncu</strong><small id="gamebarLevel">Seviye 1 · 0 XP</small></div></div>
             <div class="gamebar-center"><b>ALEMDAR CAFE</b><span id="gamebarMode">KLASİK · KATLAMASIZ</span></div>
             <div class="gamebar-right"><div class="gamebar-chip"><small>ODA KODU</small><strong id="gamebarRoom">------</strong></div><div class="gamebar-chip"><small>OYUN MODU</small><strong id="gamebarAssist">Yardımlı</strong></div><button id="gamebarLeaveBtn" class="gamebar-leave" type="button" title="Masa menüsü" aria-label="Masa menüsünü aç" aria-controls="quickMenuPanel" aria-expanded="false">Menü</button>
             <div id="quickMenuPanel" class="quick-menu-panel hidden" role="menu" aria-label="Masa işlemleri">
@@ -449,7 +449,7 @@
             </div>
         </div>
 
-        <div id="turnTimerBar" class="turn-timer-bar hidden" aria-hidden="true"><span class="ttb-clock"></span><div class="ttb-track"><div class="ttb-fill"></div><span class="ttb-knob"></span></div></div>
+        <div id="turnTimerBar" class="turn-timer-bar hidden" aria-hidden="true"><span class="ttb-clock"></span><div class="ttb-track"><div class="ttb-fill"></div><span class="ttb-rail"><span class="ttb-knob"></span></span></div></div>
         <button id="returnTakenBtn" type="button" class="return-taken hidden" title="Yandan aldığın taşı geri bırak"><span class="rt-tile"></span><span class="rt-label">GERİ<br>BIRAK</span></button>
         <div id="connectionBanner" class="connection-banner hidden" role="status">Bağlantı koptu; tekrar bağlanıyor...</div>
         <!-- Bildirim Toast -->
@@ -460,9 +460,9 @@
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="js/meldSolver.js?v=22"></script>
+    <script src="js/meldSolver.js?v=23"></script>
     <script src="js/tableGrid.js?v=2"></script>
-    <script src="js/game.js?v=43"></script>
+    <script src="js/game.js?v=52"></script>
     <script src="js/stage-fit.js?v=18"></script>
 </body>
 

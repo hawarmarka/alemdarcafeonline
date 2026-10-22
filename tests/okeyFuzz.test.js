@@ -38,4 +38,20 @@ for (let round = 0; round < 1500; round++) {
   assert(solved.groups.flat().length < hand.length, 'keepOne: elde en az bir taş kalmalı');
 }
 assert(withJoker > 100, 'yeterince okeyli grup denenmeli');
-console.log(`okeyFuzz: ${checked} grup (${withJoker} okeyli/sahte okeyli) çözücü ve sunucuda tutarlı`);
+// Botun hızlı hesabı (probeGains) her deneme taşı için tam çözümle aynı artışı vermeli.
+let probes = 0;
+for (let round = 0; round < 200; round++) {
+  const okey = { color: colors[rnd(4)], number: 1 + rnd(13) };
+  const deck = [];
+  for (let s = 0; s < 2; s++) for (const c of colors) for (let n = 1; n <= 13; n++) deck.push({ id: `${c}-${n}-${s}`, color: c, number: n, isFakeJoker: false });
+  deck.push({ id: 'Sahte-1', color: 'Sahte', number: 0, isFakeJoker: true }, { id: 'Sahte-2', color: 'Sahte', number: 0, isFakeJoker: true });
+  for (let i = deck.length - 1; i > 0; i--) { const j = rnd(i + 1); [deck[i], deck[j]] = [deck[j], deck[i]]; }
+  const hand = deck.slice(0, 14 + rnd(8));
+  const list = deck.slice(40, 52).map((t, i) => ({ ...t, id: 'probe-' + i }));
+  const base = Melds.solve(hand, okey).score;
+  Melds.probeGains(hand, okey, list).forEach((gain, i) => {
+    assert.equal(gain, Melds.solve([...hand, list[i]], okey).score - base, 'probeGains tam çözümden farklı');
+    probes++;
+  });
+}
+console.log(`okeyFuzz: ${checked} grup (${withJoker} okeyli/sahte okeyli) çözücü ve sunucuda tutarlı; ${probes} deneme taşında probeGains tam çözümle aynı`);
