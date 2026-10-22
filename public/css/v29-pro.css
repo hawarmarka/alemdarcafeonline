@@ -29,7 +29,12 @@ body.game-page .particles,body.game-page .background-animation{display:none!impo
 
 /* ---------- sürükle-bırak: hedef grup ---------- */
 #compactOpenGroups .grid-table-tile.drop-target{box-shadow:0 0 0 2px #9be34a,0 0 12px 2px rgba(155,227,74,.8)!important;z-index:6!important}
-.pointer-ghost{pointer-events:none!important;z-index:10000!important;transition:none!important}
+.pointer-ghost{pointer-events:none!important;z-index:10000!important;transition:none!important;filter:drop-shadow(0 14px 16px rgba(0,0,0,.45))}
+/* Tutulan taşın ıstakadaki yeri soluk kalır; uzun basışta telefon menüsü/seçimi açılmaz */
+#gameContainer .cue-wood .tile-sprite.drag-source{opacity:.28!important;transform:none!important;transition:none!important}
+#gameContainer .cue-wood .tile-sprite,#drawPile,#leftDiscardTiles .tile-sprite{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+/* Yardımsız masada SERİ DİZ / ÇİFT DİZ kapalı */
+#gameContainer #sortSeriesBtn.action-btn:disabled,#gameContainer #sortPairsBtn.action-btn:disabled{filter:grayscale(1) brightness(.55)!important;cursor:not-allowed!important;opacity:.7}
 
 /* ---------- süre göstergeleri: JS Web Animations ile transform/clip-path animasyonu (layout yok) ---------- */
 #turnTimerBar .ttb-fill{width:100%;transform-origin:left center;transition:none}
@@ -104,6 +109,37 @@ body.game-page .particles,body.game-page .background-animation{display:none!impo
 #gameContainer #rulesModal.hidden{display:none!important}
 #gameContainer #rulesModal .rules-dialog{position:relative;width:min(720px,90%);padding:26px 30px}
 #gameContainer #rulesModal li{font:500 17px/1.45 var(--pro-text);margin:4px 0}
+
+/* ---------- hediye albümü ---------- */
+#gameContainer #tomatoSelectOverlay{position:fixed;inset:0;z-index:960;display:grid;place-items:center;background:rgba(3,12,26,.55)}
+#gameContainer #tomatoSelectOverlay.hidden{display:none!important}
+#gameContainer .tomato-select-panel.gift-album{width:min(760px,92%);padding:22px 26px 20px;text-align:left}
+.gift-album-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px}
+.gift-album-head h3{margin:0;font:600 30px/1 var(--pro-font);letter-spacing:1.5px;color:#fff}
+.gift-album-left{font:500 16px/1 var(--pro-font);letter-spacing:.8px;color:#ffd670}
+.gift-album-step{margin:14px 0 8px;font:500 15px/1 var(--pro-font);letter-spacing:1.6px;color:#9fc6ee;text-transform:uppercase}
+.gift-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.gift-card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;height:96px;padding:6px;border-radius:14px;cursor:pointer;
+  border:1px solid rgba(255,255,255,.16);background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(255,255,255,.04));color:#eef6ff;transition:transform .12s,border-color .12s,background .12s}
+.gift-card:hover{transform:translateY(-3px);border-color:rgba(160,205,255,.6)}
+.gift-card.selected{border-color:#ffd670;background:linear-gradient(160deg,rgba(255,214,112,.28),rgba(255,214,112,.08));box-shadow:0 0 0 2px rgba(255,214,112,.35)}
+.gift-emoji{font-size:40px;line-height:1;filter:drop-shadow(0 3px 4px rgba(0,0,0,.35))}
+.gift-name{font:500 14px/1 var(--pro-font);letter-spacing:.6px;white-space:nowrap}
+.gift-targets{display:flex!important;gap:12px!important;margin:0!important;flex-wrap:wrap}
+.gift-targets .gift-target{display:flex!important;align-items:center;gap:10px;padding:8px 16px 8px 8px!important;border-radius:999px!important;cursor:pointer;
+  border:1px solid rgba(160,205,255,.35)!important;background:rgba(20,60,110,.7)!important;color:#fff!important;font:500 18px/1 var(--pro-font)!important;letter-spacing:.5px}
+.gift-targets .gift-target img{width:38px;height:38px;border-radius:50%;object-fit:cover}
+.gift-targets .gift-target:hover{background:rgba(40,100,170,.85)!important}
+#gameContainer .gift-album .cancel-throw-btn{display:block;margin:16px auto 0;padding:10px 26px;border-radius:12px;font:500 17px/1 var(--pro-font);letter-spacing:.8px;cursor:pointer}
+/* profil penceresindeki küçük ızgara */
+#gameContainer #profileGiftIcons.gift-grid-compact{display:grid!important;grid-template-columns:repeat(6,1fr)!important;gap:6px!important}
+#gameContainer #profileGiftIcons .gift-card{width:auto!important;height:62px!important;padding:4px!important;font-size:inherit!important}
+#gameContainer #profileGiftIcons .gift-emoji{font-size:26px}
+#gameContainer #profileGiftIcons .gift-name{font-size:11px}
+/* gönderilen hediye: alıcının panelinde büyüyüp süzülür */
+.gift-float{pointer-events:none}
+.gift-float .gift-float-kind{display:inline-block;font-size:44px!important;animation:giftPop 2.6s ease-out forwards}
+@keyframes giftPop{0%{transform:scale(.3) translateY(10px);opacity:0}15%{transform:scale(1.25);opacity:1}30%{transform:scale(1)}80%{opacity:1}100%{transform:translateY(-40px);opacity:0}}
 
 /* ---------- masa bekleme: arkada masa görünsün ---------- */
 #lobbyOverlay.lobby-overlay{background:radial-gradient(ellipse at 50% 45%,rgba(4,16,34,.25),rgba(4,16,34,.62))!important;backdrop-filter:blur(1.5px)}

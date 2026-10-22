@@ -7,12 +7,12 @@ let currentUser = null, pendingJoin = null, authMode = 'login';
 let selectedAvatar = localStorage.getItem('okeyPlayerAvatar') || 'default.svg';
 let selectedFrame = localStorage.getItem('okeyPlayerFrame') || 'gold';
 let selectedIstaka = localStorage.getItem('okeyPlayerIstaka') || 'istaka.jpg';
-const builtins = ['default.svg', 'alibicim.png', 'egefitness.png', 'james.jpg', 'lvblc5.jpg'];
+// Hazır avatarlar (sunucudaki Avatars.BUILTIN ile aynı). Eski fotoğraf avatarları kaldırıldı; kayıtlı eski adlar varsayılana döner.
+const presetAvatars = Array.from({ length: 10 }, (_, i) => `av${String(i + 1).padStart(2, '0')}.svg`);
 // Sunucu yüklenen resimleri /api/avatar/<id> adresiyle gönderir; bulunamazsa varsayılana dönülür.
 document.addEventListener('error', e => { if (e.target.tagName === 'IMG' && e.target.src.includes('/api/avatar/')) e.target.src = '/asset/avatar-default.svg'; }, true);
-const avatarSrc = a => a?.startsWith('data:image/') || /^\/api\/avatar\/[\w-]{22}$/.test(a || '') ? a : a === 'default.svg' || !a ? '/asset/avatar-default.svg' : '/asset/avatars/' + webpAvatar(builtins.includes(a) ? a : builtins[0]);
-// Hazır avatarların adları (hesaplarda/tarayıcıda kayıtlı) aynı kalır; küçültülmüş WebP sürümü gösterilir.
-function webpAvatar(a) { return a === 'lvblc5.jpg' ? a : a.replace(/\.(png|jpe?g)$/, '.webp'); }
+const avatarSrc = a => a?.startsWith('data:image/') || /^\/api\/avatar\/[\w-]{22}$/.test(a || '') ? a : presetAvatars.includes(a) ? '/asset/avatars/' + a : '/asset/avatar-default.svg';
+if (!presetAvatars.includes(selectedAvatar) && !selectedAvatar.startsWith('data:image/')) selectedAvatar = 'default.svg';
 function toast(message) { const node = $('errorToast'); node.querySelector('.toast-message').textContent = message; node.classList.remove('hidden'); clearTimeout(toast.timer); toast.timer = setTimeout(() => node.classList.add('hidden'), 5000); }
 async function api(url, body, method = 'POST') {
   const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + authToken }, ...(method !== 'GET' ? { body: JSON.stringify(body || {}) } : {}) });
@@ -106,6 +106,25 @@ $('avatarUpload').onchange = async e => {
   } catch (err) { toast('Fotoğraf yüklenemedi: ' + err.message); }
   e.target.value = '';
 };
+// Hazır avatar seçimi (profil penceresi): hesaplıysa sunucuya, misafirse tarayıcıya kaydedilir.
+(function presetAvatarPicker() {
+  const box = $('avatarOptions'); if (!box) return;
+  const paint = () => box.querySelectorAll('button').forEach(b => b.classList.toggle('selected', b.dataset.avatar === (currentUser?.avatar || selectedAvatar)));
+  for (const name of presetAvatars) {
+    const b = document.createElement('button'); b.type = 'button'; b.dataset.avatar = name; b.title = 'Bu avatarı seç';
+    const img = document.createElement('img'); img.src = '/asset/avatars/' + name; img.alt = ''; b.append(img);
+    b.addEventListener('click', async () => {
+      try {
+        if (currentUser) currentUser = (await api('/api/avatar', { avatar: name })).user;
+        else { selectedAvatar = name; localStorage.setItem('okeyPlayerAvatar', name); }
+        applyProfile(); paint();
+      } catch (err) { toast(err.message); }
+    });
+    box.append(b);
+  }
+  paint();
+  $('avatarModal')?.addEventListener('click', paint, true);
+})();
 document.querySelectorAll('.rack-options button').forEach(btn => btn.onclick = () => {
   selectedIstaka = btn.dataset.istaka; localStorage.setItem('okeyPlayerIstaka', selectedIstaka);
   document.querySelectorAll('.rack-options button').forEach(b => b.classList.toggle('selected', b === btn));

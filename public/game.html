@@ -23,7 +23,7 @@
     <link rel="stylesheet" href="css/v27-tidy.css?v=7">
     <link rel="stylesheet" href="css/transitions.css?v=1">
     <link rel="stylesheet" href="css/v28-polish.css?v=2">
-    <link rel="stylesheet" href="css/v29-pro.css?v=10">
+    <link rel="stylesheet" href="css/v29-pro.css?v=11">
     <script src="js/transitions.js?v=1"></script>
 </head>
 
@@ -339,20 +339,18 @@
                     <div><span>Durum</span><strong id="profileState">-</strong></div>
                 </div>
                 <div class="profile-gift-label">🎁 Hediye Gönder</div>
-                <div id="profileGiftIcons" class="profile-gifts">
-                    <button data-gift="🎁">🎁</button><button data-gift="💐">💐</button><button data-gift="☕">☕</button><button data-gift="❤️">❤️</button><button data-gift="🌹">🌹</button><button data-gift="😘">😘</button>
-                </div>
+                <div id="profileGiftIcons" class="profile-gifts gift-grid gift-grid-compact"><!-- game.js hediye listesinden doldurur --></div>
             </div>
         </div>
 
         <!-- Domates Hedef Seçimi -->
         <div id="tomatoSelectOverlay" class="tomato-select-overlay hidden">
-            <div class="tomato-select-panel">
-                <h3>🎁 Hediye Gönder</h3>
-                <p>Önce hediye sonra oyuncu seç. Bu hediyeler ücretsiz ve semboliktir.</p><div class="gift-icons" id="giftIcons"><button data-gift="🎁" class="selected">🎁</button><button data-gift="💐">💐</button><button data-gift="☕">☕</button><button data-gift="❤️">❤️</button><button data-gift="🌹">🌹</button><button data-gift="😘">😘</button></div>
-                <div id="targetButtons" class="target-buttons">
-                    <!-- Hedefler JS ile doldurulacak -->
-                </div>
+            <div class="tomato-select-panel gift-album">
+                <div class="gift-album-head"><h3>Hediye Albümü</h3><span class="gift-album-left" id="giftAlbumLeft"></span></div>
+                <p class="gift-album-step">1 · Hediyeni seç</p>
+                <div class="gift-grid" id="giftIcons"><!-- game.js hediye listesinden doldurur --></div>
+                <p class="gift-album-step">2 · Kime gönderiyorsun?</p>
+                <div id="targetButtons" class="target-buttons gift-targets"><!-- Hedefler JS ile doldurulacak --></div>
                 <button id="cancelThrowBtn" class="cancel-throw-btn">Vazgeç</button>
             </div>
         </div>
@@ -462,7 +460,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/meldSolver.js?v=23"></script>
     <script src="js/tableGrid.js?v=2"></script>
-    <script src="js/game.js?v=52"></script>
+    <script src="js/game.js?v=53"></script>
     <script src="js/stage-fit.js?v=18"></script>
 </body>
 

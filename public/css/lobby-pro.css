@@ -112,3 +112,10 @@ body.lobby-page{font-family:var(--txt);background:radial-gradient(ellipse at 50%
 .lb-logo-img{position:absolute;left:672px;top:2px;width:214px;filter:drop-shadow(0 8px 12px rgba(0,0,0,.4))}
 .splash .splash-logo.logo-img{position:absolute;left:50%;top:7%;width:min(44vw,62vh);transform:translateX(-50%);filter:drop-shadow(0 14px 22px rgba(0,0,0,.45))}
 .auth-dialog .modal-logo{width:190px!important;margin:-6px auto 4px!important;display:block}
+
+/* Hazır avatar seçimi (profil penceresi) */
+.avatar-options{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:8px 0 14px}
+.avatar-options button{aspect-ratio:1;padding:3px;border-radius:50%;border:2px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);cursor:pointer;transition:transform .12s,border-color .12s}
+.avatar-options button img{width:100%;height:100%;border-radius:50%;display:block}
+.avatar-options button:hover{transform:translateY(-2px);border-color:rgba(120,185,255,.7)}
+.avatar-options button.selected{border-color:#ffd670;box-shadow:0 0 0 3px rgba(255,214,112,.35)}

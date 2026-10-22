@@ -109,7 +109,7 @@ function addBotToRoom(room, seatIndex = room.players.length) {
         token: `bot-${room.code}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         socketId: null,
         name,
-        avatar: 'default.svg',
+        avatar: Avatars.randomAvatar(),
         frame: 'silver',
         level: 1,
         accountId: null,
@@ -918,6 +918,8 @@ function playerLeave(socket, deliberate = false) {
     }
     socket.emit('leftGame');
 }
+// Hediye albümü (istemcideki GIFTS listesiyle aynı kimlikler); hediyeler ücretsiz ve semboliktir, elde 5 hak.
+const GIFT_IDS = ['cay', 'gul', 'opucuk', 'goz', 'kahkaha', 'domates', 'alkis', 'ortaparmak', 'uyku', 'ates', 'kalp', 'hediye'];
 // Socket başına olay hız sınırı (token bucket): normal oyun saniyede birkaç olay üretir; seli keser.
 const EVENT_BURST = 30, EVENT_REFILL_PER_SEC = 15;
 function allowEvent(socket) {
@@ -1062,7 +1064,7 @@ io.on('connection', socket => {
         if (!room || index < 0 || !room.started) return issue(socket, 'Masada değilsiniz.');
         const to = Number(data?.target), kind = String(data?.kind || '');
         if (!Number.isInteger(to) || to < 0 || to >= 4 || to === index) return issue(socket, 'Hediye gönderilecek oyuncu geçersiz.');
-        if (!['🎁','💐','☕','❤️','🌹','😘'].includes(kind)) return issue(socket, 'Geçersiz hediye.');
+        if (!GIFT_IDS.includes(kind)) return issue(socket, 'Geçersiz hediye.');
         if ((room.gifts[index] || 0) >= 5) return issue(socket, 'Bir elde en fazla 5 ücretsiz hediye gönderebilirsin.');
         room.gifts[index]++;
         io.to(room.code).emit('giftSent', { from: room.players[index].name, fromIndex: index, to: room.players[to].name, toIndex: to, kind, left: 5 - room.gifts[index] });

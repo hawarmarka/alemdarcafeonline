@@ -146,6 +146,15 @@ Her madde bitince `[x]` yapın ve ilgili tabloya "✅ yapıldı" notu düşün. 
 
 Canlı kural testi (2026-10-23, tarayıcıda, gerçek düğmeler/fonksiyonlarla): seri açma (+60 sn), geri toplama (101 ceza), işleme ve bir gruba turda en fazla 2 taş, masadaki okeyi alma, yerden alma zorunluluğu + GERİ BIRAK + aynı taşı tekrar alamama, işlek ve okey atma cezası, çift açma penceresi (el puanı ×2), eli bitirme. Hepsi beklendiği gibi çalıştı. Ayrıca 3 ellik eşli ve katlamalı otomatik maç oynandı, ortasında sayfa yenilendi (aynı el ve ıstaka dizilimi geri geldi). Sonuç: 0 hata, 0 JS hatası, takılma yok. Test aracı `debugSetup` (yalnızca `OKEY_DEBUG=1`) artık `reset`, `pairsOpponent` ve `myGroups` alıyor.
 
+Ek (2026-10-23, kullanıcı isteği):
+- Yardımsız masada SERİ DİZ / ÇİFT DİZ kapalı.
+- Istakada çift dokunuş taşı atıyor (okeyde yüzü çeviriyor). `dblclick` kullanılamaz: ilk dokunuş ıstakayı yeniden çizer; çözüm `pointerEnd` içinde `lastTap`.
+- Desteye tıklayınca taş çekiliyor.
+- Sürüklerken tutulan taşın yeri soluk (`drag-source`), kopya tam opak ve gerçek boyutta. Bırakınca taş yeni yuvasına kayarak oturuyor.
+- Elle işlemede uçan taşın ekranı kaplama hatası giderildi. Sebep: `.grid-table-tile{width:100%!important}` sayfa gövdesinde ekran genişliği oluyordu; `flyTile` ölçüleri artık `!important` ile veriyor.
+- Hazır avatarlar artık çizim SVG `av01..av10.svg` (eski fotoğraflar silindi, kayıtlı eski adlar varsayılana döner). Profil penceresinde seçilebiliyor, botlar rastgele birini alıyor.
+- Hediye albümü: 12 hediye (`GIFTS` istemcide, `GIFT_IDS` sunucuda, ikisi aynı olmalı). Her hediyenin alıcıya ve diğerlerine okunan esprili cümlesi var (`speechSynthesis`, ses kapalıysa okunmaz).
+
 Doğrulama (2026-10-23): `tests/v34Stability.test.js` yukarıdakileri test ediyor. Ayrıca tarayıcıda 2 ellik tam maç otomatik oynandı: her turda taş çekme 4 kez, atma 2 kez art arda basıldı. Sonuç: 0 hata mesajı, 0 JS hatası, takılma yok. Bir el seri açılarak oynandı. "YENİ OYUNA BAŞLA" yeni masaya oturttu.
 
 ### Faz 4 — Kod düzeni (2-3 gün, davranış değişmeden)

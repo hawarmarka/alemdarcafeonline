@@ -2,7 +2,9 @@
 // Yüklenen profil resimleri içerik hash'iyle bir kez saklanır; oyun mesajlarında yalnızca kısa URL gider
 // (önceden her hamlede 4 oyuncunun base64 resmi tekrar gönderiliyordu).
 const crypto = require('crypto');
-const BUILTIN = ['default.svg', 'alibicim.png', 'egefitness.png', 'james.jpg', 'lvblc5.jpg'];
+// Hazır avatarlar: public/asset/avatars/av01..av10.svg (eski fotoğraf avatarları kaldırıldı; kayıtlı eski adlar default olur).
+const AVATARS = Array.from({ length: 10 }, (_, i) => `av${String(i + 1).padStart(2, '0')}.svg`);
+const BUILTIN = ['default.svg', ...AVATARS];
 const MAX_BYTES = Number(process.env.AVATAR_CACHE_BYTES) || 64 * 1024 * 1024;
 const store = new Map(); // id → { type, data, uri } (en eski kullanılan başta)
 const idOf = new Map(); // data URI → id (aynı resim tekrar hash'lenmesin)
@@ -27,4 +29,5 @@ function ref(avatar) {
   return '/api/avatar/' + id;
 }
 function get(id) { return store.get(String(id)) || null; }
-module.exports = { ref, get, BUILTIN };
+const randomAvatar = () => AVATARS[crypto.randomInt(AVATARS.length)];
+module.exports = { ref, get, BUILTIN, AVATARS, randomAvatar };

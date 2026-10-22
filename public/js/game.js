@@ -20,9 +20,7 @@ async function refreshGameProfile() {
 refreshGameProfile();
 // Sunucu yüklenen resimleri /api/avatar/<id> adresiyle gönderir; sunucu yeniden başladıysa resim bulunamaz, varsayılana dönülür.
 document.addEventListener('error', e => { if (e.target.tagName === 'IMG' && e.target.src.includes('/api/avatar/')) e.target.src = '/asset/avatar-default.svg'; }, true);
-const avatarSrc = a => String(a || '').startsWith('data:image/') || /^\/api\/avatar\/[\w-]{22}$/.test(a) ? a : a === 'default.svg' || !a ? '/asset/avatar-default.svg' : '/asset/avatars/' + (['alibicim.png','egefitness.png','james.jpg','lvblc5.jpg'].includes(a) ? webpAvatar(a) : 'default.svg');
-// Hazır avatarların adları (hesaplarda/tarayıcıda kayıtlı) aynı kalır; küçültülmüş WebP sürümü gösterilir.
-function webpAvatar(a) { return a === 'lvblc5.jpg' ? a : a.replace(/\.(png|jpe?g)$/, '.webp'); }
+const avatarSrc = a => String(a || '').startsWith('data:image/') || /^\/api\/avatar\/[\w-]{22}$/.test(a) ? a : a === 'default.svg' || !a ? '/asset/avatar-default.svg' : (/^av(0[1-9]|10)\.svg$/.test(a) ? '/asset/avatars/' + a : '/asset/avatar-default.svg');
 if (!session?.token || !session?.roomCode) window.location.replace('/?oturum=yok');
 const SLOTS = 32, ROW_WIDTH = 16; // Üstte 16, altta 16 YER; oyun yine 21/22 taş dağıtır
 const spriteRows = { Mavi: 0, Siyah: 1, Kirmizi: 2, Yesil: 3, Sahte: 4 };
@@ -378,8 +376,11 @@ socket.on('gameState', data => {
     setText($('gamebarMode'), (state.teamMode ? 'TAKIM' : 'TEK') + ' · ' + (state.assisted ? 'YARDIMLI' : 'YARDIMSIZ') + ' · ' + (state.stackingMode ? 'KATLAMALI' : 'KATLAMASIZ') + ` · EL ${(state.roundsCompleted || 0) + 1}/${state.roundLimit || 4}`);
     setText($('tableOptions'), `${state.teamMode ? 'Takım' : 'Tek'} · ${state.assisted ? 'Yardımlı' : 'Yardımsız'} · ${state.stackingMode ? `Katlamalı · Açılış ${state.minimumOpenScore}+` : 'Katlamasız'} · ${(state.roundsCompleted || 0) + 1}/${state.roundLimit} El`);
     syncTurnClock(data);
-    $('sortSeriesBtn').disabled = false;
-    $('sortPairsBtn').disabled = false;
+    // Yardımsız masada ıstakayı oyuncu kendisi dizer: SERİ DİZ / ÇİFT DİZ kapalı.
+    for (const id of ['sortSeriesBtn', 'sortPairsBtn']) {
+        $(id).disabled = !state.assisted;
+        $(id).title = state.assisted ? '' : 'Yardımsız masada taşları kendin dizersin';
+    }
     const nextSignature = data.tiles.map(t=>t.id).sort().join('|');
     const rackChanged = lastRackSignature !== nextSignature;
     restoreSlots(data.tiles);
@@ -592,34 +593,70 @@ socket.on('nextRoundReady', data => {
     if (finished && $('newRoundBtn').dataset.finished !== 'true') $('newRoundBtn').textContent = `${lastCompletedRound+1}. ELE GEÇ (${data.ready}/${data.total} hazır)`;
 });
 let tomatoesLeft = 5;
-let currentGift = '🎁';
+// Hediye albümü: kimlikler sunucudaki GIFT_IDS ile aynı olmalı. me: alan kişiye okunan cümle, other: masadaki diğerlerine.
+const GIFTS = [
+    { id: 'cay', emoji: '☕', name: 'Çay', me: f => `${f} size bir çay ısmarladı, demli olsun!`, other: (f, t) => `${f}, ${t} oyuncusuna çay ısmarladı.` },
+    { id: 'gul', emoji: '🌹', name: 'Gül', me: f => `${f} size bir gül uzattı.`, other: (f, t) => `${f}, ${t} oyuncusuna gül uzattı.` },
+    { id: 'opucuk', emoji: '😘', name: 'Öpücük', me: f => `${f} size öpücük gönderdi.`, other: (f, t) => `${f}, ${t} oyuncusuna öpücük gönderdi.` },
+    { id: 'goz', emoji: '👀', name: 'Göz', me: f => `Dikkat! ${f} size göz dikmiş.`, other: (f, t) => `${f}, ${t} oyuncusuna göz dikmiş.` },
+    { id: 'kahkaha', emoji: '😂', name: 'Kahkaha', me: f => `${f} size kahkahalarla güldü.`, other: (f, t) => `${f}, ${t} oyuncusuna kahkahalarla güldü.` },
+    { id: 'domates', emoji: '🍅', name: 'Domates', me: f => `${f} size domates fırlattı!`, other: (f, t) => `${f}, ${t} oyuncusuna domates fırlattı.` },
+    { id: 'alkis', emoji: '👏', name: 'Alkış', me: f => `${f} sizi ayakta alkışlıyor.`, other: (f, t) => `${f}, ${t} oyuncusunu ayakta alkışlıyor.` },
+    { id: 'ortaparmak', emoji: '🖕', name: 'Orta Parmak', me: f => `${f} size orta parmak gösterdi. Ayıp ayıp!`, other: (f, t) => `${f}, ${t} oyuncusuna orta parmak gösterdi. Ayıp ayıp!` },
+    { id: 'uyku', emoji: '😴', name: 'Uyandır', me: f => `${f} dürttü: uyuyor musun, oyna artık!`, other: (f, t) => `${f}, ${t} oyuncusunu dürttü: uyuma!` },
+    { id: 'ates', emoji: '🔥', name: 'Ateş', me: f => `${f} diyor ki: bu masa yanıyor!`, other: (f, t) => `${f}, ${t} için diyor ki: bu masa yanıyor!` },
+    { id: 'kalp', emoji: '❤️', name: 'Kalp', me: f => `${f} size kalbini gönderdi.`, other: (f, t) => `${f}, ${t} oyuncusuna kalbini gönderdi.` },
+    { id: 'hediye', emoji: '🎁', name: 'Sürpriz', me: f => `${f} size sürpriz bir hediye yolladı.`, other: (f, t) => `${f}, ${t} oyuncusuna sürpriz hediye yolladı.` },
+];
+const giftById = id => GIFTS.find(g => g.id === id);
+let currentGift = 'cay';
 const lastGifts = ['', '', '', '']; // koltuk başına son alınan hediye (panelde kalıcı gösterilir)
-document.querySelectorAll('#giftIcons button').forEach(b => b.addEventListener('click', () => {
-    currentGift = b.dataset.gift;
-    document.querySelectorAll('#giftIcons button').forEach(x => x.classList.toggle('selected', x === b));
-}));
+// Albüm kartları (ana pencere) ve profil penceresindeki küçük ızgara aynı listeden çizilir.
+function fillGiftGrid(box, onPick) {
+    box.replaceChildren(...GIFTS.map(g => {
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'gift-card'; b.dataset.gift = g.id; b.title = g.name;
+        const e = document.createElement('span'); e.className = 'gift-emoji'; e.textContent = g.emoji;
+        const n = document.createElement('span'); n.className = 'gift-name'; n.textContent = g.name;
+        b.append(e, n); b.addEventListener('click', () => onPick(g, b)); return b;
+    }));
+}
+fillGiftGrid($('giftIcons'), (g, b) => { currentGift = g.id; $('giftIcons').querySelectorAll('.gift-card').forEach(x => x.classList.toggle('selected', x === b)); });
+$('giftIcons').querySelector('.gift-card')?.classList.add('selected');
 $('tomatoBtn').addEventListener('click', () => {
     if (!state) return toast('Oyun başlayınca kullanabilirsin.', true);
     if (tomatoesLeft <= 0) return toast('Bu eldeki hediye hakkın bitti.', true);
     const list = $('targetButtons'); list.replaceChildren();
     state.players.forEach((p, i) => {
         if (i === state.playerIndex) return;
-        const btn = document.createElement('button'); btn.textContent = '🎁 ' + p.name;
+        const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'gift-target';
+        const img = document.createElement('img'); img.src = avatarSrc(p.avatar); img.alt = '';
+        const name = document.createElement('span'); name.textContent = p.name;
+        btn.append(img, name);
         btn.addEventListener('click', () => { action('sendGift', { target: i, kind: currentGift }); $('tomatoSelectOverlay').classList.add('hidden'); });
         list.append(btn);
     });
+    setText($('giftAlbumLeft'), `${tomatoesLeft} hak kaldı`);
     $('tomatoSelectOverlay').classList.remove('hidden');
 });
 $('cancelThrowBtn').addEventListener('click', () => $('tomatoSelectOverlay').classList.add('hidden'));
+$('tomatoSelectOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.classList.add('hidden'); });
 function seatToRelativePos(seatIndex){ const positions=['bottom','right','top','left']; return positions[(seatIndex - state.playerIndex + 4) % 4]; }
 function showGiftEffect(seatIndex, kind, text){ if(!state) return; const pos=seatToRelativePos(seatIndex); const host=$(pos + 'PlayerInfo'); if(!host) return; const float=document.createElement('div'); float.className='gift-float'; const k=document.createElement('span'); k.className='gift-float-kind'; k.textContent=kind; const t=document.createElement('small'); t.textContent=text; float.append(k,t); host.append(float); setTimeout(()=>float.remove(),2800);}
+// Hediye cümlesi sesli okunur (ses kapalıysa okunmaz); yeni hediye gelince öncekini keser.
+function speak(text) {
+    if (!soundEnabled || !('speechSynthesis' in window)) return;
+    try { const u = new SpeechSynthesisUtterance(text); u.lang = 'tr-TR'; u.rate = 1.02; window.speechSynthesis.cancel(); window.speechSynthesis.speak(u); } catch {}
+}
 socket.on('giftSent', data => {
-    const kiss = data.kind === '😘';
-    lastGifts[data.toIndex] = data.kind;
+    const gift = giftById(data.kind);
+    if (!gift) return;
+    lastGifts[data.toIndex] = gift.emoji;
     if (state) renderPlayers();
-    toast(kiss ? `${data.from} ${data.to} oyuncusuna öpücük gönderdi 💋` : `${data.kind} ${data.from} → ${data.to}: Hediye gönderildi!`);
-    showGiftEffect(data.toIndex, data.kind, kiss ? `${data.from} sizi öptü` : `${data.from} hediye gönderdi`);
-    if (kiss && 'speechSynthesis' in window) { try { const u = new SpeechSynthesisUtterance(`${data.from} sizi öptü`); u.lang='tr-TR'; u.rate=1; window.speechSynthesis.cancel(); window.speechSynthesis.speak(u); } catch {} }
+    const toMe = data.toIndex === state?.playerIndex;
+    const line = toMe ? gift.me(data.from) : gift.other(data.from, data.to);
+    toast(`${gift.emoji} ${line}`);
+    showGiftEffect(data.toIndex, gift.emoji, toMe ? line : `${data.from} → ${gift.name}`);
+    speak(line);
     if (data.fromIndex === state?.playerIndex) { tomatoesLeft = data.left; $('tomatoCounter').textContent = tomatoesLeft; }
 });
 // Tiles use the included 13-column sprite sheet, same dimensions in rack, discards, and on table.
@@ -684,10 +721,15 @@ function pointerMove(e) {
     drag.x = e.clientX; drag.y = e.clientY;
     if (!drag.ghost && Math.hypot(drag.x - drag.startX, drag.y - drag.startY) > 8) {
         drag.ghost = drag.tile.cloneNode(true);
+        drag.ghost.classList.remove('selected', 'drop-target');
         drag.ghost.classList.add('pointer-ghost');
-        Object.assign(drag.ghost.style, { pointerEvents: 'none', left: '0', top: '0', willChange: 'transform' });
+        // Ölçü tutunduğu taşın ekrandaki boyutu (sayfa gövdesinde ıstaka kuralları geçmez); tam opak.
+        for (const [k, v] of Object.entries({ 'pointer-events': 'none', left: '0', top: '0', width: drag.width + 'px', height: drag.height + 'px', margin: '0', opacity: '1', 'will-change': 'transform' }))
+            drag.ghost.style.setProperty(k, v, 'important');
         placeGhost();
         document.body.append(drag.ghost);
+        // Tutulan taşın yeri boş görünür (yarı saydam kopyası başka taşların üstünde çift görüntü yapmasın).
+        drag.tile.classList.add('drag-source');
     }
     if (drag.ghost && !drag.frame) drag.frame = requestAnimationFrame(paintDrag);
 }
@@ -749,26 +791,50 @@ function highlightDropGroup(target) {
     lastDropTiles = next;
     lastDropTiles.forEach(t => t.classList.add('drop-target'));
 }
+// Çift dokunuş: aynı taşa 350 ms içinde iki kez dokunulursa taş atılır (okeyde yüzü çevrilir).
+// dblclick olayı kullanılamaz: ilk dokunuş seçimi değiştirip ıstakayı yeniden çizdiği için ikinci dokunuş yeni elemana düşer.
+let lastTap = null;
+function doubleTapTile(tile) {
+    if (state?.okey && !tile.isFakeJoker && tile.color === state.okey.color && tile.number === state.okey.number) {
+        if (flippedTiles.has(tile.id)) flippedTiles.delete(tile.id); else flippedTiles.add(tile.id);
+        saveRack(); renderRack(); return;
+    }
+    discard(tile.id);
+}
 function pointerEnd(e) {
     if (!drag || e.pointerId !== drag.pointerId) return;
     const from = drag.from;
     const moved = !!drag.ghost;
     const target = document.elementFromPoint(e.clientX, e.clientY);
     const dropGroup = moved && typeof from === 'number' ? findDropGroup(e.clientX, e.clientY) : null;
+    const ghostRect = drag.ghost?.getBoundingClientRect();
     if (drag.frame) cancelAnimationFrame(drag.frame);
     drag.ghost?.remove();
+    drag.tile.classList.remove('drag-source');
     drag = null;
     if (!moved) {
-        if (typeof from === 'number') { selected = slots[from]?.id || null; renderRack(); }
+        if (typeof from === 'number') {
+            const tile = slots[from], now = Date.now();
+            if (tile && lastTap?.id === tile.id && now - lastTap.at < 350) { lastTap = null; doubleTapTile(tile); return; }
+            lastTap = tile ? { id: tile.id, at: now } : null;
+            selected = tile?.id || null; renderRack();
+        }
         else if (from === 'pile') draw(false);
         else if (from === 'left') draw(true);
         return;
     }
+    lastTap = null;
     const slot = target?.closest('.tile-slot');
     const throwZone = target?.closest('#rightDiscardTiles, #myRightDiscard');
     highlightDropGroup(null);
     if (typeof from === 'number') {
-        if (slot) moveRack(from, Number(slot.dataset.slot));
+        if (slot) {
+            // Bırakılan taş parmağın altından yeni yuvasına yumuşakça oturur.
+            const movedId = slots[from]?.id;
+            moveRack(from, Number(slot.dataset.slot));
+            const placed = movedId && document.querySelector(`.cue-row .tile-sprite[data-tile-id="${CSS.escape(movedId)}"]`);
+            if (placed && ghostRect) flyTile(placed, ghostRect, 140);
+        }
         else if (throwZone) discard(slots[from]?.id);
         else if (dropGroup) processGroup(slots[from]?.id, dropGroup.tile, dropGroup.onOkey ? null : dropGroup.position);
     } else if (from === 'left' || from === 'pile') {
@@ -780,7 +846,7 @@ function bindPointer(el, from) {
     el.addEventListener('pointerdown', e => pointerStart(e, from, el));
     el.addEventListener('pointermove', pointerMove);
     el.addEventListener('pointerup', pointerEnd);
-    el.addEventListener('pointercancel', () => { if (drag?.frame) cancelAnimationFrame(drag.frame); drag?.ghost?.remove(); drag = null; highlightDropGroup(null); });
+    el.addEventListener('pointercancel', () => { if (drag?.frame) cancelAnimationFrame(drag.frame); drag?.ghost?.remove(); drag?.tile.classList.remove('drag-source'); drag = null; highlightDropGroup(null); });
 }
 function draw(fromDiscard) {
     if (!canPlay() || state.hasDrawn) return toast('Taş çekme sırası sizde değil veya zaten taş aldınız.', true);
@@ -841,7 +907,10 @@ function flyTile(target, fromRect, ms = 420) {
     if (!to.width || !fromRect.width) return;
     const ghost = target.cloneNode(true);
     ghost.classList.add('fly-ghost');
-    Object.assign(ghost.style, { position: 'fixed', left: to.left + 'px', top: to.top + 'px', width: to.width + 'px', height: to.height + 'px', margin: '0', zIndex: 9000, pointerEvents: 'none' });
+    // Ölçüler !important ile verilir: masa taşının "genişlik %100 !important" kuralı sayfa gövdesinde
+    // ekran genişliği demektir; yoksa işlenen taş uçarken bir an bütün ekranı kaplıyordu.
+    for (const [k, v] of Object.entries({ position: 'fixed', left: to.left + 'px', top: to.top + 'px', width: to.width + 'px', height: to.height + 'px',
+        margin: '0', 'z-index': '9000', 'pointer-events': 'none', 'grid-column': 'auto', 'grid-row': 'auto' })) ghost.style.setProperty(k, v, 'important');
     document.body.append(ghost);
     const dx = (fromRect.left + fromRect.width / 2) - (to.left + to.width / 2);
     const dy = (fromRect.top + fromRect.height / 2) - (to.top + to.height / 2);
@@ -1003,7 +1072,7 @@ function renderRack() {
             bindPointer(tile, i);
             if(tile.classList.contains('real-okey')){
                 const flip=()=>{if(flippedTiles.has(slots[i].id))flippedTiles.delete(slots[i].id);else flippedTiles.add(slots[i].id);tile.classList.toggle('okey-joker', state.assisted && !flippedTiles.has(slots[i].id)); saveRack();};
-                tile.addEventListener('dblclick',e=>{e.stopPropagation();flip();});
+                // Çift dokunuş pointerEnd'de (doubleTapTile); sağ tık / uzun basış da yüzü çevirir.
                 tile.addEventListener('contextmenu',e=>{e.preventDefault();flip();});
             }
             slot.append(tile);
@@ -1448,12 +1517,14 @@ function arrangeRack(mode='series',render=true){
 // SERİ DİZ / ÇİFT DİZ her masada çalışır (yalnızca ıstaka düzeni); sonuç kısa bildirimle söylenir.
 $('sortPairsBtn').addEventListener('click',()=>{
     if(!state)return toast('Oyun başlayınca dizebilirsin.',true);
+    if(!state.assisted)return toast('Yardımsız masada taşları kendin dizersin.',true);
     autoRack=!!state.assisted;autoRackMode='pairs';arrangeRack('pairs');
     const n=findAvailablePairs().length;
     toast(n?`${n} çift yan yana dizildi${state.myOpenType?'':` (açmak için ${state.minimumPairs||5} çift gerekir)`}.`:'Elinde çift yok.');
 });
 $('sortSeriesBtn').addEventListener('click',()=>{
     if(!state)return toast('Oyun başlayınca dizebilirsin.',true);
+    if(!state.assisted)return toast('Yardımsız masada taşları kendin dizersin.',true);
     autoRack=!!state.assisted;autoRackMode='series';arrangeRack('series');
     const r=rackArrangement();
     toast(r.groups.length?`${r.groups.length} seri/per dizildi: ${r.score} puan.`:'Elinde seri veya per yok.');
@@ -1662,6 +1733,8 @@ $('tableChatForm').addEventListener('submit',e=>{
 });
 // Attach draw gestures to actual deck area, not only to small graphic.
 bindPointer($('drawPile'), 'pile');
+// Istakada uzun basış tarayıcı menüsü açmasın (okeyde yüzü çevirme kendi contextmenu dinleyicisinde).
+for (const id of ['playerHandTop', 'playerHandBottom']) $(id).addEventListener('contextmenu', e => e.preventDefault());
 // Initial lobby until the server returns a snapshot.
 if (!socketAvailable) {
     showLobbyProblem('Socket.IO dosyası yüklenemedi. Oyunu doğrudan HTML dosyasından açmayın; npm start ile Node.js sunucusunu çalıştırın.');
@@ -1720,12 +1793,13 @@ if (!socketAvailable) {
     const closeBtn = document.getElementById('profileClose');
     if (closeBtn) closeBtn.addEventListener('click', () => pop.classList.add('hidden'));
     pop.addEventListener('click', e => { if (e.target === pop) pop.classList.add('hidden'); });
-    document.querySelectorAll('#profileGiftIcons button').forEach(b => b.addEventListener('click', () => {
+    fillGiftGrid(document.getElementById('profileGiftIcons'), g => {
         if (profileTarget == null) return;
-        if (typeof action === 'function') action('sendGift', { target: profileTarget, kind: b.dataset.gift });
+        if (tomatoesLeft <= 0) return toast('Bu eldeki hediye hakkın bitti.', true);
+        action('sendGift', { target: profileTarget, kind: g.id });
         pop.classList.add('hidden');
-        // Sunucudan onay geldiğinde giftSent bildirimi görünür.
-    }));
+        // Sunucudan onay geldiğinde giftSent bildirimi görünür ve sesli okunur.
+    });
     // Profillere tıklama: pos → seat
     ['top','left','right','bottom'].forEach(pos => {
         const el = document.getElementById(pos + 'PlayerInfo');
