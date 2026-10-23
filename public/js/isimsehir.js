@@ -181,6 +181,7 @@ function renderWait() {
   $('isWaitText').textContent = s.autoBots ? `${free} koltuk boş · birkaç saniye içinde botlar oturacak`
     : `${s.players.length}/${s.size} oyuncu · ${s.isHost ? 'hazır olunca OYUNU BAŞLAT' : 'masayı açanın başlatması bekleniyor'}${s.team ? ' · eşlide boş koltuklara bot oturur' : ''}`;
   const seats = $('isSeats'); seats.replaceChildren();
+  seats.style.setProperty('--cols', String(s.size <= 4 ? s.size : s.size / 2)); // simetrik: 6 → 3+3, 10 → 5+5
   for (let k = 0; k < s.size; k++) {
     const i = s.players.findIndex(p => p.seat === k), p = s.players[i], cell = el('div', 'is-seat' + (i === s.me ? ' me' : ''));
     if (s.team) cell.append(el('small', null, teamName(k % (s.size / 2))));

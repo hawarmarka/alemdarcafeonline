@@ -294,7 +294,6 @@ $('tpCreate').onclick = () => { hideModal('modeListModal'); if (tp.game === 'bat
 addEventListener('keydown', e => { if ($('modeListModal').classList.contains('hidden')) return; if (e.key === 'ArrowLeft') tpStep(-1); if (e.key === 'ArrowRight') tpStep(1); });
 document.querySelectorAll('.select-mode').forEach(btn => btn.onclick = () => showRoomList());
 $('modeAutoJoinBtn').onclick = () => { hideModal('modeListModal'); if (tp.game === 'batak') batakJoin('quick'); else if (tp.game === 'pisti') pistiJoin('quick'); else if (tp.game === 'isimsehir') isimJoin('quick'); else start('random', quickMode()); };
-$('randomJoinBtn').onclick = () => start('random', quickMode());
 // MASA AÇ: KLASİK kartında herkese açık (Oda Seç listesinde), ÖZEL kartında yalnızca kodla katılınan masa
 let createPublic = true;
 function openCreate(isPublic) {
@@ -450,7 +449,8 @@ loadPistiCount(); setInterval(loadPistiCount, 15000);
 // Lobi sahnesini (1600×735) ekrana sığdır
 (function fitLobby() {
   const stage = $('lobbyStage'); if (!stage) return;
-  const fit = () => { const s = Math.min(innerWidth / 1600, innerHeight / 735); stage.style.setProperty('--s', String(s)); };
+  // --ui: pencereler (sahne dışında) de lobiyle aynı oranda büyüsün
+  const fit = () => { const s = Math.min(innerWidth / 1600, innerHeight / 735); stage.style.setProperty('--s', String(s)); document.documentElement.style.setProperty('--ui', String(Math.max(.8, Math.min(1.6, s)))); };
   addEventListener('resize', fit, { passive: true }); fit();
 })();
 // Ek düğmeler

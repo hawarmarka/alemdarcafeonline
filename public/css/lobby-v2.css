@@ -1,0 +1,122 @@
+/* Alemdar Cafe lobisi v2: modern, simetrik düğmeler ve pencereler (öbür lobi CSS'lerinin üstüne, en son yüklenir).
+   Bütün düğmeler aynı sistem: eşit yükseklik, ortalanmış simge + yazı, aynı köşe yuvarlaklığı, basınca hafif çöker.
+   Simgeler CSS maskesiyle (tek renkli SVG): .ic-plus .ic-grid .ic-key .ic-lock .ic-bolt .ic-enter .ic-eye */
+:root{
+  --v2-radius:14px;--v2-h:50px;
+  --v2-blue-1:#4c9cf0;--v2-blue-2:#2366c4;--v2-blue-d:#163f7a;
+  --v2-gold-1:#ffc65a;--v2-gold-2:#ec8f1c;--v2-gold-d:#9a560c;
+  --v2-green-1:#6fd85a;--v2-green-2:#2f9f2a;--v2-green-d:#1b6516;
+  --v2-red-1:#ff7468;--v2-red-2:#cf2b2b;--v2-red-d:#7d1515;
+  --v2-panel:linear-gradient(180deg,#1b4f8c 0%,#123966 60%,#0d2b52 100%);
+  --i-plus:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M12 5v14M5 12h14'/%3E%3C/svg%3E");
+  --i-grid:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Crect x='3' y='3' width='8' height='8' rx='2'/%3E%3Crect x='13' y='3' width='8' height='8' rx='2'/%3E%3Crect x='3' y='13' width='8' height='8' rx='2'/%3E%3Crect x='13' y='13' width='8' height='8' rx='2'/%3E%3C/svg%3E");
+  --i-key:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='8' cy='15' r='4.5'/%3E%3Cpath d='M11.2 11.8 20 3M16.5 6.5l2.5 2.5M14 9l2 2'/%3E%3C/svg%3E");
+  --i-lock:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M7 10V7a5 5 0 0 1 10 0v3h1.5A1.5 1.5 0 0 1 20 11.5v8A1.5 1.5 0 0 1 18.5 21h-13A1.5 1.5 0 0 1 4 19.5v-8A1.5 1.5 0 0 1 5.5 10zm2.6 0h4.8V7a2.4 2.4 0 0 0-4.8 0z'/%3E%3C/svg%3E");
+  --i-bolt:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M13.5 2 4 14h6.5L9 22l11-13h-6.6z'/%3E%3C/svg%3E");
+  --i-enter:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M3 12h12M11 8l4 4-4 4'/%3E%3C/svg%3E");
+  --i-eye:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4'%3E%3Cpath d='M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z'/%3E%3Ccircle cx='12' cy='12' r='3.2' fill='black'/%3E%3C/svg%3E");
+  --i-check:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
+}
+
+/* ---------- ortak düğme ---------- */
+.lb-btn,.tp-btn,.lb-tag,.lb-code-row button{
+  display:inline-flex!important;align-items:center;justify-content:center;gap:9px;height:var(--v2-h)!important;min-width:0!important;padding:0 16px!important;
+  border:0!important;border-radius:var(--v2-radius)!important;color:#fff!important;cursor:pointer;
+  font:600 19px/1 'Oswald','Arial Narrow',sans-serif!important;letter-spacing:1px!important;text-shadow:0 1px 1px rgba(0,0,0,.35)!important;white-space:nowrap;
+  background:linear-gradient(180deg,var(--v2-blue-1),var(--v2-blue-2))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 4px 0 var(--v2-blue-d),0 8px 14px rgba(0,0,0,.25)!important;
+  transition:transform .08s,filter .15s,box-shadow .08s;position:relative}
+.lb-btn:hover,.tp-btn:hover,.lb-tag:hover,.lb-code-row button:hover{filter:brightness(1.08)}
+.lb-btn:active,.tp-btn:active,.lb-tag:active,.lb-code-row button:active{transform:translateY(3px)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 1px 0 var(--v2-blue-d)!important}
+.lb-btn.orange,.tp-btn.orange{background:linear-gradient(180deg,var(--v2-gold-1),var(--v2-gold-2))!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 4px 0 var(--v2-gold-d),0 8px 14px rgba(0,0,0,.25)!important}
+.lb-btn.green,.tp-btn.green,.lb-tag,.lb-code-row button{background:linear-gradient(180deg,var(--v2-green-1),var(--v2-green-2))!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 4px 0 var(--v2-green-d),0 8px 14px rgba(0,0,0,.25)!important}
+.lb-btn.red,.tp-btn.red{background:linear-gradient(180deg,var(--v2-red-1),var(--v2-red-2))!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 4px 0 var(--v2-red-d),0 8px 14px rgba(0,0,0,.25)!important}
+.lb-btn.grey{background:linear-gradient(180deg,#a9b4c2,#77838f)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 4px 0 #4a545e!important;color:#f3f6fa!important}
+.lb-btn:disabled,.tp-btn:disabled{filter:saturate(.5) brightness(.9);cursor:not-allowed}
+/* simge: yazının solunda, yazıyla aynı renk */
+[class*=" ic-"]::before,[class^="ic-"]::before{content:'';flex:0 0 20px;width:20px;height:20px;background:currentColor;-webkit-mask:var(--ic) center/contain no-repeat;mask:var(--ic) center/contain no-repeat;filter:drop-shadow(0 1px 0 rgba(0,0,0,.25))}
+.ic-plus{--ic:var(--i-plus)}.ic-grid{--ic:var(--i-grid)}.ic-key{--ic:var(--i-key)}.ic-lock{--ic:var(--i-lock)}.ic-bolt{--ic:var(--i-bolt)}.ic-enter{--ic:var(--i-enter)}.ic-eye{--ic:var(--i-eye)}.ic-check{--ic:var(--i-check)}
+
+/* ---------- oyun kartları ---------- */
+.lb-cards{top:150px!important;height:450px!important;gap:20px!important;align-items:stretch}
+.lb-card{flex:0 0 256px!important;height:430px!important;padding:14px 14px 16px!important;border:0!important;border-radius:22px!important;
+  background:linear-gradient(180deg,#ffffff 0%,#f1ece2 100%)!important;box-shadow:0 14px 28px rgba(0,0,0,.35),inset 0 0 0 1px rgba(0,0,0,.06)!important;transition:transform .18s,box-shadow .18s!important}
+.lb-card:hover{transform:translateY(-6px)!important;box-shadow:0 22px 36px rgba(0,0,0,.4),inset 0 0 0 1px rgba(0,0,0,.06)!important}
+.lb-card header{padding:2px 0 12px!important;text-align:center}
+.lb-card h2{font:700 36px/1 'Oswald',sans-serif!important;letter-spacing:1px!important}
+.lb-card h3{margin-top:6px!important;font:500 14px/1 'Oswald',sans-serif!important;letter-spacing:1.6px!important;color:#7a6a4a!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-art{border-radius:16px!important;border:0!important;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15),inset 0 -40px 50px rgba(0,0,0,.25)!important}
+.lb-art small{bottom:10px!important;font:600 14px/1 'Barlow',sans-serif!important;letter-spacing:.4px}
+.lb-card-btns{display:grid!important;grid-template-columns:1fr 1fr;gap:10px!important;margin-top:14px!important}
+.lb-card-btns .lb-btn{height:48px!important;font-size:17px!important;padding:0 10px!important;gap:7px}
+.lb-card-btns .lb-btn:only-child{grid-column:1 / -1}
+.lb-card-btns [class*=" ic-"]::before{flex-basis:17px;width:17px;height:17px}
+.c-soon .lb-card-btns .lb-btn{background:#e4ded2!important;color:#8b7f68!important;text-shadow:none!important;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)!important}
+.lb-divider{flex:0 0 52px!important;margin:24px 0!important;border-left:0!important;position:relative}
+.lb-divider::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;background:linear-gradient(180deg,transparent,rgba(255,211,74,.7),transparent)}
+.lb-divider span{position:relative;padding:12px 4px;border-radius:999px;background:#0f3a63;border:1px solid rgba(255,211,74,.5);font-size:16px!important;letter-spacing:5px!important}
+
+/* ---------- sol kartlar ---------- */
+.lb-side{top:150px!important;gap:16px!important}
+.lb-banner{height:132px!important;border:0!important;border-radius:20px!important;padding:16px 16px 14px!important;box-shadow:0 12px 22px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.25)!important}
+.lb-banner strong{font:700 28px/1 'Oswald',sans-serif!important;letter-spacing:1px!important}
+.lb-banner em{font:500 14px/1.25 'Barlow',sans-serif!important;opacity:.9}
+.lb-tag{position:absolute!important;left:16px!important;right:16px!important;bottom:14px!important;height:42px!important;font-size:17px!important}
+.lb-code-row{left:16px!important;right:16px!important;bottom:14px!important;gap:8px!important}
+.lb-code-row input{height:42px!important;border-radius:12px!important;border:0!important;box-shadow:inset 0 2px 4px rgba(0,0,0,.2)!important;font:600 20px/1 'Oswald',sans-serif!important}
+.lb-code-row button{height:42px!important;padding:0 18px!important;font-size:17px!important}
+
+/* ---------- alt şerit (HEMEN OYNA kaldırıldı) ---------- */
+.lb-bottom{height:110px!important;display:flex;align-items:center;justify-content:center}
+.lb-dock{display:flex;gap:14px;padding:10px;border-radius:24px;background:rgba(8,30,56,.55);border:1px solid rgba(160,200,255,.22);box-shadow:0 12px 26px rgba(0,0,0,.3)}
+.lb-round{position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;width:176px!important;height:62px!important;border-radius:16px!important;
+  display:flex;align-items:center;justify-content:center;gap:10px;padding:0 16px 0 50px;border:0!important;
+  background:linear-gradient(180deg,#2f72c4,#1a4f94)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 4px 0 #0e325f!important;color:#fff;transition:transform .08s,filter .15s}
+.lb-round:hover{filter:brightness(1.1)}.lb-round:active{transform:translateY(3px);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 #0e325f!important}
+.lb-round::after{inset:auto!important;left:18px!important;top:50%!important;width:28px!important;height:28px!important;transform:translateY(-50%);background-size:contain!important}
+.lb-round span{font:600 18px/1 'Oswald',sans-serif;letter-spacing:1.4px}
+.lb-round .soc-badge{top:-8px!important;right:-8px!important}
+.lb-online{position:absolute;left:40px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:999px;background:rgba(8,30,56,.55);border:1px solid rgba(160,200,255,.22);font:600 16px 'Barlow',sans-serif;color:#d9ecff}
+.lb-online i{width:10px;height:10px;border-radius:50%;background:#4fe07c;box-shadow:0 0 0 4px rgba(79,224,124,.2)}
+.lb-online b{font:700 20px 'Oswald',sans-serif;color:#fff}
+
+/* ---------- pencereler ---------- */
+/* Lobi sahnesi ekrana göre ölçeklenir; pencereler de aynı oranda (main.js --ui) */
+body.lobby-page .premium-modal .modal-panel,body.lobby-page .soc-panel,body.lobby-page .soc-invite{zoom:var(--ui,1)}
+body.lobby-page .modal-panel.room-dialog{max-height:calc(92vh / var(--ui,1))!important}
+.premium-modal{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:rgba(3,14,30,.7)!important}
+.modal-panel{background:var(--v2-panel)!important;border:1px solid rgba(160,200,255,.28)!important;border-radius:24px!important;box-shadow:0 30px 70px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.12)!important;backdrop-filter:none!important}
+.modal-panel.room-dialog{width:min(660px,92vw)!important;padding:30px 34px 28px!important;overflow:auto!important;max-height:92vh;height:auto!important;min-height:0!important}
+/* kapatma: sağ üstte küçük yuvarlak (eski büyük yan düğme yerine) */
+.premium-modal .round-x{position:absolute!important;left:auto!important;right:16px!important;top:16px!important;width:42px!important;height:42px!important;margin:0!important;transform:none!important;
+  border:0!important;border-radius:50%!important;background:rgba(255,255,255,.12)!important;box-shadow:none!important}
+.premium-modal .round-x:hover{background:rgba(255,90,90,.85)!important}
+.premium-modal .round-x::after{content:'✕'!important;font:600 20px/1 'Barlow',sans-serif!important;text-shadow:none!important;color:#fff}
+.dialog-head{width:auto!important;margin:0 0 22px!important;padding:0 50px!important;background:none!important;box-shadow:none!important;color:#fff!important;text-align:center}
+.dialog-head b{font:700 32px/1 'Oswald',sans-serif!important;letter-spacing:2px!important;color:#fff}
+.dialog-head small{margin-top:8px!important;font:500 15px/1.3 'Barlow',sans-serif!important;color:#a9c9ef!important}
+.opt-rows{gap:12px!important}
+.opt-row{grid-template-columns:112px 1fr!important;gap:14px!important}
+.opt-row>span{font:600 15px/1 'Oswald',sans-serif!important;letter-spacing:1.6px!important;color:#9cc1ea!important;text-align:left}
+.seg{gap:6px!important;padding:5px!important;border-radius:16px!important;background:rgba(0,0,0,.25)!important;border:1px solid rgba(255,255,255,.1)!important}
+.seg button{height:42px!important;border-radius:11px!important;font:500 17px/1 'Oswald',sans-serif!important;letter-spacing:1px!important;color:#cfe2f7!important}
+.seg button.on{background:linear-gradient(180deg,var(--v2-blue-1),var(--v2-blue-2))!important;color:#fff!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 3px 0 var(--v2-blue-d)!important}
+#batakModal .batak-code,#pistiModal .batak-code,#isimModal .batak-code{display:grid!important;grid-template-columns:1fr 104px 104px;gap:8px!important;position:static!important;width:auto!important;margin:0!important}
+#batakModal .batak-code input,#pistiModal .batak-code input,#isimModal .batak-code input{width:auto!important;height:44px!important;border-radius:12px!important;border:0!important;background:#f6f9ff!important;color:#173a6a!important;font:600 20px/1 'Oswald',sans-serif!important;letter-spacing:4px;text-align:center}
+#batakModal .batak-code button,#pistiModal .batak-code button,#isimModal .batak-code button{height:44px!important;padding:0!important;font-size:16px!important}
+#batakModal .batak-code button:nth-child(3),#pistiModal .batak-code button:nth-child(3),#isimModal .batak-code button:nth-child(3){background:linear-gradient(180deg,var(--v2-blue-1),var(--v2-blue-2))!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 4px 0 var(--v2-blue-d)!important}
+.create-note{margin:18px 0 0!important;padding:12px 16px;border-radius:14px;background:rgba(255,255,255,.06);color:#cfe2f7!important;font:500 14.5px/1.4 'Barlow',sans-serif!important;text-align:center;position:static!important}
+/* eylem satırı: eşit genişlikte düğmeler, ortada */
+.tp-actions{display:grid!important;grid-auto-flow:column;grid-auto-columns:1fr;gap:12px!important;width:100%;max-width:600px;margin:20px auto 0!important;flex-wrap:nowrap!important}
+.tp-actions.one{max-width:320px}
+.tp-actions.two{max-width:420px}
+.tp-btn{height:54px!important;font-size:19px!important;position:relative!important;width:100%}
+.code-big{margin:4px auto 0!important;display:block;width:100%!important;max-width:420px;height:72px!important;border-radius:16px!important;border:0!important;background:#f6f9ff!important;color:#173a6a!important;box-shadow:inset 0 2px 6px rgba(0,0,0,.2)!important}
+/* masa gezgini */
+#modeListModal .tp-panel .round-x{top:16px!important;right:16px!important}
+#modeListModal .tp-actions{max-width:520px}
+.tp-filter button{border-radius:999px!important}
+
+/* telefon yatay */
+@media (max-height:560px){.lb-round span{font-size:16px}}
+@media (prefers-reduced-motion:reduce){.lb-card,.lb-btn,.tp-btn,.lb-round{transition:none!important}}
