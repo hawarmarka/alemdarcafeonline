@@ -46,7 +46,7 @@ function install({ io, Accounts, Avatars, Logger }) {
       players: room.players.map((p, i) => ({ name: p.name, avatar: p.avatar, isBot: !!p.isBot, connected: !!p.socketId || !!p.isBot,
         bid: b ? b.bids[i] : null, passed: b ? b.passed[i] : false, tricks: room.tricks[i], total: room.totals[i], cards: room.hands?.[i]?.length || 0 })),
       hand, legal: playing ? L.legalCards(hand, room.trick, room.trump, room.trumpBroken).map(c => c.id) : [],
-      turn: room.turn, deadline: room.deadline, remainingMs: Math.max(0, room.deadline - Date.now()), dealer: room.dealer,
+      turn: room.turn, deadline: room.deadline, remainingMs: Math.max(0, room.deadline - Date.now()), turnMs: room.turnMs || PLAY_MS, dealer: room.dealer,
       bidding: b && !b.done ? { high: b.high, minNext: L.TYPES[room.type].declare ? 0 : (b.high ? b.high.bid + 1 : L.TYPES[room.type].minBid) } : null,
       contract: room.contract, trump: room.trump, trumpBroken: room.trumpBroken, trick: room.trick, lastTrick: room.lastTrick,
       revealed: room.revealed != null && room.revealed !== seat ? { seat: room.revealed, cards: room.hands[room.revealed] } : null,
@@ -91,7 +91,7 @@ function install({ io, Accounts, Avatars, Logger }) {
     if (!['bidding', 'trump', 'playing'].includes(room.phase)) { emit(room); return; }
     const p = room.players[room.turn];
     const ms = room.phase === 'playing' ? PLAY_MS : BID_MS;
-    room.deadline = Date.now() + ms;
+    room.deadline = Date.now() + ms; room.turnMs = ms;
     if (p.isBot) timer(room, 'botTimer', BOT_MS, 'bot', () => autoMove(room));
     else timer(room, 'turnTimer', p.socketId ? ms : Math.min(ms, 8000), 'süre', () => autoMove(room, true));
     emit(room);
@@ -275,6 +275,17 @@ function install({ io, Accounts, Avatars, Logger }) {
       const { room, seat } = where(socket);
       if (!room || room.phase !== 'waiting' || room.players[seat]?.token !== room.hostToken) return fail('Bunu yalnızca masayı açan kişi yapabilir.');
       fillWithBots(room);
+    });
+    // Masa sohbeti: kısa mesaj ya da hazır cümle; masadaki herkese gider, oyuncunun avatarının üstünde balon olarak görünür.
+    socket.on('batak:chat', data => {
+      const { room, seat } = where(socket);
+      if (!room || seat < 0) return;
+      const now = Date.now();
+      if (now - (socket.data.batakChatAt || 0) < 1200) return fail('Biraz daha yavaş yaz.');
+      const text = String(data?.text || '').replace(/[\x00-\x1F\x7F]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 100);
+      if (!text) return;
+      socket.data.batakChatAt = now;
+      for (const p of room.players) if (p.socketId) io.to(p.socketId).emit('batak:chat', { seat, name: room.players[seat].name, text });
     });
     // Maç bitince aynı masada yeniden.
     socket.on('batak:rematch', () => {

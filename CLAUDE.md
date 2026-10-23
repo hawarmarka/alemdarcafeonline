@@ -252,8 +252,21 @@ Lobideki BATAK kartı artık çalışıyor: **OYNA** (ihaleli, boş koltuklara 6
   - `server/batak/bot.js`: bot.
   - `server/batak/index.js`: masalar ve `batak:*` socket olayları.
   - `public/batak.html`, `public/js/batak.js`, `public/css/batak.css`: masa sayfası.
+  - `public/js/batak-cards.js`: kart çizimi.
   - Lobi tarafı `main.js` içindeki "Batak" bölümünde.
-- Kartlar CSS ile çiziliyor, görsel dosya yok.
+- Kartlar gerçek iskambil kartı gibi SVG ile çiziliyor, görsel dosya yok (`batak-cards.js`):
+  - İki köşede değer ve renk, 2-10 için standart pip dizilimi.
+  - As'ta büyük ortada simge; J/Q/K çerçeveli ve ayna simetrili resimli.
+  - Arka yüz desenli.
+  - Her kart bir kez çizilip önbelleğe alınıyor.
+- Masa görünümü (2026-10-24 yenilendi):
+  - Oval keçe masa, ahşap kenar.
+  - Rakiplerin kapalı kartları yelpaze halinde.
+  - Ortaya atılan kart oyuncunun yönünden kayarak geliyor; el bitince kartlar alan oyuncuya doğru toplanıyor, kazanan kart parlıyor.
+  - El kavisli; seçilebilir kartlar yukarıda, diğerleri soluk. Kartlar arası bindirme ekran genişliğine göre `layoutHand` ile hesaplanıyor.
+  - "SIRA SENDE" süre çubuğu ve avatarın etrafında süre halkası var; son 5 saniyede halka kırmızı.
+- Düğmeler: sohbet (hazır cümleler + yazı, avatar üstünde balon, okunmamış sayısı), son el, puan tablosu, ses (WebAudio, lobideki ses ayarıyla aynı) ve menü (kurallar, puan tablosu, masadan ayrıl). Bekleme ekranında KODU KOPYALA.
+- Kısa ekranda (yükseklik ≤ 520 px) kendi panelin sol alt köşeye geçiyor, el sağa kayıyor.
 - Masalar yalnızca RAM'de tutuluyor (okeydeki gibi diske yazılmıyor). Güncelleme sırasında süren Batak maçı kaybolur.
 - Masa kodları `B` ile başlıyor; okey kodlarıyla karışmıyor.
 - Türler:
@@ -275,8 +288,9 @@ Lobideki BATAK kartı artık çalışıyor: **OYNA** (ihaleli, boş koltuklara 6
 - Süreler: ihale 20 sn, kart 25 sn. Süre dolarsa ya da bağlantı kopuksa (8 sn) hamleyi bot mantığı yapar.
 - Oyundan ayrılanın yerine bot geçer. Bağlı gerçek oyuncu kalmazsa masa 60 sn sonra silinir.
 - Hesaplılara maç sonunda XP veriliyor (`Accounts.award`). Çip bahsi yok.
-- Yapılmayanlar: King, Kanlı, OHEL, Gömmeli türleri, masa sohbeti, Batak için çip bahsi.
-- Test: `tests/v41Batak.test.js`. Kurallar, ihale, puan ve 360 botlu el test ediliyor (her kart kurala uygun, 52 kart korunuyor). Ayrıca socket üzerinden 5 ellik maç ve kural dışı kartın reddi test ediliyor.
+- Masa sohbeti `batak:chat`: en çok 100 karakter, 1,2 saniyede bir mesaj.
+- Yapılmayanlar: King, Kanlı, OHEL, Gömmeli türleri ve Batak için çip bahsi.
+- Test: `tests/v41Batak.test.js`. Kurallar, ihale, puan ve 360 botlu el test ediliyor (her kart kurala uygun, 52 kart korunuyor). Ayrıca socket üzerinden 5 ellik maç, kural dışı kartın reddi ve sohbet test ediliyor.
 
 ## 6. Teknoloji önerileri neden şimdilik gerekli değil
 

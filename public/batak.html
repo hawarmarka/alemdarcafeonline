@@ -3,28 +3,35 @@
 <link rel="icon" href="/asset/ui/alemdar-logo.svg" type="image/svg+xml">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Alemdar Cafe · Batak</title>
-<meta name="theme-color" content="#0c3a5c">
+<meta name="theme-color" content="#06231c">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/batak.css?v=4">
+<link rel="stylesheet" href="/css/batak.css?v=10">
 </head>
 <body class="batak-page">
 <div class="bk-stage" id="bkStage">
-  <!-- Üst bilgi -->
+  <!-- Üst çubuk: oyun bilgisi, koz, ihale; sağda düğmeler -->
   <header class="bk-top">
     <div class="bk-info"><b id="bkType">İHALELİ</b><span id="bkRound">El 1 / 5</span></div>
-    <div class="bk-trump" id="bkTrump" title="Koz"><small>KOZ</small><i id="bkTrumpSuit">?</i></div>
+    <div class="bk-trump" id="bkTrump" title="Koz"><small>KOZ</small><i id="bkTrumpSuit"></i></div>
     <div class="bk-contract" id="bkContract"></div>
-    <div class="bk-top-btns">
-      <button type="button" id="bkScoreBtn" class="bk-icon" title="Puan tablosu" aria-label="Puan tablosu">📊</button>
-      <button type="button" id="bkLastBtn" class="bk-icon" title="Son eli göster" aria-label="Son eli göster">↺</button>
-      <button type="button" id="bkLeaveBtn" class="bk-icon red" title="Masadan ayrıl" aria-label="Masadan ayrıl">✕</button>
-    </div>
+    <nav class="bk-top-btns" aria-label="Masa düğmeleri">
+      <button type="button" id="bkChatBtn" class="bk-icon" title="Masa sohbeti" aria-label="Masa sohbeti"><span>💬</span></button>
+      <button type="button" id="bkLastBtn" class="bk-icon" title="Son el" aria-label="Son eli göster"><span>⟲</span></button>
+      <button type="button" id="bkScoreBtn" class="bk-icon" title="Puan tablosu" aria-label="Puan tablosu"><span>📊</span></button>
+      <button type="button" id="bkSoundBtn" class="bk-icon" title="Ses" aria-label="Sesi aç/kapat"><span id="bkSoundIcon">🔊</span></button>
+      <button type="button" id="bkMenuBtn" class="bk-icon" title="Menü" aria-label="Menü" aria-expanded="false"><span>☰</span></button>
+      <div class="bk-menu hidden" id="bkMenu" role="menu">
+        <button type="button" role="menuitem" id="bkRulesBtn">📖 Kurallar</button>
+        <button type="button" role="menuitem" id="bkMenuScore">📊 Puan tablosu</button>
+        <button type="button" role="menuitem" id="bkLeaveBtn" class="danger">🚪 Masadan ayrıl</button>
+      </div>
+    </nav>
   </header>
 
   <!-- Masa -->
   <main class="bk-table" id="bkTable">
-    <div class="bk-felt"></div>
+    <div class="bk-felt"><div class="bk-logo"><b>ALEMDAR</b><span>BATAK</span></div></div>
     <div class="bk-seat" data-pos="top" id="seatTop"></div>
     <div class="bk-seat" data-pos="left" id="seatLeft"></div>
     <div class="bk-seat" data-pos="right" id="seatRight"></div>
@@ -32,28 +39,41 @@
     <div class="bk-dummy hidden" id="bkDummy"></div>
     <div class="bk-trick" id="bkTrick"></div>
     <div class="bk-notice hidden" id="bkNotice"></div>
-    <!-- Bekleme: masa kodu ve masayı açanın düğmeleri -->
+    <!-- Bekleme -->
     <div class="bk-wait hidden" id="bkWait">
       <b>MASA <span id="bkCode">------</span></b>
       <p id="bkWaitText">Oyuncular bekleniyor…</p>
-      <div class="bk-wait-btns" id="bkHostBtns"><button type="button" class="bk-btn blue" id="bkAddBot">🤖 BOT EKLE</button><button type="button" class="bk-btn green" id="bkStartBots">▶ BOTLARLA BAŞLAT</button></div>
+      <div class="bk-wait-btns">
+        <button type="button" class="bk-btn orange" id="bkCopyCode">📋 KODU KOPYALA</button>
+        <span id="bkHostBtns"><button type="button" class="bk-btn blue" id="bkAddBot">🤖 BOT EKLE</button><button type="button" class="bk-btn green" id="bkStartBots">▶ BOTLARLA BAŞLAT</button></span>
+      </div>
     </div>
+    <!-- İhale / koz / el iptal: masanın ortasında -->
+    <section class="bk-panel hidden" id="bkBidPanel" aria-live="polite">
+      <b id="bkBidTitle">KAÇ EL ALIRSIN?</b>
+      <small id="bkBidInfo"></small>
+      <div class="bk-bid-row" id="bkBidButtons"></div>
+      <button type="button" class="bk-btn grey hidden" id="bkCancelBtn" title="Elinde 10'dan büyük kart yoksa kartlar yeniden dağıtılır">↻ EL İPTAL</button>
+    </section>
+    <section class="bk-panel hidden" id="bkTrumpPanel">
+      <b>KOZU SEÇ</b>
+      <small>İhale sende. Hangi renk koz olsun?</small>
+      <div class="bk-bid-row" id="bkTrumpButtons"></div>
+    </section>
   </main>
 
-  <!-- İhale / koz seçimi / el iptal -->
-  <section class="bk-panel hidden" id="bkBidPanel" aria-live="polite">
-    <b id="bkBidTitle">KAÇ EL ALIRSIN?</b>
-    <div class="bk-bid-row" id="bkBidButtons"></div>
-    <button type="button" class="bk-btn grey hidden" id="bkCancelBtn" title="Elinde 10'dan büyük kart yoksa kartlar yeniden dağıtılır">EL İPTAL</button>
-  </section>
-  <section class="bk-panel hidden" id="bkTrumpPanel">
-    <b>KOZU SEÇ</b>
-    <div class="bk-bid-row" id="bkTrumpButtons"></div>
-  </section>
-
-  <!-- Elim -->
+  <!-- Sıra çubuğu ve elim -->
+  <div class="bk-turnbar hidden" id="bkTurnBar"><span id="bkTurnText">SIRA SENDE</span><i><b id="bkTurnFill"></b></i></div>
   <footer class="bk-hand" id="bkHand" aria-label="Elindeki kartlar"></footer>
 </div>
+
+<!-- Sohbet -->
+<aside class="bk-chat hidden" id="bkChat" aria-label="Masa sohbeti">
+  <div class="bk-chat-head"><b>MASA SOHBETİ</b><button type="button" id="bkChatClose" aria-label="Kapat">✕</button></div>
+  <div class="bk-chat-log" id="bkChatLog" role="log" aria-live="polite"></div>
+  <div class="bk-quick" id="bkQuick"></div>
+  <form class="bk-chat-form" id="bkChatForm"><input id="bkChatInput" maxlength="100" autocomplete="off" placeholder="Mesaj yaz…" aria-label="Mesaj"><button type="submit" aria-label="Gönder">➤</button></form>
+</aside>
 
 <!-- Puan tablosu / el sonu / maç sonu -->
 <div class="bk-modal hidden" id="bkScoreModal" role="dialog" aria-modal="true" aria-labelledby="bkScoreTitle">
@@ -61,11 +81,28 @@
     <h2 id="bkScoreTitle">PUAN TABLOSU</h2>
     <div class="bk-score-wrap"><table class="bk-score" id="bkScoreTable"></table></div>
     <p class="bk-score-note" id="bkScoreNote"></p>
-    <div class="bk-modal-btns" id="bkScoreBtns"><button type="button" class="bk-btn blue" id="bkScoreClose">KAPAT</button></div>
+    <div class="bk-modal-btns" id="bkScoreBtns"></div>
+  </div>
+</div>
+<!-- Son el -->
+<div class="bk-modal hidden" id="bkLastModal" role="dialog" aria-modal="true" aria-labelledby="bkLastTitle">
+  <div class="bk-modal-box small">
+    <h2 id="bkLastTitle">SON EL</h2>
+    <div class="bk-last" id="bkLastCards"></div>
+    <div class="bk-modal-btns"><button type="button" class="bk-btn blue" data-close="bkLastModal">KAPAT</button></div>
+  </div>
+</div>
+<!-- Kurallar -->
+<div class="bk-modal hidden" id="bkRulesModal" role="dialog" aria-modal="true" aria-labelledby="bkRulesTitle">
+  <div class="bk-modal-box">
+    <h2 id="bkRulesTitle">BATAK KURALLARI</h2>
+    <div class="bk-rules" id="bkRulesText"></div>
+    <div class="bk-modal-btns"><button type="button" class="bk-btn blue" data-close="bkRulesModal">TAMAM</button></div>
   </div>
 </div>
 <div class="bk-toast hidden" id="bkToast" role="alert"></div>
-<div id="rotateHint" role="alert"><div class="rotate-phone"></div><div>Daha rahat oynamak için telefonunu yan çevir</div></div>
+<div id="rotateHint" role="alert"><div>Daha rahat oynamak için telefonunu yan çevir</div></div>
 <script src="/socket.io/socket.io.js"></script>
-<script src="/js/batak.js?v=1"></script>
+<script src="/js/batak-cards.js?v=1"></script>
+<script src="/js/batak.js?v=8"></script>
 </body></html>

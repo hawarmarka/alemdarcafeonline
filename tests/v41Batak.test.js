@@ -107,6 +107,11 @@ while (room.phase !== 'matchEnd' && guard++ < 2000) {
 assert.equal(room.phase, 'matchEnd'); assert.equal(room.history.length, 5);
 assert.equal(s1.last('batak:state').phase, 'matchEnd');
 assert.deepEqual(room.totals, [0, 1, 2, 3].map(i => room.history.reduce((n, h) => n + h.scores[i], 0)));
+// Masa sohbeti: masadakilere gider, kontrol karakterleri ve uzunluk temizlenir, art arda yazma sınırlı.
+s1.receive('batak:chat', { text: 'Selam\u0007 ' + 'x'.repeat(200) });
+const chat = s1.last('batak:chat'); assert.equal(chat.seat, 0); assert.equal(chat.text.length, 100); assert(!chat.text.includes('\u0007'));
+s1.receive('batak:chat', { text: 'hızlı' }); assert.match(s1.last('batak:error').message, /yavaş/);
+assert.equal(s1.last('batak:state').turnMs > 0, true, 'süre halkası için turnMs gitmeli');
 // Yeniden bağlanma: yeni socket aynı oyuncu jetonuyla masaya döner.
 const s2 = new FakeSocket(); Batak.onSocket(s2);
 s2.receive('batak:rejoin', { code: room.code, token: 'z'.repeat(30) });
