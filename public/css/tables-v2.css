@@ -64,6 +64,10 @@
 .bk-wait-btns .bk-btn{width:100%}
 .bk-wait-hint{margin-top:14px!important}
 
+/* Sade görünüm: bilgilendirme yazıları gösterilmez */
+.bk-wait-hint,#isHint,#isAi{display:none!important}
+.is-actions{justify-content:center;padding-left:18px!important}
+
 /* ---------- İsim Şehir: açık renkli defter üstünde aynı düzen ---------- */
 .is-wait .bk-wait-btns{width:min(560px,100%)}
 .is-seats{width:auto!important;grid-template-columns:repeat(var(--cols,4),minmax(0,140px))!important;justify-content:center;gap:12px!important}

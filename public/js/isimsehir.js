@@ -178,8 +178,7 @@ function renderWait() {
   if (!waiting) return;
   $('isCode').textContent = s.code;
   const free = s.size - s.players.length;
-  $('isWaitText').textContent = s.autoBots ? `${free} koltuk boş · birkaç saniye içinde botlar oturacak`
-    : `${s.players.length}/${s.size} oyuncu · ${s.isHost ? 'hazır olunca OYUNU BAŞLAT' : 'masayı açanın başlatması bekleniyor'}${s.team ? ' · eşlide boş koltuklara bot oturur' : ''}`;
+  $('isWaitText').textContent = `${s.players.length}/${s.size} oyuncu`;
   const seats = $('isSeats'); seats.replaceChildren();
   seats.style.setProperty('--cols', String(s.size <= 4 ? s.size : s.size / 2)); // simetrik: 6 → 3+3, 10 → 5+5
   for (let k = 0; k < s.size; k++) {
@@ -225,7 +224,7 @@ function renderResult() {
   $('isResultTitle').textContent = over ? 'OYUN BİTTİ' : `TUR ${s.results.round} · HARF ${s.results.letter}`;
   const winners = (s.winners || []).map(i => s.players[i]?.name);
   $('isResultNote').textContent = over ? `🏆 Kazanan: ${s.team ? teamName(s.players[s.winners[0]].team) + ' (' + winners.join(' & ') + ')' : winners.join(', ')}`
-    : 'Aynı cevap 5, farklı cevap 10, o satırı tek doğru yazan 20 puan alır.';
+    : '';
   const btns = $('isResultBtns'); btns.replaceChildren();
   const mk = (cls, text, fn) => { const b = el('button', 'bk-btn ' + cls, text); b.type = 'button'; b.onclick = fn; btns.append(b); };
   if (over && !spectating) { mk('green', '↻ YENİDEN OYNA', () => socket.emit('isim:rematch')); mk('red', 'LOBİYE DÖN', () => socket.emit('isim:leave')); }

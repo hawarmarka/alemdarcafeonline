@@ -282,8 +282,7 @@ function renderWait() {
   if (!waiting) return;
   $('ptCode').textContent = s.code;
   const free = s.n - s.players.length;
-  $('ptWaitText').textContent = s.autoBots ? `${free} koltuk boş · birkaç saniye içinde botlar oturacak`
-    : s.isPublic ? `${free} koltuk boş · masa, masa listesinde görünüyor` : `${free} koltuk boş · arkadaşlarına masa kodunu gönder`;
+  $('ptWaitText').textContent = `${free} koltuk boş`;
   $('ptWaitHint').textContent = s.team ? 'Boş koltuktaki OTUR ile istediğin koltuğa geç. Karşındaki eşindir.' : 'Boş koltuktaki OTUR ile istediğin koltuğa geçebilirsin.';
   $('ptHostBtns').classList.toggle('hidden', !s.isHost || s.autoBots);
 }
@@ -340,7 +339,7 @@ function showScores() {
   ks.forEach(k => { const d = el('div'); d.append(el('small', null, sideName(k)), tally(total(k))); tl.append(d); });
   $('ptScoreTitle').textContent = over ? 'MAÇ SONU' : s.phase === 'roundEnd' ? `EL ${s.round} SONUCU` : 'PUAN TABELASI';
   $('ptScoreNote').textContent = over ? `🏆 Kazanan: ${s.winners.map(sideName).join(', ')} (${total(s.winners[0])} puan)`
-    : s.phase === 'roundEnd' ? `Hedef ${s.target}. Yeni el birkaç saniye içinde başlayacak.` : `Hedef ${s.target} puan.`;
+    : '';
   const btns = $('ptScoreBtns'); btns.replaceChildren();
   const mk = (cls, text, fn) => { const b = el('button', 'bk-btn ' + cls, text); b.type = 'button'; b.onclick = fn; btns.append(b); };
   if (over) { mk('green', '↻ YENİDEN OYNA', () => { socket.emit('pisti:rematch'); closeModal('ptScoreModal'); }); mk('red', 'LOBİYE DÖN', () => socket.emit('pisti:leave')); }

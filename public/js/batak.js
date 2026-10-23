@@ -251,8 +251,7 @@ function renderWait() {
   if (!waiting) return;
   $('bkCode').textContent = s.code;
   const free = 4 - s.players.length;
-  $('bkWaitText').textContent = s.autoBots ? `${free} koltuk boş · birkaç saniye içinde botlar oturacak`
-    : s.isPublic ? `${free} koltuk boş · masa, masa listesinde görünüyor` : `${free} koltuk boş · arkadaşlarına masa kodunu gönder`;
+  $('bkWaitText').textContent = `${free} koltuk boş`;
   $('bkHostBtns').classList.toggle('hidden', !s.isHost || s.autoBots);
 }
 function renderDummy() {
@@ -288,7 +287,7 @@ function showScores() {
   const tot = el('tr', 'total'); tot.append(el('td', null, 'TOPLAM')); s.players.forEach(p => tot.append(el('td', p.total < 0 ? 'neg' : '', String(p.total)))); t.append(tot);
   $('bkScoreTitle').textContent = over ? 'MAÇ SONU' : s.phase === 'roundEnd' ? `EL ${s.round} SONUCU` : 'PUAN TABLOSU';
   const winners = s.players.filter(p => p.total === best).map(p => p.name);
-  $('bkScoreNote').textContent = over ? `🏆 Kazanan: ${winners.join(s.team ? ' & ' : ', ')} (${best} puan)` : s.phase === 'roundEnd' ? 'Yeni el birkaç saniye içinde başlayacak.' : '';
+  $('bkScoreNote').textContent = over ? `🏆 Kazanan: ${winners.join(s.team ? ' & ' : ', ')} (${best} puan)` : '';
   const btns = $('bkScoreBtns'); btns.replaceChildren();
   const mk = (cls, text, fn) => { const b = el('button', 'bk-btn ' + cls, text); b.type = 'button'; b.onclick = fn; btns.append(b); };
   if (over) { mk('green', '↻ YENİDEN OYNA', () => { socket.emit('batak:rematch'); closeModal('bkScoreModal'); }); mk('red', 'LOBİYE DÖN', () => socket.emit('batak:leave')); }

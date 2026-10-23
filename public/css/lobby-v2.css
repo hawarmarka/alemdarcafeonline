@@ -117,6 +117,11 @@ body.lobby-page .modal-panel.room-dialog{max-height:calc(92vh / var(--ui,1))!imp
 #modeListModal .tp-actions{max-width:520px}
 .tp-filter button{border-radius:999px!important}
 
+/* Sade görünüm: bilgilendirme amaçlı açıklama yazıları gösterilmez (kurallar Kurallar penceresinde) */
+.dialog-head small,.create-note,.lb-banner em,.set-hint{display:none!important}
+.dialog-head{margin-bottom:24px!important}
+.lb-banner strong{margin-top:6px}
+
 /* telefon yatay */
 @media (max-height:560px){.lb-round span{font-size:16px}}
 @media (prefers-reduced-motion:reduce){.lb-card,.lb-btn,.tp-btn,.lb-round{transition:none!important}}
