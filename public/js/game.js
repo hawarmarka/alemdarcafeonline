@@ -667,29 +667,22 @@ socket.on('giftSent', data => {
     if (data.fromIndex === state?.playerIndex) { tomatoesLeft = data.left; $('tomatoCounter').textContent = tomatoesLeft; }
 });
 // Tiles use the included 13-column sprite sheet, same dimensions in rack, discards, and on table.
-// represent: masadaki okeyin yerine geçtiği taş ({color, number}); verilirse okey o taş olarak çizilir.
+// Gerçek okey her yerde (ıstaka, masadaki seri/per/çift, atık) arkası dönük düz beyaz taş olarak çizilir: yüzü, yıldızı, yazısı yok.
+// Hangi taşın okey olduğu göstergeden anlaşılır. (represent parametresi geriye uyum için duruyor, okeyde kullanılmıyor.)
 function createTile(tile, cls = '', represent = null) {
     const el = document.createElement('div');
     el.className = 'tile-sprite fresh-tile ' + cls;
     el.dataset.tileId = tile.id;
     const isRealOkey = !!state?.okey && !tile.isFakeJoker && tile.color === state.okey.color && tile.number === state.okey.number;
-    const face = isRealOkey && represent ? represent : tile;
-    el.dataset.color = face.color; // CSS: 4. renk sarı
-    if (tile.isFakeJoker) { const clover = document.createElement('span'); clover.className = 'fake-clover'; el.append(clover); }
-    const spriteCol = tile.isFakeJoker ? (tile.id === 'Sahte-2' ? 1 : 0) : Math.max(0, Number(face.number) - 1);
-    el.style.backgroundPosition = `${(spriteCol / 12) * 100}% ${((spriteRows[face.color] || 0) / 4) * 100}%`;
     if (isRealOkey) {
-        el.classList.add('real-okey');
-        const star = document.createElement('span'); star.className = 'okey-star'; el.append(star);
-        if (represent) {
-            el.classList.add('okey-on-table');
-            el.title = 'OKEY · bu taşın üstüne yerine geçtiği taşı koyarak okeyi alabilirsin';
-        } else if (state.assisted && !flippedTiles.has(tile.id)) {
-            // Yardımlı masada okey "ters döner": joker yüzü (çift tıkla / sağ tıkla gerçek yüzü)
-            el.classList.add('okey-joker');
-            el.title = 'OKEY · gerçek yüzünü görmek için çift tıkla';
-        } else el.title = 'OKEY';
+        el.classList.add('real-okey', 'okey-back');
+        el.title = represent ? 'OKEY · üstüne yerine geçtiği taşı koyarak okeyi alabilirsin' : 'OKEY';
+        return el;
     }
+    el.dataset.color = tile.color; // CSS: 4. renk sarı
+    if (tile.isFakeJoker) { const clover = document.createElement('span'); clover.className = 'fake-clover'; el.append(clover); }
+    const spriteCol = tile.isFakeJoker ? (tile.id === 'Sahte-2' ? 1 : 0) : Math.max(0, Number(tile.number) - 1);
+    el.style.backgroundPosition = `${(spriteCol / 12) * 100}% ${((spriteRows[tile.color] || 0) / 4) * 100}%`;
     return el;
 }
 // Masadaki bir gruptaki okeylerin hangi taşın yerine geçtiği (sunucu grubu yuvalarına göre dizer).
@@ -798,14 +791,13 @@ function highlightDropGroup(target) {
     lastDropTiles = next;
     lastDropTiles.forEach(t => t.classList.add('drop-target'));
 }
-// Çift dokunuş: aynı taşa 350 ms içinde iki kez dokunulursa taş atılır (okeyde yüzü çevrilir).
+// Çift dokunuş: aynı taşa 350 ms içinde iki kez dokunulursa taş atılır. Okey çift dokunuşla atılmaz (101 ceza);
+// yanlışlıkla okey atılmasın diye yalnızca uyarı verilir, okey sürükleyip atık alanına bırakılarak atılabilir.
 // dblclick olayı kullanılamaz: ilk dokunuş seçimi değiştirip ıstakayı yeniden çizdiği için ikinci dokunuş yeni elemana düşer.
 let lastTap = null;
 function doubleTapTile(tile) {
-    if (state?.okey && !tile.isFakeJoker && tile.color === state.okey.color && tile.number === state.okey.number) {
-        if (flippedTiles.has(tile.id)) flippedTiles.delete(tile.id); else flippedTiles.add(tile.id);
-        saveRack(); renderRack(); return;
-    }
+    if (state?.okey && !tile.isFakeJoker && tile.color === state.okey.color && tile.number === state.okey.number)
+        return toast('Okeyi atarsan 101 ceza yazılır. Yine de atmak istersen atık alanına sürükle.', true);
     discard(tile.id);
 }
 function pointerEnd(e) {
@@ -1081,11 +1073,6 @@ function renderRack() {
                 tile.append(mark);
             }
             bindPointer(tile, i);
-            if(tile.classList.contains('real-okey')){
-                const flip=()=>{if(flippedTiles.has(slots[i].id))flippedTiles.delete(slots[i].id);else flippedTiles.add(slots[i].id);tile.classList.toggle('okey-joker', state.assisted && !flippedTiles.has(slots[i].id)); saveRack();};
-                // Çift dokunuş pointerEnd'de (doubleTapTile); sağ tık / uzun basış da yüzü çevirir.
-                tile.addEventListener('contextmenu',e=>{e.preventDefault();flip();});
-            }
             slot.append(tile);
         }
         (i < ROW_WIDTH ? top : bottom).append(slot);

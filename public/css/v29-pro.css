@@ -33,6 +33,12 @@ body.game-page .particles,body.game-page .background-animation{display:none!impo
 /* Tutulan taşın ıstakadaki yeri soluk kalır; uzun basışta telefon menüsü/seçimi açılmaz */
 #gameContainer .cue-wood .tile-sprite.drag-source{opacity:.28!important;transform:none!important;transition:none!important}
 #gameContainer .cue-wood .tile-sprite,#drawPile,#leftDiscardTiles .tile-sprite{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+/* Okey: her yerde arkası dönük düz beyaz taş (yüz, yıldız, "OKEY" yazısı, altın çerçeve yok) */
+.tile-sprite.okey-back,#gameContainer .tile-sprite.okey-back,#compactOpenGroups .grid-table-tile.okey-back,#pairsGrid .tile-sprite.okey-back{
+  background-image:none!important;background:linear-gradient(180deg,#fffefa 0%,#f6f1e3 60%,#e9e1cc 100%)!important;filter:none!important}
+#gameContainer .tile-sprite.okey-back::after,#gameContainer .tile-sprite.okey-back::before,.tile-sprite.okey-back .okey-star,
+#gameContainer :is(#playerHandTop,#playerHandBottom) .tile-sprite.tile-sprite.okey-back::after,#gameContainer :is(#playerHandTop,#playerHandBottom) .tile-sprite.tile-sprite.okey-back::before{content:none!important;display:none!important}
+#compactOpenGroups .grid-table-tile.okey-back:not(.drop-target){box-shadow:0 1px 2px rgba(5,12,22,.6)!important}
 /* Yardımsız masada SERİ DİZ / ÇİFT DİZ kapalı */
 #gameContainer #sortSeriesBtn.action-btn:disabled,#gameContainer #sortPairsBtn.action-btn:disabled{filter:grayscale(1) brightness(.55)!important;cursor:not-allowed!important;opacity:.7}
 
