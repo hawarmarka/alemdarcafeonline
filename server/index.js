@@ -89,6 +89,8 @@ app.get('/api/rooms', (_req, res) => {
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, { maxHttpBufferSize: 1e5 });
 const rooms = new Map();
+// Arkadaşlar, mesajlar ve masaya davet (HTTP uçları + çevrimiçi takibi), bkz. socialHub.js
+const SocialHub = require('./socialHub').install({ app, io, rooms, authReq, fromToken: t => Accounts.fromToken(t) });
 RoomStore.init(rooms, reviveRoom); // masalar diske yazılır; güncelleme sonrası oyuncu dönünce geri yüklenir
 const POSITION = ['bottom', 'right', 'top', 'left'];
 const BASE_TURN_MS = 45000; // Standart sıra süresi
@@ -1023,6 +1025,7 @@ io.on('connection', socket => {
         try { handler(...args); }
         catch (err) { console.error(`Socket olayı hatası (${event}):`, err); issue(socket, 'İşlem gerçekleştirilemedi, tekrar deneyin.'); }
     });
+    SocialHub.onSocket(socket); // 'hello' (çevrimiçi), 'inviteFriend'
     socket.on('joinGame', data => {
         if (socket.data.roomCode) return issue(socket, 'Zaten bir odadasınız.');
         const account = Accounts.fromToken(data?.authToken);

@@ -224,6 +224,16 @@ function leave() {
     if (!window.confirm('Masadan ayrılmak istiyor musun? Oyun devam ediyorsa yerine bot geçer.')) return;
     action('leaveGame');
 }
+// Arkadaşlar (js/social.js): bekleme panelinden davet ve mesaj; gelen davet kabul edilirse bu masadan ayrılıp lobi üzerinden o masaya oturulur.
+Social.init({ socket, token: () => userAuth, toast, avatarSrc, buttons: () => [$('twFriends')],
+    currentRoom: () => session?.roomCode,
+    needAccount: () => toast('Arkadaş davet etmek ve mesajlaşmak için lobiden hesabınla giriş yap.', true),
+    onJoin: code => {
+        if (state && !window.confirm('Bu masadan ayrılıp davet edilen masaya geçilsin mi? Oyun devam ediyorsa yerine bot geçer.')) return;
+        try { sessionStorage.setItem('inviteJoin', code); } catch (_) {}
+        action('leaveGame');
+    } });
+$('twInvite').addEventListener('click', () => Social.open(true));
 $('lobbyLeaveBtn').addEventListener('click', leave);
 $('leaveTableBtn').addEventListener('click', leave);
 $('lobbyCopyBtn').addEventListener('click', async () => {

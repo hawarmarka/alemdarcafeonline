@@ -34,7 +34,7 @@ Akış: istemci `socket.emit(olay)` gönderir. Sunucu doğrular, durumu değişt
 
 ## 3. Çalışma kuralları
 
-- Değişiklikten sonra mutlaka `npm test` çalıştırılmalı (13 dosya). Testlerin hepsi geçmeden iş bitmiş sayılmaz.
+- Değişiklikten sonra mutlaka `npm test` çalıştırılmalı (16 dosya). Testlerin hepsi geçmeden iş bitmiş sayılmaz.
 - Yeni bir socket hamlesi eklenirse istemcide `MOVE_EVENTS` listesine de eklenmeli. Sunucu bu hamleye her durumda `gameState` veya `gameError` ile cevap vermeli, yoksa istemci 5 sn boyunca yeni hamle göndermez.
 - Yeni bir oda zamanlayıcısı `guardedTimer(room, ad, fn)` ile kurulmalı.
 - Testler `DATA_DIR` değişkenine bakar. Gerçek hesap dosyası bozulmasın diye testleri geçici bir klasörle çalıştırın: `$env:DATA_DIR="$env:TEMP\okey-test-data"; npm test`
@@ -196,6 +196,18 @@ Doğrulama (2026-10-23): `tests/v34Stability.test.js` yukarıdakileri test ediyo
 - ✅ Lobi: üst çubukta çip miktarı (ZAFER/OYUN yerine), Masa Aç'ta BAHİS seçimi, Oda Seç'te masa bahsi, sıralamada ÇİP / SEVİYE sekmesi (`/api/leaderboard?by=chips`). HEMEN OYNA 1.000'lik masalara oturuyor.
 - ✅ Masa: sol üst 🪙 kendi çipin (`myChips`), bekleme panelinde masa bahsi, maç sonunda kazanç/kayıp ve masa ücreti.
 - Test: `tests/v36Economy.test.js`.
+- ✅ Arkadaşlar, mesajlar ve masaya davet. Yalnızca hesabı olanlar kullanabilir.
+  - Veri `server/social.js` içinde: `friends` ve `messages` tabloları, `accounts.db` içinde. İstek gönderilir, kabul edilince iki yönlü arkadaşlık olur. İki taraf birbirine istek gönderirse doğrudan arkadaş olurlar. En fazla 200 arkadaş eklenebilir.
+  - Mesajlar yalnızca arkadaşlar arasında gidiyor: en fazla 300 karakter, saniyede bir mesaj. Okunmamış mesajlar rozet olarak görünüyor.
+  - Bağlantı `server/socialHub.js` içinde: `/api/friends*` ve `/api/messages` uçları. Sayfa açılınca `hello` olayıyla hangi hesabın çevrimiçi olduğu bildiriliyor (giriş ya da çıkışta tekrar gönderiliyor).
+  - Anlık bildirimler `social` olayıyla gidiyor (istek, kabul, mesaj).
+  - Davet `inviteFriend` olayıyla gidiyor: yalnızca masadayken, yalnızca çevrimiçi bir arkadaşa ve 3 saniyede en fazla bir kez. Alıcıya `invite` olayıyla masa bilgisi ulaşıyor.
+  - İstemci tarafı ortak `public/js/social.js` ve `public/css/social.css` dosyalarında; `Social.init` ile başlatılıyor.
+    - Lobide alt çubukta arkadaşlar düğmesi var; rozeti okunmamış mesaj ve bekleyen istek sayısını gösteriyor. Arkadaş masadaysa "MASAYA GİT" düğmesi çıkıyor.
+    - Masa bekleme panelinde "ARKADAŞ DAVET ET" ve "MESAJLAR" düğmeleri var.
+    - Gelen davet üstte bir kartla gösteriliyor (KATIL / HAYIR).
+    - Masadayken bir davet kabul edilirse oyuncu önce masadan ayrılıyor, ardından lobide `sessionStorage.inviteJoin` ile davet edilen masaya oturuyor.
+  - Test: `tests/v37Social.test.js`. Tarayıcıda iki hesapla denendi; istek, kabul, sohbet, davet ve masadayken davete katılma çalıştı.
 
 **Bizde olmayan mekanikler (öncelik önerisi):**
 1. ✅ **Çip ekonomisi (sanal, ücretsiz):** başlangıç çipi, masa bahsi (ör. 3.750), kazanana kazanç ve %7 masa ücreti. Dağıtım: yalnız bir kişi açtıysa bütün ortayı o alır; birden çok açan varsa birinci ortanın 3/4'ünü, ikinci 1/4'ünü alır; eşitlikte paylaştırılır. Hesap tablosuna `chips` sütunu, lobide çip göstergesi, bahis seviyeli odalar.
@@ -203,7 +215,7 @@ Doğrulama (2026-10-23): `tests/v34Stability.test.js` yukarıdakileri test ediyo
 3. ✅ **Seviye ödülleri:** XP zaten var; seviye atlayınca çip ödülü (rozet yok).
 4. **Rizikolu 51 / iki kişilik masa:** 2 oyunculu, daha kısa ve riskli mod. Kuralları netleştirilmeli.
 5. **Etkinlikler ve sıralama:** haftalık şampiyona (kazanılan çip/puan sıralaması), geri sayımlı etkinlik kartları. Sıralama zaten var, genişletilir.
-6. **Arkadaşlar ve mesajlar:** arkadaş ekleme, masaya davet, gelen kutusu.
+6. ✅ **Arkadaşlar ve mesajlar** (2026-10-24): aşağıya bakın.
 7. **VIP / kulüp odaları:** yüksek bahisli veya seviye şartlı özel odalar.
 8. **Mini oyunlar:** tren tahmini, kahve falı sürprizi (eğlence amaçlı, sanal çiple).
 9. Mağaza ve gerçek parayla satın alma: **yapılmaz** (ödeme ve yasal sorumluluk; ayrıca kullanıcı istemedi).

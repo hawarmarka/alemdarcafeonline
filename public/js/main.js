@@ -64,10 +64,15 @@ $('bonusBtn')?.addEventListener('click', async () => {
 async function recoverSession() {
   if (authToken) {
     try { currentUser = (await api('/api/me', undefined, 'GET')).user; }
-    catch { authToken = ''; localStorage.removeItem('okeyAuthToken'); }
+    catch { authToken = ''; localStorage.removeItem('okeyAuthToken'); Social.accountChanged(); }
   }
   applyProfile();
 }
+// Arkadaşlar ve mesajlar (js/social.js). Davet veya arkadaşın masası: kodla o masaya otur.
+const joinRoom = code => { $('roomCodeInput').value = code; start('code'); };
+Social.init({ socket, token: () => authToken, toast, avatarSrc, onJoin: joinRoom,
+  buttons: () => [$('friendsBtn')].filter(Boolean),
+  needAccount: () => { toast('Arkadaş eklemek ve mesajlaşmak için ücretsiz hesap aç.'); openAuth('register'); } });
 function showModal(id) { $(id).classList.remove('hidden'); }
 function hideModal(id) { $(id).classList.add('hidden'); }
 document.querySelectorAll('[data-close]').forEach(el => el.addEventListener('click', () => hideModal(el.dataset.close)));
@@ -91,12 +96,14 @@ $('authForm').onsubmit = async e => {
     const data = await api(authMode === 'register' ? '/api/register' : '/api/login', payload);
     authToken = data.token; localStorage.setItem('okeyAuthToken', authToken);
     currentUser = data.user; applyProfile(); hideModal('authModal'); toast('Hoş geldin ' + currentUser.username + '!');
+    Social.accountChanged();
   } catch (err) { toast(err.message); }
   finally { $('authSubmit').disabled = false; }
 };
 $('logoutBtn').onclick = async () => {
   try { await api('/api/logout'); } catch (_) {}
   authToken = ''; currentUser = null; localStorage.removeItem('okeyAuthToken'); applyProfile(); toast('Hesaptan çıkış yapıldı.');
+  Social.accountChanged();
 };
 $('playerNameInput').addEventListener('input', () => { localStorage.setItem('okeyPlayerName', $('playerNameInput').value); applyProfileNameOnly(); });
 function applyProfileNameOnly() { if (!currentUser) $('topUsername').textContent = $('playerNameInput').value.trim() || 'Misafir Oyuncu'; }
@@ -233,10 +240,12 @@ recoverSession(); loadRoomCounts(); setInterval(loadRoomCounts, 15000);
 
 // Oyun sonundaki "YENİ OYUNA BAŞLA": aynı modda yeni masaya otomatik katıl.
 (function autoJoinAfterMatch() {
-  let mode = null;
+  let mode = null, invite = null;
   try { mode = sessionStorage.getItem('autoJoinMode'); sessionStorage.removeItem('autoJoinMode'); } catch {}
-  if (!mode || !socketAvailable) return;
-  const go = () => start('random', mode);
+  // Masadayken kabul edilen davet: masa sayfası ayrılıp buraya döner, davet edilen masaya oturulur.
+  try { invite = sessionStorage.getItem('inviteJoin'); sessionStorage.removeItem('inviteJoin'); } catch {}
+  if ((!mode && !invite) || !socketAvailable) return;
+  const go = () => invite ? joinRoom(invite) : start('random', mode);
   if (socket.connected) go(); else socket.on('connect', function once() { socket.off?.('connect', once); go(); });
 })();
 

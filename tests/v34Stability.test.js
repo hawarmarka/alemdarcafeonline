@@ -88,11 +88,18 @@ try {
   e.receive('startWithBots');
   const g4 = room4.game, me = 0;
   const isOk = t => g4.isOkey(t);
-  const pool = g4.tiles.filter(t => !t.isFakeJoker && !isOk(t));
+  // Her taştan iki tane var; deste + bütün eller içinde aranırsa çift her zaman bulunur (yalnız destede aramak rastgele başarısız oluyordu).
+  const pool = [...g4.tiles, ...g4.playerTiles.flat()].filter(t => !t.isFakeJoker && !isOk(t));
   const twin = pool.find(t => pool.some(u => u !== t && u.color === t.color && u.number === t.number));
   const pairTiles = [twin, pool.find(u => u !== twin && u.color === twin.color && u.number === twin.number)];
-  const singles = pool.filter(t => !pairTiles.includes(t) && !(t.color === twin.color && t.number === twin.number)).slice(0, 2);
-  g4.tiles = g4.tiles.filter(t => !pairTiles.includes(t) && !singles.includes(t)).concat(g4.playerTiles[me]);
+  // İki tek taş: çiftle ve birbiriyle aynı türden olmamalı, yoksa ikinci bir çift oluşur.
+  const kind = t => t.color + t.number, singles = [];
+  for (const t of pool) if (singles.length < 2 && kind(t) !== kind(twin) && !singles.some(s => kind(s) === kind(t))) singles.push(t);
+  const chosen = new Set([...pairTiles, ...singles]);
+  const oldHand = g4.playerTiles[me].filter(t => !chosen.has(t));
+  g4.tiles = g4.tiles.filter(t => !chosen.has(t));
+  g4.playerTiles = g4.playerTiles.map(h => h.filter(t => !chosen.has(t)));
+  g4.tiles.push(...oldHand);
   g4.playerTiles[me] = [...pairTiles, ...singles];
   Object.assign(g4.playerStates[me], { hasOpened: true, openType: 'normal', openedGroups: [] });
   g4.currentPlayer = me; g4.hasDrawn = true; _testing.beginTurn(room4);

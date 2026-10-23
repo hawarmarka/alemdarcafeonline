@@ -237,5 +237,8 @@ function leaderboard(n = 25, by = 'xp') {
 function close() { try { db.close(); } catch {} }
 // /health için: hesaplar kalıcı diskte mi ('persistent'), container içinde mi ('ephemeral'), bellekte mi ('memory')?
 const storageStatus = () => storage;
+const userByName = name => rowToUser(q.byKey.get(usernameKey(name)));
 module.exports = { register, login, cleanUser, fromToken, logout, updateAvatar, updateFrame, award, leaderboard, close, storageStatus,
-  chipsOf, takeChips, addChips, claimBonus, START_CHIPS };
+  chipsOf, takeChips, addChips, claimBonus, START_CHIPS,
+  // social.js aynı veritabanını kullanır (arkadaşlık ve mesaj tabloları)
+  db, userById, userByName };
