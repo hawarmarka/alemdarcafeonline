@@ -71,6 +71,7 @@ async function recoverSession() {
 // Arkadaşlar ve mesajlar (js/social.js). Davet veya arkadaşın masası: kodla o masaya otur.
 const joinRoom = (code, game = 'okey') => {
   if (game === 'batak') return batakJoin('code', { code });
+  if (game === 'pisti') return pistiJoin('code', { code });
   $('roomCodeInput').value = code; start('code');
 };
 Social.init({ socket, token: () => authToken, toast, avatarSrc, onJoin: joinRoom,
@@ -190,9 +191,12 @@ document.querySelectorAll('.join-mode').forEach(btn => btn.onclick = () => start
 const tp = { list: [], code: null, filter: 'all', timer: null, game: 'okey' };
 const TP_SEAT_CLASS = ['s-bottom', 's-right', 's-top', 's-left']; // sunucudaki koltuk sırası
 const TP_FILTERS = { okey: [['all', 'TÜMÜ'], ['tek', 'TEK'], ['esli', 'EŞLİ'], ['katlamali', 'KATLAMALI'], ['yardimsiz', 'YARDIMSIZ']],
-  batak: [['all', 'TÜMÜ'], ['ihaleli', 'İHALELİ'], ['kozmaca', 'KOZ MAÇA'], ['esli', 'EŞLİ']] };
+  batak: [['all', 'TÜMÜ'], ['ihaleli', 'İHALELİ'], ['kozmaca', 'KOZ MAÇA'], ['esli', 'EŞLİ']],
+  pisti: [['all', 'TÜMÜ'], ['ikili', '2 KİŞİ'], ['dortlu', '4 KİŞİ'], ['esli', 'EŞLİ'], ['blof', 'BLÖFLÜ']] };
 const BATAK_TYPE_NAME = { ihaleli: 'İhaleli', kozmaca: 'Koz Maça', esli: 'Eşli' };
+const PISTI_TYPE_NAME = { ikili: '2 Kişi', dortlu: '4 Kişi', esli: 'Eşli' };
 const tpMatch = r => tp.filter === 'all' || (tp.game === 'batak' ? r.type === tp.filter
+  : tp.game === 'pisti' ? (tp.filter === 'blof' ? r.bluff : r.type === tp.filter)
   : (tp.filter === 'tek' && !r.teamMode) || (tp.filter === 'esli' && r.teamMode) || (tp.filter === 'katlamali' && r.stackingMode) || (tp.filter === 'yardimsiz' && !r.assisted));
 function tpVisible() { return tp.list.filter(tpMatch); }
 function tpPaint() {
@@ -210,6 +214,10 @@ function tpPaint() {
   if (tp.game === 'batak') {
     box.classList.add('batak');
     rules.append(el('span', 'wide g', 'BATAK'), el('span', null, BATAK_TYPE_NAME[room.type] || room.type), el('span', null, `${room.rounds} El`));
+  } else if (tp.game === 'pisti') {
+    box.classList.add('batak');
+    rules.append(el('span', 'wide g', 'PİŞTİ'), el('span', null, PISTI_TYPE_NAME[room.type] || room.type), el('span', null, `${room.target}'e`),
+      el('span', 'wide ' + (room.bluff ? 'r' : ''), room.bluff ? 'Blöflü' : 'Blöfsüz'));
   } else {
     box.classList.remove('batak');
     box.append(el('div', 'tp-bet', `🪙 ${Number(room.bet || 1000).toLocaleString('tr-TR')}`));
@@ -219,6 +227,7 @@ function tpPaint() {
   }
   box.append(rules);
   (room.seats || []).forEach((p, s) => {
+    if (room.valid && !room.valid.includes(s)) return; // 2 kişilik Pişti: yalnızca karşılıklı koltuklar
     const seat = el('div', 'tp-seat ' + TP_SEAT_CLASS[s]);
     if (p) {
       const img = el('img'); img.src = avatarSrc(p.avatar); img.alt = '';
@@ -228,6 +237,7 @@ function tpPaint() {
       b.addEventListener('click', () => {
         hideModal('modeListModal');
         if (tp.game === 'batak') return batakJoin('code', { code: room.code, seat: s });
+        if (tp.game === 'pisti') return pistiJoin('code', { code: room.code, seat: s });
         $('roomCodeInput').value = room.code; start('code', 'klasik', { seat: s });
       });
       seat.append(b);
@@ -237,7 +247,7 @@ function tpPaint() {
   $('tpCount').textContent = `Masa ${i + 1} / ${list.length} · ${room.host ? room.host + ' · ' : ''}${room.code}`;
 }
 async function tpLoad() {
-  try { tp.list = (await api(tp.game === 'batak' ? '/api/batak' : '/api/rooms', null, 'GET')).waiting || []; } catch (e) { toast(e.message); }
+  try { tp.list = (await api({ batak: '/api/batak', pisti: '/api/pisti' }[tp.game] || '/api/rooms', null, 'GET')).waiting || []; } catch (e) { toast(e.message); }
   tpPaint();
 }
 function tpStep(d) {
@@ -247,7 +257,7 @@ function tpStep(d) {
 }
 async function showRoomList(game = 'okey') {
   tp.game = game; tp.filter = 'all'; tp.code = null;
-  $('modeListTitle').textContent = game === 'batak' ? 'BATAK · MASA SEÇ' : 'ODA SEÇ';
+  $('modeListTitle').textContent = { batak: 'BATAK · MASA SEÇ', pisti: 'PİŞTİ · MASA SEÇ' }[game] || 'ODA SEÇ';
   const f = $('tpFilter'); f.replaceChildren();
   for (const [key, label] of TP_FILTERS[game]) {
     const b = document.createElement('button'); b.type = 'button'; b.dataset.f = key; b.textContent = label; b.classList.toggle('on', key === 'all');
@@ -261,10 +271,10 @@ async function showRoomList(game = 'okey') {
 }
 $('tpPrev').onclick = () => tpStep(-1);
 $('tpNext').onclick = () => tpStep(1);
-$('tpCreate').onclick = () => { hideModal('modeListModal'); if (tp.game === 'batak') showModal('batakModal'); else openCreate(true); };
+$('tpCreate').onclick = () => { hideModal('modeListModal'); if (tp.game === 'batak') showModal('batakModal'); else if (tp.game === 'pisti') showModal('pistiModal'); else openCreate(true); };
 addEventListener('keydown', e => { if ($('modeListModal').classList.contains('hidden')) return; if (e.key === 'ArrowLeft') tpStep(-1); if (e.key === 'ArrowRight') tpStep(1); });
 document.querySelectorAll('.select-mode').forEach(btn => btn.onclick = () => showRoomList());
-$('modeAutoJoinBtn').onclick = () => { hideModal('modeListModal'); if (tp.game === 'batak') batakJoin('quick'); else start('random', quickMode()); };
+$('modeAutoJoinBtn').onclick = () => { hideModal('modeListModal'); if (tp.game === 'batak') batakJoin('quick'); else if (tp.game === 'pisti') pistiJoin('quick'); else start('random', quickMode()); };
 $('randomJoinBtn').onclick = () => start('random', quickMode());
 // MASA AÇ: KLASİK kartında herkese açık (Oda Seç listesinde), ÖZEL kartında yalnızca kodla katılınan masa
 let createPublic = true;
@@ -343,6 +353,42 @@ $('batakCodeInput')?.addEventListener('input', e => { e.target.value = e.target.
 document.querySelectorAll('[data-target=batakType] button').forEach(b => b.addEventListener('click', () => { $('batakRuleNote').textContent = BATAK_NOTES[b.dataset.value]; }));
 async function loadBatakCount() { try { const r = await api('/api/batak', null, 'GET'); if ($('batakCount')) $('batakCount').textContent = r.players.toLocaleString('tr-TR'); } catch (_) {} }
 loadBatakCount(); setInterval(loadBatakCount, 15000);
+
+// ================= Pişti =================
+// Batak ile aynı akış: masaya oturunca /pisti sayfasına geçilir; oyuncu jetonu sessionStorage'da.
+let pistiPending = false;
+const PISTI_NOTES = { ikili: 'İki kişi karşılıklı oynar. Yerdeki kartın aynısı ya da Vale yerdekileri alır; tek karta aynısı PİŞTİ (10), Vale\'ye Vale 20 puan.',
+  dortlu: 'Dört kişi, herkes kendi için oynar. En çok kart toplayan 3 puan alır.',
+  esli: 'Karşılıklı oturanlar takım; aldığınız kartlar ve piştiler birlikte sayılır.' };
+function pistiJoin(mode, extra = {}) {
+  if (!socket.connected) return toast('Oyun sunucusuna bağlanılamadı.');
+  if (pistiPending) return;
+  const code = (extra.code || $('pistiCodeInput').value).trim().toUpperCase();
+  if (mode === 'code' && !/^[A-Z0-9]{6}$/.test(code)) return toast('6 karakterli Pişti masa kodunu yaz.');
+  const token = [...crypto.getRandomValues(new Uint8Array(24))].map(b => b.toString(16).padStart(2, '0')).join('');
+  pistiPending = { token };
+  socket.emit('pisti:join', { mode, code, token, seat: Number.isInteger(extra.seat) ? extra.seat : undefined, isPublic: extra.isPublic === true,
+    type: $('pistiType').value, target: Number($('pistiTarget').value), bluff: $('pistiBluff').value === 'true', authToken,
+    playerName: currentUser?.username || $('playerNameInput').value.trim() || 'Oyuncu' + Math.floor(10000 + Math.random() * 89999),
+    avatar: currentUser?.avatar || selectedAvatar });
+  setTimeout(() => { pistiPending = false; }, 5000);
+}
+socket.on('pisti:joined', d => {
+  if (!pistiPending) return;
+  sessionStorage.setItem('pistiSession', JSON.stringify({ code: d.code, token: pistiPending.token }));
+  if (window.AlemdarTransition) AlemdarTransition.leaveTo('/pisti'); else location.assign('/pisti');
+});
+socket.on('pisti:error', d => { pistiPending = false; toast(d.message || 'Pişti masasına katılınamadı.'); });
+$('pistiQuickBtn')?.addEventListener('click', () => showRoomList('pisti'));
+$('pistiOpenBtn')?.addEventListener('click', () => showModal('pistiModal'));
+$('pistiPlayBtn')?.addEventListener('click', () => { hideModal('pistiModal'); pistiJoin('quick'); });
+$('pistiPrivateBtn')?.addEventListener('click', () => { hideModal('pistiModal'); pistiJoin('create'); });
+$('pistiPublicBtn')?.addEventListener('click', () => { hideModal('pistiModal'); pistiJoin('create', { isPublic: true }); });
+$('pistiCodeBtn')?.addEventListener('click', () => pistiJoin('code'));
+$('pistiCodeInput')?.addEventListener('input', e => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); });
+document.querySelectorAll('[data-target=pistiType] button').forEach(b => b.addEventListener('click', () => { $('pistiRuleNote').textContent = PISTI_NOTES[b.dataset.value]; }));
+async function loadPistiCount() { try { const r = await api('/api/pisti', null, 'GET'); if ($('pistiCount')) $('pistiCount').textContent = r.players.toLocaleString('tr-TR'); } catch (_) {} }
+loadPistiCount(); setInterval(loadPistiCount, 15000);
 
 // ================= Okey Plus düzeni: lobi ekleri =================
 // Lobi sahnesini (1600×735) ekrana sığdır

@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8">
+<link rel="icon" href="/asset/ui/alemdar-logo.svg" type="image/svg+xml">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Alemdar Cafe · Pişti</title>
+<meta name="theme-color" content="#071512">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Barlow:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/social.css?v=1">
+<link rel="stylesheet" href="/css/batak.css?v=14">
+<link rel="stylesheet" href="/css/pisti.css?v=1">
+</head>
+<body class="batak-page pisti-page">
+<div class="bk-stage" id="bkStage">
+  <!-- Üst çubuk: solda oyun bilgisi ve hedef, sağda araç çubuğu (Batak ile ortak görünüm) -->
+  <header class="bk-top">
+    <div class="bk-hud">
+      <div class="bk-info"><b id="ptType">PİŞTİ</b><span id="ptRound">El 1</span></div>
+      <div class="pt-target" id="ptTarget" title="Bitiş sayısı"><small>BİTİŞ</small><b>101</b></div>
+      <div class="bk-contract" id="ptScoreLine"></div>
+    </div>
+    <nav class="bk-toolbar" aria-label="Masa düğmeleri">
+      <div class="bk-tgroup">
+        <button type="button" id="bkFriendsBtn" class="bk-tool" title="Arkadaşlar ve davet"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.3-6 6.5-6s5.9 2.4 6.5 6"/><path d="M16 4.6a3.4 3.4 0 0 1 0 6.8M18 14.4c2 .8 3.2 2.8 3.5 5.6"/></svg><span>Arkadaşlar</span></button>
+        <button type="button" id="bkChatBtn" class="bk-tool" title="Masa sohbeti"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg><span>Sohbet</span></button>
+        <button type="button" id="bkVoiceBtn" class="bk-tool" title="Sesli sohbet" aria-pressed="false"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/><path id="bkVoiceSlash" d="M4 4l16 16"/></svg><span>Sesli</span></button>
+        <button type="button" id="bkTreatBtn" class="bk-tool" title="İkram et (çay, kahve…)"><svg viewBox="0 0 24 24"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8 3c0 1.5 1 1.5 1 3M12 3c0 1.5 1 1.5 1 3"/></svg><span>İkram</span></button>
+      </div>
+      <div class="bk-tgroup">
+        <button type="button" id="ptScoreBtn" class="bk-tool icon-only" title="Puan tabelası"><svg viewBox="0 0 24 24"><path d="M5 20V11M12 20V5M19 20v-6"/></svg></button>
+        <button type="button" id="ptSoundBtn" class="bk-tool icon-only" title="Oyun sesi"><svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path id="ptSoundWave" d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/><path id="ptSoundOff" class="hidden" d="M16 9l5 6M21 9l-5 6"/></svg></button>
+        <button type="button" id="ptMenuBtn" class="bk-tool icon-only" title="Menü" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      </div>
+      <div class="bk-menu hidden" id="ptMenu" role="menu">
+        <button type="button" role="menuitem" id="ptRulesBtn">Kurallar</button>
+        <button type="button" role="menuitem" id="ptMenuScore">Puan tabelası</button>
+        <button type="button" role="menuitem" id="ptMenuProfile">Profilim</button>
+        <button type="button" role="menuitem" id="ptLeaveBtn" class="danger">Masadan ayrıl</button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Masa ve oyuncular: profiller masanın dışında (üst, sol, sağ; sen altta ortada) -->
+  <section class="bk-arena" id="ptArena">
+    <div class="bk-slot" data-pos="top" id="seatTop"></div>
+    <div class="bk-slot" data-pos="left" id="seatLeft"></div>
+    <main class="bk-table" id="ptTable">
+      <div class="bk-felt"><div class="bk-logo"><b>ALEMDAR</b><span>PİŞTİ</span></div></div>
+      <div class="pt-layer" id="ptOpp"></div>
+      <div class="pt-layer" id="ptWon"></div>
+      <div class="pt-deck hidden" id="ptDeck" title="Deste"><div class="pt-deck-bottom" id="ptDeckBottom"></div><div class="pt-deck-stack" id="ptDeckStack"></div><b id="ptDeckCount">0</b></div>
+      <div class="pt-pile" id="ptPile" aria-label="Yerdeki kartlar"></div>
+      <div class="pt-pile-count hidden" id="ptPileCount"></div>
+      <div class="pt-peek hidden" id="ptPeek" title="İlk alışta kapalı kartları gördün"><small>GÖRDÜĞÜN KAPALI KARTLAR</small><div id="ptPeekCards"></div></div>
+      <div class="bk-notice hidden" id="ptNotice"></div>
+      <div class="pt-burst hidden" id="ptBurst" aria-live="assertive"><b id="ptBurstTitle">PİŞTİ!</b><span id="ptBurstSub">+10</span></div>
+      <div class="bk-wait hidden" id="ptWait">
+        <b>MASA <span id="ptCode">------</span></b>
+        <p id="ptWaitText">Oyuncular bekleniyor…</p>
+        <div class="bk-wait-btns">
+          <button type="button" class="bk-btn ghost" id="ptCopyCode">KODU KOPYALA</button>
+          <button type="button" class="bk-btn ghost" id="ptInviteBtn">ARKADAŞ DAVET ET</button>
+          <span id="ptHostBtns"><button type="button" class="bk-btn ghost" id="ptAddBot">BOT EKLE</button><button type="button" class="bk-btn primary" id="ptStartBots">BOTLARLA BAŞLAT</button></span>
+        </div>
+        <small class="bk-wait-hint" id="ptWaitHint">Boş koltuktaki OTUR ile istediğin koltuğa geçebilirsin.</small>
+      </div>
+      <section class="bk-panel hidden" id="ptBluffPanel" aria-live="polite">
+        <b id="ptBluffTitle">PİŞTİ Mİ, BLÖF MÜ?</b>
+        <small id="ptBluffInfo"></small>
+        <div class="bk-bid-row">
+          <button type="button" class="bk-btn green" id="ptBelieve">İNANIYORUM</button>
+          <button type="button" class="bk-btn red" id="ptChallenge">AÇ · BLÖF!</button>
+        </div>
+      </section>
+    </main>
+    <div class="bk-slot" data-pos="right" id="seatRight"></div>
+    <div class="bk-slot" data-pos="bottom" id="seatBottom"></div>
+  </section>
+
+  <footer class="bk-hand pt-hand" id="ptHand" aria-label="Elindeki kartlar"></footer>
+  <button type="button" class="pt-bluff-toggle hidden" id="ptBluffToggle" aria-pressed="false" title="Kartını kapalı atıp pişti iddia et">KAPALI AT · <b>PİŞTİ DE</b></button>
+</div>
+
+<!-- Sohbet -->
+<aside class="bk-chat hidden" id="bkChat" aria-label="Masa sohbeti">
+  <div class="bk-chat-head"><b>MASA SOHBETİ</b><button type="button" id="bkChatClose" aria-label="Kapat">✕</button></div>
+  <div class="bk-chat-log" id="bkChatLog" role="log" aria-live="polite"></div>
+  <div class="bk-quick" id="bkQuick"></div>
+  <form class="bk-chat-form" id="bkChatForm"><input id="bkChatInput" maxlength="100" autocomplete="off" placeholder="Mesaj yaz…" aria-label="Mesaj"><button type="submit" aria-label="Gönder">➤</button></form>
+</aside>
+
+<!-- İkram: çay, kahve, oralet… (js/batak-extras.js) -->
+<div class="bk-modal hidden" id="bkTreatModal" role="dialog" aria-modal="true" aria-labelledby="bkTreatTitle">
+  <div class="bk-modal-box small">
+    <h2 id="bkTreatTitle">İKRAM ET</h2>
+    <p class="bk-treat-step">1 · Ne ikram edeceksin?</p>
+    <div class="bk-treats" id="bkTreatItems"></div>
+    <p class="bk-treat-step">2 · Kime?</p>
+    <div class="bk-treat-targets" id="bkTreatTargets"></div>
+    <div class="bk-modal-btns"><button type="button" class="bk-btn ghost" data-close="bkTreatModal">VAZGEÇ</button></div>
+  </div>
+</div>
+
+<!-- Puan tabelası / el sonu / maç sonu -->
+<div class="bk-modal hidden" id="ptScoreModal" role="dialog" aria-modal="true" aria-labelledby="ptScoreTitle">
+  <div class="bk-modal-box">
+    <h2 id="ptScoreTitle">PUAN TABELASI</h2>
+    <div class="bk-score-wrap"><table class="bk-score pt-score" id="ptScoreTable"></table></div>
+    <div class="pt-tally" id="ptTally"></div>
+    <p class="bk-score-note" id="ptScoreNote"></p>
+    <div class="bk-modal-btns" id="ptScoreBtns"></div>
+  </div>
+</div>
+<!-- Kurallar -->
+<div class="bk-modal hidden" id="ptRulesModal" role="dialog" aria-modal="true" aria-labelledby="ptRulesTitle">
+  <div class="bk-modal-box">
+    <h2 id="ptRulesTitle">PİŞTİ KURALLARI</h2>
+    <div class="bk-rules" id="ptRulesText"></div>
+    <div class="bk-modal-btns"><button type="button" class="bk-btn primary" data-close="ptRulesModal">TAMAM</button></div>
+  </div>
+</div>
+<!-- Oyuncu profili (avatara tıklayınca) -->
+<div class="bk-modal hidden" id="bkProfileModal" role="dialog" aria-modal="true" aria-labelledby="bkProfileName">
+  <div class="bk-modal-box small bk-profile">
+    <img id="bkProfileAvatar" src="/asset/avatar-default.svg" alt="">
+    <h2 id="bkProfileName">Oyuncu</h2>
+    <p id="bkProfileSub"></p>
+    <div class="bk-profile-stats" id="bkProfileStats"></div>
+    <div class="bk-modal-btns"><button type="button" class="bk-btn primary" id="bkProfileAdd">ARKADAŞ EKLE</button><button type="button" class="bk-btn ghost" id="bkProfileTreat">İKRAM ET</button><button type="button" class="bk-btn ghost" data-close="bkProfileModal">KAPAT</button></div>
+  </div>
+</div>
+<div class="bk-toast hidden" id="bkToast" role="alert"></div>
+<div id="rotateHint" role="alert"><div>Daha rahat oynamak için telefonunu yan çevir</div></div>
+<div id="bkAudio" hidden></div>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/social.js?v=3"></script>
+<script src="/js/batak-cards.js?v=4"></script>
+<script src="/js/batak-extras.js?v=3"></script>
+<script src="/js/pisti.js?v=1"></script>
+</body></html>

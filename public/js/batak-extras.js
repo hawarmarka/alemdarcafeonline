@@ -1,11 +1,13 @@
 'use strict';
 // Batak masası ekleri: ikram (çay, kahve, oralet…) ve sesli sohbet (WebRTC).
 // batak.js init({...}) ile bağlar ve her çizimden sonra update() çağırır.
-// İkram: sunucu 'batak:treat' ile herkese duyurur; ikram uçarak gelir ve bir süre alanın kutusunun yanında durur.
-// Sesli sohbet: sunucu yalnızca kimlerin sesli sohbette olduğunu ('batak:voice') ve teklif/cevap/ICE iletilerini ('batak:signal') aktarır;
+// Batak ve Pişti ortak (init'te prefix: 'batak' | 'pisti'; olaylar '<önek>:treat' gibi). Sunucu tarafı: server/tableExtras.js.
+// İkram: sunucu '<önek>:treat' ile herkese duyurur; ikram uçarak gelir ve bir süre alanın kutusunun yanında durur.
+// Sesli sohbet: sunucu yalnızca kimlerin sesli sohbette olduğunu ('<önek>:voice') ve teklif/cevap/ICE iletilerini ('<önek>:signal') aktarır;
 // ses doğrudan tarayıcılar arasında akar. Eşler oyuncu adıyla tutulur (koltuk numarası maç başında değişebilir).
 window.BatakExtras = (function () {
   let ctx = null;
+  const ev = name => `${ctx?.prefix || 'batak'}:${name}`; // olay öneki: 'batak', 'pisti'…
   const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
   const $ = id => document.getElementById(id);
 
@@ -32,7 +34,7 @@ window.BatakExtras = (function () {
       items.append(b);
     }
     const targets = $('bkTreatTargets'); targets.replaceChildren();
-    const send = to => { ctx.socket.emit('batak:treat', { item: pick, to }); ctx.closeModal('bkTreatModal'); };
+    const send = to => { ctx.socket.emit(ev('treat'), { item: pick, to }); ctx.closeModal('bkTreatModal'); };
     s.players.forEach((p, i) => {
       if (i === s.me) return;
       const b = el('button', 'bk-btn ' + (i === target ? 'primary' : 'ghost'), p.name); b.type = 'button'; b.onclick = () => send(i); targets.append(b);
@@ -89,7 +91,7 @@ window.BatakExtras = (function () {
     } catch (_) { return ctx.toast('Mikrofon izni verilmedi. Tarayıcının adres çubuğundan mikrofona izin ver.'); }
     voice.on = true; paintVoiceBtn();
     meter(myName(), voice.stream);
-    ctx.socket.emit('batak:voiceJoin');
+    ctx.socket.emit(ev('voiceJoin'));
     ctx.toast('Sesli sohbete katıldın. Masadaki diğer sesli oyuncuları duyacaksın.', true);
   }
   function stopVoice() {
@@ -97,7 +99,7 @@ window.BatakExtras = (function () {
     for (const name of [...voice.peers.keys()]) closePeer(name);
     voice.stream?.getTracks().forEach(t => t.stop()); voice.stream = null;
     voice.meters.clear();
-    ctx.socket.emit('batak:voiceLeave');
+    ctx.socket.emit(ev('voiceLeave'));
   }
   function paintVoiceBtn() {
     const b = $('bkVoiceBtn'); b.setAttribute('aria-pressed', String(voice.on));
@@ -129,7 +131,7 @@ window.BatakExtras = (function () {
   }
   function signal(name, data) {
     const to = seatOfName(name); if (to < 0) return;
-    ctx.socket.emit('batak:signal', { to, data: JSON.parse(JSON.stringify(data)) });
+    ctx.socket.emit(ev('signal'), { to, data: JSON.parse(JSON.stringify(data)) });
   }
   async function onSignal({ from, data }) {
     if (!voice.on) return;
@@ -184,11 +186,11 @@ window.BatakExtras = (function () {
     $('bkTreatBtn').onclick = () => openTreat();
     $('bkVoiceBtn').onclick = toggleVoice;
     paintVoiceBtn();
-    ctx.socket.on('batak:treat', onTreat);
-    ctx.socket.on('batak:voice', onVoiceList);
-    ctx.socket.on('batak:signal', onSignal);
-    ctx.socket.on('connect', () => { if (voice.on) { for (const n of [...voice.peers.keys()]) closePeer(n); ctx.socket.emit('batak:voiceJoin'); } });
-    addEventListener('beforeunload', () => { if (voice.on) ctx.socket.emit('batak:voiceLeave'); });
+    ctx.socket.on(ev('treat'), onTreat);
+    ctx.socket.on(ev('voice'), onVoiceList);
+    ctx.socket.on(ev('signal'), onSignal);
+    ctx.socket.on('connect', () => { if (voice.on) { for (const n of [...voice.peers.keys()]) closePeer(n); ctx.socket.emit(ev('voiceJoin')); } });
+    addEventListener('beforeunload', () => { if (voice.on) ctx.socket.emit(ev('voiceLeave')); });
   }
   return { init, update, openTreat, TREATS };
 })();

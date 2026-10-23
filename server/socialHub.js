@@ -2,24 +2,30 @@
 // Arkadaşlar, mesajlar ve masaya davet: HTTP uçları, çevrimiçi takibi ve anlık bildirimler.
 // Lobi ve masa sayfası bağlanınca 'hello' ile hesap anahtarını gönderir; sunucu hangi hesabın hangi socket'lerde açık olduğunu bilir.
 const Social = require('./social');
+const PistiRules = require('./pisti/logic');
 
 function install({ app, io, rooms, authReq, fromToken }) {
   const online = new Map(); // hesap id → socket id kümesi
   const notify = (uid, event, payload) => { for (const sid of online.get(uid) || []) io.to(sid).emit(event, payload); };
   // Arkadaş masada mı? (yalnızca bağlı olduğu, bitmemiş masa)
-  // Diğer oyunların masaları (Batak…): index.js setGames ile bağlar. Her biri { rooms: Map } verir.
-  let batakRooms = new Map();
+  // Diğer oyunların masaları (Batak, Pişti…): index.js setGames ile bağlar. Her biri { rooms: Map } verir;
+  // oyuncunun masası socket.data[`${oyun}Code`] içinde.
+  let games = {};
   const tableOf = uid => {
     for (const room of rooms.values()) {
       if (room.matchEnded) continue;
       if (room.players.some(p => p.accountId === uid && p.socketId)) return { game: 'okey', code: room.code, started: !!room.started, seats: room.players.length };
     }
-    for (const room of batakRooms.values()) {
+    for (const [game, g] of Object.entries(games)) for (const room of g.rooms.values()) {
       if (room.phase === 'matchEnd') continue;
-      if (room.players.some(p => p.accountId === uid && p.socketId)) return { game: 'batak', code: room.code, started: room.phase !== 'waiting', seats: room.players.length };
+      if (room.players.some(p => p.accountId === uid && p.socketId)) return { game, code: room.code, started: room.phase !== 'waiting', seats: room.players.length,
+        size: game === 'pisti' ? PistiRules.TYPES[room.type]?.players || 4 : 4 };
     }
     return null;
   };
+  // Davet kartında gösterilen masa kuralları (oyuna göre).
+  const inviteInfo = (game, room) => game === 'batak' ? { batakType: room.type, roundLimit: room.roundLimit }
+    : { pistiType: room.type, target: room.target, bluff: room.bluff, size: PistiRules.TYPES[room.type]?.players || 4 };
   const withPresence = data => ({ ...data, friends: data.friends.map(f => ({ ...f, online: online.has(f.id), table: tableOf(f.id) })) });
   const wrap = fn => (req, res) => {
     const me = authReq(req);
@@ -70,9 +76,9 @@ function install({ app, io, rooms, authReq, fromToken }) {
     // Masadaki oyuncu çevrimiçi bir arkadaşını bu masaya çağırır.
     socket.on('inviteFriend', data => {
       const uid = socket.data.uid, okeyRoom = rooms.get(socket.data.roomCode);
-      const batak = !okeyRoom && batakRooms.get(socket.data.batakCode);
-      const room = okeyRoom || batak;
-      const fail = message => socket.emit(batak ? 'batak:error' : 'gameError', { message });
+      const game = okeyRoom ? null : Object.keys(games).find(g => games[g].rooms.has(socket.data[`${g}Code`]));
+      const room = okeyRoom || (game && games[game].rooms.get(socket.data[`${game}Code`]));
+      const fail = message => socket.emit(game ? `${game}:error` : 'gameError', { message });
       if (!uid) return fail('Davet için hesabınla giriş yapmalısın.');
       if (!room || room.matchEnded || room.phase === 'matchEnd') return fail('Önce bir masaya otur.');
       const now = Date.now();
@@ -81,14 +87,14 @@ function install({ app, io, rooms, authReq, fromToken }) {
       const friend = Social.list({ id: uid, username: socket.data.username }).friends.find(f => f.username === String(data?.username || ''));
       if (!friend) return fail('Yalnızca arkadaşlarını davet edebilirsin.');
       if (!online.has(friend.id)) return fail(`${friend.username} şu an çevrimiçi değil.`);
-      if (batak) notify(friend.id, 'invite', { game: 'batak', from: socket.data.username, roomCode: room.code, batakType: room.type, roundLimit: room.roundLimit,
+      if (game) notify(friend.id, 'invite', { game, from: socket.data.username, roomCode: room.code, ...inviteInfo(game, room),
         seats: room.players.length, started: room.phase !== 'waiting' });
       else notify(friend.id, 'invite', { game: 'okey', from: socket.data.username, roomCode: room.code, bet: room.bet, seats: room.players.length, started: !!room.started,
         teamMode: room.teamMode, assisted: room.assisted, stackingMode: room.stackingMode, roundLimit: room.roundLimit });
-      socket.emit(batak ? 'batak:info' : 'actionSuccess', { message: `${friend.username} masaya davet edildi.` });
+      socket.emit(game ? `${game}:info` : 'actionSuccess', { message: `${friend.username} masaya davet edildi.` });
     });
     socket.on('disconnect', forget);
   }
-  return { onSocket, notify, isOnline: uid => online.has(uid), setGames: g => { if (g.batak) batakRooms = g.batak.rooms; } };
+  return { onSocket, notify, isOnline: uid => online.has(uid), setGames: g => { games = { ...games, ...g }; } };
 }
 module.exports = { install };

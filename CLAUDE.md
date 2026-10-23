@@ -34,7 +34,7 @@ Akış: istemci `socket.emit(olay)` gönderir. Sunucu doğrular, durumu değişt
 
 ## 3. Çalışma kuralları
 
-- Değişiklikten sonra mutlaka `npm test` çalıştırılmalı (20 dosya). Testlerin hepsi geçmeden iş bitmiş sayılmaz.
+- Değişiklikten sonra mutlaka `npm test` çalıştırılmalı (21 dosya). Testlerin hepsi geçmeden iş bitmiş sayılmaz.
 - Yeni bir socket hamlesi eklenirse istemcide `MOVE_EVENTS` listesine de eklenmeli. Sunucu bu hamleye her durumda `gameState` veya `gameError` ile cevap vermeli, yoksa istemci 5 sn boyunca yeni hamle göndermez.
 - Yeni bir oda zamanlayıcısı `guardedTimer(room, ad, fn)` ile kurulmalı.
 - Testler `DATA_DIR` değişkenine bakar. Gerçek hesap dosyası bozulmasın diye testleri geçici bir klasörle çalıştırın: `$env:DATA_DIR="$env:TEMP\okey-test-data"; npm test`
@@ -316,6 +316,55 @@ Lobideki BATAK kartı artık çalışıyor: **OYNA** (ihaleli, boş koltuklara 6
 - Masa sohbeti `batak:chat`: en çok 100 karakter, 1,2 saniyede bir mesaj.
 - Yapılmayanlar: King, Kanlı, OHEL, Gömmeli türleri ve Batak için çip bahsi.
 - Test: `tests/v41Batak.test.js`. Kurallar, ihale, puan ve 360 botlu el test ediliyor (her kart kurala uygun, 52 kart korunuyor). Ayrıca socket üzerinden 5 ellik maç, kural dışı kartın reddi, koltuk seçimi, ikram, sesli sohbet sinyal iletimi ve sohbet test ediliyor.
+
+## 5d. Pişti (2026-10-23)
+
+Lobideki PİŞTİ kartı çalışıyor: **ODA SEÇ** (ortak masa gezgini, `showRoomList('pisti')`, `/api/pisti`) ve **MASA AÇ** (2 KİŞİ / 4 KİŞİ / EŞLİ, bitiş 101/151/171/201, BLÖFSÜZ/BLÖFLÜ, kodla katıl, MASA AÇ / ÖZEL MASA / HEMEN OYNA). Masa sayfası `/pisti`. Masa kodları `P` ile başlar.
+
+- Dosyalar:
+  - `server/pisti/logic.js`: kurallar, saf fonksiyonlar.
+  - `server/pisti/bot.js`: bot.
+  - `server/pisti/index.js`: masalar ve `pisti:*` olayları.
+  - `server/tableExtras.js`: Batak ve Pişti **ortak** masa sohbeti, ikram ve sesli sohbet sinyali (önekle: `batak:chat`, `pisti:chat`…). Batak da artık bunu kullanıyor; davranış aynı.
+  - `public/pisti.html`, `public/js/pisti.js`, `public/css/pisti.css`.
+  - Görünüm `batak.css` üstüne kurulu (oyuncu kutuları, araç çubuğu, pencereler, sohbet aynı sınıflar). Kartlar `batak-cards.js`, ikram/sesli sohbet `batak-extras.js` (init'te `prefix: 'pisti'`).
+- Oyuncu dizisi: sıra numarası `i` (0..n-1); `p.seat` masadaki koltuk. 2 kişide koltuklar 0 ve 2 (karşılıklı), `lobbyInfo.valid` bunu söyler. Puan "taraf"a yazılır: eşlide `i % 2`, değilse oyuncu (`sideOf`).
+- Kurallar (kullanıcının gönderdiği metin):
+  - Ortaya 4 kart: 3 kapalı, en üst açık ve Vale değil (Vale ise kapalılardan Vale olmayan açılır; 4'ü de Vale ise yeniden). Herkese 4'er kart, dağıtanın sağından başlayarak, dağıtan en son. Eller bitince deste bitene kadar yeniden 4'er.
+  - Destenin altındaki kart açık durur ve son dağıtımda dağıtana gelir (dağıtım sırası bunu kendiliğinden sağlar).
+  - **İlk dağıtımda** birine aynı sayıdan 3 kart gelirse kartlar yeniden karıştırılır. Sonraki dağıtımlarda bu kural uygulanmıyor.
+  - En üst kartın aynısı ya da Vale yerdekilerin hepsini alır. Yerde tek açık kart varken aynısı pişti: 10 puan; Vale'ye Vale 20 puan. Vale ile başka karta pişti yok.
+  - İlk alan kapalı 3 kartı da alır; o taraf bu kartları görür (`closedSeen`, masada sol altta küçük panel).
+  - El sonunda yerde kalanları en son alan alır.
+  - Puan: As 1, Vale 1, ♣2 = 2, ♦10 = 3 (toplam 13). En çok kart +3; kart eşitse puanı fazla olan alır, o da eşitse kimse almaz.
+  - Maç: hedefe (101…) ulaşan ve tek başına önde olan kazanır; tepede eşitlik varsa bir el daha.
+- **Blöflü masa:** yerde tek açık kart varken kart kapalı atılabilir (`pisti:play { closed: true }`; istemcide KAPALI AT · PİŞTİ DE). Sıradaki oyuncu `pisti:respond { choice: 'believe' | 'challenge' }`.
+  - İnanırsa: iddia eden 10 alır ve yığını alır; kapalı kartın yüzü kimseye gönderilmez (`room.hidden`).
+  - Açarsa: eşleşiyorsa iddia eden 20 alır, eşleşmiyorsa açan 20 alır ve açılan kart yığında kalır.
+  - Yerdeki kart Vale ise blöf puanları 2 katı. Süre dolarsa "inan" sayılır.
+- Bot (`bot.js`):
+  - Kart sayar. Sıradaki rakibin bir sayıyı tutma olasılığını hipergeometrik hesaplar (`probHas`).
+  - Pişti fırsatını kaçırmaz, Vale'yi ucuz yığına harcamaz, boş yere pişti verecek kartı atmaz.
+  - Blöflü masada gerçek piştiyi kapalı atar, ~%18 blöf yapar.
+  - Blöfe cevabı beklenen değere göre verir: eşi kalmayan karta "pişti" diyeni her zaman açar.
+  - Hile yapmaz: yalnızca masada görünenleri, kendi tarafının gördüğü kapalı kartları ve destenin altındaki kartın dağıtanda olduğunu bilir.
+  - Ölçüm: rastgele oynayan oyuncuyu 30 maçta 30 kez yendi.
+- Süreler: kart 15 sn, blöf kararı 10 sn, bağlantısı kopuk oyuncu 6 sn, bot 0,85 sn; alma gösterimi 0,95 sn, yeni el 8 sn.
+- İstemci akıcılığı: yerdeki yığından en çok son 9 kart çizilir, altı kalınlık gölgesi. Hareketler yalnızca `transform`/`opacity`; kartlarda `filter` yok (`box-shadow`). Bölümler imza ile yalnızca değişince yeniden çizilir.
+- Efektler: atılan kart atanın yerinden uçar; alınan yığın alanın önüne süpürülür; PİŞTİ / VALE PİŞTİ / BLÖF YAKALANDI büyük yazısı; yeni dağıtımda kartlar desteden gelir.
+- Puan tabelası: son elin dökümü, önceki eller, TOPLAM ve geleneksel çizgi tabelası (her 10 puan bir çizgi, 5 çizgi bir demet, kalan sayı).
+- Arkadaş daveti ve "Pişti oynuyor" durumu: `socialHub` artık oyunları genel tutuyor (`setGames({ batak, pisti })`, `socket.data[`${oyun}Code`]`).
+- Masalar yalnızca RAM'de; güncelleme sırasında süren Pişti maçı kaybolur. Çip bahsi yok; hesaplılara maç sonunda XP.
+- Test: `tests/v42Pisti.test.js`. Kapsamı:
+  - Kurallar, dağıtım (400 kez), puan ve eşitlik.
+  - Bot kararları.
+  - 2 kişilik maç 101'e kadar ve eşli blöflü maç; her adımda 52 kart korunuyor.
+  - Koltuk seçimi, ikram, sohbet, sesli sohbet, yeniden oyna, yeniden bağlanma.
+  - Bot rastgele oyuncuya karşı.
+- Tarayıcıda denendi:
+  - Lobi penceresi, 2 kişilik ve eşli blöflü masa, kapalı atıp gerçek pişti (bot açtı, +20), el sonu tablosu.
+  - Telefon yatay (844×390).
+  - Sonuç: 0 JS hatası.
 
 ## 6. Teknoloji önerileri neden şimdilik gerekli değil
 

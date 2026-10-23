@@ -70,6 +70,7 @@ app.use(express.static(path.join(__dirname, '..', 'public'), {
 }));
 app.get('/game', (_req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'game.html')));
 app.get('/batak', (_req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'batak.html')));
+app.get('/pisti', (_req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'pisti.html')));
 // storage: 'persistent' olmalı. 'ephemeral' ise Coolify'da /app/data için kalıcı depolama yok, güncellemede hesaplar silinir.
 app.get('/health', (_req, res) => res.json({ status: 'ok', storage: Accounts.storageStatus(), rooms: rooms.size }));
 app.get('/api/leaderboard', (req, res) => res.json({ top: Accounts.leaderboard(25, req.query.by === 'chips' ? 'chips' : 'xp') }));
@@ -100,7 +101,10 @@ const SocialHub = require('./socialHub').install({ app, io, rooms, authReq, from
 // Batak masaları (server/batak): kendi 'batak:' socket olayları, okey masalarından ayrı.
 const Batak = require('./batak').install({ io, Accounts, Avatars, Logger });
 app.get('/api/batak', (_req, res) => res.json(Batak.stats()));
-SocialHub.setGames({ batak: Batak });
+// Pişti masaları (server/pisti): 'pisti:' olayları.
+const Pisti = require('./pisti').install({ io, Accounts, Avatars, Logger });
+app.get('/api/pisti', (_req, res) => res.json(Pisti.stats()));
+SocialHub.setGames({ batak: Batak, pisti: Pisti });
 // Oyuncu profili (masada oyuncuya tıklayınca): yalnızca hesabı olanlar; herkese açık bilgiler.
 app.get('/api/profile', (req, res) => {
   const u = Accounts.userByName(String(req.query.name || '').trim());
@@ -1112,6 +1116,7 @@ io.on('connection', socket => {
     });
     SocialHub.onSocket(socket); // 'hello' (çevrimiçi), 'inviteFriend'
     Batak.onSocket(socket); // 'batak:*'
+    Pisti.onSocket(socket); // 'pisti:*'
     socket.on('joinGame', data => {
         if (socket.data.roomCode) return issue(socket, 'Zaten bir odadasınız.');
         const account = Accounts.fromToken(data?.authToken);

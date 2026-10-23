@@ -53,8 +53,8 @@ window.Social = (function () {
     }
   }
   function statusOf(f) {
-    const game = f.table?.game === 'batak' ? 'Batak' : 'Okey';
-    if (f.table) return { cls: 'at-table', text: f.table.started ? `${game} oynuyor` : `${game} masasında bekliyor (${f.table.seats}/4)` };
+    const game = { batak: 'Batak', pisti: 'Pişti' }[f.table?.game] || 'Okey';
+    if (f.table) return { cls: 'at-table', text: f.table.started ? `${game} oynuyor` : `${game} masasında bekliyor (${f.table.seats}/${f.table.size || 4})` };
     return f.online ? { cls: 'online', text: 'Çevrimiçi' } : { cls: 'offline', text: 'Çevrimdışı' };
   }
   function avatar(u) { const i = el('img', 'soc-av'); i.src = opt.avatarSrc(u.avatar); i.alt = ''; return i; }
@@ -181,13 +181,14 @@ window.Social = (function () {
     if (opt.currentRoom?.() === d.roomCode) return;
     inviteEl?.remove(); clearTimeout(inviteTimer);
     inviteEl = el('div', 'soc-invite'); inviteEl.setAttribute('role', 'alert');
-    const BATAK = { ihaleli: 'İHALELİ', kozmaca: 'KOZ MAÇA', esli: 'EŞLİ' };
+    const BATAK = { ihaleli: 'İHALELİ', kozmaca: 'KOZ MAÇA', esli: 'EŞLİ' }, PISTI = { ikili: '2 KİŞİ', dortlu: '4 KİŞİ', esli: 'EŞLİ' };
     const rules = d.game === 'batak' ? ['BATAK', BATAK[d.batakType] || '', `${d.roundLimit || 5} EL`].join(' · ')
+      : d.game === 'pisti' ? ['PİŞTİ', PISTI[d.pistiType] || '', `${d.target || 101} SAYI`, d.bluff ? 'BLÖFLÜ' : ''].filter(Boolean).join(' · ')
       : ['101 OKEY', `${fmt(d.bet)} ÇİP`, d.teamMode ? 'EŞLİ' : 'TEK', `${d.roundLimit || 4} EL`, d.assisted ? 'YARDIMLI' : 'YARDIMSIZ', d.stackingMode ? 'KATLAMALI' : 'KATLAMASIZ'].join(' · ');
     const text = el('div', 'soc-info');
-    text.append(el('strong', null, `${d.from} seni masasına çağırıyor!`), el('small', null, `${rules} · ${d.started ? 'oyun başladı' : `${d.seats}/4 oyuncu`}`));
+    text.append(el('strong', null, `${d.from} seni masasına çağırıyor!`), el('small', null, `${rules} · ${d.started ? 'oyun başladı' : `${d.seats}/${d.size || 4} oyuncu`}`));
     const hide = () => { inviteEl?.remove(); inviteEl = null; clearTimeout(inviteTimer); };
-    inviteEl.append(el('i', 'soc-invite-icon', d.game === 'batak' ? '♠' : '🎴'), text,
+    inviteEl.append(el('i', 'soc-invite-icon', d.game === 'batak' ? '♠' : d.game === 'pisti' ? '🃏' : '🎴'), text,
       btn('soc-btn green', 'KATIL', () => { hide(); close(); opt.onJoin?.(d.roomCode, d.game || 'okey'); }),
       btn('soc-btn ghost', 'HAYIR', hide));
     document.body.append(inviteEl);
