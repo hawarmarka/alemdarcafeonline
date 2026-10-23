@@ -40,6 +40,7 @@ npm test
 | `DATA_DIR` | `/app/data` | Hesap verisi klasörü |
 | `TRUST_PROXY` | `1` | Coolify/Traefik arkasında gerçek oyuncu IP'si için. Vekil sunucu yoksa `0` yap. |
 | `OKEY_DEBUG` | kapalı | Yalnızca geliştirme testi içindir; **canlıda açma**. |
+| `ANTHROPIC_API_KEY` | yok | İsim Şehir'in yapay zekâ hakemi (Claude). Sözlükte olmayan cevapları araştırıp doğrular; kararlar `/app/data/isimsehir.db`'de saklanır, aynı kelime bir daha sorulmaz. Yoksa oyun yalnızca yerleşik sözlükle çalışır (sözlükte olmayan cevap geçersiz sayılır). Anahtar console.anthropic.com'dan alınır; Coolify'da **Environment Variables** kısmına eklenir. |
 
 ### Bilinmesi gerekenler
 

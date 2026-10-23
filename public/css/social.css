@@ -46,4 +46,17 @@
 #tableWaitPanel .tw-host:not(.hidden) ~ .tw-social{margin-top:130px}
 #tableWaitPanel .tw-social button{position:relative;border:2px solid #7a4f07;background:linear-gradient(180deg,#ffd36b,#e0941a);box-shadow:inset 0 2px 0 rgba(255,255,255,.35),0 4px 0 #7a4f07}
 #tableWaitPanel .tw-social .soc-badge{top:-8px;right:-8px}
+/* Canlı izleme (okey masası): üstte şerit; izleyicide ıstaka ve düğmeler kapalı */
+.watch-bar{position:fixed;left:50%;top:6px;transform:translateX(-50%);z-index:9050;display:flex;align-items:center;gap:10px;padding:6px 8px 6px 14px;border-radius:999px;
+  background:rgba(8,22,40,.88);border:1px solid rgba(160,200,255,.35);color:#e8f2ff;font:600 14px Barlow,Arial,sans-serif;box-shadow:0 6px 18px rgba(0,0,0,.4);pointer-events:auto}
+.watch-bar.hidden,.watch-bar .hidden{display:none}
+.watch-bar button{height:30px;padding:0 12px;border:0;border-radius:999px;background:linear-gradient(#e0474f,#a81e26);color:#fff;font:600 13px Oswald,Arial,sans-serif;letter-spacing:.5px;cursor:pointer}
+body.spectator #gameActionPanel,body.spectator #turnActions,body.spectator #sortSeriesBtn,body.spectator #sortPairsBtn,body.spectator #rackStatus,body.spectator #tomatoBtn,body.spectator #returnTakenBtn,body.spectator #newRoundBtn,body.spectator #twHostBar,body.spectator #twSocialBar,body.spectator #tableChatForm{display:none!important}
+body.spectator #playerHandTop,body.spectator #playerHandBottom,body.spectator #drawPile,body.spectator #discardPile{pointer-events:none}
+/* Okey masası profil penceresi: arkadaş ekle / arkadaşlar */
+.profile-friend{display:flex;gap:8px;justify-content:center;margin:2px 0 12px}
+.profile-friend-btn{height:38px;padding:0 16px;border-radius:10px;border:0;cursor:pointer;color:#fff;font:600 15px Oswald,Arial,sans-serif;letter-spacing:.6px;background:linear-gradient(#4fbf3c,#2c8a22);box-shadow:0 3px 0 #1c5c15}
+.profile-friend-btn.ghost{background:linear-gradient(#2d6fbd,#1d4f8f);box-shadow:0 3px 0 #123a6a}
+.profile-friend-btn:disabled{opacity:.6;cursor:default}
+.profile-friend-btn.hidden{display:none}
 @media (max-width:480px){.soc-tools .soc-btn{padding:0 8px}.soc-invite{flex-wrap:wrap}}

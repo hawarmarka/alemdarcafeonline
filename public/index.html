@@ -8,8 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/lobby-plus.css?v=4">
 <link rel="stylesheet" href="/css/lobby-pro.css?v=4">
-<link rel="stylesheet" href="/css/social.css?v=1">
-<link rel="stylesheet" href="/css/lobby-tables.css?v=5">
+<link rel="stylesheet" href="/css/social.css?v=2">
+<link rel="stylesheet" href="/css/lobby-tables.css?v=6">
 <script src="/js/transitions.js?v=2"></script>
 </head>
 <body class="lobby-page">
@@ -90,6 +90,18 @@
       <div class="lb-art art-pisti"><svg class="art-svg" viewBox="0 0 220 180" aria-hidden="true"><g transform="rotate(-18 80 100)"><rect x="50" y="44" width="64" height="92" rx="8" fill="#1f5fae" stroke="#0b2a55" stroke-width="2"/><rect x="58" y="52" width="48" height="76" rx="5" fill="none" stroke="#9fc6ff" stroke-width="2"/></g><g transform="rotate(4 112 96)"><rect x="80" y="40" width="64" height="92" rx="8" fill="#fff" stroke="#9b958a" stroke-width="2"/><text x="112" y="96" text-anchor="middle" font-family="Oswald,Arial" font-weight="700" font-size="40" fill="#c8202a">J</text></g><g transform="rotate(20 146 102)"><rect x="112" y="48" width="64" height="92" rx="8" fill="#fff" stroke="#9b958a" stroke-width="2"/><text x="144" y="106" text-anchor="middle" font-family="Oswald,Arial" font-weight="700" font-size="40" fill="#151515">J</text></g></svg>
         <small><b id="pistiCount">0</b> oyuncu</small></div>
       <div class="lb-card-btns"><button type="button" class="lb-btn blue" id="pistiQuickBtn" title="Bekleyen Pişti masaları, istediğin koltuğa otur">ODA SEÇ</button><button type="button" class="lb-btn orange" id="pistiOpenBtn">MASA AÇ</button></div>
+    </article>
+    <!-- EKSTRA: kalabalık grup oyunları (2–10 kişi) -->
+    <div class="lb-divider" aria-hidden="true"><span>EKSTRA</span></div>
+    <article class="lb-card c-isim">
+      <header><h2>İSİM ŞEHİR</h2><h3>2–10 KİŞİ · TEKLİ · EŞLİ</h3></header>
+      <div class="lb-art art-isim"><svg class="art-svg" viewBox="0 0 220 180" aria-hidden="true"><g transform="rotate(-6 110 92)"><rect x="40" y="26" width="140" height="132" rx="8" fill="#fdfaf1" stroke="#8e887c" stroke-width="2"/>
+        <g stroke="#cfe0f3" stroke-width="2"><path d="M40 58h140M40 82h140M40 106h140M40 130h140"/></g><path d="M74 26v132" stroke="#e46a6a" stroke-width="2"/>
+        <g font-family="Arial" font-weight="700" font-size="10" fill="#4a5a78"><text x="44" y="53">İSİM</text><text x="44" y="77">ŞEHİR</text><text x="44" y="101">HAYVAN</text><text x="44" y="125">BİTKİ</text><text x="44" y="149">EŞYA</text></g>
+        <g font-family="'Comic Sans MS',cursive" font-size="17" fill="#173a8a"><text x="82" y="54">Ahmet</text><text x="82" y="78">Ankara</text><text x="82" y="102">Aslan</text><text x="82" y="126">Ayva</text><text x="82" y="150">Ampul</text></g></g>
+        <circle cx="176" cy="40" r="24" fill="#ffd34a" stroke="#a87412" stroke-width="3"/><text x="176" y="51" text-anchor="middle" font-family="Oswald,Arial" font-weight="700" font-size="30" fill="#5a3a05">A</text></svg>
+        <small><b id="isimCount">0</b> oyuncu</small></div>
+      <div class="lb-card-btns"><button type="button" class="lb-btn blue" id="isimQuickBtn" title="Bekleyen İsim Şehir masaları">ODA SEÇ</button><button type="button" class="lb-btn orange" id="isimOpenBtn">MASA AÇ</button></div>
     </article>
     <article class="lb-card c-soon c-domino">
       <header><h2>DOMİNO</h2><h3>YAKINDA</h3></header>
@@ -188,7 +200,7 @@
   <div class="opt-rows">
     <div class="opt-row"><span>TÜR</span><div class="seg" data-target="batakType"><button type="button" data-value="ihaleli">İHALELİ</button><button type="button" data-value="kozmaca">KOZ MAÇA</button><button type="button" data-value="esli">EŞLİ</button></div></div>
     <div class="opt-row"><span>EL SAYISI</span><div class="seg" data-target="batakRounds"><button type="button" data-value="5">5</button><button type="button" data-value="7">7</button><button type="button" data-value="9">9</button><button type="button" data-value="11">11</button></div></div>
-    <div class="opt-row"><span>KOD</span><div class="lb-code-row batak-code"><input id="batakCodeInput" maxlength="6" autocomplete="off" placeholder="BXXXXX" aria-label="Batak masa kodu"><button type="button" id="batakCodeBtn">KATIL</button></div></div>
+    <div class="opt-row"><span>KOD</span><div class="lb-code-row batak-code"><input id="batakCodeInput" maxlength="6" autocomplete="off" placeholder="BXXXXX" aria-label="Batak masa kodu"><button type="button" id="batakCodeBtn">KATIL</button><button type="button" id="batakWatchBtn" title="Masayı canlı izle">İZLE</button></div></div>
   </div>
   <div class="hidden-selects" hidden>
     <select id="batakType"><option value="ihaleli" selected>İhaleli</option><option value="kozmaca">Koz Maça</option><option value="esli">Eşli</option></select>
@@ -196,6 +208,27 @@
   </div>
   <p class="create-note" id="batakRuleNote">İhale en az 5; kimse girmezse dağıtanın sağındaki 4 el almak zorunda. İhaleyi alan kozu seçer.</p>
   <div class="tp-actions"><button type="button" class="tp-btn orange" id="batakPublicBtn" title="Masa listesinde görünür, başkaları istediği koltuğa oturur">MASA AÇ</button><button type="button" class="tp-btn orange" id="batakPrivateBtn" title="Yalnızca kodu verdiğin arkadaşların katılır">ÖZEL MASA</button><button type="button" class="tp-btn green" id="batakPlayBtn">HEMEN OYNA</button></div>
+</div></div>
+
+<!-- İSİM ŞEHİR: kişi sayısı, tekli/eşli, tur, süre; hemen oyna (botlar tamamlar), açık/özel masa, kodla katıl / izle -->
+<div id="isimModal" class="premium-modal hidden" role="dialog" aria-modal="true" aria-labelledby="isimTitle"><div class="modal-panel room-dialog create-dialog">
+  <button class="round-x" data-close="isimModal" aria-label="Vazgeç"></button>
+  <div class="dialog-head"><b id="isimTitle">İSİM ŞEHİR</b><small>Kaç kişi, tekli mi eşli mi, kaç tur, kaç saniye</small></div>
+  <div class="opt-rows">
+    <div class="opt-row"><span>KİŞİ</span><div class="seg" data-target="isimSize"><button type="button" data-value="2">2</button><button type="button" data-value="4">4</button><button type="button" data-value="6">6</button><button type="button" data-value="8">8</button><button type="button" data-value="10">10</button></div></div>
+    <div class="opt-row"><span>OYUN</span><div class="seg" data-target="isimTeam"><button type="button" data-value="false">TEKLİ</button><button type="button" data-value="true">EŞLİ</button></div></div>
+    <div class="opt-row"><span>TUR</span><div class="seg" data-target="isimRounds"><button type="button" data-value="5">5 TUR</button><button type="button" data-value="10">10 TUR</button></div></div>
+    <div class="opt-row"><span>SÜRE</span><div class="seg" data-target="isimTime"><button type="button" data-value="45">45 SN</button><button type="button" data-value="60">60 SN</button><button type="button" data-value="90">90 SN</button></div></div>
+    <div class="opt-row"><span>KOD</span><div class="lb-code-row batak-code"><input id="isimCodeInput" maxlength="6" autocomplete="off" placeholder="SXXXXX" aria-label="İsim Şehir masa kodu"><button type="button" id="isimCodeBtn">KATIL</button><button type="button" id="isimWatchBtn" title="Masayı canlı izle">İZLE</button></div></div>
+  </div>
+  <div class="hidden-selects" hidden>
+    <select id="isimSize"><option value="2">2</option><option value="4" selected>4</option><option value="6">6</option><option value="8">8</option><option value="10">10</option></select>
+    <select id="isimTeam"><option value="false" selected>Tekli</option><option value="true">Eşli</option></select>
+    <select id="isimRounds"><option value="5" selected>5</option><option value="10">10</option></select>
+    <select id="isimTime"><option value="45">45</option><option value="60" selected>60</option><option value="90">90</option></select>
+  </div>
+  <p class="create-note" id="isimRuleNote">Harf seçilir; İsim, Şehir, Hayvan, Bitki ve Eşya yazarsınız. Aynı cevap 5, farklı 10, tek doğru 20 puan. Cevapları yapay zekâ hakem kontrol eder.</p>
+  <div class="tp-actions"><button type="button" class="tp-btn orange" id="isimPublicBtn" title="Masa listesinde görünür">MASA AÇ</button><button type="button" class="tp-btn orange" id="isimPrivateBtn" title="Yalnızca kodu verdiğin arkadaşların katılır">ÖZEL MASA</button><button type="button" class="tp-btn green" id="isimPlayBtn">HEMEN OYNA</button></div>
 </div></div>
 
 <!-- PİŞTİ: kişi sayısı / eşli, bitiş sayısı, blöf; hemen oyna (botlar tamamlar), açık/özel masa, kodla katıl -->
@@ -206,7 +239,7 @@
     <div class="opt-row"><span>OYUN</span><div class="seg" data-target="pistiType"><button type="button" data-value="ikili">2 KİŞİ</button><button type="button" data-value="dortlu">4 KİŞİ</button><button type="button" data-value="esli">EŞLİ</button></div></div>
     <div class="opt-row"><span>BİTİŞ</span><div class="seg" data-target="pistiTarget"><button type="button" data-value="101">101</button><button type="button" data-value="151">151</button><button type="button" data-value="171">171</button><button type="button" data-value="201">201</button></div></div>
     <div class="opt-row"><span>BLÖF</span><div class="seg" data-target="pistiBluff"><button type="button" data-value="false">BLÖFSÜZ</button><button type="button" data-value="true">BLÖFLÜ</button></div></div>
-    <div class="opt-row"><span>KOD</span><div class="lb-code-row batak-code"><input id="pistiCodeInput" maxlength="6" autocomplete="off" placeholder="PXXXXX" aria-label="Pişti masa kodu"><button type="button" id="pistiCodeBtn">KATIL</button></div></div>
+    <div class="opt-row"><span>KOD</span><div class="lb-code-row batak-code"><input id="pistiCodeInput" maxlength="6" autocomplete="off" placeholder="PXXXXX" aria-label="Pişti masa kodu"><button type="button" id="pistiCodeBtn">KATIL</button><button type="button" id="pistiWatchBtn" title="Masayı canlı izle">İZLE</button></div></div>
   </div>
   <div class="hidden-selects" hidden>
     <select id="pistiType"><option value="ikili" selected>2 kişi</option><option value="dortlu">4 kişi</option><option value="esli">Eşli</option></select>
@@ -242,10 +275,11 @@
   <div class="dialog-head"><b id="codeTitle">ÖZEL ODA</b><small>Arkadaşının gönderdiği 6 haneli kodu yaz</small></div>
   <input id="codeModalInput" class="code-big" maxlength="6" autocomplete="off" placeholder="AB4K7P" aria-label="Oda kodu">
   <button id="codeModalJoin" class="round-ok" type="button" aria-label="Katıl"></button>
+  <button id="codeModalWatch" class="code-watch" type="button" title="Oyuna katılmadan masayı canlı seyret">👁 MASAYI İZLE</button>
 </div></div>
 
 <div id="avatarModal" class="premium-modal hidden" role="dialog" aria-modal="true" aria-labelledby="avatarModalTitle"><div class="modal-panel avatar-editor"><button class="modal-x" data-close="avatarModal" aria-label="Kapat"></button><h2 id="avatarModalTitle">PROFİL</h2><label for="avatarUpload" class="avatar-edit-preview"><span class="portrait-wrap frame-gold" id="avatarPreviewFrame"><img id="previewAvatar" src="/asset/avatar-default.svg" alt="Profil fotoğrafı"></span><span class="lb-btn blue">FOTOĞRAF YÜKLE</span></label><input id="avatarUpload" type="file" accept="image/jpeg,image/png,image/webp" hidden><h3>AVATAR SEÇ</h3><div class="avatar-options" id="avatarOptions"></div><h3>ÇERÇEVENİ SEÇ</h3><div class="frame-options" id="frameOptions"><button data-frame="gold" class="selected" type="button"><span class="frame-sample frame-gold"></span>Altın Şampiyon</button><button data-frame="silver" type="button"><span class="frame-sample frame-silver"></span>Gümüş Kanat</button><button data-frame="royal" type="button"><span class="frame-sample frame-royal"></span>Kraliyet</button><button data-frame="emerald" type="button"><span class="frame-sample frame-emerald"></span>Zümrüt Ejder</button><button data-frame="neon" type="button"><span class="frame-sample frame-neon"></span>Neon Siber</button><button data-frame="rose" type="button"><span class="frame-sample frame-rose"></span>Yakut Kanat</button></div><button class="lb-btn green" data-close="avatarModal" type="button">TAMAM</button></div></div>
 
 <div id="rotateHint" role="alert"><div class="rotate-phone"></div><div>Daha rahat oynamak için telefonunu yan çevir</div><small>Alemdar Cafe yatay ekranda oynanır</small></div>
 <div id="errorToast" class="toast hidden" role="alert"><span class="toast-message"></span></div>
-<script src="/socket.io/socket.io.js"></script><script src="/js/social.js?v=3"></script><script src="/js/main.js?v=13"></script></body></html>
+<script src="/socket.io/socket.io.js"></script><script src="/js/social.js?v=4"></script><script src="/js/main.js?v=14"></script></body></html>

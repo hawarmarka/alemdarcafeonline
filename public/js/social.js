@@ -53,7 +53,7 @@ window.Social = (function () {
     }
   }
   function statusOf(f) {
-    const game = { batak: 'Batak', pisti: 'Pişti' }[f.table?.game] || 'Okey';
+    const game = { batak: 'Batak', pisti: 'Pişti', isimsehir: 'İsim Şehir' }[f.table?.game] || 'Okey';
     if (f.table) return { cls: 'at-table', text: f.table.started ? `${game} oynuyor` : `${game} masasında bekliyor (${f.table.seats}/${f.table.size || 4})` };
     return f.online ? { cls: 'online', text: 'Çevrimiçi' } : { cls: 'offline', text: 'Çevrimdışı' };
   }
@@ -108,7 +108,9 @@ window.Social = (function () {
         else if (!f.online) { inv.disabled = true; inv.title = 'Çevrimdışı arkadaş davet edilemez'; }
         tools.append(inv);
       } else if (f.table && opt.onJoin) {
-        tools.append(btn('soc-btn blue', 'MASAYA GİT', () => { close(); opt.onJoin(f.table.code, f.table.game || 'okey'); }, 'Arkadaşının masasına otur'));
+        // Oyun başladıysa koltuk yok: masayı canlı izle. Bekliyorsa otur ya da izle.
+        if (!f.table.started) tools.append(btn('soc-btn blue', 'MASAYA GİT', () => { close(); opt.onJoin(f.table.code, f.table.game || 'okey'); }, 'Arkadaşının masasına otur'));
+        if (opt.onWatch) tools.append(btn('soc-btn', '👁 İZLE', () => { close(); opt.onWatch(f.table.code, f.table.game || 'okey'); }, 'Masayı canlı izle'));
       }
       const msg = btn('soc-btn', '💬', () => { chatWith = f; paint(); }, 'Mesaj yaz');
       if (f.unread) msg.append(el('i', 'soc-badge', String(f.unread)));
@@ -183,12 +185,13 @@ window.Social = (function () {
     inviteEl = el('div', 'soc-invite'); inviteEl.setAttribute('role', 'alert');
     const BATAK = { ihaleli: 'İHALELİ', kozmaca: 'KOZ MAÇA', esli: 'EŞLİ' }, PISTI = { ikili: '2 KİŞİ', dortlu: '4 KİŞİ', esli: 'EŞLİ' };
     const rules = d.game === 'batak' ? ['BATAK', BATAK[d.batakType] || '', `${d.roundLimit || 5} EL`].join(' · ')
+      : d.game === 'isimsehir' ? ['İSİM ŞEHİR', `${d.size} KİŞİ`, d.team ? 'EŞLİ' : 'TEKLİ', `${d.rounds} TUR`, `${d.time} SN`].join(' · ')
       : d.game === 'pisti' ? ['PİŞTİ', PISTI[d.pistiType] || '', `${d.target || 101} SAYI`, d.bluff ? 'BLÖFLÜ' : ''].filter(Boolean).join(' · ')
       : ['101 OKEY', `${fmt(d.bet)} ÇİP`, d.teamMode ? 'EŞLİ' : 'TEK', `${d.roundLimit || 4} EL`, d.assisted ? 'YARDIMLI' : 'YARDIMSIZ', d.stackingMode ? 'KATLAMALI' : 'KATLAMASIZ'].join(' · ');
     const text = el('div', 'soc-info');
     text.append(el('strong', null, `${d.from} seni masasına çağırıyor!`), el('small', null, `${rules} · ${d.started ? 'oyun başladı' : `${d.seats}/${d.size || 4} oyuncu`}`));
     const hide = () => { inviteEl?.remove(); inviteEl = null; clearTimeout(inviteTimer); };
-    inviteEl.append(el('i', 'soc-invite-icon', d.game === 'batak' ? '♠' : d.game === 'pisti' ? '🃏' : '🎴'), text,
+    inviteEl.append(el('i', 'soc-invite-icon', d.game === 'batak' ? '♠' : d.game === 'pisti' ? '🃏' : d.game === 'isimsehir' ? '✏️' : '🎴'), text,
       btn('soc-btn green', 'KATIL', () => { hide(); close(); opt.onJoin?.(d.roomCode, d.game || 'okey'); }),
       btn('soc-btn ghost', 'HAYIR', hide));
     document.body.append(inviteEl);

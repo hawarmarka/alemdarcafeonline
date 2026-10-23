@@ -12,7 +12,7 @@ const dirty = new Set();
 let rooms = null, restore = null;
 
 // Zamanlayıcılar kaydedilmez (geri yüklemede yeniden kurulur); Set'ler diziye çevrilir.
-const replacer = (k, v) => (k.endsWith('Timer') ? undefined : v instanceof Set ? { __set: [...v] } : v);
+const replacer = (k, v) => (k.endsWith('Timer') || k === 'watchers' ? undefined : v instanceof Set ? { __set: [...v] } : v); // izleyiciler kalıcı değil
 const reviver = (k, v) => (v && typeof v === 'object' && Array.isArray(v.__set) ? new Set(v.__set) : v);
 const fileOf = code => path.join(DIR, `${code}.json`);
 const validCode = code => /^[A-Z0-9]{6}$/.test(String(code));

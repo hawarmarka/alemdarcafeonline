@@ -34,7 +34,7 @@ Akış: istemci `socket.emit(olay)` gönderir. Sunucu doğrular, durumu değişt
 
 ## 3. Çalışma kuralları
 
-- Değişiklikten sonra mutlaka `npm test` çalıştırılmalı (21 dosya). Testlerin hepsi geçmeden iş bitmiş sayılmaz.
+- Değişiklikten sonra mutlaka `npm test` çalıştırılmalı (22 dosya). Testlerin hepsi geçmeden iş bitmiş sayılmaz.
 - Yeni bir socket hamlesi eklenirse istemcide `MOVE_EVENTS` listesine de eklenmeli. Sunucu bu hamleye her durumda `gameState` veya `gameError` ile cevap vermeli, yoksa istemci 5 sn boyunca yeni hamle göndermez.
 - Yeni bir oda zamanlayıcısı `guardedTimer(room, ad, fn)` ile kurulmalı.
 - Testler `DATA_DIR` değişkenine bakar. Gerçek hesap dosyası bozulmasın diye testleri geçici bir klasörle çalıştırın: `$env:DATA_DIR="$env:TEMP\okey-test-data"; npm test`
@@ -256,10 +256,11 @@ Lobideki BATAK kartı artık çalışıyor: **OYNA** (ihaleli, boş koltuklara 6
   - `public/batak.html`, `public/js/batak.js`, `public/css/batak.css`: masa sayfası.
   - `public/js/batak-cards.js`: kart çizimi.
   - Lobi tarafı `main.js` içindeki "Batak" bölümünde.
-- **Kartlar kullanıcının gönderdiği deste resminden** (`public/asset/cards/klasik-deste.jpg`, 1200×900) kesiliyor (`batak-cards.js`, CSS `background-position`).
-  - Resimde 4 satır (sinek, maça, kupa, karo) × 13 sütun (2…10, J, Q, K, A) var. Her kart 90×121 piksel; sütunlar 92, satırlar 124 piksel arayla. İlk kart (1, 157) noktasında.
-  - Arka yüz ve renk simgeleri SVG.
-  - **Uyarı:** bu resim eski Windows Solitaire destesi (telif Microsoft'ta) ve düşük çözünürlüklü. Kullanıcıya söylendi, kullanıcı yine de bunu seçti. Değiştirmek gerekirse yalnızca bu resim ve `SPRITE` ölçüleri değişir. Önerilen seçenek: OpenGameArt'taki Byron Knoll destesi (CC0).
+- **Kartlar vektörle çiziliyor** (2026-10-23, `batak-cards.js`, Batak ve Pişti ortak). Kullanıcı eski deste resmini düşük kaliteli bulduğu için resim kaldırıldı.
+  - Her kartın SVG'si bir kez üretilip data-URL olarak önbelleğe alınıyor ve CSS arka planı olarak kullanılıyor; DOM'da kart başına tek `<div>` var.
+  - Sayı kartlarında klasik simge dizilimi, A'da büyük simge (maça asında altın halka). J, Q, K'de çerçeveli, yansımalı modern figür: papaz taç ve sakal, kız uzun saç ve küçük taç, vale şapka ve tüy.
+  - Arka yüz bordo, altın kafes ve ortada "A" amblemi (`--card-back`). Kart oranı 1:1,4.
+  - Sayfa açılınca 52 kart boşta önceden hazırlanıyor (`requestIdleCallback`).
 - Yerleşim (`.bk-arena` grid): bütün oyuncu kutuları masanın **dışında**. Üst oyuncu masanın üstünde, sol/sağ oyuncular yanlarda, sen masanın altında ortada, elin en altta.
   - Kutu (`.bk-pbox`): avatar (seviye, dağıtan D), ad ve etiketler (SEN/BOT/EŞİN/RAKİP), SÖZ–ALDI–PUAN, kalan kart sayısı ve sıradayken altta süre çubuğu.
   - Kısa ekranda (yükseklik ≤ 560 px) üst oyuncu üst çubuğun ortasına, sen elin soluna geçiyorsun; masa bütün yüksekliği kullanıyor.
@@ -365,6 +366,63 @@ Lobideki PİŞTİ kartı çalışıyor: **ODA SEÇ** (ortak masa gezgini, `showR
   - Lobi penceresi, 2 kişilik ve eşli blöflü masa, kapalı atıp gerçek pişti (bot açtı, +20), el sonu tablosu.
   - Telefon yatay (844×390).
   - Sonuç: 0 JS hatası.
+
+## 5e. İsim Şehir (EKSTRA, 2026-10-23)
+
+Lobide kartların arasında **EKSTRA** ayracı ve İSİM ŞEHİR kartı var.
+- **ODA SEÇ:** masa gezgini; 4'ten fazla koltukta ızgara görünümü (`.tp-table.grid`).
+- **MASA AÇ:** 2/4/6/8/10 kişi, TEKLİ/EŞLİ (eşli en az 4 kişi), 5/10 tur, 45/60/90 sn. Kodla KATIL / İZLE; MASA AÇ / ÖZEL MASA / HEMEN OYNA.
+- Masa sayfası `/isim-sehir`, kodlar `S` ile başlar.
+
+- Dosyalar:
+  - `server/isimsehir/words.js`: yerleşik sözlük, ~2.160 kelime (iller, ilçeler, dünya şehirleri, isim, hayvan, bitki, eşya). `/` ile takma adlar (Afyonkarahisar/Afyon); takma ad kendi harfiyle sayılır.
+  - `server/isimsehir/judge.js`: hakem.
+  - `server/isimsehir/logic.js`: harf seçimi ve puan.
+  - `server/isimsehir/bot.js`: bot.
+  - `server/isimsehir/index.js`: masa akışı ve `isim:*` olayları.
+  - `public/isim-sehir.html`, `public/js/isimsehir.js`, `public/css/isimsehir.css` (defter görünümü, `batak.css` üstüne).
+- Akış: bekleme → `letter` (çark 2,6 sn, harf gizli) → `writing` → `judging` → `results` (14 sn, kurucu SONRAKİ TUR ile atlayabilir) → … → `matchEnd`.
+  - Harfler Türk alfabesinden; Ğ ve J yok, bir oyunda tekrar yok.
+  - Yazarken cevaplar taslak olarak gidiyor (`isim:answers`); süre dolunca son taslak sayılıyor.
+  - BİTİRDİM yalnızca bütün satırlar doluyken diğerlerinin süresini 10 sn'ye indiriyor. O anda botlar da bu 10 sn içinde yazıyor.
+  - Herkes bitirirse tur hemen bitiyor.
+  - Başkalarının cevabı sonuç ekranına kadar gönderilmiyor.
+- **Hakem** (`judge.js`):
+  1. Biçim: harf, en az 2, en çok 30 karakter. Türkçe karakter isteğe bağlı ("semsiye" = Şemsiye).
+  2. Harf kontrolü **doğru yazılış** üzerinden yapılıyor: "canakkale" Ç'de geçerli, C'de geçersiz.
+  3. Sözlük. Bitki/hayvanda "ağacı, çiçeği, kuşu…" ekleri atılıp tekrar aranıyor.
+  4. Kalıcı önbellek: `DATA_DIR/isimsehir.db`, `node:sqlite`.
+  5. **Yapay zekâ:** Claude `claude-opus-5-5`, `@anthropic-ai/sdk`. Bir elde sözlükte olmayan bütün cevaplar tek istekle gidiyor; aynı kelime bir kez soruluyor.
+     - İstek ayarları: `output_config.effort: 'low'`, JSON şeması. `server-side-fallback-2026-07-01` + `fallbacks: 'default'` ile gidiyor; 400 dönerse düz `messages.create` ile tekrar deneniyor.
+     - Kararlar önbelleğe yazılıyor.
+     - `ANTHROPIC_API_KEY` yoksa ya da cevap gelmezse sözlükte olmayan kelime "Sözlükte yok / Doğrulanamadı" gerekçesiyle geçersiz.
+     - Zaman aşımı `ISIM_AI_TIMEOUT_MS` (12 sn).
+- Puan: o satırda doğru cevabı olan tek kişi 20; farklı doğru cevap 10; aynı cevap 5; boş/geçersiz 0. Eşlide takım = koltuk % (kişi/2), yani karşılıklı; takım puanı toplam. Eşlide boş koltuklar başlarken botla dolar.
+- Bot: sözlükten harfe uyan rastgele kelime. Bilgi düzeyi %62–91, bitirme anı sürenin %55–95'i, %45 ihtimalle BİTİRDİM der.
+- Ortak özellikler: sesli sohbet, ikram, sohbet (`tableExtras`, önek `isim`), profil, arkadaş daveti, koltuk seçimi (OTUR), canlı izleme.
+- Test: `tests/v43IsimSehir.test.js`. Yapay zekâ sahte istemciyle (`Judge._setClient`) test ediliyor.
+- Tarayıcıda denendi: 4 kişilik masa, harf çarkı, yazma, Enter ile satır geçişi, BİTİRDİM ve 10 sn, sonuç tablosu (geçersiz cevap üstü çizili ve gerekçeli), izleyici.
+- **Gerçek yapay zekâ çağrısı burada denenmedi** (API anahtarı yok).
+
+## 5f. Canlı izleme, arkadaş düğmesi, akıcılık (2026-10-23)
+
+- **Canlı izleme** (bütün oyunlar). Masaya oyuncu olmadan girip seyretmek için üç yol:
+  - Arkadaş listesinde masadaki arkadaşın yanında **👁 İZLE**. Oyun başlamadıysa MASAYA GİT de var.
+  - Lobide ÖZEL ODA penceresinde **MASAYI İZLE**.
+  - Oyun pencerelerinde kod satırındaki **İZLE**.
+  - `/api/where?code=` kodun hangi oyuna ait olduğunu söyler; ÖZEL ODA'daki kodla katıl da artık bütün oyunlarda çalışıyor.
+  - Okey: `watchGame` / `unwatchGame`. `spectatorSnapshot` 0 numaralı koltuktan bakar, ıstaka boş gelir. İzleyici `room.watchers` (Set; `roomStore` kaydetmez) ve socket.io odasına katılıyor. `game.js` `spectating` iken hamle göndermiyor; `body.spectator` düğmeleri gizliyor.
+  - Kart oyunları ve İsim Şehir: `tableExtras.attachWatch` / `emitWatchers`. Olaylar `<önek>:watch` / `<önek>:unwatch`; izleyiciye `snapshot(room, -1)` gidiyor, sohbet ve ikram izleyiciye de iletiliyor. İstemcide `session.watch`.
+  - Oyunculara "👁 N kişi masanı izliyor" şeridi görünüyor.
+- **Okey masasında arkadaş ekleme:** profil penceresinde ARKADAŞ EKLE (hesaplı gerçek oyuncuda; zaten arkadaşsa ARKADAŞSINIZ) ve ARKADAŞLAR düğmeleri. `summary()` artık `account` alanı veriyor.
+  - Kullanıcının "tuşlar çıkmıyor" şikâyeti buydu: oyun sırasında okey masasında arkadaş düğmesi yoktu. Lobideki istek ve KABUL/RED tarayıcıda denendi, çalışıyor.
+- **Akıcılık:**
+  - Batak ve Pişti oyuncu kutuları yalnızca değişince yeniden kuruluyor (avatar resimleri her hamlede yeniden çözülmüyordu).
+  - İkram ikonları yalnızca değişince çiziliyor; önceden sesli sohbet açıkken saniyede 5 kez siliniyordu.
+  - Konuşan göstergesi yalnızca durum değişince güncelleniyor.
+  - Masa zemini ayrı katmanda (`will-change`, `contain:strict`).
+  - Kart gölgeleri ve parlamaları `filter` yerine `box-shadow`; pencerelerde `backdrop-filter` kaldırıldı.
+  - Ölçüm (masaüstü): Pişti'de 15 sn oyun, en uzun kare 20 ms, uzun görev yok.
 
 ## 6. Teknoloji önerileri neden şimdilik gerekli değil
 

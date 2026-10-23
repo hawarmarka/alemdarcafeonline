@@ -66,13 +66,19 @@ window.BatakExtras = (function () {
     if (d.to === s.me) ctx.toast(`${d.name} sana ${TREATS[d.item].name.toLowerCase()} ikram etti.`, true);
     setTimeout(paintTreats, 900);
   }
+  // Yalnızca değişen kutuya dokunur: kutuda aynı ikramlar zaten varsa DOM'a yazılmaz.
   function paintTreats() {
-    const now = Date.now();
-    document.querySelectorAll('.pb-treats').forEach(n => n.remove());
+    const now = Date.now(), want = new Map();
     for (const [seat, list] of treats) {
       const live = list.filter(x => x.until > now); if (!live.length) { treats.delete(seat); continue; }
-      const slot = boxOf(seat); if (!slot) continue;
-      const box = el('div', 'pb-treats');
+      const slot = boxOf(seat); if (slot) want.set(slot, live);
+    }
+    document.querySelectorAll('.pb-treats').forEach(n => { if (!want.has(n.parentElement)) n.remove(); });
+    for (const [slot, live] of want) {
+      const sig = live.map(t => t.item + t.until).join(), old = slot.querySelector(':scope > .pb-treats');
+      if (old?.dataset.sig === sig) continue;
+      old?.remove();
+      const box = el('div', 'pb-treats'); box.dataset.sig = sig;
       for (const t of live) { const i = el('i'); i.innerHTML = treatSvg(t.item); i.title = TREATS[t.item].name; box.append(i); }
       slot.append(box);
     }
@@ -164,22 +170,23 @@ window.BatakExtras = (function () {
   }
   setInterval(() => {
     if (!voice.meters.size) return;
+    let changed = false;
     for (const [name, m] of voice.meters) {
       m.an.getByteTimeDomainData(m.buf);
       let peak = 0; for (const v of m.buf) peak = Math.max(peak, Math.abs(v - 128));
-      m.talking = peak > 14;
+      if (m.talking !== peak > 14) { m.talking = peak > 14; changed = true; }
     }
-    update();
+    if (changed) paintVoice(); // yalnızca konuşan değişince
   }, 200);
-  function update() {
+  function paintVoice() {
     const s = ctx?.getState(); if (!s) return;
     document.querySelectorAll('.bk-pbox').forEach(box => {
       const name = s.players[Number(box.dataset.seat)]?.name;
       box.classList.toggle('voice', voice.list.includes(name));
       box.classList.toggle('talking', !!voice.meters.get(name)?.talking);
     });
-    if (treats.size) paintTreats();
   }
+  function update() { paintVoice(); if (treats.size) paintTreats(); }
 
   function init(options) {
     ctx = options;

@@ -13,7 +13,8 @@ const SEAT_ID = { bottom: 'seatBottom', top: 'seatTop', left: 'seatLeft', right:
 const QUICK = ['Selam 👋', 'Bol şans!', 'Pişti! 😎', 'Güzel oyun 👏', 'İlk elin günahı olmaz', 'Dördüncüyü bul senin olsun', 'Tebrikler 🎉', 'Görüşürüz'];
 let session = null;
 try { session = JSON.parse(sessionStorage.getItem('pistiSession') || 'null'); } catch (_) {}
-if (!session?.code || !session?.token) location.replace('/');
+if (!session?.code || !(session?.token || session?.watch)) location.replace('/');
+const spectating = !!session?.watch; // canlı izleme: el yok, hamle ve sohbet yazma yok
 let state = null, prev = null, sent = false, shownResult = '', chatUnread = 0, seenSeq = 0, seenDeal = 0, bluffArmed = false, playRect = null;
 const avatarSrc = a => /^\/api\/avatar\/[\w-]{22}$/.test(a || '') ? a : /^av(0[1-9]|10)\.svg$/.test(a || '') ? '/asset/avatars/' + a : '/asset/avatar-default.svg';
 document.addEventListener('error', e => { if (e.target.tagName === 'IMG' && !e.target.src.endsWith('avatar-default.svg')) e.target.src = '/asset/avatar-default.svg'; }, true);
@@ -22,8 +23,11 @@ function toast(msg, info = false) { const t = $('bkToast'); t.textContent = msg;
 const cardName = c => `${SUIT_NAME[c.suit]} ${RANK[c.rank] || c.rank}`;
 const active = () => ['playing', 'capture', 'bluff', 'roundEnd', 'matchEnd'].includes(state.phase);
 // Ekrandaki yer: oyun sırasında herkes kendini altta görür; beklerken koltuklar sabit yerinde (OTUR için).
-const posOf = i => (state.phase === 'waiting' ? POS[state.players[i].seat] : POS[(state.players[i].seat - state.players[state.me].seat + 4) % 4]);
-const sideName = k => { const ps = state.players.filter(p => p.side === k); const mine = ps.some(p => p === state.players[state.me]);
+// İzleyicide (me = -1) masaya 0 numaralı koltuktan bakılır.
+const refSeat = () => (state.me >= 0 ? state.players[state.me].seat : 0);
+const mySide = () => (state.me >= 0 ? state.players[state.me].side : -99);
+const posOf = i => (state.phase === 'waiting' ? POS[state.players[i].seat] : POS[(state.players[i].seat - refSeat() + 4) % 4]);
+const sideName = k => { const ps = state.players.filter(p => p.side === k); const mine = ps.some(p => p.side === mySide());
   return state.team ? (mine ? 'Siz' : 'Rakip') + ` (${ps.map(p => p.name).join(' & ')})` : ps[0]?.name || ''; };
 const sides = () => [...new Set(state.players.map(p => p.side))].sort((a, b) => a - b);
 // Canlı puan: maç toplamı + bu eldeki pişti/blöf puanları (kart puanları el sonunda eklenir).
@@ -48,7 +52,16 @@ const sfx = { card: () => beep(520, 70, 'triangle', .07, .6), capture: () => bee
 function paintSound() { $('ptSoundWave').classList.toggle('hidden', !soundOn()); $('ptSoundOff').classList.toggle('hidden', soundOn()); }
 
 // ---------- Bağlantı ----------
-socket.on('connect', () => socket.emit('pisti:rejoin', { code: session.code, token: session.token }));
+socket.on('connect', () => socket.emit(spectating ? 'pisti:watch' : 'pisti:rejoin', { code: session.code, token: session.token }));
+// İzleyici şeridi; oyunculara kaç kişinin izlediğini gösterir.
+const watchBar = (() => {
+  const bar = el('div', 'watch-bar hidden'), text = el('span'), exit = el('button', null, 'İZLEMEYİ BIRAK'); exit.type = 'button';
+  exit.onclick = () => { socket.emit('pisti:unwatch'); goLobby(); };
+  bar.append(text, exit); document.body.append(bar);
+  if (spectating) document.body.classList.add('spectator');
+  return n => { text.textContent = spectating ? `👁 İZLEYİCİ MODU · masa ${session.code}${n > 1 ? ` · ${n} izleyici` : ''}` : `👁 ${n} kişi masanı izliyor`;
+    exit.classList.toggle('hidden', !spectating); bar.classList.toggle('hidden', !spectating && !n); };
+})();
 socket.on('pisti:state', s => { prev = state; state = s; sent = false; render(); });
 socket.on('pisti:error', d => { sent = false; sfx.bad(); toast(d.message || 'İşlem yapılamadı.'); if (/bulunamadı|kapandı/.test(d.message || '')) setTimeout(goLobby, 2500); });
 socket.on('pisti:replaced', () => toast('Masa başka bir sekmede açıldı.'));
@@ -69,6 +82,7 @@ function render() {
   $('ptArena').classList.toggle('two', s.n === 2);
   renderSeats(); renderOpp(); renderWon(); renderDeck(); renderPile(); renderHand(); renderWait(); renderBluff(); renderPeek();
   window.BatakExtras?.update();
+  watchBar(s.watchers || 0);
   const notice = $('ptNotice'); notice.textContent = s.notice || ''; notice.classList.toggle('hidden', !s.notice || s.phase === 'waiting');
   if (prev && s.turn === s.me && prev.turn !== s.me && ['playing', 'bluff'].includes(s.phase)) sfx.turn();
   if (s.dealSeq !== seenDeal) { if (seenDeal && s.phase === 'playing') sfx.deal(); seenDeal = s.dealSeq; }
@@ -76,8 +90,12 @@ function render() {
   if ((s.phase === 'roundEnd' || s.phase === 'matchEnd') && shownResult !== key) { shownResult = key; setTimeout(showScores, 900); }
   if (s.phase === 'playing' && $('ptScoreModal').dataset.auto === '1') closeModal('ptScoreModal');
 }
+let seatSig = '';
 function renderSeats() {
   const s = state, waiting = s.phase === 'waiting';
+  // Kutular yalnızca gösterdikleri bir şey değişince yeniden kurulur (avatar resimleri her hamlede yeniden çözülmesin).
+  const sig = JSON.stringify([s.phase, s.me, s.turn, s.deadline, s.dealer, s.players.map(p => [p.name, p.avatar, p.level, p.isBot, p.connected, p.seat, p.side, liveTotal(p), p.captured, p.pistis.length])]);
+  if (sig === seatSig) return; seatSig = sig;
   const byPos = new Map(s.players.map((p, i) => [posOf(i), i]));
   const used = s.n === 2 ? ['bottom', 'top'] : POS;
   for (const pos of POS) {
@@ -106,7 +124,7 @@ function playerBox(p, i) {
   const main = el('div', 'pb-main'), name = el('div', 'pb-name');
   name.append(document.createTextNode(p.name));
   if (mine) name.append(el('i', 'pb-tag me', 'SEN')); else if (p.isBot) name.append(el('i', 'pb-tag', 'BOT'));
-  if (s.team && !waiting && !mine) name.append(el('i', 'pb-tag team', p.side === s.players[s.me].side ? 'EŞİN' : 'RAKİP'));
+  if (s.team && !waiting && !mine && s.me >= 0) name.append(el('i', 'pb-tag team', p.side === mySide() ? 'EŞİN' : 'RAKİP'));
   if (!p.connected) name.append(el('i', 'pb-tag', 'BAĞLANIYOR'));
   main.append(name);
   if (!waiting) {
@@ -134,7 +152,7 @@ function renderOpp() {
 function renderWon() {
   const s = state, box = $('ptWon');
   if (!active()) { box.replaceChildren(); box.dataset.sig = ''; return; }
-  const items = sides().map(k => { const at = s.players.findIndex((p, i) => p.side === k && (i === s.me || p.side !== s.players[s.me].side));
+  const items = sides().map(k => { const at = s.players.findIndex((p, i) => p.side === k && (i === s.me || p.side !== mySide()));
     const p = s.players[at]; return { pos: posOf(at), n: p.captured, pistis: p.pistis }; });
   const sig = JSON.stringify(items);
   if (box.dataset.sig === sig) return; box.dataset.sig = sig;
@@ -204,7 +222,7 @@ function flyIn(card, seat) {
 }
 function sweep(seat) {
   const s = state, side = s.players[seat]?.side;
-  const target = [...document.querySelectorAll('.pt-won')].find(w => w.dataset.pos === posOf(s.players.findIndex((p, i) => p.side === side && (i === s.me || p.side !== s.players[s.me].side))))
+  const target = [...document.querySelectorAll('.pt-won')].find(w => w.dataset.pos === posOf(s.players.findIndex((p, i) => p.side === side && (i === s.me || p.side !== mySide()))))
     || $(SEAT_ID[posOf(seat)]);
   const box = $('ptPile'), a = box.getBoundingClientRect(), b = target.getBoundingClientRect();
   const dx = b.left + b.width / 2 - (a.left + a.width / 2), dy = b.top + b.height / 2 - (a.top + a.height / 2);
@@ -425,7 +443,7 @@ $('ptMenuBtn').onclick = e => { e.stopPropagation(); menu.classList.toggle('hidd
 document.addEventListener('click', e => { if (!menu.contains(e.target)) menu.classList.add('hidden'); });
 $('ptRulesBtn').onclick = () => { menu.classList.add('hidden'); showRules(); };
 $('ptMenuScore').onclick = () => { menu.classList.add('hidden'); showScores(); };
-$('ptMenuProfile').onclick = () => { menu.classList.add('hidden'); if (state) showProfile(state.players[state.me]); };
+$('ptMenuProfile').onclick = () => { menu.classList.add('hidden'); if (state?.players[state.me]) showProfile(state.players[state.me]); };
 $('ptScoreBtn').onclick = () => (state && active() ? showScores() : toast('Puan tabelası oyun başlayınca açılır.', true));
 $('ptSoundBtn').onclick = () => { localStorage.setItem('okeySoundsEnabled', soundOn() ? '0' : '1'); paintSound(); if (soundOn()) sfx.turn(); };
 $('ptLeaveBtn').onclick = () => { menu.classList.add('hidden'); if (confirm('Masadan ayrılmak istiyor musun? Oyun sürüyorsa yerine bot geçer.')) socket.emit('pisti:leave'); };

@@ -71,6 +71,7 @@ app.use(express.static(path.join(__dirname, '..', 'public'), {
 app.get('/game', (_req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'game.html')));
 app.get('/batak', (_req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'batak.html')));
 app.get('/pisti', (_req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'pisti.html')));
+app.get('/isim-sehir', (_req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'isim-sehir.html')));
 // storage: 'persistent' olmalı. 'ephemeral' ise Coolify'da /app/data için kalıcı depolama yok, güncellemede hesaplar silinir.
 app.get('/health', (_req, res) => res.json({ status: 'ok', storage: Accounts.storageStatus(), rooms: rooms.size }));
 app.get('/api/leaderboard', (req, res) => res.json({ top: Accounts.leaderboard(25, req.query.by === 'chips' ? 'chips' : 'xp') }));
@@ -104,7 +105,16 @@ app.get('/api/batak', (_req, res) => res.json(Batak.stats()));
 // Pişti masaları (server/pisti): 'pisti:' olayları.
 const Pisti = require('./pisti').install({ io, Accounts, Avatars, Logger });
 app.get('/api/pisti', (_req, res) => res.json(Pisti.stats()));
-SocialHub.setGames({ batak: Batak, pisti: Pisti });
+// İsim Şehir masaları (server/isimsehir): 'isim:' olayları; cevaplar sözlük + yapay zekâ hakemle doğrulanır.
+const IsimSehir = require('./isimsehir').install({ io, Accounts, Avatars, Logger });
+app.get('/api/isimsehir', (_req, res) => res.json(IsimSehir.stats()));
+SocialHub.setGames({ batak: Batak, pisti: Pisti, isimsehir: IsimSehir });
+// Masa kodu hangi oyunun? (lobideki "kodla katıl / izle" bunu sorar)
+app.get('/api/where', (req, res) => {
+    const code = String(req.query.code || '').trim().toUpperCase();
+    const game = rooms.has(code) ? 'okey' : Batak.rooms.has(code) ? 'batak' : Pisti.rooms.has(code) ? 'pisti' : IsimSehir.rooms.has(code) ? 'isimsehir' : null;
+    res.json({ game });
+});
 // Oyuncu profili (masada oyuncuya tıklayınca): yalnızca hesabı olanlar; herkese açık bilgiler.
 app.get('/api/profile', (req, res) => {
   const u = Accounts.userByName(String(req.query.name || '').trim());
@@ -648,7 +658,7 @@ function settleMatch(room) {
 function summary(room) {
     return room.players.map((p, i) => ({ name: p.name, avatar: p.avatar, index: i, seat: seatOf(room, p),
         position: POSITION[i], team: room.teamMode ? i % 2 + 1 : null, level: p.accountId ? p.level : 1, frame: p.frame || 'gold',
-        connected: !!p.socketId || !!p.isBot, isBot: !!p.isBot, hasOpened: !!room.game?.playerStates[i]?.hasOpened,
+        connected: !!p.socketId || !!p.isBot, isBot: !!p.isBot, account: !!p.accountId, hasOpened: !!room.game?.playerStates[i]?.hasOpened,
         openType: room.game?.playerStates[i]?.openType || null,
         // Panelde gösterilir: açılış puanı (seri) / çift sayısı ve bu eldeki cezalar.
         openScore: room.game?.playerStates[i]?.openScore || 0,
@@ -687,12 +697,18 @@ function snapshot(room, index) {
         leftLocked: leftLocked(game, index),
         retractPenalty: canRetract(room, index) && !room.turnSnap.states[index].hasOpened && !!game.playerStates[index].hasOpened, drawnFromDiscardTileId: game.playerStates[index].drawnFromDiscardTile?.id || null };
 }
+// İzleyici görüntüsü: masaya 0 numaralı koltuğun yerinden bakar, hiçbir oyuncunun ıstakası gönderilmez.
+function spectatorSnapshot(room) {
+    return { ...snapshot(room, 0), tiles: [], spectator: true, myChips: null, myOpenType: null, mustOpenThisTurn: false, canRetract: false,
+        leftLocked: false, retractPenalty: false, drawnFromDiscardTileId: null };
+}
 function broadcastGame(room) {
     RoomStore.markDirty(room); // her durum değişikliği yayınlanır; masa 2 sn içinde diske yazılır
     if (!room.game || !room.started) return;
     room.players.forEach((p, i) => {
         if (p.socketId) io.to(p.socketId).emit('gameState', snapshot(room, i));
     });
+    if (room.watchers?.size) { const view = spectatorSnapshot(room); for (const id of room.watchers) io.to(id).emit('gameState', view); }
 }
 function newRound(room) {
     if (room.matchEnded || room.players.length !== 4 || room.players.some(p => !p.socketId && !p.isBot)) return false;
@@ -1117,6 +1133,7 @@ io.on('connection', socket => {
     SocialHub.onSocket(socket); // 'hello' (çevrimiçi), 'inviteFriend'
     Batak.onSocket(socket); // 'batak:*'
     Pisti.onSocket(socket); // 'pisti:*'
+    IsimSehir.onSocket(socket); // 'isim:*'
     socket.on('joinGame', data => {
         if (socket.data.roomCode) return issue(socket, 'Zaten bir odadasınız.');
         const account = Accounts.fromToken(data?.authToken);
@@ -1240,6 +1257,27 @@ io.on('connection', socket => {
         lobby(room);
         newRound(room);
     });
+    // Canlı izleme: masa kodunu bilen (ya da arkadaş listesinden İZLE'ye basan) masayı oyuncu olmadan seyreder.
+    // İzleyici masanın yayınlarını alır ama hamle yapamaz (socket.data.roomCode boş kalır), ıstakaları görmez.
+    socket.on('watchGame', data => {
+        const room = rooms.get(String(data?.roomCode || '').toUpperCase());
+        if (!room) return issue(socket, 'İzlenecek masa bulunamadı veya kapandı.');
+        if (socket.data.roomCode) return issue(socket, 'Masadayken başka masa izlenemez.');
+        room.watchers = room.watchers || new Set(); room.watchers.add(socket.id);
+        socket.data.watchCode = room.code; socket.join(room.code);
+        socket.emit('chatHistory', room.chatHistory);
+        socket.emit('lobbyUpdate', { code: room.code, isPublic: room.isPublic, players: summary(room), teamMode: room.teamMode, started: room.started, spectator: true,
+            assisted: room.assisted, stackingMode: room.stackingMode, roundLimit: room.roundLimit, botFillAt: 0, hostIndex: -1, autoBots: !!room.autoBots, bet: room.bet });
+        if (room.started && room.game) socket.emit('gameState', spectatorSnapshot(room));
+        io.to(room.code).emit('watchersUpdate', { count: room.watchers.size });
+    });
+    const unwatch = () => {
+        const room = rooms.get(socket.data.watchCode); socket.data.watchCode = null;
+        if (!room?.watchers?.delete(socket.id)) return;
+        socket.leave(room.code); io.to(room.code).emit('watchersUpdate', { count: room.watchers.size });
+    };
+    socket.on('unwatchGame', unwatch);
+    socket.on('disconnect', unwatch);
     socket.on('leaveGame', () => playerLeave(socket, true));
     socket.on('throwTomato', data => {
         const { room, index } = getRoomAndSeat(socket);

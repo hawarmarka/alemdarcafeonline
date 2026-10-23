@@ -1,6 +1,6 @@
 /* Pişti masası: css/batak.css'in (üst çubuk, oyuncu kutuları, pencereler, sohbet, ikram) üstüne yalnızca Pişti'ye özel parçalar.
    Akıcılık: hareket eden kartlarda filter yok (box-shadow), animasyonlar yalnızca transform/opacity. */
-.pisti-page{--card-w:clamp(54px,min(7vw,13.4vh),118px);--card-h:calc(var(--card-w)*121/90);--mini-w:calc(var(--card-w)*.46)}
+.pisti-page{--card-w:clamp(54px,min(7vw,13.4vh),118px);--card-h:calc(var(--card-w)*1.4);--mini-w:calc(var(--card-w)*.46)}
 .pisti-page .card{filter:none;box-shadow:0 2px 6px rgba(0,0,0,.38),0 0 0 1px rgba(0,0,0,.12)}
 .pt-target{display:flex;align-items:center;gap:8px;height:44px;padding:0 12px;border-radius:12px;background:linear-gradient(180deg,#fff,#eef0ea);color:#222;border:1px solid rgba(0,0,0,.15);box-shadow:0 6px 16px rgba(0,0,0,.35)}
 .pt-target small{font:700 11px Oswald,Arial,sans-serif;letter-spacing:1.6px;color:#777}
@@ -33,6 +33,7 @@
 .pt-ohand{position:absolute;display:flex;--card-w:calc(var(--mini-w)*1.18)}
 .pt-ohand .card{margin-left:calc(var(--card-w)*-.55);transform:rotate(calc(var(--k)*6deg)) translateY(calc(var(--k)*var(--k)*2px))}
 .pt-ohand .card:first-child{margin-left:0}
+.pt-ohand[data-pos=bottom]{left:50%;bottom:5%;transform:translateX(-50%)} /* yalnız izleyicide */
 .pt-ohand[data-pos=top]{left:50%;top:5%;transform:translateX(-50%) rotate(180deg)}
 .pt-ohand[data-pos=left]{left:4%;top:50%;transform:translateY(-50%) rotate(90deg)}
 .pt-ohand[data-pos=right]{right:4%;top:50%;transform:translateY(-50%) rotate(-90deg)}
@@ -101,7 +102,7 @@
 
 /* Kısa ekran (telefon yatay) */
 @media (max-height:560px){
-  .pisti-page{--card-w:clamp(44px,min(6.4vw,15vh),86px);--card-h:calc(var(--card-w)*121/90)}
+  .pisti-page{--card-w:clamp(44px,min(6.4vw,15vh),86px);--card-h:calc(var(--card-w)*1.4)}
   .pt-target{height:36px}.pt-target b{font-size:18px}
   .pt-hand{padding-left:190px}
   .pt-won[data-pos=bottom]{right:10%;bottom:5%}

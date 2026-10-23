@@ -21,7 +21,7 @@ refreshGameProfile();
 // Sunucu yüklenen resimleri /api/avatar/<id> adresiyle gönderir; sunucu yeniden başladıysa resim bulunamaz, varsayılana dönülür.
 document.addEventListener('error', e => { if (e.target.tagName === 'IMG' && e.target.src.includes('/api/avatar/')) e.target.src = '/asset/avatar-default.svg'; }, true);
 const avatarSrc = a => String(a || '').startsWith('data:image/') || /^\/api\/avatar\/[\w-]{22}$/.test(a) ? a : a === 'default.svg' || !a ? '/asset/avatar-default.svg' : (/^av(0[1-9]|10)\.svg$/.test(a) ? '/asset/avatars/' + a : '/asset/avatar-default.svg');
-if (!session?.token || !session?.roomCode) window.location.replace('/?oturum=yok');
+if (!(session?.token || session?.watch) || !session?.roomCode) window.location.replace('/?oturum=yok'); // izleyicinin jetonu yok
 const SLOTS = 32, ROW_WIDTH = 16; // Üstte 16, altta 16 YER; oyun yine 21/22 taş dağıtır
 const spriteRows = { Mavi: 0, Siyah: 1, Kirmizi: 2, Yesil: 3, Sahte: 4 };
 let state = null, slots = Array(SLOTS).fill(null), selected = null, drag = null;
@@ -161,7 +161,11 @@ function toast(message, isError = false) {
 // çift tıklama veya hızlı dokunuş iki istek ve "zaten taş aldınız" gibi gereksiz hatalar üretmesin.
 const MOVE_EVENTS = new Set(['drawTile', 'discardTile', 'openHand', 'openWithPairs', 'addToGroup', 'processAll', 'retractTurn', 'undoDiscardDraw', 'finishGame']);
 let moveInFlight = 0;
+// İzleyici modu: arkadaş listesinden ya da kodla İZLE. Masa görünür, ıstaka boş, hamle gönderilmez.
+const spectating = !!session?.watch;
+if (spectating) document.body.classList.add('spectator');
 function action(event, data = {}) {
+    if (spectating) return toast('İzleyici modundasın; masayı yalnızca seyredebilirsin.');
     if (!socket.connected) return toast('Bağlantı yok, tekrar bağlanmayı bekleyin.', true);
     if (MOVE_EVENTS.has(event)) {
         if (moveInFlight && Date.now() - moveInFlight < 5000) return;
@@ -171,8 +175,24 @@ function action(event, data = {}) {
 }
 const moveAnswered = () => { moveInFlight = 0; };
 function joinGameSocket() {
-    if (session?.token) socket.emit('rejoinRoom', { roomCode: session.roomCode, token: session.token });
+    if (spectating) socket.emit('watchGame', { roomCode: session.roomCode });
+    else if (session?.token) socket.emit('rejoinRoom', { roomCode: session.roomCode, token: session.token });
 }
+// İzleyici şeridi (yalnız izleyicide) ve oyunculara izleyici sayısı.
+(function spectatorBar() {
+    const bar = document.createElement('div'); bar.id = 'watchBar'; bar.className = 'watch-bar hidden';
+    const text = document.createElement('span'), exit = document.createElement('button');
+    exit.type = 'button'; exit.textContent = 'İZLEMEYİ BIRAK';
+    exit.onclick = () => { socket.emit('unwatchGame'); sessionStorage.removeItem('okeySession'); window.location.assign('/'); };
+    bar.append(text, exit); document.body.append(bar);
+    const paint = n => {
+        text.textContent = spectating ? `👁 İZLEYİCİ MODU · masa ${session.roomCode}${n > 1 ? ` · ${n} izleyici` : ''}` : `👁 ${n} kişi masanı izliyor`;
+        exit.classList.toggle('hidden', !spectating);
+        bar.classList.toggle('hidden', !spectating && !n);
+    };
+    paint(0);
+    socket.on('watchersUpdate', d => paint(d.count || 0));
+})();
 socket.on('connect', () => {
     $('connectionBanner').classList.add('hidden');
     $('lobbyConnectionAlert').classList.add('hidden');
@@ -1121,7 +1141,7 @@ function renderPlayers() {
         const pos = positions[relative];
         const player = state.players[i];
         if (!player) continue;
-        setText($(pos + 'PlayerName'), (player.isBot ? '🤖 ' : '') + (relative === 0 ? player.name + ' (Sen)' : player.name + (player.connected ? '' : ' ⏳')));
+        setText($(pos + 'PlayerName'), (player.isBot ? '🤖 ' : '') + (relative === 0 && !spectating ? player.name + ' (Sen)' : player.name + (player.connected ? '' : ' ⏳')));
         const avatar = $(pos + 'PlayerAvatar');
         const playerAvatarSrc = avatarSrc(player.avatar);
         if (avatar.getAttribute('src') !== playerAvatarSrc) avatar.src = playerAvatarSrc;
@@ -1781,8 +1801,34 @@ if (!socketAvailable) {
         if (img && typeof avatarSrc === 'function') img.src = avatarSrc(pl.avatar);
         // Kendi profiline hediye gönderilemez (sunucu reddediyordu); düğmeler gizlenir.
         document.getElementById('profileGiftIcons')?.classList.toggle('hidden', seat === state.playerIndex);
+        paintFriendBtn(pl, seat === state.playerIndex);
         pop.classList.remove('hidden');
     }
+    // Arkadaş ekle: yalnızca hesabı olan gerçek oyuncuya; zaten arkadaşsa ya da istek gittiyse düğme bunu söyler.
+    const addBtn = document.getElementById('profileAddFriend');
+    async function paintFriendBtn(pl, mine) {
+        if (!addBtn) return;
+        addBtn.classList.toggle('hidden', mine || pl.isBot || !pl.account);
+        addBtn.disabled = false; addBtn.textContent = 'ARKADAŞ EKLE'; addBtn.dataset.name = pl.name;
+        if (mine || pl.isBot || !pl.account || !userAuth) return;
+        try {
+            const f = await fetch('/api/friends', { headers: { Authorization: 'Bearer ' + userAuth } }).then(r => r.ok ? r.json() : null);
+            if (addBtn.dataset.name !== pl.name) return;
+            if (f?.friends?.some(u => u.username === pl.name)) { addBtn.textContent = 'ARKADAŞSINIZ'; addBtn.disabled = true; }
+            else if (f?.outgoing?.some(u => u.username === pl.name)) { addBtn.textContent = 'İSTEK GÖNDERİLDİ'; addBtn.disabled = true; }
+        } catch (_) {}
+    }
+    addBtn?.addEventListener('click', async () => {
+        if (!userAuth) return toast('Arkadaş eklemek için lobiden hesabınla giriş yap.', true);
+        addBtn.disabled = true;
+        try {
+            const res = await fetch('/api/friends/request', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + userAuth }, body: JSON.stringify({ username: addBtn.dataset.name }) });
+            const out = await res.json();
+            if (!res.ok) throw Error(out.error || 'İstek gönderilemedi.');
+            addBtn.textContent = out.result === 'accepted' ? 'ARTIK ARKADAŞSINIZ' : 'İSTEK GÖNDERİLDİ';
+        } catch (err) { addBtn.disabled = false; toast(err.message, true); }
+    });
+    document.getElementById('profileFriends')?.addEventListener('click', () => { pop.classList.add('hidden'); Social.open(false); });
     const closeBtn = document.getElementById('profileClose');
     if (closeBtn) closeBtn.addEventListener('click', () => pop.classList.add('hidden'));
     pop.addEventListener('click', e => { if (e.target === pop) pop.classList.add('hidden'); });

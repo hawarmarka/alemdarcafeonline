@@ -58,7 +58,7 @@ function install({ io, Accounts, Avatars, Logger }) {
     const playing = ['playing', 'capture', 'bluff', 'roundEnd', 'matchEnd'].includes(room.phase);
     return {
       code: room.code, type: room.type, n: size(room), team: team(room), target: room.target, bluff: room.bluff,
-      round: room.round, phase: room.phase, me, isHost: room.players[me]?.token === room.hostToken, isPublic: room.isPublic, autoBots: room.autoBots, notice: room.notice,
+      round: room.round, phase: room.phase, me, isHost: room.players[me]?.token === room.hostToken, isPublic: room.isPublic, autoBots: room.autoBots, notice: room.notice, watchers: room.watchers?.size || 0, spectator: me < 0,
       players: room.players.map((p, i) => {
         const side = playing ? sideOf(room, i) : i;
         return { name: p.name, avatar: p.avatar, isBot: !!p.isBot, connected: !!p.socketId || !!p.isBot, seat: p.seat, account: !!p.accountId, level: p.level || 1,
@@ -78,6 +78,7 @@ function install({ io, Accounts, Avatars, Logger }) {
   }
   function emit(room) {
     room.players.forEach((p, i) => { if (p.socketId) io.to(p.socketId).emit('pisti:state', snapshot(room, i)); });
+    extras.emitWatchers(room, snapshot); // canlı izleyenler
   }
   function lobbyInfo(room) {
     const host = room.players.find(p => p.token === room.hostToken) || room.players.find(p => !p.isBot);
@@ -332,6 +333,7 @@ function install({ io, Accounts, Avatars, Logger }) {
       fillWithBots(room);
     });
     extras.attach(socket, where); // masa sohbeti, ikram, sesli sohbet
+    extras.attachWatch(socket, { rooms, snapshot, emitAll: emit });
     socket.on('pisti:rematch', () => {
       const { room, seat } = where(socket);
       if (!room || seat < 0 || room.phase !== 'matchEnd') return;

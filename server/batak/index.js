@@ -51,7 +51,7 @@ function install({ io, Accounts, Avatars, Logger }) {
     return {
       code: room.code, type: room.type, team: L.TYPES[room.type].team, declare: !!L.TYPES[room.type].declare,
       roundLimit: room.roundLimit, round: room.round, phase: room.phase, me: seat, isHost: room.players[seat]?.token === room.hostToken,
-      isPublic: room.isPublic, autoBots: room.autoBots, notice: room.notice,
+      isPublic: room.isPublic, autoBots: room.autoBots, notice: room.notice, watchers: room.watchers?.size || 0, spectator: seat < 0,
       players: room.players.map((p, i) => ({ name: p.name, avatar: p.avatar, isBot: !!p.isBot, connected: !!p.socketId || !!p.isBot,
         seat: Number.isInteger(p.seat) ? p.seat : i, account: !!p.accountId, level: p.level || 1,
         bid: b ? b.bids[i] : null, passed: b ? b.passed[i] : false, tricks: room.tricks[i], total: room.totals[i], cards: room.hands?.[i]?.length || 0 })),
@@ -66,6 +66,7 @@ function install({ io, Accounts, Avatars, Logger }) {
   const untouched = room => room.bidding && room.bidding.bids.every(v => v == null) && room.bidding.passed.every(p => !p);
   function emit(room) {
     room.players.forEach((p, i) => { if (p.socketId) io.to(p.socketId).emit('batak:state', snapshot(room, i)); });
+    extras.emitWatchers(room, snapshot); // canlı izleyenler
   }
   function lobbyInfo(room) {
     const host = room.players.find(p => p.token === room.hostToken) || room.players.find(p => !p.isBot);
@@ -308,6 +309,7 @@ function install({ io, Accounts, Avatars, Logger }) {
     });
     // Masa sohbeti, ikram (çay, kahve…) ve sesli sohbet sinyali: server/tableExtras.js
     extras.attach(socket, where);
+    extras.attachWatch(socket, { rooms, snapshot, emitAll: emit });
     // Maç bitince aynı masada yeniden.
     socket.on('batak:rematch', () => {
       const { room, seat } = where(socket);

@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8">
+<link rel="icon" href="/asset/ui/alemdar-logo.svg" type="image/svg+xml">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Alemdar Cafe · İsim Şehir</title>
+<meta name="theme-color" content="#0f2a3d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Barlow:wght@400;500;600;700;800&family=Patrick+Hand&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/social.css?v=2">
+<link rel="stylesheet" href="/css/batak.css?v=15">
+<link rel="stylesheet" href="/css/isimsehir.css?v=1">
+</head>
+<body class="batak-page isim-page">
+<div class="is-stage">
+  <!-- Üst çubuk (Batak/Pişti ile ortak görünüm) -->
+  <header class="bk-top">
+    <div class="bk-hud">
+      <div class="bk-info"><b id="isTitle">İSİM ŞEHİR</b><span id="isRound">Masa</span></div>
+      <div class="is-ai" id="isAi" title="Cevap kontrolü"></div>
+    </div>
+    <nav class="bk-toolbar" aria-label="Masa düğmeleri">
+      <div class="bk-tgroup">
+        <button type="button" id="bkFriendsBtn" class="bk-tool" title="Arkadaşlar ve davet"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.3-6 6.5-6s5.9 2.4 6.5 6"/><path d="M16 4.6a3.4 3.4 0 0 1 0 6.8M18 14.4c2 .8 3.2 2.8 3.5 5.6"/></svg><span>Arkadaşlar</span></button>
+        <button type="button" id="bkChatBtn" class="bk-tool" title="Masa sohbeti"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg><span>Sohbet</span></button>
+        <button type="button" id="bkVoiceBtn" class="bk-tool" title="Sesli sohbet" aria-pressed="false"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/><path id="bkVoiceSlash" d="M4 4l16 16"/></svg><span>Sesli</span></button>
+        <button type="button" id="bkTreatBtn" class="bk-tool" title="İkram et (çay, kahve…)"><svg viewBox="0 0 24 24"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8 3c0 1.5 1 1.5 1 3M12 3c0 1.5 1 1.5 1 3"/></svg><span>İkram</span></button>
+      </div>
+      <div class="bk-tgroup">
+        <button type="button" id="isScoreBtn" class="bk-tool icon-only" title="Puan tablosu"><svg viewBox="0 0 24 24"><path d="M5 20V11M12 20V5M19 20v-6"/></svg></button>
+        <button type="button" id="isSoundBtn" class="bk-tool icon-only" title="Oyun sesi"><svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path id="isSoundWave" d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/><path id="isSoundOff" class="hidden" d="M16 9l5 6M21 9l-5 6"/></svg></button>
+        <button type="button" id="isMenuBtn" class="bk-tool icon-only" title="Menü" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      </div>
+      <div class="bk-menu hidden" id="isMenu" role="menu">
+        <button type="button" role="menuitem" id="isRulesBtn">Kurallar</button>
+        <button type="button" role="menuitem" id="isMenuScore">Puan tablosu</button>
+        <button type="button" role="menuitem" id="isMenuProfile">Profilim</button>
+        <button type="button" role="menuitem" id="isLeaveBtn" class="danger">Masadan ayrıl</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="is-main">
+    <!-- Oyuncular (2–10): sesli sohbet ve ikram bu kutulara bağlanır -->
+    <aside class="is-players" id="isPlayers" aria-label="Oyuncular"></aside>
+
+    <!-- Defter: harf, süre, beş satır -->
+    <section class="is-book" id="isBook">
+      <div class="is-book-head">
+        <div class="is-letter" id="isLetter" aria-live="polite"><span>?</span></div>
+        <div class="is-timer"><div class="is-timer-bar"><b id="isTimerFill"></b></div><span id="isTimerText">--</span></div>
+      </div>
+      <form class="is-form" id="isForm" autocomplete="off">
+        <div class="is-rows" id="isRows"></div>
+        <div class="is-actions">
+          <button type="submit" class="bk-btn primary is-finish" id="isFinish" disabled>BİTİRDİM</button>
+          <small id="isHint">Bütün satırları doldurunca BİTİRDİM'e bas; diğerlerine 10 saniye kalır.</small>
+        </div>
+      </form>
+      <!-- Bekleme -->
+      <div class="is-wait hidden" id="isWait">
+        <b>MASA <span id="isCode">------</span></b>
+        <p id="isWaitText">Oyuncular bekleniyor…</p>
+        <div class="is-seats" id="isSeats"></div>
+        <div class="bk-wait-btns">
+          <button type="button" class="bk-btn ghost" id="isCopyCode">KODU KOPYALA</button>
+          <button type="button" class="bk-btn ghost" id="isInviteBtn">ARKADAŞ DAVET ET</button>
+          <span id="isHostBtns"><button type="button" class="bk-btn ghost" id="isAddBot">BOT EKLE</button><button type="button" class="bk-btn primary" id="isStart">OYUNU BAŞLAT</button></span>
+        </div>
+      </div>
+      <!-- Hakem / sonuç -->
+      <div class="is-result hidden" id="isResult">
+        <h2 id="isResultTitle">SONUÇLAR</h2>
+        <div class="is-result-wrap"><table class="is-table" id="isTable"></table></div>
+        <p class="is-result-note" id="isResultNote"></p>
+        <div class="bk-modal-btns" id="isResultBtns"></div>
+      </div>
+      <div class="is-judging hidden" id="isJudging"><i></i><b id="isJudgingText">Cevaplar kontrol ediliyor…</b></div>
+    </section>
+  </main>
+  <div class="bk-notice hidden" id="isNotice"></div>
+</div>
+
+<!-- Sohbet -->
+<aside class="bk-chat hidden" id="bkChat" aria-label="Masa sohbeti">
+  <div class="bk-chat-head"><b>MASA SOHBETİ</b><button type="button" id="bkChatClose" aria-label="Kapat">✕</button></div>
+  <div class="bk-chat-log" id="bkChatLog" role="log" aria-live="polite"></div>
+  <div class="bk-quick" id="bkQuick"></div>
+  <form class="bk-chat-form" id="bkChatForm"><input id="bkChatInput" maxlength="100" autocomplete="off" placeholder="Mesaj yaz…" aria-label="Mesaj"><button type="submit" aria-label="Gönder">➤</button></form>
+</aside>
+<!-- İkram -->
+<div class="bk-modal hidden" id="bkTreatModal" role="dialog" aria-modal="true" aria-labelledby="bkTreatTitle">
+  <div class="bk-modal-box small">
+    <h2 id="bkTreatTitle">İKRAM ET</h2>
+    <p class="bk-treat-step">1 · Ne ikram edeceksin?</p>
+    <div class="bk-treats" id="bkTreatItems"></div>
+    <p class="bk-treat-step">2 · Kime?</p>
+    <div class="bk-treat-targets" id="bkTreatTargets"></div>
+    <div class="bk-modal-btns"><button type="button" class="bk-btn ghost" data-close="bkTreatModal">VAZGEÇ</button></div>
+  </div>
+</div>
+<!-- Toplam puan tablosu -->
+<div class="bk-modal hidden" id="isScoreModal" role="dialog" aria-modal="true" aria-labelledby="isScoreTitle">
+  <div class="bk-modal-box">
+    <h2 id="isScoreTitle">PUAN TABLOSU</h2>
+    <div class="bk-score-wrap"><table class="bk-score" id="isScoreTable"></table></div>
+    <div class="bk-modal-btns"><button type="button" class="bk-btn ghost" data-close="isScoreModal">KAPAT</button></div>
+  </div>
+</div>
+<!-- Kurallar -->
+<div class="bk-modal hidden" id="isRulesModal" role="dialog" aria-modal="true" aria-labelledby="isRulesTitle">
+  <div class="bk-modal-box">
+    <h2 id="isRulesTitle">İSİM ŞEHİR KURALLARI</h2>
+    <div class="bk-rules" id="isRulesText"></div>
+    <div class="bk-modal-btns"><button type="button" class="bk-btn primary" data-close="isRulesModal">TAMAM</button></div>
+  </div>
+</div>
+<!-- Oyuncu profili -->
+<div class="bk-modal hidden" id="bkProfileModal" role="dialog" aria-modal="true" aria-labelledby="bkProfileName">
+  <div class="bk-modal-box small bk-profile">
+    <img id="bkProfileAvatar" src="/asset/avatar-default.svg" alt="">
+    <h2 id="bkProfileName">Oyuncu</h2>
+    <p id="bkProfileSub"></p>
+    <div class="bk-profile-stats" id="bkProfileStats"></div>
+    <div class="bk-modal-btns"><button type="button" class="bk-btn primary" id="bkProfileAdd">ARKADAŞ EKLE</button><button type="button" class="bk-btn ghost" id="bkProfileTreat">İKRAM ET</button><button type="button" class="bk-btn ghost" data-close="bkProfileModal">KAPAT</button></div>
+  </div>
+</div>
+<div class="bk-toast hidden" id="bkToast" role="alert"></div>
+<div id="bkAudio" hidden></div>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/social.js?v=4"></script>
+<script src="/js/batak-extras.js?v=4"></script>
+<script src="/js/isimsehir.js?v=1"></script>
+</body></html>

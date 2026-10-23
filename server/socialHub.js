@@ -19,12 +19,13 @@ function install({ app, io, rooms, authReq, fromToken }) {
     for (const [game, g] of Object.entries(games)) for (const room of g.rooms.values()) {
       if (room.phase === 'matchEnd') continue;
       if (room.players.some(p => p.accountId === uid && p.socketId)) return { game, code: room.code, started: room.phase !== 'waiting', seats: room.players.length,
-        size: game === 'pisti' ? PistiRules.TYPES[room.type]?.players || 4 : 4 };
+        size: game === 'pisti' ? PistiRules.TYPES[room.type]?.players || 4 : room.size || 4 };
     }
     return null;
   };
   // Davet kartında gösterilen masa kuralları (oyuna göre).
   const inviteInfo = (game, room) => game === 'batak' ? { batakType: room.type, roundLimit: room.roundLimit }
+    : game === 'isimsehir' ? { size: room.size, team: room.team, rounds: room.rounds, time: room.time }
     : { pistiType: room.type, target: room.target, bluff: room.bluff, size: PistiRules.TYPES[room.type]?.players || 4 };
   const withPresence = data => ({ ...data, friends: data.friends.map(f => ({ ...f, online: online.has(f.id), table: tableOf(f.id) })) });
   const wrap = fn => (req, res) => {

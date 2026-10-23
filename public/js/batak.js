@@ -13,13 +13,14 @@ const QUICK = ['Selam 👋', 'Bol şans!', 'Güzel oyun 👏', 'Hadi bakalım!',
 const isRed = s => s === 'H' || s === 'D';
 let session = null;
 try { session = JSON.parse(sessionStorage.getItem('batakSession') || 'null'); } catch (_) {}
-if (!session?.code || !session?.token) location.replace('/');
+if (!session?.code || !(session?.token || session?.watch)) location.replace('/');
+const spectating = !!session?.watch; // canlı izleme: el yok, hamle ve sohbet yazma yok
 let state = null, prev = null, sent = false, shownResultRound = 0, chatUnread = 0;
 const avatarSrc = a => /^\/api\/avatar\/[\w-]{22}$/.test(a || '') ? a : /^av(0[1-9]|10)\.svg$/.test(a || '') ? '/asset/avatars/' + a : '/asset/avatar-default.svg';
 document.addEventListener('error', e => { if (e.target.tagName === 'IMG' && !e.target.src.endsWith('avatar-default.svg')) e.target.src = '/asset/avatar-default.svg'; }, true);
 const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
 function toast(msg, info = false) { const t = $('bkToast'); t.textContent = msg; t.classList.toggle('info', info); t.classList.remove('hidden'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.add('hidden'), 3200); }
-const posOf = seat => POS[(seat - state.me + 4) % 4];
+const posOf = seat => POS[(seat - Math.max(0, state.me) + 4) % 4]; // izleyici (me = -1) 0 numaralı koltuktan bakar
 const suitIcon = suit => { const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('viewBox', '0 0 100 100');
   s.innerHTML = `<use href="#bk-${suit}" fill="${isRed(suit) ? '#c4161c' : '#161616'}"/>`; return s; };
 const cardName = c => `${SUIT_NAME[c.suit]} ${RANK[c.rank] || c.rank}`;
@@ -42,7 +43,16 @@ const sfx = { card: () => beep(520, 70, 'triangle', .07, .6), win: () => { beep(
 function paintSound() { $('bkSoundWave').classList.toggle('hidden', !soundOn()); $('bkSoundOff').classList.toggle('hidden', soundOn()); }
 
 // ---------- Bağlantı ----------
-socket.on('connect', () => socket.emit('batak:rejoin', { code: session.code, token: session.token }));
+socket.on('connect', () => socket.emit(spectating ? 'batak:watch' : 'batak:rejoin', { code: session.code, token: session.token }));
+// İzleyici şeridi; oyunculara kaç kişinin izlediğini gösterir.
+const watchBar = (() => {
+  const bar = el('div', 'watch-bar hidden'), text = el('span'), exit = el('button', null, 'İZLEMEYİ BIRAK'); exit.type = 'button';
+  exit.onclick = () => { socket.emit('batak:unwatch'); goLobby(); };
+  bar.append(text, exit); document.body.append(bar);
+  if (spectating) document.body.classList.add('spectator');
+  return n => { text.textContent = spectating ? `👁 İZLEYİCİ MODU · masa ${session.code}${n > 1 ? ` · ${n} izleyici` : ''}` : `👁 ${n} kişi masanı izliyor`;
+    exit.classList.toggle('hidden', !spectating); bar.classList.toggle('hidden', !spectating && !n); };
+})();
 socket.on('batak:state', s => { prev = state; state = s; sent = false; render(); });
 socket.on('batak:error', d => { sent = false; sfx.bad(); toast(d.message || 'İşlem yapılamadı.'); if (/bulunamadı|kapandı/.test(d.message || '')) setTimeout(goLobby, 2500); });
 socket.on('batak:replaced', () => toast('Masa başka bir sekmede açıldı.'));
@@ -65,6 +75,7 @@ function render() {
     : s.declare && s.phase === 'playing' ? 'Herkes söylediği kadar el almaya çalışıyor' : s.phase === 'bidding' ? 'İhale sürüyor…' : '';
   renderSeats(); renderTrick(); renderHand(); renderPanels(); renderWait(); renderDummy();
   window.BatakExtras?.update();
+  watchBar(s.watchers || 0);
   const notice = $('bkNotice'); notice.textContent = s.notice || ''; notice.classList.toggle('hidden', !s.notice);
   // Sesler: sıra bana geldi, el bitti
   if (prev && s.turn === s.me && prev.turn !== s.me && ['bidding', 'trump', 'playing'].includes(s.phase)) sfx.turn();
@@ -75,8 +86,12 @@ function render() {
 // Beklerken koltuklar sabit yerinde (0 alt, 1 sağ, 2 üst, 3 sol) ve boş koltukta OTUR var; oyun başlayınca herkes
 // kendini altta görür. Oyun sırasında oyuncu dizisi koltuk sırasındadır (sunucu maç başında dizer).
 const waitingSeat = s => state.players.findIndex(p => p.seat === s);
+let seatSig = '';
 function renderSeats() {
   const s = state, active = ['bidding', 'trump', 'playing'].includes(s.phase), waiting = s.phase === 'waiting';
+  // Kutular yalnızca gösterdikleri bir şey değişince yeniden kurulur (avatar resimleri her hamlede yeniden çözülmesin).
+  const sig = JSON.stringify([s.phase, s.me, s.turn, s.deadline, s.dealer, s.contract, s.players]);
+  if (sig === seatSig) return; seatSig = sig;
   for (let place = 0; place < 4; place++) {
     const seat = waiting ? waitingSeat(place) : place;
     const slot = $(SEAT_ID[waiting ? POS[place] : posOf(place)]), p = seat >= 0 ? s.players[seat] : null;
@@ -106,7 +121,7 @@ function playerBox(p, seat, active, waiting) {
   const name = el('div', 'pb-name'); name.append(document.createTextNode(p.name));
   if (mine) name.append(el('i', 'pb-tag me', 'SEN'));
   else if (p.isBot) name.append(el('i', 'pb-tag', 'BOT'));
-  if (s.team && !waiting && !mine) name.append(el('i', 'pb-tag team', seat % 2 === s.me % 2 ? 'EŞİN' : 'RAKİP'));
+  if (s.team && !waiting && !mine && s.me >= 0) name.append(el('i', 'pb-tag team', seat % 2 === s.me % 2 ? 'EŞİN' : 'RAKİP'));
   if (!p.connected) name.append(el('i', 'pb-tag', 'BAĞLANIYOR'));
   main.append(name);
   const stats = el('div', 'pb-stats');
@@ -356,7 +371,7 @@ $('bkProfileAdd').onclick = async () => {
     btn.textContent = out.result === 'accepted' ? 'ARTIK ARKADAŞSINIZ' : 'İSTEK GÖNDERİLDİ';
   } catch (err) { btn.disabled = false; toast(err.message); }
 };
-$('bkMenuProfile').onclick = () => { menu.classList.add('hidden'); if (state) showProfile(state.players[state.me]); };
+$('bkMenuProfile').onclick = () => { menu.classList.add('hidden'); if (state?.players[state.me]) showProfile(state.players[state.me]); };
 if (window.Social) Social.init({ socket, token: authToken, toast: m => toast(m, true), avatarSrc, buttons: () => [$('bkFriendsBtn')],
   currentRoom: () => session?.code,
   needAccount: () => toast('Arkadaşlar ve davet için lobiden hesabınla giriş yap.'),
