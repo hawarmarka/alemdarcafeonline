@@ -286,6 +286,40 @@ recoverSession(); loadRoomCounts(); setInterval(loadRoomCounts, 15000);
   if (socket.connected) go(); else socket.on('connect', function once() { socket.off?.('connect', once); go(); });
 })();
 
+// ================= Batak =================
+// Masaya oturunca /batak sayfasına geçilir; oyuncu jetonu sessionStorage'da (sayfa yenilenince aynı koltuğa döner).
+let batakPending = false;
+const BATAK_NOTES = { ihaleli: 'İhale en az 5; kimse girmezse dağıtanın sağındaki 4 el almak zorunda. İhaleyi alan kozu seçer.',
+  kozmaca: 'Koz her zaman maça. Herkes kaç el alacağını söyler; 0 = el almaz (tutarsa +50, tutmazsa −50).',
+  esli: 'Karşılıklı oturanlar takım. İhale en az 8; kimse girmezse dağıtan 7 almak zorunda. İhaleyi alanın eşi kartlarını açar.' };
+function batakJoin(mode) {
+  if (!socket.connected) return toast('Oyun sunucusuna bağlanılamadı.');
+  if (batakPending) return;
+  const code = $('batakCodeInput').value.trim().toUpperCase();
+  if (mode === 'code' && !/^[A-Z0-9]{6}$/.test(code)) return toast('6 karakterli Batak masa kodunu yaz.');
+  const token = [...crypto.getRandomValues(new Uint8Array(24))].map(b => b.toString(16).padStart(2, '0')).join('');
+  batakPending = { token };
+  socket.emit('batak:join', { mode, code, token, type: $('batakType').value, rounds: Number($('batakRounds').value), authToken,
+    playerName: currentUser?.username || $('playerNameInput').value.trim() || 'Oyuncu' + Math.floor(10000 + Math.random() * 89999),
+    avatar: currentUser?.avatar || selectedAvatar });
+  setTimeout(() => { batakPending = false; }, 5000);
+}
+socket.on('batak:joined', d => {
+  if (!batakPending) return;
+  sessionStorage.setItem('batakSession', JSON.stringify({ code: d.code, token: batakPending.token }));
+  if (window.AlemdarTransition) AlemdarTransition.leaveTo('/batak'); else location.assign('/batak');
+});
+socket.on('batak:error', d => { batakPending = false; toast(d.message || 'Batak masasına katılınamadı.'); });
+$('batakQuickBtn')?.addEventListener('click', () => batakJoin('quick'));
+$('batakOpenBtn')?.addEventListener('click', () => showModal('batakModal'));
+$('batakPlayBtn')?.addEventListener('click', () => { hideModal('batakModal'); batakJoin('quick'); });
+$('batakPrivateBtn')?.addEventListener('click', () => { hideModal('batakModal'); batakJoin('create'); });
+$('batakCodeBtn')?.addEventListener('click', () => batakJoin('code'));
+$('batakCodeInput')?.addEventListener('input', e => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); });
+document.querySelectorAll('[data-target=batakType] button').forEach(b => b.addEventListener('click', () => { $('batakRuleNote').textContent = BATAK_NOTES[b.dataset.value]; }));
+async function loadBatakCount() { try { const r = await api('/api/batak', null, 'GET'); if ($('batakCount')) $('batakCount').textContent = r.players.toLocaleString('tr-TR'); } catch (_) {} }
+loadBatakCount(); setInterval(loadBatakCount, 15000);
+
 // ================= Okey Plus düzeni: lobi ekleri =================
 // Lobi sahnesini (1600×735) ekrana sığdır
 (function fitLobby() {

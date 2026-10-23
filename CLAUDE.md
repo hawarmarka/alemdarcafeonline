@@ -226,6 +226,41 @@ Doğrulama (2026-10-23): `tests/v34Stability.test.js` yukarıdakileri test ediyo
 8. **Mini oyunlar:** tren tahmini, kahve falı sürprizi (eğlence amaçlı, sanal çiple).
 9. Mağaza ve gerçek parayla satın alma: **yapılmaz** (ödeme ve yasal sorumluluk; ayrıca kullanıcı istemedi).
 
+## 5c. Batak (2026-10-24)
+
+Lobideki BATAK kartı artık çalışıyor: **OYNA** (ihaleli, boş koltuklara 6 sn sonra botlar oturur) ve **MASA AÇ** (tür, el sayısı, HEMEN OYNA / ÖZEL MASA AÇ / kodla katıl). Masa sayfası `/batak`.
+
+- Dosyalar:
+  - `server/batak/logic.js`: kurallar, saf fonksiyonlar.
+  - `server/batak/bot.js`: bot.
+  - `server/batak/index.js`: masalar ve `batak:*` socket olayları.
+  - `public/batak.html`, `public/js/batak.js`, `public/css/batak.css`: masa sayfası.
+  - Lobi tarafı `main.js` içindeki "Batak" bölümünde.
+- Kartlar CSS ile çiziliyor, görsel dosya yok.
+- Masalar yalnızca RAM'de tutuluyor (okeydeki gibi diske yazılmıyor). Güncelleme sırasında süren Batak maçı kaybolur.
+- Masa kodları `B` ile başlıyor; okey kodlarıyla karışmıyor.
+- Türler:
+  - **İhaleli:** ihale en az 5. Kimse girmezse dağıtanın sağındaki 4 almak zorunda. İhaleyi alan kozu seçer ve ilk eli açar.
+  - **Koz Maça:** koz her zaman maça. Herkes 0–13 söyler; 0 "el almaz" demek. Dağıtanın sağındaki açar.
+  - **Eşli:** karşılıklı oturanlar takım (0-2, 1-3). İhale en az 8; kimse girmezse dağıtan 7 almak zorunda. İlk kart oynanınca ihaleyi alanın eşinin kartları herkese açılır.
+  - El sayısı 5/7/9/11. Dağıtıcı her el saatin tersine bir kayar. Sıra saatin tersine: ekranda sıradaki oyuncu sağda.
+- Oynama kuralları:
+  - Açılan rengi takip etmek zorunlu. Yer kozlanmadıysa ve geçebiliyorsan büyütmek zorunlu.
+  - Rengin yoksa koz atmak zorunlu. Yerde koz varsa ve geçebiliyorsan kozu büyütmek zorunlu.
+  - Ne renk ne koz varsa herhangi bir kart (çöp) atılır.
+  - Koz kırılmadan (bir kez oynanmadan) koz açılamaz; elinde yalnızca koz varsa açılabilir.
+- Puan:
+  - Söylediğini tuttuysan `10 × söz + fazla`, tutmadıysan `−10 × söz`.
+  - İhaleye girmeyen el aldıysa aldığı el sayısı kadar puan alır, hiç almadıysa `−10 × ihale`.
+  - El almaz: tutarsa +50, tutmazsa −50.
+  - Eşlide puan takımın toplam eline göre hesaplanır.
+- El iptal: ihale başlamadan, elinde 10'dan büyük kart (J, Q, K, A) olmayan oyuncu yeniden dağıtım isteyebilir. Bot bunu kendisi yapar, art arda bir kez.
+- Süreler: ihale 20 sn, kart 25 sn. Süre dolarsa ya da bağlantı kopuksa (8 sn) hamleyi bot mantığı yapar.
+- Oyundan ayrılanın yerine bot geçer. Bağlı gerçek oyuncu kalmazsa masa 60 sn sonra silinir.
+- Hesaplılara maç sonunda XP veriliyor (`Accounts.award`). Çip bahsi yok.
+- Yapılmayanlar: King, Kanlı, OHEL, Gömmeli türleri, masa sohbeti, Batak için çip bahsi.
+- Test: `tests/v41Batak.test.js`. Kurallar, ihale, puan ve 360 botlu el test ediliyor (her kart kurala uygun, 52 kart korunuyor). Ayrıca socket üzerinden 5 ellik maç ve kural dışı kartın reddi test ediliyor.
+
 ## 6. Teknoloji önerileri neden şimdilik gerekli değil
 
 | Öneri | Karar | Neden |

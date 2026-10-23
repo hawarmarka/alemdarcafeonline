@@ -8,6 +8,7 @@ const path = require('path');
 const GameLogic = require('./gameLogic');
 const Accounts = require('./accounts');
 const Avatars = require('./avatars');
+const Logger = require('./logger');
 const RoomStore = require('./roomStore');
 const Economy = require('./economy');
 const Melds = require('../public/js/meldSolver');
@@ -68,6 +69,7 @@ app.use(express.static(path.join(__dirname, '..', 'public'), {
     setHeaders(res, file) { if (file.endsWith('.html')) res.setHeader('Cache-Control', 'no-cache'); }
 }));
 app.get('/game', (_req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'game.html')));
+app.get('/batak', (_req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'batak.html')));
 // storage: 'persistent' olmalı. 'ephemeral' ise Coolify'da /app/data için kalıcı depolama yok, güncellemede hesaplar silinir.
 app.get('/health', (_req, res) => res.json({ status: 'ok', storage: Accounts.storageStatus(), rooms: rooms.size }));
 app.get('/api/leaderboard', (req, res) => res.json({ top: Accounts.leaderboard(25, req.query.by === 'chips' ? 'chips' : 'xp') }));
@@ -95,6 +97,9 @@ const io = new Server(httpServer, { maxHttpBufferSize: 1e5 });
 const rooms = new Map();
 // Arkadaşlar, mesajlar ve masaya davet (HTTP uçları + çevrimiçi takibi), bkz. socialHub.js
 const SocialHub = require('./socialHub').install({ app, io, rooms, authReq, fromToken: t => Accounts.fromToken(t) });
+// Batak masaları (server/batak): kendi 'batak:' socket olayları, okey masalarından ayrı.
+const Batak = require('./batak').install({ io, Accounts, Avatars, Logger });
+app.get('/api/batak', (_req, res) => res.json(Batak.stats()));
 RoomStore.init(rooms, reviveRoom); // masalar diske yazılır; güncelleme sonrası oyuncu dönünce geri yüklenir
 const POSITION = ['bottom', 'right', 'top', 'left'];
 const BASE_TURN_MS = 45000; // Standart sıra süresi
@@ -1091,6 +1096,7 @@ io.on('connection', socket => {
         catch (err) { console.error(`Socket olayı hatası (${event}):`, err); issue(socket, 'İşlem gerçekleştirilemedi, tekrar deneyin.'); }
     });
     SocialHub.onSocket(socket); // 'hello' (çevrimiçi), 'inviteFriend'
+    Batak.onSocket(socket); // 'batak:*'
     socket.on('joinGame', data => {
         if (socket.data.roomCode) return issue(socket, 'Zaten bir odadasınız.');
         const account = Accounts.fromToken(data?.authToken);

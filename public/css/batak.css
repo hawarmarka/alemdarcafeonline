@@ -1,0 +1,108 @@
+/* Batak masası (public/batak.html, js/batak.js). Kartlar CSS ile çizilir; görsel dosya yok. */
+:root{--felt1:#2f8f6a;--felt2:#14523c;--wood:#7a4520;--wood2:#3e1f08;--gold:#f2c14e;--ink:#0b2747;--red:#c8202a;--card-w:clamp(42px,min(6.4vw,12.5vh),96px)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:radial-gradient(ellipse at 50% 30%,#164a7a,#0a2340 75%);color:#fff;font-family:Barlow,Arial,sans-serif;user-select:none;-webkit-user-select:none}
+.hidden{display:none!important}
+.bk-stage{position:fixed;inset:0;display:grid;grid-template-rows:auto 1fr auto;padding:10px 14px 0}
+/* Üst çubuk */
+.bk-top{display:flex;align-items:center;gap:12px;min-height:54px}
+.bk-info{display:flex;flex-direction:column;padding:6px 14px;border-radius:12px;background:rgba(5,20,40,.7);border:1px solid #3f7fc4}
+.bk-info b{font:700 18px/1.1 Oswald,Arial,sans-serif;letter-spacing:1px;color:var(--gold)}
+.bk-info span{font-size:14px;color:#cfe3ff}
+.bk-trump{display:flex;align-items:center;gap:8px;padding:4px 14px;border-radius:12px;background:#fff;color:#111;border:3px solid var(--gold);box-shadow:0 4px 0 #7a4f07}
+.bk-trump small{font:700 13px Oswald,Arial,sans-serif;letter-spacing:1px;color:#555}
+.bk-trump i{font-style:normal;font-size:30px;line-height:1}
+.bk-trump.red i{color:var(--red)}
+.bk-contract{flex:1;font:600 16px Oswald,Arial,sans-serif;letter-spacing:.5px;color:#ffe08a;text-shadow:0 1px 2px #000}
+.bk-top-btns{display:flex;gap:8px}
+.bk-icon{width:46px;height:46px;border-radius:12px;border:2px solid #0b2a55;background:linear-gradient(#4aa0f0,#1b5fb8);color:#fff;font-size:22px;cursor:pointer;box-shadow:0 3px 0 #0b2a55}
+.bk-icon.red{background:linear-gradient(#e0474f,#a81e26);border-color:#5c0d12;box-shadow:0 3px 0 #5c0d12}
+.bk-icon:active{transform:translateY(2px)}
+/* Masa */
+.bk-table{position:relative;margin:6px 4% 0}
+.bk-felt{position:absolute;inset:4% 8% 6%;border-radius:200px;background:radial-gradient(ellipse at 50% 40%,var(--felt1),var(--felt2) 75%);
+  border:16px solid var(--wood);box-shadow:inset 0 0 0 4px #c47a35,inset 0 12px 40px rgba(0,0,0,.45),0 0 0 4px var(--wood2),0 18px 40px rgba(0,0,0,.5)}
+.bk-seat{position:absolute;display:flex;align-items:center;gap:10px;transform:translate(-50%,-50%);z-index:3}
+.bk-seat[data-pos=top]{left:50%;top:8%}.bk-seat[data-pos=left]{left:7%;top:50%;flex-direction:column}.bk-seat[data-pos=right]{left:93%;top:50%;flex-direction:column}
+.bk-seat[data-pos=bottom]{left:15%;top:92%}
+.bk-avatar{position:relative;width:68px;height:68px;border-radius:50%;flex:none}
+.bk-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;background:var(--ink);border:4px solid #0b2a55;box-shadow:0 0 0 2px #6fb0ff}
+.bk-seat.turn .bk-avatar img{box-shadow:0 0 0 3px var(--gold),0 0 18px var(--gold)}
+/* Sıra süresi: avatarın etrafında dolan halka */
+.bk-ring{position:absolute;inset:-7px;border-radius:50%;background:conic-gradient(var(--gold) var(--p,0%),transparent 0);-webkit-mask:radial-gradient(circle,transparent 62%,#000 63%);mask:radial-gradient(circle,transparent 62%,#000 63%)}
+.bk-plate{display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 10px;border-radius:10px;background:rgba(5,20,40,.82);border:1px solid #4b7bb0;min-width:110px}
+.bk-plate b{font:600 15px Oswald,Arial,sans-serif;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bk-plate .bk-stats{display:flex;gap:6px;font-size:13px}
+.bk-chip{padding:1px 7px;border-radius:8px;background:#0b2747;border:1px solid #4b7bb0;white-space:nowrap}
+.bk-chip.bid{background:#7a4f07;border-color:var(--gold)}.bk-chip.pass{opacity:.6}.bk-chip.won{background:#2c8a22;border-color:#8fe07f}
+.bk-chip.contract{background:var(--red);border-color:#ff8c93}
+.bk-backs{display:flex;margin-left:4px}
+.bk-back{width:22px;height:32px;margin-left:-14px;border-radius:4px;background:repeating-linear-gradient(45deg,#1f5fae 0 4px,#164a8c 4px 8px);border:2px solid #fff;box-shadow:0 1px 2px rgba(0,0,0,.4)}
+.bk-seat[data-pos=left] .bk-backs,.bk-seat[data-pos=right] .bk-backs{display:none}
+.bk-dealer{position:absolute;right:-6px;bottom:-4px;width:24px;height:24px;border-radius:50%;background:var(--gold);color:#3a2400;font:700 13px/24px Oswald,Arial,sans-serif;text-align:center;box-shadow:0 2px 0 #7a4f07}
+/* Kart */
+.card{position:relative;width:var(--card-w);aspect-ratio:5/7;border-radius:calc(var(--card-w)*.1);background:linear-gradient(#fff,#f1ede3);color:#111;
+  border:1px solid #9b958a;box-shadow:0 3px 8px rgba(0,0,0,.35);flex:none}
+.card.red{color:var(--red)}
+.card .cr{position:absolute;left:8%;top:4%;font:700 calc(var(--card-w)*.3)/1 Oswald,Arial,sans-serif;text-align:center}
+.card .cr small{display:block;font-size:.8em;line-height:1}
+.card .cs{position:absolute;right:8%;bottom:4%;font-size:calc(var(--card-w)*.52);line-height:1}
+.card.trump::after{content:'';position:absolute;inset:3px;border-radius:inherit;border:2px solid var(--gold);pointer-events:none}
+/* El */
+.bk-hand{display:flex;justify-content:center;align-items:flex-end;padding:0 10px 14px;min-height:calc(var(--card-w)*1.6);position:relative;z-index:5}
+.bk-hand .card{margin-left:calc(var(--card-w)*-.36);transition:transform .15s ease,filter .15s;cursor:default}
+.bk-hand .card:first-child{margin-left:0}
+.bk-hand.myturn .card.legal{cursor:pointer;transform:translateY(-14px)}
+.bk-hand.myturn .card.legal:hover{transform:translateY(-26px)}
+.bk-hand.myturn .card:not(.legal){filter:brightness(.62) saturate(.6)}
+.bk-hand .card.gap{margin-left:calc(var(--card-w)*-.12)}
+/* Ortadaki el (yere atılan kartlar), oyuncunun yönünden */
+.bk-trick{position:absolute;left:50%;top:48%;width:0;height:0;z-index:4}
+.bk-trick .card{position:absolute;transform:translate(-50%,-50%);animation:bkIn .22s ease-out}
+.bk-trick .card[data-pos=bottom]{left:0;top:calc(var(--card-w)*.8)}.bk-trick .card[data-pos=top]{left:0;top:calc(var(--card-w)*-.8)}
+.bk-trick .card[data-pos=left]{left:calc(var(--card-w)*-1.1);top:0}.bk-trick .card[data-pos=right]{left:calc(var(--card-w)*1.1);top:0}
+.bk-trick .card.win{box-shadow:0 0 0 3px var(--gold),0 0 20px var(--gold)}
+@keyframes bkIn{from{opacity:0;transform:translate(-50%,-50%) scale(.6)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+.bk-trick.collect .card{transition:all .35s ease-in;opacity:0}
+/* Eşli: ihaleyi alanın eşinin açık kartları */
+.bk-dummy{position:absolute;display:flex;flex-wrap:wrap;gap:2px;max-width:34%;z-index:3;--card-w:clamp(34px,3.6vw,54px)}
+.bk-dummy[data-pos=top]{left:50%;top:22%;transform:translateX(-50%);justify-content:center}
+.bk-dummy[data-pos=left]{left:15%;top:50%;transform:translateY(-50%);max-width:16%}
+.bk-dummy[data-pos=right]{right:15%;top:50%;transform:translateY(-50%);max-width:16%}
+.bk-notice{position:absolute;left:50%;top:76%;transform:translateX(-50%);padding:6px 16px;border-radius:10px;background:rgba(5,20,40,.85);border:1px solid var(--gold);
+  font:600 16px Oswald,Arial,sans-serif;letter-spacing:.4px;white-space:nowrap;z-index:6;max-width:90%;overflow:hidden;text-overflow:ellipsis}
+.bk-wait{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);text-align:center;padding:16px 26px;border-radius:16px;background:rgba(5,20,40,.85);border:2px solid #6fb0ff;z-index:6}
+.bk-wait b{font:700 24px Oswald,Arial,sans-serif;letter-spacing:1px;color:var(--gold)}
+.bk-wait p{margin:8px 0 12px;font-size:16px}
+.bk-wait-btns{display:flex;gap:10px;justify-content:center}
+/* İhale paneli */
+.bk-panel{position:fixed;left:50%;top:46%;transform:translate(-50%,-50%);z-index:8;display:flex;flex-direction:column;align-items:center;gap:8px;
+  padding:12px 16px;border-radius:16px;background:linear-gradient(#1f5fae,#0b2a55);border:2px solid var(--gold);box-shadow:0 12px 30px rgba(0,0,0,.55);max-width:96vw}
+.bk-panel b{font:700 20px Oswald,Arial,sans-serif;letter-spacing:1px}
+.bk-bid-row{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.bk-btn{min-width:46px;height:46px;padding:0 14px;border-radius:12px;color:#fff;font:700 19px/1 Oswald,Arial,sans-serif;letter-spacing:.5px;cursor:pointer;text-shadow:0 1px 2px rgba(0,0,0,.45)}
+.bk-btn.green{border:2px solid #1b6e0a;background:linear-gradient(#8ff05a,#3aa81d);box-shadow:0 4px 0 #1b6e0a}
+.bk-btn.blue{border:2px solid #0b2a4f;background:linear-gradient(#4aa0f0,#1b5fb8);box-shadow:0 4px 0 #0b2a4f}
+.bk-btn.orange{border:2px solid #7a4f07;background:linear-gradient(#ffd36b,#e0941a);box-shadow:0 4px 0 #7a4f07}
+.bk-btn.red{border:2px solid #5c0d12;background:linear-gradient(#e0474f,#a81e26);box-shadow:0 4px 0 #5c0d12}
+.bk-btn.grey{border:2px solid #333;background:linear-gradient(#8a8f99,#555b66);box-shadow:0 4px 0 #333}
+.bk-btn:active{transform:translateY(3px);box-shadow:none}
+.bk-btn.suit{min-width:70px;height:70px;font-size:40px;background:linear-gradient(#fff,#e8e2d4);color:#111;border:3px solid var(--gold);box-shadow:0 4px 0 #7a4f07;text-shadow:none}
+.bk-btn.suit.red{color:var(--red)}
+/* Puan tablosu */
+.bk-modal{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:rgba(3,14,30,.65);padding:16px}
+.bk-modal-box{width:min(760px,100%);max-height:calc(100vh - 32px);display:flex;flex-direction:column;padding:18px 20px;border-radius:18px;background:linear-gradient(#14457e,#0b2a55);border:3px solid #6fb0ff;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.bk-modal-box h2{margin:0 0 12px;text-align:center;font:700 26px Oswald,Arial,sans-serif;letter-spacing:1.5px;color:var(--gold)}
+.bk-score-wrap{overflow:auto}
+.bk-score{width:100%;border-collapse:collapse;font-size:15px}
+.bk-score th,.bk-score td{padding:6px 8px;text-align:center;border-bottom:1px solid rgba(111,176,255,.25);white-space:nowrap}
+.bk-score th{font:600 15px Oswald,Arial,sans-serif;color:#cfe3ff}
+.bk-score td.neg{color:#ff8c93}.bk-score td.pos{color:#8fe07f}
+.bk-score tr.total td{font:700 18px Oswald,Arial,sans-serif;border-top:2px solid var(--gold)}
+.bk-score td small{display:block;font-size:11px;color:#b7cbe4}
+.bk-score-note{text-align:center;margin:10px 0 0;font-size:16px;color:#ffe08a;min-height:20px}
+.bk-modal-btns{display:flex;justify-content:center;gap:12px;margin-top:14px}
+.bk-toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:30;padding:10px 18px;border-radius:12px;background:#a81e26;border:2px solid #ff8c93;font-weight:600;max-width:90vw}
+#rotateHint{display:none}
+@media (orientation:portrait) and (max-width:700px){#rotateHint{display:flex;position:fixed;inset:0;z-index:99;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#0a2340;font-size:18px;text-align:center;padding:20px}}
+@media (max-height:520px){.bk-avatar{width:48px;height:48px}.bk-plate{min-width:90px;padding:3px 8px}.bk-top{min-height:44px}.bk-icon{width:40px;height:40px}}
