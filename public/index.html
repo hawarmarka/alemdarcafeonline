@@ -1,288 +1,288 @@
 <!doctype html>
 <html lang="tr"><head><meta charset="utf-8">
-<link rel="icon" href="cassetcuicalemdar-logo.svg" type="imagecsvg+xml">
+<link rel="icon" href="/asset/ui/alemdar-logo.svg" type="image/svg+xml">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Alemdar Cafe · 101 Okey<ctitle>
+<title>Alemdar Cafe · 101 Okey</title>
 <meta name="theme-color" content="#0c3a5c">
-<link rel="preconnect" href="https:ccfonts.googleapis.com">
-<link href="https:ccfonts.googleapis.comccss2?family=Oswald:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="ccssclobby-plus.css?v=4">
-<link rel="stylesheet" href="ccssclobby-pro.css?v=4">
-<link rel="stylesheet" href="ccsscsocial.css?v=2">
-<link rel="stylesheet" href="ccssclobby-tables.css?v=7">
-<link rel="stylesheet" href="ccssclobby-v2.css?v=1">
-<script src="cjsctransitions.js?v=2"><cscript>
-<chead>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/lobby-plus.css?v=4">
+<link rel="stylesheet" href="/css/lobby-pro.css?v=4">
+<link rel="stylesheet" href="/css/social.css?v=2">
+<link rel="stylesheet" href="/css/lobby-tables.css?v=7">
+<link rel="stylesheet" href="/css/lobby-v2.css?v=2">
+<script src="/js/transitions.js?v=2"></script>
+</head>
 <body class="lobby-page">
 
 <!-- Açılış ekranı -->
 <div id="splash" class="splash hidden" aria-live="polite">
   <div class="splash-stage">
-    <div class="splash-lights" id="splashLights"><cdiv>
-    <img class="splash-logo logo-img" src="cassetcuicalemdar-logo.svg" alt="Alemdar Cafe">
-    <div class="splash-fence"><cdiv>
-    <div class="splash-leafpile" id="splashLeafPile"><cdiv>
-    <div class="splash-loading"><span id="splashText">Bağlanıyor... Lütfen Bekleyiniz!<cspan><div class="splash-bar"><i id="splashFill"><ci><cdiv><cdiv>
-  <cdiv>
-<cdiv>
+    <div class="splash-lights" id="splashLights"></div>
+    <img class="splash-logo logo-img" src="/asset/ui/alemdar-logo.svg" alt="Alemdar Cafe">
+    <div class="splash-fence"></div>
+    <div class="splash-leafpile" id="splashLeafPile"></div>
+    <div class="splash-loading"><span id="splashText">Bağlanıyor... Lütfen Bekleyiniz!</span><div class="splash-bar"><i id="splashFill"></i></div></div>
+  </div>
+</div>
 
 <div id="lobbyStage" class="lobby-stage">
   <!-- Üst çubuk -->
   <header class="lb-top">
-    <button type="button" class="lb-avatar frame-gold" id="profileImage" title="Profil fotoğrafı ve çerçeve"><img id="headerAvatar" src="cassetcavatar-default.svg" alt="Profil"><cbutton>
-    <div class="lb-nameplate"><strong id="topUsername">Misafir Oyuncu<cstrong><span><i class="lb-star">★<ci> Seviye: <b id="headerLevel">1<cb><cspan><cdiv>
-    <button type="button" class="lb-link" id="sidebarAvatarBtn" title="Profilimi düzenle" aria-label="Profilimi düzenle"><cbutton>
-    <div class="lb-xp" title="Deneyim puanı"><i class="lb-gem"><ci><div class="lb-xp-track"><div class="lb-xp-fill" id="xpFill"><cdiv><span id="xpLabel">0 XP<cspan><cdiv><cdiv>
-    <img class="lb-logo-img" src="cassetcuicalemdar-logo.svg" alt="Alemdar Cafe">
-    <div class="lb-chip chip-wins" title="Sanal çip (gerçek para değildir)"><i class="lb-coin">🪙<ci><b id="headerChips">0<cb><small>ÇİP<csmall><cdiv>
-    <button type="button" class="lb-chip chip-games chip-bonus" id="bonusBtn" title="Ücretsiz hediye çip (4 saatte bir)"><i class="lb-ticket">🎁<ci><b id="bonusLabel">TOPLA<cb><small>HEDİYE ÇİP<csmall><cbutton>
-    <span hidden><b id="headerWins">0<cb><b id="headerGames">0<cb><cspan>
-    <button type="button" class="lb-account" id="profileOpenBtn" title="Hesap ve ayarlar" aria-label="Hesap ve ayarlar"><cbutton>
-  <cheader>
+    <button type="button" class="lb-avatar frame-gold" id="profileImage" title="Profil fotoğrafı ve çerçeve"><img id="headerAvatar" src="/asset/avatar-default.svg" alt="Profil"></button>
+    <div class="lb-nameplate"><strong id="topUsername">Misafir Oyuncu</strong><span><i class="lb-star">★</i> Seviye: <b id="headerLevel">1</b></span></div>
+    <button type="button" class="lb-link" id="sidebarAvatarBtn" title="Profilimi düzenle" aria-label="Profilimi düzenle"></button>
+    <div class="lb-xp" title="Deneyim puanı"><i class="lb-gem"></i><div class="lb-xp-track"><div class="lb-xp-fill" id="xpFill"></div><span id="xpLabel">0 XP</span></div></div>
+    <img class="lb-logo-img" src="/asset/ui/alemdar-logo.svg" alt="Alemdar Cafe">
+    <div class="lb-chip chip-wins" title="Sanal çip (gerçek para değildir)"><i class="lb-coin">🪙</i><b id="headerChips">0</b><small>ÇİP</small></div>
+    <button type="button" class="lb-chip chip-games chip-bonus" id="bonusBtn" title="Ücretsiz hediye çip (4 saatte bir)"><i class="lb-ticket">🎁</i><b id="bonusLabel">TOPLA</b><small>HEDİYE ÇİP</small></button>
+    <span hidden><b id="headerWins">0</b><b id="headerGames">0</b></span>
+    <button type="button" class="lb-account" id="profileOpenBtn" title="Hesap ve ayarlar" aria-label="Hesap ve ayarlar"></button>
+  </header>
 
   <!-- Sol kartlar -->
   <aside class="lb-side">
     <div class="lb-banner b-code">
-      <strong>ODA KODU<cstrong><em>Arkadaşının masasına katıl<cem>
-      <div class="lb-code-row"><input id="roomCodeInput" maxlength="6" autocomplete="off" placeholder="AB4K7P" aria-label="Oda kodu"><button type="button" id="joinCodeBtn">KATIL<cbutton><cdiv>
-    <cdiv>
-    <div class="lb-banner b-profile"><strong>PROFİL<cstrong><em>Fotoğraf ve çerçeve seç<cem><button type="button" class="lb-tag" id="profileEditBtn">Düzenle<cbutton><cdiv>
-    <div class="lb-banner b-rules"><strong>NASIL OYNANIR?<cstrong><em>101 Okey kuralları<cem><button type="button" class="lb-tag" id="rulesBannerBtn">Oku<cbutton><cdiv>
-  <caside>
+      <strong>ODA KODU</strong><em>Arkadaşının masasına katıl</em>
+      <div class="lb-code-row"><input id="roomCodeInput" maxlength="6" autocomplete="off" placeholder="AB4K7P" aria-label="Oda kodu"><button type="button" id="joinCodeBtn">KATIL</button></div>
+    </div>
+    <div class="lb-banner b-profile"><strong>PROFİL</strong><em>Fotoğraf ve çerçeve seç</em><button type="button" class="lb-tag" id="profileEditBtn">Düzenle</button></div>
+    <div class="lb-banner b-rules"><strong>NASIL OYNANIR?</strong><em>101 Okey kuralları</em><button type="button" class="lb-tag" id="rulesBannerBtn">Oku</button></div>
+  </aside>
 
   <!-- Oyun kartları: farenle sağa sola sürükleyebilirsin -->
   <main class="lb-cards" id="lbCards" aria-label="Oyunlar">
     <article class="lb-card c-classic">
-      <header><h2>KLASİK<ch2><h3>101 OKEY ODALARI<ch3><cheader>
+      <header><h2>KLASİK</h2><h3>101 OKEY ODALARI</h3></header>
       <div class="lb-art art-classic">
-        <svg class="art-svg" viewBox="0 0 220 180" aria-hidden="true"><defs><linearGradient id="tw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"c><stop offset="1" stop-color="#e4dfd3"c><clinearGradient><radialGradient id="cs" cx=".5" cy=".3"><stop offset="0" stop-color="#d93a43"c><stop offset="1" stop-color="#6d0b12"c><cradialGradient><cdefs>
-          <ellipse cx="110" cy="146" rx="88" ry="26" fill="url(#cs)"c><path d="M32 146 q78 30 156 0" fill="none" stroke="#f2c14e" stroke-width="3"c>
-          <g transform="rotate(-12 82 92)"><rect x="52" y="46" width="62" height="84" rx="10" fill="url(#tw)" stroke="#9b958a" stroke-width="2"c><text x="83" y="104" text-anchor="middle" font-family="Oswald,Arial" font-weight="700" font-size="44" fill="#151515">10<ctext><circle cx="83" cy="118" r="5" fill="#d6d2c8"c><cg>
-          <g transform="rotate(12 138 92)"><rect x="106" y="46" width="62" height="84" rx="10" fill="url(#tw)" stroke="#9b958a" stroke-width="2"c><text x="137" y="104" text-anchor="middle" font-family="Oswald,Arial" font-weight="700" font-size="44" fill="#e7a50c">1<ctext><circle cx="137" cy="118" r="5" fill="#d6d2c8"c><cg>
-        <csvg>
-        <small><b data-count="klasik">0<cb> oyuncu<csmall>
-      <cdiv>
-      <div class="lb-card-btns"><button type="button" class="lb-btn blue ic-grid select-mode" data-mode="klasik">ODA SEÇ<cbutton><button type="button" class="lb-btn orange ic-plus" id="createRoomBtn">MASA AÇ<cbutton><cdiv>
-    <carticle>
+        <svg class="art-svg" viewBox="0 0 220 180" aria-hidden="true"><defs><linearGradient id="tw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#e4dfd3"/></linearGradient><radialGradient id="cs" cx=".5" cy=".3"><stop offset="0" stop-color="#d93a43"/><stop offset="1" stop-color="#6d0b12"/></radialGradient></defs>
+          <ellipse cx="110" cy="146" rx="88" ry="26" fill="url(#cs)"/><path d="M32 146 q78 30 156 0" fill="none" stroke="#f2c14e" stroke-width="3"/>
+          <g transform="rotate(-12 82 92)"><rect x="52" y="46" width="62" height="84" rx="10" fill="url(#tw)" stroke="#9b958a" stroke-width="2"/><text x="83" y="104" text-anchor="middle" font-family="Oswald,Arial" font-weight="700" font-size="44" fill="#151515">10</text><circle cx="83" cy="118" r="5" fill="#d6d2c8"/></g>
+          <g transform="rotate(12 138 92)"><rect x="106" y="46" width="62" height="84" rx="10" fill="url(#tw)" stroke="#9b958a" stroke-width="2"/><text x="137" y="104" text-anchor="middle" font-family="Oswald,Arial" font-weight="700" font-size="44" fill="#e7a50c">1</text><circle cx="137" cy="118" r="5" fill="#d6d2c8"/></g>
+        </svg>
+        <small><b data-count="klasik">0</b> oyuncu</small>
+      </div>
+      <div class="lb-card-btns"><button type="button" class="lb-btn blue ic-grid select-mode" data-mode="klasik">ODA SEÇ</button><button type="button" class="lb-btn orange ic-plus" id="createRoomBtn">MASA AÇ</button></div>
+    </article>
     <article class="lb-card c-vip">
-      <header><h2>ÖZEL<ch2><h3>ARKADAŞ ODALARI<ch3><cheader>
+      <header><h2>ÖZEL</h2><h3>ARKADAŞ ODALARI</h3></header>
       <div class="lb-art art-vip">
-        <svg class="art-svg" viewBox="0 0 220 180" aria-hidden="true"><defs><linearGradient id="vg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2b8"c><stop offset=".5" stop-color="#f2c14e"c><stop offset="1" stop-color="#a8700f"c><clinearGradient><cdefs>
-          <g fill="url(#vg)" stroke="#7a4f07" stroke-width="2"><path d="M60 40 l8 16 18 3 -13 12 3 18 -16 -9 -16 9 3 -18 -13 -12 18 -3z"c><path d="M110 22 l11 22 24 4 -18 17 4 24 -21 -11 -21 11 4 -24 -18 -17 24 -4z"c><path d="M160 40 l8 16 18 3 -13 12 3 18 -16 -9 -16 9 3 -18 -13 -12 18 -3z"c><cg>
-          <text x="110" y="148" text-anchor="middle" font-family="Oswald,Arial" font-weight="700" font-size="58" fill="url(#vg)" stroke="#5a3a05" stroke-width="2" letter-spacing="4">VIP<ctext>
-        <csvg>
-        <small>6 haneli davet kodu<csmall>
-      <cdiv>
-      <div class="lb-card-btns"><button type="button" class="lb-btn blue ic-key" id="privateOptionsBtn">ODA SEÇ<cbutton><button type="button" class="lb-btn orange ic-plus" id="createRoomBtn2">MASA AÇ<cbutton><cdiv>
-    <carticle>
+        <svg class="art-svg" viewBox="0 0 220 180" aria-hidden="true"><defs><linearGradient id="vg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2b8"/><stop offset=".5" stop-color="#f2c14e"/><stop offset="1" stop-color="#a8700f"/></linearGradient></defs>
+          <g fill="url(#vg)" stroke="#7a4f07" stroke-width="2"><path d="M60 40 l8 16 18 3 -13 12 3 18 -16 -9 -16 9 3 -18 -13 -12 18 -3z"/><path d="M110 22 l11 22 24 4 -18 17 4 24 -21 -11 -21 11 4 -24 -18 -17 24 -4z"/><path d="M160 40 l8 16 18 3 -13 12 3 18 -16 -9 -16 9 3 -18 -13 -12 18 -3z"/></g>
+          <text x="110" y="148" text-anchor="middle" font-family="Oswald,Arial" font-weight="700" font-size="58" fill="url(#vg)" stroke="#5a3a05" stroke-width="2" letter-spacing="4">VIP</text>
+        </svg>
+        <small>6 haneli davet kodu</small>
+      </div>
+      <div class="lb-card-btns"><button type="button" class="lb-btn blue ic-key" id="privateOptionsBtn">ODA SEÇ</button><button type="button" class="lb-btn orange ic-plus" id="createRoomBtn2">MASA AÇ</button></div>
+    </article>
     <article class="lb-card c-batak">
-      <header><h2>BATAK<ch2><h3>İHALELİ · KOZ MAÇA · EŞLİ<ch3><cheader>
-      <div class="lb-art art-batak"><svg class="art-svg" viewBox="0 0 220 180" aria-hidden="true"><g transform="rotate(-14 90 96)"><rect x="56" y="38" width="66" height="96" rx="9" fill="#fff" stroke="#9b958a" stroke-width="2"c><path d="M89 66 c-14 14 -22 22 -22 32 a10 10 0 0 0 18 6 l-4 14 h16 l-4 -14 a10 10 0 0 0 18 -6 c0 -10 -8 -18 -22 -32z" fill="#151515"c><cg><g transform="rotate(10 132 96)"><rect x="100" y="38" width="66" height="96" rx="9" fill="#fff" stroke="#9b958a" stroke-width="2"c><path d="M133 70 c-10 -14 -30 -4 -20 12 l20 22 20 -22 c10 -16 -10 -26 -20 -12z" fill="#c8202a"c><cg><csvg>
-        <small><b id="batakCount">0<cb> oyuncu<csmall><cdiv>
-      <div class="lb-card-btns"><button type="button" class="lb-btn blue ic-grid" id="batakQuickBtn" title="Bekleyen Batak masaları, istediğin koltuğa otur">ODA SEÇ<cbutton><button type="button" class="lb-btn orange ic-plus" id="batakOpenBtn">MASA AÇ<cbutton><cdiv>
-    <carticle>
+      <header><h2>BATAK</h2><h3>İHALELİ · KOZ MAÇA · EŞLİ</h3></header>
+      <div class="lb-art art-batak"><svg class="art-svg" viewBox="0 0 220 180" aria-hidden="true"><g transform="rotate(-14 90 96)"><rect x="56" y="38" width="66" height="96" rx="9" fill="#fff" stroke="#9b958a" stroke-width="2"/><path d="M89 66 c-14 14 -22 22 -22 32 a10 10 0 0 0 18 6 l-4 14 h16 l-4 -14 a10 10 0 0 0 18 -6 c0 -10 -8 -18 -22 -32z" fill="#151515"/></g><g transform="rotate(10 132 96)"><rect x="100" y="38" width="66" height="96" rx="9" fill="#fff" stroke="#9b958a" stroke-width="2"/><path d="M133 70 c-10 -14 -30 -4 -20 12 l20 22 20 -22 c10 -16 -10 -26 -20 -12z" fill="#c8202a"/></g></svg>
+        <small><b id="batakCount">0</b> oyuncu</small></div>
+      <div class="lb-card-btns"><button type="button" class="lb-btn blue ic-grid" id="batakQuickBtn" title="Bekleyen Batak masaları, istediğin koltuğa otur">ODA SEÇ</button><button type="button" class="lb-btn orange ic-plus" id="batakOpenBtn">MASA AÇ</button></div>
+    </article>
     <article class="lb-card c-soon c-tavla">
-      <header><h2>TAVLA<ch2><h3>YAKINDA<ch3><cheader>
-      <div class="lb-art art-tavla"><svg class="art-svg" viewBox="0 0 220 180" aria-hidden="true"><rect x="22" y="30" width="176" height="120" rx="10" fill="#7a4520" stroke="#3e1f08" stroke-width="4"c><rect x="30" y="38" width="76" height="104" fill="#e9d2a6"c><rect x="114" y="38" width="76" height="104" fill="#e9d2a6"c><g fill="#a3281e"><path d="M30 38 l9 44 9 -44z M48 38 l9 44 9 -44z M66 38 l9 44 9 -44z M84 38 l9 44 9 -44z"c><path d="M114 142 l9 -44 9 44z M132 142 l9 -44 9 44z M150 142 l9 -44 9 44z M168 142 l9 -44 9 44z"c><cg><g fill="#2a5d8c"><path d="M30 142 l9 -44 9 44z M66 142 l9 -44 9 44z"c><path d="M132 38 l9 44 9 -44z M168 38 l9 44 9 -44z"c><cg><circle cx="58" cy="128" r="9" fill="#fff" stroke="#444" stroke-width="2"c><circle cx="160" cy="52" r="9" fill="#1b1b1b" stroke="#000" stroke-width="2"c><rect x="92" y="78" width="18" height="18" rx="4" fill="#fff" stroke="#333" stroke-width="2"c><rect x="112" y="84" width="18" height="18" rx="4" fill="#fff" stroke="#333" stroke-width="2"c><csvg><cdiv>
-      <div class="lb-card-btns"><button type="button" class="lb-btn grey" disabled>YAKINDA<cbutton><cdiv>
-    <carticle>
+      <header><h2>TAVLA</h2><h3>YAKINDA</h3></header>
+      <div class="lb-art art-tavla"><svg class="art-svg" viewBox="0 0 220 180" aria-hidden="true"><rect x="22" y="30" width="176" height="120" rx="10" fill="#7a4520" stroke="#3e1f08" stroke-width="4"/><rect x="30" y="38" width="76" height="104" fill="#e9d2a6"/><rect x="114" y="38" width="76" height="104" fill="#e9d2a6"/><g fill="#a3281e"><path d="M30 38 l9 44 9 -44z M48 38 l9 44 9 -44z M66 38 l9 44 9 -44z M84 38 l9 44 9 -44z"/><path d="M114 142 l9 -44 9 44z M132 142 l9 -44 9 44z M150 142 l9 -44 9 44z M168 142 l9 -44 9 44z"/></g><g fill="#2a5d8c"><path d="M30 142 l9 -44 9 44z M66 142 l9 -44 9 44z"/><path d="M132 38 l9 44 9 -44z M168 38 l9 44 9 -44z"/></g><circle cx="58" cy="128" r="9" fill="#fff" stroke="#444" stroke-width="2"/><circle cx="160" cy="52" r="9" fill="#1b1b1b" stroke="#000" stroke-width="2"/><rect x="92" y="78" width="18" height="18" rx="4" fill="#fff" stroke="#333" stroke-width="2"/><rect x="112" y="84" width="18" height="18" rx="4" fill="#fff" stroke="#333" stroke-width="2"/></svg></div>
+      <div class="lb-card-btns"><button type="button" class="lb-btn grey" disabled>YAKINDA</button></div>
+    </article>
     <article class="lb-card c-pisti">
-      <header><h2>PİŞTİ<ch2><h3>2 KİŞİ · 4 KİŞİ · EŞLİ<ch3><cheader>
-      <div class="lb-art art-pisti"><svg class="art-svg" viewBox="0 0 220 180" aria-hidden="true"><g transform="rotate(-18 80 100)"><rect x="50" y="44" width="64" height="92" rx="8" fill="#1f5fae" stroke="#0b2a55" stroke-width="2"c><rect x="58" y="52" width="48" height="76" rx="5" fill="none" stroke="#9fc6ff" stroke-width="2"c><cg><g transform="rotate(4 112 96)"><rect x="80" y="40" width="64" height="92" rx="8" fill="#fff" stroke="#9b958a" stroke-width="2"c><text x="112" y="96" text-anchor="middle" font-family="Oswald,Arial" font-weight="700" font-size="40" fill="#c8202a">J<ctext><cg><g transform="rotate(20 146 102)"><rect x="112" y="48" width="64" height="92" rx="8" fill="#fff" stroke="#9b958a" stroke-width="2"c><text x="144" y="106" text-anchor="middle" font-family="Oswald,Arial" font-weight="700" font-size="40" fill="#151515">J<ctext><cg><csvg>
-        <small><b id="pistiCount">0<cb> oyuncu<csmall><cdiv>
-      <div class="lb-card-btns"><button type="button" class="lb-btn blue ic-grid" id="pistiQuickBtn" title="Bekleyen Pişti masaları, istediğin koltuğa otur">ODA SEÇ<cbutton><button type="button" class="lb-btn orange ic-plus" id="pistiOpenBtn">MASA AÇ<cbutton><cdiv>
-    <carticle>
+      <header><h2>PİŞTİ</h2><h3>2 KİŞİ · 4 KİŞİ · EŞLİ</h3></header>
+      <div class="lb-art art-pisti"><svg class="art-svg" viewBox="0 0 220 180" aria-hidden="true"><g transform="rotate(-18 80 100)"><rect x="50" y="44" width="64" height="92" rx="8" fill="#1f5fae" stroke="#0b2a55" stroke-width="2"/><rect x="58" y="52" width="48" height="76" rx="5" fill="none" stroke="#9fc6ff" stroke-width="2"/></g><g transform="rotate(4 112 96)"><rect x="80" y="40" width="64" height="92" rx="8" fill="#fff" stroke="#9b958a" stroke-width="2"/><text x="112" y="96" text-anchor="middle" font-family="Oswald,Arial" font-weight="700" font-size="40" fill="#c8202a">J</text></g><g transform="rotate(20 146 102)"><rect x="112" y="48" width="64" height="92" rx="8" fill="#fff" stroke="#9b958a" stroke-width="2"/><text x="144" y="106" text-anchor="middle" font-family="Oswald,Arial" font-weight="700" font-size="40" fill="#151515">J</text></g></svg>
+        <small><b id="pistiCount">0</b> oyuncu</small></div>
+      <div class="lb-card-btns"><button type="button" class="lb-btn blue ic-grid" id="pistiQuickBtn" title="Bekleyen Pişti masaları, istediğin koltuğa otur">ODA SEÇ</button><button type="button" class="lb-btn orange ic-plus" id="pistiOpenBtn">MASA AÇ</button></div>
+    </article>
     <!-- EKSTRA: kalabalık grup oyunları (2–10 kişi) -->
-    <div class="lb-divider" aria-hidden="true"><span>EKSTRA<cspan><cdiv>
+    <div class="lb-divider" aria-hidden="true"><span>EKSTRA</span></div>
     <article class="lb-card c-isim">
-      <header><h2>İSİM ŞEHİR<ch2><h3>2–10 KİŞİ · TEKLİ · EŞLİ<ch3><cheader>
-      <div class="lb-art art-isim"><svg class="art-svg" viewBox="0 0 220 180" aria-hidden="true"><g transform="rotate(-6 110 92)"><rect x="40" y="26" width="140" height="132" rx="8" fill="#fdfaf1" stroke="#8e887c" stroke-width="2"c>
-        <g stroke="#cfe0f3" stroke-width="2"><path d="M40 58h140M40 82h140M40 106h140M40 130h140"c><cg><path d="M74 26v132" stroke="#e46a6a" stroke-width="2"c>
-        <g font-family="Arial" font-weight="700" font-size="10" fill="#4a5a78"><text x="44" y="53">İSİM<ctext><text x="44" y="77">ŞEHİR<ctext><text x="44" y="101">HAYVAN<ctext><text x="44" y="125">BİTKİ<ctext><text x="44" y="149">EŞYA<ctext><cg>
-        <g font-family="'Comic Sans MS',cursive" font-size="17" fill="#173a8a"><text x="82" y="54">Ahmet<ctext><text x="82" y="78">Ankara<ctext><text x="82" y="102">Aslan<ctext><text x="82" y="126">Ayva<ctext><text x="82" y="150">Ampul<ctext><cg><cg>
-        <circle cx="176" cy="40" r="24" fill="#ffd34a" stroke="#a87412" stroke-width="3"c><text x="176" y="51" text-anchor="middle" font-family="Oswald,Arial" font-weight="700" font-size="30" fill="#5a3a05">A<ctext><csvg>
-        <small><b id="isimCount">0<cb> oyuncu<csmall><cdiv>
-      <div class="lb-card-btns"><button type="button" class="lb-btn blue ic-grid" id="isimQuickBtn" title="Bekleyen İsim Şehir masaları">ODA SEÇ<cbutton><button type="button" class="lb-btn orange ic-plus" id="isimOpenBtn">MASA AÇ<cbutton><cdiv>
-    <carticle>
+      <header><h2>İSİM ŞEHİR</h2><h3>2–10 KİŞİ · TEKLİ · EŞLİ</h3></header>
+      <div class="lb-art art-isim"><svg class="art-svg" viewBox="0 0 220 180" aria-hidden="true"><g transform="rotate(-6 110 92)"><rect x="40" y="26" width="140" height="132" rx="8" fill="#fdfaf1" stroke="#8e887c" stroke-width="2"/>
+        <g stroke="#cfe0f3" stroke-width="2"><path d="M40 58h140M40 82h140M40 106h140M40 130h140"/></g><path d="M74 26v132" stroke="#e46a6a" stroke-width="2"/>
+        <g font-family="Arial" font-weight="700" font-size="10" fill="#4a5a78"><text x="44" y="53">İSİM</text><text x="44" y="77">ŞEHİR</text><text x="44" y="101">HAYVAN</text><text x="44" y="125">BİTKİ</text><text x="44" y="149">EŞYA</text></g>
+        <g font-family="'Comic Sans MS',cursive" font-size="17" fill="#173a8a"><text x="82" y="54">Ahmet</text><text x="82" y="78">Ankara</text><text x="82" y="102">Aslan</text><text x="82" y="126">Ayva</text><text x="82" y="150">Ampul</text></g></g>
+        <circle cx="176" cy="40" r="24" fill="#ffd34a" stroke="#a87412" stroke-width="3"/><text x="176" y="51" text-anchor="middle" font-family="Oswald,Arial" font-weight="700" font-size="30" fill="#5a3a05">A</text></svg>
+        <small><b id="isimCount">0</b> oyuncu</small></div>
+      <div class="lb-card-btns"><button type="button" class="lb-btn blue ic-grid" id="isimQuickBtn" title="Bekleyen İsim Şehir masaları">ODA SEÇ</button><button type="button" class="lb-btn orange ic-plus" id="isimOpenBtn">MASA AÇ</button></div>
+    </article>
     <article class="lb-card c-soon c-domino">
-      <header><h2>DOMİNO<ch2><h3>YAKINDA<ch3><cheader>
-      <div class="lb-art art-domino"><svg class="art-svg" viewBox="0 0 220 180" aria-hidden="true"><g transform="rotate(-16 80 96)"><rect x="56" y="34" width="50" height="100" rx="8" fill="#fbfaf6" stroke="#8e887c" stroke-width="2"c><line x1="60" y1="84" x2="102" y2="84" stroke="#8e887c" stroke-width="2"c><g fill="#151515"><circle cx="70" cy="48" r="5"c><circle cx="92" cy="70" r="5"c><circle cx="81" cy="59" r="5"c><circle cx="70" cy="98" r="5"c><circle cx="92" cy="98" r="5"c><circle cx="70" cy="120" r="5"c><circle cx="92" cy="120" r="5"c><cg><cg><g transform="rotate(14 142 96)"><rect x="118" y="34" width="50" height="100" rx="8" fill="#fbfaf6" stroke="#8e887c" stroke-width="2"c><line x1="122" y1="84" x2="164" y2="84" stroke="#8e887c" stroke-width="2"c><g fill="#151515"><circle cx="143" cy="59" r="5"c><circle cx="132" cy="98" r="5"c><circle cx="154" cy="98" r="5"c><circle cx="132" cy="120" r="5"c><circle cx="154" cy="120" r="5"c><circle cx="143" cy="109" r="5"c><cg><cg><csvg><cdiv>
-      <div class="lb-card-btns"><button type="button" class="lb-btn grey" disabled>YAKINDA<cbutton><cdiv>
-    <carticle>
-  <cmain>
+      <header><h2>DOMİNO</h2><h3>YAKINDA</h3></header>
+      <div class="lb-art art-domino"><svg class="art-svg" viewBox="0 0 220 180" aria-hidden="true"><g transform="rotate(-16 80 96)"><rect x="56" y="34" width="50" height="100" rx="8" fill="#fbfaf6" stroke="#8e887c" stroke-width="2"/><line x1="60" y1="84" x2="102" y2="84" stroke="#8e887c" stroke-width="2"/><g fill="#151515"><circle cx="70" cy="48" r="5"/><circle cx="92" cy="70" r="5"/><circle cx="81" cy="59" r="5"/><circle cx="70" cy="98" r="5"/><circle cx="92" cy="98" r="5"/><circle cx="70" cy="120" r="5"/><circle cx="92" cy="120" r="5"/></g></g><g transform="rotate(14 142 96)"><rect x="118" y="34" width="50" height="100" rx="8" fill="#fbfaf6" stroke="#8e887c" stroke-width="2"/><line x1="122" y1="84" x2="164" y2="84" stroke="#8e887c" stroke-width="2"/><g fill="#151515"><circle cx="143" cy="59" r="5"/><circle cx="132" cy="98" r="5"/><circle cx="154" cy="98" r="5"/><circle cx="132" cy="120" r="5"/><circle cx="154" cy="120" r="5"/><circle cx="143" cy="109" r="5"/></g></g></svg></div>
+      <div class="lb-card-btns"><button type="button" class="lb-btn grey" disabled>YAKINDA</button></div>
+    </article>
+  </main>
 
   <!-- Alt çubuk -->
   <footer class="lb-bottom">
     <!-- Alt çubuk: dört eşit düğme ortada, çevrimiçi sayısı solda -->
-    <div class="lb-online" title="Şu an çevrimiçi oyuncu"><i><ci><b id="onlineCount">0<cb><span>çevrimiçi<cspan><cdiv>
+    <div class="lb-online" title="Şu an çevrimiçi oyuncu"><i></i><b id="onlineCount">0</b><span>çevrimiçi</span></div>
     <nav class="lb-dock" aria-label="Lobi menüsü">
-      <button type="button" class="lb-round r-rank" id="leaderboardBtn" title="Sıralama"><span>SIRALAMA<cspan><cbutton>
-      <button type="button" class="lb-round r-friends" id="friendsBtn" title="Arkadaşlar ve mesajlar"><span>ARKADAŞLAR<cspan><cbutton>
-      <button type="button" class="lb-round r-rules" id="rulesBtn" title="Kurallar"><span>KURALLAR<cspan><cbutton>
-      <button type="button" class="lb-round r-gear" id="settingsBtn" title="Ayarlar"><span>AYARLAR<cspan><cbutton>
-    <cnav>
-  <cfooter>
-<cdiv>
+      <button type="button" class="lb-round r-rank" id="leaderboardBtn" title="Sıralama"><span>SIRALAMA</span></button>
+      <button type="button" class="lb-round r-friends" id="friendsBtn" title="Arkadaşlar ve mesajlar"><span>ARKADAŞLAR</span></button>
+      <button type="button" class="lb-round r-rules" id="rulesBtn" title="Kurallar"><span>KURALLAR</span></button>
+      <button type="button" class="lb-round r-gear" id="settingsBtn" title="Ayarlar"><span>AYARLAR</span></button>
+    </nav>
+  </footer>
+</div>
 
 <!-- Ayarlar -->
 <div id="settingsModal" class="premium-modal hidden" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
   <div class="modal-panel settings-panel">
-    <button class="modal-x" data-close="settingsModal" aria-label="Kapat"><cbutton>
-    <h2 id="settingsTitle">AYARLAR<ch2>
+    <button class="modal-x" data-close="settingsModal" aria-label="Kapat"></button>
+    <h2 id="settingsTitle">AYARLAR</h2>
     <div class="settings-cols">
-      <section><h3>GENEL AYARLAR<ch3>
-        <div class="set-row"><span>Ses<cspan><button type="button" class="set-toggle" id="soundToggle" aria-pressed="true">AÇIK<cbutton><cdiv>
-        <div class="set-row"><label for="playerNameInput">Misafir adı<clabel><input id="playerNameInput" maxlength="20" placeholder="Oyuncu adın..."><cdiv>
-        <div class="set-row set-account"><span id="accountStatus">Misafir olarak oynuyorsun.<cspan><cdiv>
-        <div class="set-buttons"><button id="loginOpenBtn" class="lb-btn blue" type="button">GİRİŞ YAP<cbutton><button id="registerOpenBtn" class="lb-btn orange" type="button">KAYIT OL<cbutton><button id="logoutBtn" class="lb-btn red hidden" type="button">ÇIKIŞ YAP<cbutton><cdiv>
-      <csection>
-      <section><h3>HEMEN OYNA AYARLARI<ch3>
-        <p class="set-hint">HEMEN OYNA'ya basınca bu oyun türünde masaya katılırsın.<cp>
-        <div class="set-stepper"><button type="button" data-step="-1" aria-label="Önceki">‹<cbutton><b id="quickModeLabel">KLASİK<cb><button type="button" data-step="1" aria-label="Sonraki">›<cbutton><cdiv>
-        <div class="set-buttons"><button type="button" class="lb-btn blue" id="settingsRulesBtn">KURALLAR<cbutton><cdiv>
-      <csection>
-    <cdiv>
-  <cdiv>
-<cdiv>
+      <section><h3>GENEL AYARLAR</h3>
+        <div class="set-row"><span>Ses</span><button type="button" class="set-toggle" id="soundToggle" aria-pressed="true">AÇIK</button></div>
+        <div class="set-row"><label for="playerNameInput">Misafir adı</label><input id="playerNameInput" maxlength="20" placeholder="Oyuncu adın..."></div>
+        <div class="set-row set-account"><span id="accountStatus">Misafir olarak oynuyorsun.</span></div>
+        <div class="set-buttons"><button id="loginOpenBtn" class="lb-btn blue" type="button">GİRİŞ YAP</button><button id="registerOpenBtn" class="lb-btn orange" type="button">KAYIT OL</button><button id="logoutBtn" class="lb-btn red hidden" type="button">ÇIKIŞ YAP</button></div>
+      </section>
+      <section><h3>HEMEN OYNA AYARLARI</h3>
+        <p class="set-hint">HEMEN OYNA'ya basınca bu oyun türünde masaya katılırsın.</p>
+        <div class="set-stepper"><button type="button" data-step="-1" aria-label="Önceki">‹</button><b id="quickModeLabel">KLASİK</b><button type="button" data-step="1" aria-label="Sonraki">›</button></div>
+        <div class="set-buttons"><button type="button" class="lb-btn blue" id="settingsRulesBtn">KURALLAR</button></div>
+      </section>
+    </div>
+  </div>
+</div>
 
 <!-- Sıralama -->
 <div id="leaderboardModal" class="premium-modal hidden" role="dialog" aria-modal="true" aria-labelledby="lbTitle">
   <div class="modal-panel leader-panel">
-    <button class="modal-x" data-close="leaderboardModal" aria-label="Kapat"><cbutton>
-    <div class="leader-tabs"><span class="on" id="lbTitle">EN İYİ 25<cspan><button type="button" class="lb-tab" data-by="chips">ÇİP<cbutton><button type="button" class="lb-tab" data-by="xp">SEVİYE<cbutton><cdiv>
-    <ol id="leaderList" class="leader-list"><col>
-  <cdiv>
-<cdiv>
+    <button class="modal-x" data-close="leaderboardModal" aria-label="Kapat"></button>
+    <div class="leader-tabs"><span class="on" id="lbTitle">EN İYİ 25</span><button type="button" class="lb-tab" data-by="chips">ÇİP</button><button type="button" class="lb-tab" data-by="xp">SEVİYE</button></div>
+    <ol id="leaderList" class="leader-list"></ol>
+  </div>
+</div>
 
 <!-- Kurallar -->
 <div id="rulesModal" class="premium-modal hidden" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
   <div class="modal-panel rules-panel">
-    <button class="modal-x" data-close="rulesModal" aria-label="Kapat"><cbutton>
-    <h2 id="rulesTitle">101 OKEY KURALLARI<ch2>
+    <button class="modal-x" data-close="rulesModal" aria-label="Kapat"></button>
+    <h2 id="rulesTitle">101 OKEY KURALLARI</h2>
     <ul>
-      <li>Başlayana 22, diğerlerine 21 taş dağıtılır; başlayan oyuncu bir taş atarak başlar.<cli>
-      <li>Seri (aynı renk ardışık) ve per (aynı sayı farklı renk) toplamı en az 101 ise seri açılır; en az 5 çiftle çift açılır. Okey çiftte joker olur: herhangi bir taşın yanına konunca çift sayılır.<cli>
-      <li>Açtıktan sonra masadaki gruplara taş işlenebilir (sürükleyip bırak); bir sete bir turda en fazla 2 taş işlenir.<cli>
-      <li>Soldan taş alan oyuncu o taşı aynı turda açılışta veya işlemede kullanmalıdır. Geri bırakılan taş aynı tur tekrar alınamaz.<cli>
-      <li>İşlenebilir taş atmak, okey atmak ve hatalı açmak 101 cezadır.<cli>
-      <li>12-13-1 geçerli değildir. Elde kalan okey 101 sayılır; en düşük toplam puan kazanır.<cli>
-      <li>Katlamalı masada sonraki açılış öncekinden en az 1 puan (çiftte 1 çift) fazla olmalıdır.<cli>
-    <cul>
-  <cdiv>
-<cdiv>
+      <li>Başlayana 22, diğerlerine 21 taş dağıtılır; başlayan oyuncu bir taş atarak başlar.</li>
+      <li>Seri (aynı renk ardışık) ve per (aynı sayı farklı renk) toplamı en az 101 ise seri açılır; en az 5 çiftle çift açılır. Okey çiftte joker olur: herhangi bir taşın yanına konunca çift sayılır.</li>
+      <li>Açtıktan sonra masadaki gruplara taş işlenebilir (sürükleyip bırak); bir sete bir turda en fazla 2 taş işlenir.</li>
+      <li>Soldan taş alan oyuncu o taşı aynı turda açılışta veya işlemede kullanmalıdır. Geri bırakılan taş aynı tur tekrar alınamaz.</li>
+      <li>İşlenebilir taş atmak, okey atmak ve hatalı açmak 101 cezadır.</li>
+      <li>12-13-1 geçerli değildir. Elde kalan okey 101 sayılır; en düşük toplam puan kazanır.</li>
+      <li>Katlamalı masada sonraki açılış öncekinden en az 1 puan (çiftte 1 çift) fazla olmalıdır.</li>
+    </ul>
+  </div>
+</div>
 
-<div id="authModal" class="premium-modal hidden" role="dialog" aria-modal="true" aria-labelledby="authTitle"><div class="modal-panel auth-dialog"><button class="modal-x" data-close="authModal" aria-label="Kapat"><cbutton><img class="modal-logo" src="cassetcuicalemdar-logo.svg" alt="Alemdar Cafe"><h2 id="authTitle">Hesabına Giriş Yap<ch2><p>Profilini ve kazandığın XP'yi koru.<cp><form id="authForm"><label for="authName">Kullanıcı Adı<clabel><input id="authName" required autocomplete="username" minlength="3" maxlength="18" placeholder="Kullanıcı adın"><label for="authPassword">Şifre<clabel><input type="password" id="authPassword" required minlength="8" autocomplete="current-password" placeholder="En az 8 karakter"><button type="submit" id="authSubmit" class="lb-btn green">Giriş Yap<cbutton><cform><button class="text-link" id="authSwitch" type="button">Hesabın yok mu? Kayıt ol<cbutton><cdiv><cdiv>
+<div id="authModal" class="premium-modal hidden" role="dialog" aria-modal="true" aria-labelledby="authTitle"><div class="modal-panel auth-dialog"><button class="modal-x" data-close="authModal" aria-label="Kapat"></button><img class="modal-logo" src="/asset/ui/alemdar-logo.svg" alt="Alemdar Cafe"><h2 id="authTitle">Hesabına Giriş Yap</h2><p>Profilini ve kazandığın XP'yi koru.</p><form id="authForm"><label for="authName">Kullanıcı Adı</label><input id="authName" required autocomplete="username" minlength="3" maxlength="18" placeholder="Kullanıcı adın"><label for="authPassword">Şifre</label><input type="password" id="authPassword" required minlength="8" autocomplete="current-password" placeholder="En az 8 karakter"><button type="submit" id="authSubmit" class="lb-btn green">Giriş Yap</button></form><button class="text-link" id="authSwitch" type="button">Hesabın yok mu? Kayıt ol</button></div></div>
 
 <!-- MASA AÇ: Okey Plus gibi seçenekli -->
 <div id="roomModal" class="premium-modal hidden" role="dialog" aria-modal="true" aria-labelledby="roomTitle"><div class="modal-panel room-dialog create-dialog">
-  <button class="round-x" data-close="roomModal" aria-label="Vazgeç"><cbutton>
-  <div class="dialog-head"><b id="roomTitle">MASA AÇ<cb><small id="roomSubtitle">Masa herkese açık olur, Oda Seç listesinde görünür<csmall><cdiv>
+  <button class="round-x" data-close="roomModal" aria-label="Vazgeç"></button>
+  <div class="dialog-head"><b id="roomTitle">MASA AÇ</b><small id="roomSubtitle">Masa herkese açık olur, Oda Seç listesinde görünür</small></div>
   <div class="opt-rows">
-    <div class="opt-row"><span>OYUN<cspan><div class="seg" data-target="roomTeam"><button type="button" data-value="tek">TEK<cbutton><button type="button" data-value="takim">EŞLİ<cbutton><cdiv><cdiv>
-    <div class="opt-row"><span>EL SAYISI<cspan><div class="seg" data-target="roundLimit"><button type="button" data-value="1">1<cbutton><button type="button" data-value="2">2<cbutton><button type="button" data-value="3">3<cbutton><button type="button" data-value="4">4<cbutton><cdiv><cdiv>
-    <div class="opt-row"><span>YARDIM<cspan><div class="seg" data-target="roomAssist"><button type="button" data-value="true">YARDIMLI<cbutton><button type="button" data-value="false">YARDIMSIZ<cbutton><cdiv><cdiv>
-    <div class="opt-row"><span>AÇILIŞ<cspan><div class="seg" data-target="roomStack"><button type="button" data-value="false">KATLAMASIZ<cbutton><button type="button" data-value="true">KATLAMALI<cbutton><cdiv><cdiv>
-    <div class="opt-row"><span>CEZA<cspan><div class="seg" data-target="penaltyModeToggle"><button type="button" data-value="true">AÇIK<cbutton><button type="button" data-value="false">KAPALI<cbutton><cdiv><cdiv>
-    <div class="opt-row"><span>BAHİS<cspan><div class="seg" data-target="roomBet"><button type="button" data-value="1000">1K<cbutton><button type="button" data-value="5000">5K<cbutton><button type="button" data-value="25000">25K<cbutton><button type="button" data-value="100000">VIP 100K<cbutton><cdiv><cdiv>
-  <cdiv>
+    <div class="opt-row"><span>OYUN</span><div class="seg" data-target="roomTeam"><button type="button" data-value="tek">TEK</button><button type="button" data-value="takim">EŞLİ</button></div></div>
+    <div class="opt-row"><span>EL SAYISI</span><div class="seg" data-target="roundLimit"><button type="button" data-value="1">1</button><button type="button" data-value="2">2</button><button type="button" data-value="3">3</button><button type="button" data-value="4">4</button></div></div>
+    <div class="opt-row"><span>YARDIM</span><div class="seg" data-target="roomAssist"><button type="button" data-value="true">YARDIMLI</button><button type="button" data-value="false">YARDIMSIZ</button></div></div>
+    <div class="opt-row"><span>AÇILIŞ</span><div class="seg" data-target="roomStack"><button type="button" data-value="false">KATLAMASIZ</button><button type="button" data-value="true">KATLAMALI</button></div></div>
+    <div class="opt-row"><span>CEZA</span><div class="seg" data-target="penaltyModeToggle"><button type="button" data-value="true">AÇIK</button><button type="button" data-value="false">KAPALI</button></div></div>
+    <div class="opt-row"><span>BAHİS</span><div class="seg" data-target="roomBet"><button type="button" data-value="1000">1K</button><button type="button" data-value="5000">5K</button><button type="button" data-value="25000">25K</button><button type="button" data-value="100000">VIP 100K</button></div></div>
+  </div>
   <div class="hidden-selects" hidden>
-    <select id="roomTeam"><option value="tek">Tek<coption><option value="takim">Eşli<coption><cselect>
-    <select id="roundLimit"><option value="1">1<coption><option value="2">2<coption><option value="3" selected>3<coption><option value="4">4<coption><cselect>
-    <select id="roomAssist"><option value="true">Yardımlı<coption><option value="false">Yardımsız<coption><cselect>
-    <select id="roomStack"><option value="false">Katlamasız<coption><option value="true">Katlamalı<coption><cselect>
+    <select id="roomTeam"><option value="tek">Tek</option><option value="takim">Eşli</option></select>
+    <select id="roundLimit"><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option></select>
+    <select id="roomAssist"><option value="true">Yardımlı</option><option value="false">Yardımsız</option></select>
+    <select id="roomStack"><option value="false">Katlamasız</option><option value="true">Katlamalı</option></select>
     <input type="checkbox" id="penaltyModeToggle" checked>
-    <select id="roomBet"><option value="1000" selected>1000<coption><option value="5000">5000<coption><option value="25000">25000<coption><option value="100000">100000<coption><cselect>
-  <cdiv>
-  <p class="create-note">Masaya oturunca eksik koltuklara <b>BOT EKLE<cb> ile bilgisayar oyuncusu koyabilirsin.<cp>
-  <div class="tp-actions one"><button id="confirmCreateBtn" class="tp-btn green ic-plus" type="button">MASAYI AÇ<cbutton><cdiv>
-<cdiv><cdiv>
+    <select id="roomBet"><option value="1000" selected>1000</option><option value="5000">5000</option><option value="25000">25000</option><option value="100000">100000</option></select>
+  </div>
+  <p class="create-note">Masaya oturunca eksik koltuklara <b>BOT EKLE</b> ile bilgisayar oyuncusu koyabilirsin.</p>
+  <div class="tp-actions one"><button id="confirmCreateBtn" class="tp-btn green ic-plus" type="button">MASAYI AÇ</button></div>
+</div></div>
 
 <!-- BATAK: tür, el sayısı; hemen oyna (botlar tamamlar), özel masa (kodla), kodla katıl -->
 <div id="batakModal" class="premium-modal hidden" role="dialog" aria-modal="true" aria-labelledby="batakTitle"><div class="modal-panel room-dialog create-dialog">
-  <button class="round-x" data-close="batakModal" aria-label="Vazgeç"><cbutton>
-  <div class="dialog-head"><b id="batakTitle">BATAK<cb><small>Türünü ve el sayısını seç<csmall><cdiv>
+  <button class="round-x" data-close="batakModal" aria-label="Vazgeç"></button>
+  <div class="dialog-head"><b id="batakTitle">BATAK</b><small>Türünü ve el sayısını seç</small></div>
   <div class="opt-rows">
-    <div class="opt-row"><span>TÜR<cspan><div class="seg" data-target="batakType"><button type="button" data-value="ihaleli">İHALELİ<cbutton><button type="button" data-value="kozmaca">KOZ MAÇA<cbutton><button type="button" data-value="esli">EŞLİ<cbutton><cdiv><cdiv>
-    <div class="opt-row"><span>EL SAYISI<cspan><div class="seg" data-target="batakRounds"><button type="button" data-value="5">5<cbutton><button type="button" data-value="7">7<cbutton><button type="button" data-value="9">9<cbutton><button type="button" data-value="11">11<cbutton><cdiv><cdiv>
-    <div class="opt-row"><span>KOD<cspan><div class="lb-code-row batak-code"><input id="batakCodeInput" maxlength="6" autocomplete="off" placeholder="BXXXXX" aria-label="Batak masa kodu"><button type="button" id="batakCodeBtn">KATIL<cbutton><button type="button" id="batakWatchBtn" title="Masayı canlı izle">İZLE<cbutton><cdiv><cdiv>
-  <cdiv>
+    <div class="opt-row"><span>TÜR</span><div class="seg" data-target="batakType"><button type="button" data-value="ihaleli">İHALELİ</button><button type="button" data-value="kozmaca">KOZ MAÇA</button><button type="button" data-value="esli">EŞLİ</button></div></div>
+    <div class="opt-row"><span>EL SAYISI</span><div class="seg" data-target="batakRounds"><button type="button" data-value="5">5</button><button type="button" data-value="7">7</button><button type="button" data-value="9">9</button><button type="button" data-value="11">11</button></div></div>
+    <div class="opt-row"><span>KOD</span><div class="lb-code-row batak-code"><input id="batakCodeInput" maxlength="6" autocomplete="off" placeholder="BXXXXX" aria-label="Batak masa kodu"><button type="button" id="batakCodeBtn">KATIL</button><button type="button" id="batakWatchBtn" title="Masayı canlı izle">İZLE</button></div></div>
+  </div>
   <div class="hidden-selects" hidden>
-    <select id="batakType"><option value="ihaleli" selected>İhaleli<coption><option value="kozmaca">Koz Maça<coption><option value="esli">Eşli<coption><cselect>
-    <select id="batakRounds"><option value="5" selected>5<coption><option value="7">7<coption><option value="9">9<coption><option value="11">11<coption><cselect>
-  <cdiv>
-  <p class="create-note" id="batakRuleNote">İhale en az 5; kimse girmezse dağıtanın sağındaki 4 el almak zorunda. İhaleyi alan kozu seçer.<cp>
-  <div class="tp-actions three"><button type="button" class="tp-btn orange ic-plus" id="batakPublicBtn" title="Masa listesinde görünür, başkaları istediği koltuğa oturur">MASA AÇ<cbutton><button type="button" class="tp-btn blue ic-lock" id="batakPrivateBtn" title="Yalnızca kodu verdiğin arkadaşların katılır">ÖZEL MASA<cbutton><button type="button" class="tp-btn green ic-bolt" id="batakPlayBtn">HEMEN OYNA<cbutton><cdiv>
-<cdiv><cdiv>
+    <select id="batakType"><option value="ihaleli" selected>İhaleli</option><option value="kozmaca">Koz Maça</option><option value="esli">Eşli</option></select>
+    <select id="batakRounds"><option value="5" selected>5</option><option value="7">7</option><option value="9">9</option><option value="11">11</option></select>
+  </div>
+  <p class="create-note" id="batakRuleNote">İhale en az 5; kimse girmezse dağıtanın sağındaki 4 el almak zorunda. İhaleyi alan kozu seçer.</p>
+  <div class="tp-actions three"><button type="button" class="tp-btn orange ic-plus" id="batakPublicBtn" title="Masa listesinde görünür, başkaları istediği koltuğa oturur">MASA AÇ</button><button type="button" class="tp-btn blue ic-lock" id="batakPrivateBtn" title="Yalnızca kodu verdiğin arkadaşların katılır">ÖZEL MASA</button><button type="button" class="tp-btn green ic-bolt" id="batakPlayBtn">HEMEN OYNA</button></div>
+</div></div>
 
-<!-- İSİM ŞEHİR: kişi sayısı, tekliceşli, tur, süre; hemen oyna (botlar tamamlar), açıkcözel masa, kodla katıl c izle -->
+<!-- İSİM ŞEHİR: kişi sayısı, tekli/eşli, tur, süre; hemen oyna (botlar tamamlar), açık/özel masa, kodla katıl / izle -->
 <div id="isimModal" class="premium-modal hidden" role="dialog" aria-modal="true" aria-labelledby="isimTitle"><div class="modal-panel room-dialog create-dialog">
-  <button class="round-x" data-close="isimModal" aria-label="Vazgeç"><cbutton>
-  <div class="dialog-head"><b id="isimTitle">İSİM ŞEHİR<cb><small>Kaç kişi, tekli mi eşli mi, kaç tur, kaç saniye<csmall><cdiv>
+  <button class="round-x" data-close="isimModal" aria-label="Vazgeç"></button>
+  <div class="dialog-head"><b id="isimTitle">İSİM ŞEHİR</b><small>Kaç kişi, tekli mi eşli mi, kaç tur, kaç saniye</small></div>
   <div class="opt-rows">
-    <div class="opt-row"><span>KİŞİ<cspan><div class="seg" data-target="isimSize"><button type="button" data-value="2">2<cbutton><button type="button" data-value="4">4<cbutton><button type="button" data-value="6">6<cbutton><button type="button" data-value="8">8<cbutton><button type="button" data-value="10">10<cbutton><cdiv><cdiv>
-    <div class="opt-row"><span>OYUN<cspan><div class="seg" data-target="isimTeam"><button type="button" data-value="false">TEKLİ<cbutton><button type="button" data-value="true">EŞLİ<cbutton><cdiv><cdiv>
-    <div class="opt-row"><span>TUR<cspan><div class="seg" data-target="isimRounds"><button type="button" data-value="5">5 TUR<cbutton><button type="button" data-value="10">10 TUR<cbutton><cdiv><cdiv>
-    <div class="opt-row"><span>SÜRE<cspan><div class="seg" data-target="isimTime"><button type="button" data-value="45">45 SN<cbutton><button type="button" data-value="60">60 SN<cbutton><button type="button" data-value="90">90 SN<cbutton><cdiv><cdiv>
-    <div class="opt-row"><span>KOD<cspan><div class="lb-code-row batak-code"><input id="isimCodeInput" maxlength="6" autocomplete="off" placeholder="SXXXXX" aria-label="İsim Şehir masa kodu"><button type="button" id="isimCodeBtn">KATIL<cbutton><button type="button" id="isimWatchBtn" title="Masayı canlı izle">İZLE<cbutton><cdiv><cdiv>
-  <cdiv>
+    <div class="opt-row"><span>KİŞİ</span><div class="seg" data-target="isimSize"><button type="button" data-value="2">2</button><button type="button" data-value="4">4</button><button type="button" data-value="6">6</button><button type="button" data-value="8">8</button><button type="button" data-value="10">10</button></div></div>
+    <div class="opt-row"><span>OYUN</span><div class="seg" data-target="isimTeam"><button type="button" data-value="false">TEKLİ</button><button type="button" data-value="true">EŞLİ</button></div></div>
+    <div class="opt-row"><span>TUR</span><div class="seg" data-target="isimRounds"><button type="button" data-value="5">5 TUR</button><button type="button" data-value="10">10 TUR</button></div></div>
+    <div class="opt-row"><span>SÜRE</span><div class="seg" data-target="isimTime"><button type="button" data-value="45">45 SN</button><button type="button" data-value="60">60 SN</button><button type="button" data-value="90">90 SN</button></div></div>
+    <div class="opt-row"><span>KOD</span><div class="lb-code-row batak-code"><input id="isimCodeInput" maxlength="6" autocomplete="off" placeholder="SXXXXX" aria-label="İsim Şehir masa kodu"><button type="button" id="isimCodeBtn">KATIL</button><button type="button" id="isimWatchBtn" title="Masayı canlı izle">İZLE</button></div></div>
+  </div>
   <div class="hidden-selects" hidden>
-    <select id="isimSize"><option value="2">2<coption><option value="4" selected>4<coption><option value="6">6<coption><option value="8">8<coption><option value="10">10<coption><cselect>
-    <select id="isimTeam"><option value="false" selected>Tekli<coption><option value="true">Eşli<coption><cselect>
-    <select id="isimRounds"><option value="5" selected>5<coption><option value="10">10<coption><cselect>
-    <select id="isimTime"><option value="45">45<coption><option value="60" selected>60<coption><option value="90">90<coption><cselect>
-  <cdiv>
-  <p class="create-note" id="isimRuleNote">Harf seçilir; İsim, Şehir, Hayvan, Bitki ve Eşya yazarsınız. Aynı cevap 5, farklı 10, tek doğru 20 puan. Cevapları yapay zekâ hakem kontrol eder.<cp>
-  <div class="tp-actions three"><button type="button" class="tp-btn orange ic-plus" id="isimPublicBtn" title="Masa listesinde görünür">MASA AÇ<cbutton><button type="button" class="tp-btn blue ic-lock" id="isimPrivateBtn" title="Yalnızca kodu verdiğin arkadaşların katılır">ÖZEL MASA<cbutton><button type="button" class="tp-btn green ic-bolt" id="isimPlayBtn">HEMEN OYNA<cbutton><cdiv>
-<cdiv><cdiv>
+    <select id="isimSize"><option value="2">2</option><option value="4" selected>4</option><option value="6">6</option><option value="8">8</option><option value="10">10</option></select>
+    <select id="isimTeam"><option value="false" selected>Tekli</option><option value="true">Eşli</option></select>
+    <select id="isimRounds"><option value="5" selected>5</option><option value="10">10</option></select>
+    <select id="isimTime"><option value="45">45</option><option value="60" selected>60</option><option value="90">90</option></select>
+  </div>
+  <p class="create-note" id="isimRuleNote">Harf seçilir; İsim, Şehir, Hayvan, Bitki ve Eşya yazarsınız. Aynı cevap 5, farklı 10, tek doğru 20 puan. Cevapları yapay zekâ hakem kontrol eder.</p>
+  <div class="tp-actions three"><button type="button" class="tp-btn orange ic-plus" id="isimPublicBtn" title="Masa listesinde görünür">MASA AÇ</button><button type="button" class="tp-btn blue ic-lock" id="isimPrivateBtn" title="Yalnızca kodu verdiğin arkadaşların katılır">ÖZEL MASA</button><button type="button" class="tp-btn green ic-bolt" id="isimPlayBtn">HEMEN OYNA</button></div>
+</div></div>
 
-<!-- PİŞTİ: kişi sayısı c eşli, bitiş sayısı, blöf; hemen oyna (botlar tamamlar), açıkcözel masa, kodla katıl -->
+<!-- PİŞTİ: kişi sayısı / eşli, bitiş sayısı, blöf; hemen oyna (botlar tamamlar), açık/özel masa, kodla katıl -->
 <div id="pistiModal" class="premium-modal hidden" role="dialog" aria-modal="true" aria-labelledby="pistiTitle"><div class="modal-panel room-dialog create-dialog">
-  <button class="round-x" data-close="pistiModal" aria-label="Vazgeç"><cbutton>
-  <div class="dialog-head"><b id="pistiTitle">PİŞTİ<cb><small>Masanı seç: kaç kişi, kaçta biter, blöflü mü<csmall><cdiv>
+  <button class="round-x" data-close="pistiModal" aria-label="Vazgeç"></button>
+  <div class="dialog-head"><b id="pistiTitle">PİŞTİ</b><small>Masanı seç: kaç kişi, kaçta biter, blöflü mü</small></div>
   <div class="opt-rows">
-    <div class="opt-row"><span>OYUN<cspan><div class="seg" data-target="pistiType"><button type="button" data-value="ikili">2 KİŞİ<cbutton><button type="button" data-value="dortlu">4 KİŞİ<cbutton><button type="button" data-value="esli">EŞLİ<cbutton><cdiv><cdiv>
-    <div class="opt-row"><span>BİTİŞ<cspan><div class="seg" data-target="pistiTarget"><button type="button" data-value="101">101<cbutton><button type="button" data-value="151">151<cbutton><button type="button" data-value="171">171<cbutton><button type="button" data-value="201">201<cbutton><cdiv><cdiv>
-    <div class="opt-row"><span>BLÖF<cspan><div class="seg" data-target="pistiBluff"><button type="button" data-value="false">BLÖFSÜZ<cbutton><button type="button" data-value="true">BLÖFLÜ<cbutton><cdiv><cdiv>
-    <div class="opt-row"><span>KOD<cspan><div class="lb-code-row batak-code"><input id="pistiCodeInput" maxlength="6" autocomplete="off" placeholder="PXXXXX" aria-label="Pişti masa kodu"><button type="button" id="pistiCodeBtn">KATIL<cbutton><button type="button" id="pistiWatchBtn" title="Masayı canlı izle">İZLE<cbutton><cdiv><cdiv>
-  <cdiv>
+    <div class="opt-row"><span>OYUN</span><div class="seg" data-target="pistiType"><button type="button" data-value="ikili">2 KİŞİ</button><button type="button" data-value="dortlu">4 KİŞİ</button><button type="button" data-value="esli">EŞLİ</button></div></div>
+    <div class="opt-row"><span>BİTİŞ</span><div class="seg" data-target="pistiTarget"><button type="button" data-value="101">101</button><button type="button" data-value="151">151</button><button type="button" data-value="171">171</button><button type="button" data-value="201">201</button></div></div>
+    <div class="opt-row"><span>BLÖF</span><div class="seg" data-target="pistiBluff"><button type="button" data-value="false">BLÖFSÜZ</button><button type="button" data-value="true">BLÖFLÜ</button></div></div>
+    <div class="opt-row"><span>KOD</span><div class="lb-code-row batak-code"><input id="pistiCodeInput" maxlength="6" autocomplete="off" placeholder="PXXXXX" aria-label="Pişti masa kodu"><button type="button" id="pistiCodeBtn">KATIL</button><button type="button" id="pistiWatchBtn" title="Masayı canlı izle">İZLE</button></div></div>
+  </div>
   <div class="hidden-selects" hidden>
-    <select id="pistiType"><option value="ikili" selected>2 kişi<coption><option value="dortlu">4 kişi<coption><option value="esli">Eşli<coption><cselect>
-    <select id="pistiTarget"><option value="101" selected>101<coption><option value="151">151<coption><option value="171">171<coption><option value="201">201<coption><cselect>
-    <select id="pistiBluff"><option value="false" selected>Blöfsüz<coption><option value="true">Blöflü<coption><cselect>
-  <cdiv>
-  <p class="create-note" id="pistiRuleNote">İki kişi karşılıklı oynar. Yerdeki kartın aynısı ya da Vale yerdekileri alır; tek karta aynısı PİŞTİ (10), Vale'ye Vale 20 puan.<cp>
-  <div class="tp-actions three"><button type="button" class="tp-btn orange ic-plus" id="pistiPublicBtn" title="Masa listesinde görünür, başkaları istediği koltuğa oturur">MASA AÇ<cbutton><button type="button" class="tp-btn blue ic-lock" id="pistiPrivateBtn" title="Yalnızca kodu verdiğin arkadaşların katılır">ÖZEL MASA<cbutton><button type="button" class="tp-btn green ic-bolt" id="pistiPlayBtn">HEMEN OYNA<cbutton><cdiv>
-<cdiv><cdiv>
+    <select id="pistiType"><option value="ikili" selected>2 kişi</option><option value="dortlu">4 kişi</option><option value="esli">Eşli</option></select>
+    <select id="pistiTarget"><option value="101" selected>101</option><option value="151">151</option><option value="171">171</option><option value="201">201</option></select>
+    <select id="pistiBluff"><option value="false" selected>Blöfsüz</option><option value="true">Blöflü</option></select>
+  </div>
+  <p class="create-note" id="pistiRuleNote">İki kişi karşılıklı oynar. Yerdeki kartın aynısı ya da Vale yerdekileri alır; tek karta aynısı PİŞTİ (10), Vale'ye Vale 20 puan.</p>
+  <div class="tp-actions three"><button type="button" class="tp-btn orange ic-plus" id="pistiPublicBtn" title="Masa listesinde görünür, başkaları istediği koltuğa oturur">MASA AÇ</button><button type="button" class="tp-btn blue ic-lock" id="pistiPrivateBtn" title="Yalnızca kodu verdiğin arkadaşların katılır">ÖZEL MASA</button><button type="button" class="tp-btn green ic-bolt" id="pistiPlayBtn">HEMEN OYNA</button></div>
+</div></div>
 
 <!-- ODA SEÇ (açık masalar) -->
 <!-- Masalar tek tek gösterilir; boş koltuğa OTUR ile oturulur (oklarla masa değiştirilir) -->
 <div id="modeListModal" class="premium-modal hidden" role="dialog" aria-modal="true" aria-labelledby="modeListTitle"><div class="modal-panel tp-panel">
-  <button class="round-x" data-close="modeListModal" aria-label="Kapat"><cbutton>
-  <div class="tp-head"><b id="modeListTitle">ODA SEÇ<cb>
-    <div class="tp-filter" id="tpFilter"><button type="button" data-f="all" class="on">TÜMÜ<cbutton><button type="button" data-f="tek">TEK<cbutton><button type="button" data-f="esli">EŞLİ<cbutton><button type="button" data-f="katlamali">KATLAMALI<cbutton><button type="button" data-f="yardimsiz">YARDIMSIZ<cbutton><cdiv>
-  <cdiv>
+  <button class="round-x" data-close="modeListModal" aria-label="Kapat"></button>
+  <div class="tp-head"><b id="modeListTitle">ODA SEÇ</b>
+    <div class="tp-filter" id="tpFilter"><button type="button" data-f="all" class="on">TÜMÜ</button><button type="button" data-f="tek">TEK</button><button type="button" data-f="esli">EŞLİ</button><button type="button" data-f="katlamali">KATLAMALI</button><button type="button" data-f="yardimsiz">YARDIMSIZ</button></div>
+  </div>
   <div class="tp-stage">
-    <button type="button" class="tp-arrow" id="tpPrev" aria-label="Önceki masa">‹<cbutton>
-    <div class="tp-table" id="tpTable"><cdiv>
-    <button type="button" class="tp-arrow" id="tpNext" aria-label="Sonraki masa">›<cbutton>
-  <cdiv>
-  <div class="tp-count" id="tpCount"><cdiv>
+    <button type="button" class="tp-arrow" id="tpPrev" aria-label="Önceki masa">‹</button>
+    <div class="tp-table" id="tpTable"></div>
+    <button type="button" class="tp-arrow" id="tpNext" aria-label="Sonraki masa">›</button>
+  </div>
+  <div class="tp-count" id="tpCount"></div>
   <div class="tp-actions">
-    <button type="button" class="tp-btn orange ic-plus" id="tpCreate">MASA AÇ<cbutton>
-    <button type="button" class="tp-btn green ic-bolt" id="modeAutoJoinBtn">HEMEN OYNA<cbutton>
-  <cdiv>
-<cdiv><cdiv>
+    <button type="button" class="tp-btn orange ic-plus" id="tpCreate">MASA AÇ</button>
+    <button type="button" class="tp-btn green ic-bolt" id="modeAutoJoinBtn">HEMEN OYNA</button>
+  </div>
+</div></div>
 
 <!-- ÖZEL ODA SEÇ: kodla katıl -->
 <div id="codeModal" class="premium-modal hidden" role="dialog" aria-modal="true" aria-labelledby="codeTitle"><div class="modal-panel room-dialog">
-  <button class="round-x" data-close="codeModal" aria-label="Kapat"><cbutton>
-  <div class="dialog-head"><b id="codeTitle">ÖZEL ODA<cb><small>Arkadaşının gönderdiği 6 haneli kodu yaz<csmall><cdiv>
+  <button class="round-x" data-close="codeModal" aria-label="Kapat"></button>
+  <div class="dialog-head"><b id="codeTitle">ÖZEL ODA</b><small>Arkadaşının gönderdiği 6 haneli kodu yaz</small></div>
   <input id="codeModalInput" class="code-big" maxlength="6" autocomplete="off" placeholder="AB4K7P" aria-label="Oda kodu">
-  <div class="tp-actions two"><button id="codeModalJoin" class="tp-btn green ic-enter" type="button">KATIL<cbutton><button id="codeModalWatch" class="tp-btn blue ic-eye" type="button" title="Oyuna katılmadan masayı canlı seyret">İZLE<cbutton><cdiv>
-<cdiv><cdiv>
+  <div class="tp-actions two"><button id="codeModalJoin" class="tp-btn green ic-enter" type="button">KATIL</button><button id="codeModalWatch" class="tp-btn blue ic-eye" type="button" title="Oyuna katılmadan masayı canlı seyret">İZLE</button></div>
+</div></div>
 
-<div id="avatarModal" class="premium-modal hidden" role="dialog" aria-modal="true" aria-labelledby="avatarModalTitle"><div class="modal-panel avatar-editor"><button class="modal-x" data-close="avatarModal" aria-label="Kapat"><cbutton><h2 id="avatarModalTitle">PROFİL<ch2><label for="avatarUpload" class="avatar-edit-preview"><span class="portrait-wrap frame-gold" id="avatarPreviewFrame"><img id="previewAvatar" src="cassetcavatar-default.svg" alt="Profil fotoğrafı"><cspan><span class="lb-btn blue">FOTOĞRAF YÜKLE<cspan><clabel><input id="avatarUpload" type="file" accept="imagecjpeg,imagecpng,imagecwebp" hidden><h3>AVATAR SEÇ<ch3><div class="avatar-options" id="avatarOptions"><cdiv><h3>ÇERÇEVENİ SEÇ<ch3><div class="frame-options" id="frameOptions"><button data-frame="gold" class="selected" type="button"><span class="frame-sample frame-gold"><cspan>Altın Şampiyon<cbutton><button data-frame="silver" type="button"><span class="frame-sample frame-silver"><cspan>Gümüş Kanat<cbutton><button data-frame="royal" type="button"><span class="frame-sample frame-royal"><cspan>Kraliyet<cbutton><button data-frame="emerald" type="button"><span class="frame-sample frame-emerald"><cspan>Zümrüt Ejder<cbutton><button data-frame="neon" type="button"><span class="frame-sample frame-neon"><cspan>Neon Siber<cbutton><button data-frame="rose" type="button"><span class="frame-sample frame-rose"><cspan>Yakut Kanat<cbutton><cdiv><button class="lb-btn green" data-close="avatarModal" type="button">TAMAM<cbutton><cdiv><cdiv>
+<div id="avatarModal" class="premium-modal hidden" role="dialog" aria-modal="true" aria-labelledby="avatarModalTitle"><div class="modal-panel avatar-editor"><button class="modal-x" data-close="avatarModal" aria-label="Kapat"></button><h2 id="avatarModalTitle">PROFİL</h2><label for="avatarUpload" class="avatar-edit-preview"><span class="portrait-wrap frame-gold" id="avatarPreviewFrame"><img id="previewAvatar" src="/asset/avatar-default.svg" alt="Profil fotoğrafı"></span><span class="lb-btn blue">FOTOĞRAF YÜKLE</span></label><input id="avatarUpload" type="file" accept="image/jpeg,image/png,image/webp" hidden><h3>AVATAR SEÇ</h3><div class="avatar-options" id="avatarOptions"></div><h3>ÇERÇEVENİ SEÇ</h3><div class="frame-options" id="frameOptions"><button data-frame="gold" class="selected" type="button"><span class="frame-sample frame-gold"></span>Altın Şampiyon</button><button data-frame="silver" type="button"><span class="frame-sample frame-silver"></span>Gümüş Kanat</button><button data-frame="royal" type="button"><span class="frame-sample frame-royal"></span>Kraliyet</button><button data-frame="emerald" type="button"><span class="frame-sample frame-emerald"></span>Zümrüt Ejder</button><button data-frame="neon" type="button"><span class="frame-sample frame-neon"></span>Neon Siber</button><button data-frame="rose" type="button"><span class="frame-sample frame-rose"></span>Yakut Kanat</button></div><button class="lb-btn green" data-close="avatarModal" type="button">TAMAM</button></div></div>
 
-<div id="rotateHint" role="alert"><div class="rotate-phone"><cdiv><div>Daha rahat oynamak için telefonunu yan çevir<cdiv><small>Alemdar Cafe yatay ekranda oynanır<csmall><cdiv>
-<div id="errorToast" class="toast hidden" role="alert"><span class="toast-message"><cspan><cdiv>
-<script src="csocket.iocsocket.io.js"><cscript><script src="cjscsocial.js?v=4"><cscript><script src="cjscmain.js?v=15"><cscript><cbody><chtml>
+<div id="rotateHint" role="alert"><div class="rotate-phone"></div><div>Daha rahat oynamak için telefonunu yan çevir</div><small>Alemdar Cafe yatay ekranda oynanır</small></div>
+<div id="errorToast" class="toast hidden" role="alert"><span class="toast-message"></span></div>
+<script src="/socket.io/socket.io.js"></script><script src="/js/social.js?v=4"></script><script src="/js/main.js?v=15"></script></body></html>
