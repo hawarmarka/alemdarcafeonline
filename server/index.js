@@ -11,6 +11,8 @@ const Avatars = require('./avatars');
 const RoomStore = require('./roomStore');
 const Economy = require('./economy');
 const Melds = require('../public/js/meldSolver');
+const BotMC = require('./botMC');
+const BotPool = require('./botPool');
 const app = express();
 app.disable('x-powered-by');
 // Coolify/Traefik gibi bir vekil sunucunun arkasında gerçek oyuncu IP'si (giriş deneme sınırı kişi başına olsun)
@@ -343,7 +345,7 @@ function seriesOuts(game, index, candidates) {
 //   açtıktan sonra YÜKSEK taş atılır (elde kalan ceza azalır).
 const DANGER_WEIGHT = Number(process.env.BOT_DANGER_WEIGHT) || 20;
 const tileKind = t => t.isFakeJoker ? 'F' : `${t.color}:${t.number}`;
-function chooseBotDiscard(room, index) {
+function chooseBotDiscard(room, index, opts = {}) {
     const game = room.game;
     const hand = game.playerTiles[index];
     if (!hand.length) return null;
@@ -379,15 +381,50 @@ function chooseBotDiscard(room, index) {
     const danger = tile => { const a = eff(tile); return nextPicks.reduce((n, p) => { if (p.isFakeJoker || game.isOkey(p)) return n; const b = eff(p);
         if (a.color === b.color && Math.abs(a.number - b.number) <= 2) return n + (Math.abs(a.number - b.number) === 1 ? 3 : 2);
         if (a.color !== b.color && a.number === b.number) return n + 3; return n; }, 0); };
+    // Adaylar sezgisel sıraya konur (en iyi atış başta). Monte Carlo açıksa bu sıra eşitlikte korunur.
+    let ranked;
     if (!state.hasOpened && plan === 'series' && smart && candidates.length > 1) {
         // Aynı türden iki taşın sonucu aynıdır (eşitlikte küçük id seçilir), biri yeterli.
         const seen = new Set();
         candidates = [...candidates].sort((a, b) => a.id.localeCompare(b.id)).filter(t => !seen.has(tileKind(t)) && seen.add(tileKind(t)));
         const outs = seriesOuts(game, index, candidates);
-        if (outs) return candidates.sort((a, b) => (outs.get(b.id) - danger(b) * DANGER_WEIGHT) - (outs.get(a.id) - danger(a) * DANGER_WEIGHT) || usefulness(a) - usefulness(b) || game.getTileValue(a) - game.getTileValue(b) || a.id.localeCompare(b.id))[0];
+        ranked = candidates.sort((a, b) => (outs.get(b.id) - danger(b) * DANGER_WEIGHT) - (outs.get(a.id) - danger(a) * DANGER_WEIGHT) || usefulness(a) - usefulness(b) || game.getTileValue(a) - game.getTileValue(b) || a.id.localeCompare(b.id));
+    } else {
+        const valueOrder = (state.hasOpened || game.oldBotSeats?.has(index)) ? (a, b) => game.getTileValue(b) - game.getTileValue(a) : (a, b) => game.getTileValue(a) - game.getTileValue(b);
+        ranked = candidates.sort((a, b) => (usefulness(a) + danger(a) * 2) - (usefulness(b) + danger(b) * 2) || valueOrder(a, b) || a.id.localeCompare(b.id));
     }
-    const valueOrder = (state.hasOpened || game.oldBotSeats?.has(index)) ? (a, b) => game.getTileValue(b) - game.getTileValue(a) : (a, b) => game.getTileValue(a) - game.getTileValue(b);
-    return candidates.sort((a, b) => (usefulness(a) + danger(a) * 2) - (usefulness(b) + danger(b) * 2) || valueOrder(a, b) || a.id.localeCompare(b.id))[0];
+    const mcInput = !state.hasOpened && smart && ranked.length > 1 && useMonteCarlo(game, index) ? monteCarloInput(room, index, ranked) : null;
+    if (!mcInput) return ranked[0];
+    // Sunucuda hesap worker'da yapılır (runBotTurn); burada yalnızca istenirse eşzamanlı (ölçüm ve testler).
+    if (opts.deferMonteCarlo) return { deferred: true, fallback: ranked[0], mcInput };
+    const pick = BotMC.chooseDiscard(mcInput).id;
+    return hand.find(t => t.id === pick) || ranked[0];
+}
+// ---------- Monte Carlo bot (server/botMC.js) ----------
+// BOT_AI=mc: açmadan önceki taş atışı benzetimle seçilir; basic: yalnızca sezgisel kural. Production'da varsayılan mc.
+// game.baselineSeats (yalnızca ölçüm) o koltukları eski kurala bırakır.
+const BOT_AI = process.env.BOT_AI || (process.env.NODE_ENV === 'production' ? 'mc' : 'basic');
+const MC_SAMPLES = Number(process.env.BOT_MC_SAMPLES) || 40;
+const MC_MAX_CANDIDATES = Number(process.env.BOT_MC_CANDIDATES) || 8;
+// BOT_MC_SYNC=1: hesap ana iş parçacığında (ölçüm betiği). Normalde worker_threads havuzunda (server/botPool.js).
+const MC_IN_WORKER = process.env.BOT_MC_SYNC !== '1';
+const MC_TIMEOUT_MS = Number(process.env.BOT_MC_TIMEOUT_MS) || 2500;
+function useMonteCarlo(game, index) { return (game.botAI || BOT_AI) === 'mc' && !game.baselineSeats?.has(index); }
+// Worker'a gidecek girdi: yalnızca botun görebildiği bilgiler (kendi eli, okey, görünmeyen taşların türleri ve sayıları).
+function monteCarloInput(room, index, ranked) {
+    const game = room.game, hand = game.playerTiles[index];
+    const seen = new Set(), candidates = [];
+    for (const t of ranked) { if (candidates.length >= MC_MAX_CANDIDATES) break; if (!seen.has(tileKind(t))) { seen.add(tileKind(t)); candidates.push(t.id); } }
+    const unseen = [];
+    for (const [k, n] of unseenTileCounts(game, index)) {
+        for (let c = 0; c < n; c++) {
+            if (k === 'F') unseen.push({ id: `u-F-${c}`, color: 'Sahte', number: 0, isFakeJoker: true });
+            else { const [color, num] = k.split(':'); unseen.push({ id: `u-${k}-${c}`, color, number: Number(num), isFakeJoker: false }); }
+        }
+    }
+    return { hand, okey: game.okey, unseen, candidates, myDraws: Math.floor(game.tiles.length / 4),
+        need: room.stackingMode ? room.minimumOpenScore : 101, minPairs: room.stackingMode ? room.minimumPairs : 5,
+        samples: MC_SAMPLES, seed: ((room.roundId || 1) * 7919 + (game.turnSerial || 0) * 104729 + index) >>> 0 };
 }
 function maybeBotOpen(room, index) {
     const game = room.game;
@@ -525,9 +562,22 @@ function runBotTurn(room, index) {
     maybeBotOpen(room, index);
     if (game.playerStates[index].hasOpened) botProcessOpenMoves(room, index);
     if (state.mustOpenThisTurn) { timeoutMove(room); return; }
-    const discard = chooseBotDiscard(room, index);
-    if (!discard) { finishRound(room, null, { type: 'exhausted' }); return; }
-    const error = discardAndAdvance(room, index, discard.id);
+    const choice = chooseBotDiscard(room, index, { deferMonteCarlo: MC_IN_WORKER });
+    if (!choice) { finishRound(room, null, { type: 'exhausted' }); return; }
+    if (!choice.deferred) { botDiscard(room, index, choice); return; }
+    // Monte Carlo worker'da hesaplanır; event loop serbest kalır. Cevap geldiğinde masa hâlâ aynı durumdaysa taş atılır,
+    // worker cevap vermezse (süre, hata) sezgisel seçim atılır.
+    const ticket = { game, roundId: room.roundId, serial: game.turnSerial || 0 };
+    BotPool.decide(choice.mcInput, MC_TIMEOUT_MS).then(guardedTimer(room, 'Bot Monte Carlo', result => {
+        if (room.game !== ticket.game || room.roundId !== ticket.roundId || (game.turnSerial || 0) !== ticket.serial
+            || !room.started || game.currentPlayer !== index || !room.players[index]?.isBot) return; // bu arada durum değişti
+        const tile = (result && game.playerTiles[index].find(t => t.id === result.id)) || choice.fallback;
+        botDiscard(room, index, game.playerTiles[index].includes(tile) ? tile : chooseBotDiscard(room, index));
+    }));
+}
+function botDiscard(room, index, tile) {
+    if (!tile) { finishRound(room, null, { type: 'exhausted' }); return; }
+    const error = discardAndAdvance(room, index, tile.id);
     if (error) timeoutMove(room);
 }
 
@@ -669,7 +719,7 @@ function recoverRoom(room, label, err) {
     } catch (err3) { console.error(`[${room.code}] el yeniden başlatılamadı:`, err3); }
 }
 function guardedTimer(room, label, fn) {
-    return () => { try { fn(); } catch (err) { recoverRoom(room, label, err); } };
+    return (...args) => { try { fn(...args); } catch (err) { recoverRoom(room, label, err); } };
 }
 function beginTurn(room) {
     stopTurn(room);
@@ -1499,6 +1549,7 @@ function shutdown(signal) {
     RoomStore.flushAll();
     io.emit('tableChatMessage', { from: 'Sistem', message: 'Sunucu güncelleniyor. Masanız korunuyor, birkaç saniye içinde otomatik olarak geri bağlanacaksınız.', at: Date.now() });
     Accounts.close();
+    BotPool.close();
     io.close();
     httpServer.close(() => process.exit(0));
     setTimeout(() => process.exit(0), 3000).unref();
