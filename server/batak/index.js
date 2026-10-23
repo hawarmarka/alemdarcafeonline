@@ -8,6 +8,7 @@ const Bot = require('./bot');
 
 const BID_MS = 20000, PLAY_MS = 25000, BOT_MS = 900, TRICK_SHOW_MS = 1300, NEXT_ROUND_MS = 7000, FILL_MS = 6000, IDLE_MS = 60000;
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const TREATS = ['cay', 'kahve', 'oralet', 'ayran', 'su', 'lokum', 'simit', 'kola']; // istemcideki ikram listesiyle aynı olmalı
 const BOT_NAMES = ['Bot Ayşe', 'Bot Mehmet', 'Bot Zeynep', 'Bot Can', 'Bot Elif', 'Bot Emre'];
 
 function install({ io, Accounts, Avatars, Logger }) {
@@ -77,6 +78,7 @@ function install({ io, Accounts, Avatars, Logger }) {
       room.players.sort((a, b) => (a.seat ?? 9) - (b.seat ?? 9));
       room.players.forEach((p, i) => { p.seat = i; });
     }
+    if (room.voice?.size) voiceBroadcast(room); // koltuk numaraları değişti
     room.round = 0; room.totals = [0, 0, 0, 0]; room.history = []; room.dealer = crypto.randomInt(4);
     clear(room, 'fillTimer');
     startRound(room, true);
@@ -197,6 +199,7 @@ function install({ io, Accounts, Avatars, Logger }) {
   // ---------- Masaya giriş/çıkış ----------
   function leave(room, seat) {
     const p = room.players[seat]; if (!p) return;
+    if (room.voice?.delete(p.token)) setTimeout(() => rooms.has(room.code) && voiceBroadcast(room), 0);
     if (room.phase === 'waiting') room.players.splice(seat, 1);
     else { p.isBot = true; p.socketId = null; p.token = 'bot-' + crypto.randomBytes(6).toString('hex'); p.name += ' (bot)'; p.accountId = null; }
     // Masayı açan ayrıldıysa yönetim masadaki ilk gerçek oyuncuya geçer.
@@ -234,6 +237,11 @@ function install({ io, Accounts, Avatars, Logger }) {
     while (room.players.length < 4) addBot(room);
     startMatch(room);
   }
+  // Sesli sohbetteki oyuncuların güncel koltukları (bağlı olanlar).
+  const voiceBroadcast = room => {
+    const list = room.players.map((p, i) => (p.socketId && room.voice?.has(p.token) ? i : -1)).filter(i => i >= 0);
+    for (const p of room.players) if (p.socketId) io.to(p.socketId).emit('batak:voice', { list });
+  };
   const where = socket => { const room = rooms.get(socket.data.batakCode); return { room, seat: room ? seatOfToken(room, socket.data.batakToken) : -1 }; };
 
   function onSocket(socket) {
@@ -312,6 +320,37 @@ function install({ io, Accounts, Avatars, Logger }) {
       socket.data.batakChatAt = now;
       for (const p of room.players) if (p.socketId) io.to(p.socketId).emit('batak:chat', { seat, name: room.players[seat].name, text });
     });
+    // İkram: çay, kahve, oralet… bir oyuncuya ya da bütün masaya (to = -1). Herkese gider, ekranda uçarak gelir.
+    socket.on('batak:treat', data => {
+      const { room, seat } = where(socket);
+      if (!room || seat < 0) return;
+      const item = String(data?.item || ''), to = Number(data?.to);
+      if (!TREATS.includes(item)) return fail('Bu ikram yok.');
+      if (!(to === -1 || (Number.isInteger(to) && to >= 0 && to < room.players.length && to !== seat))) return fail('Kime ikram edeceğini seç.');
+      const now = Date.now();
+      if (now - (socket.data.batakTreatAt || 0) < 3000) return fail('Biraz bekle, çay demleniyor.');
+      socket.data.batakTreatAt = now;
+      for (const p of room.players) if (p.socketId) io.to(p.socketId).emit('batak:treat', { from: seat, to, item, name: room.players[seat].name });
+    });
+    // Sesli sohbet (WebRTC): sunucu yalnızca kimin sesli sohbette olduğunu duyurur ve teklif/cevap/ICE iletilerini
+    // aynı masadaki hedef oyuncuya aktarır. Ses doğrudan tarayıcılar arasında akar, sunucudan geçmez.
+    // Üyelik oyuncu jetonuyla tutulur (koltuk sırası maç başında değişebilir); listede güncel koltuk numaraları gider.
+    socket.on('batak:voiceJoin', () => {
+      const { room, seat } = where(socket); if (!room || seat < 0) return;
+      room.voice = room.voice || new Set(); room.voice.add(room.players[seat].token); voiceBroadcast(room);
+    });
+    socket.on('batak:voiceLeave', () => {
+      const { room, seat } = where(socket); if (!room || seat < 0 || !room.voice) return;
+      room.voice.delete(room.players[seat].token); voiceBroadcast(room);
+    });
+    socket.on('batak:signal', data => {
+      const { room, seat } = where(socket); if (!room || seat < 0) return;
+      const to = Number(data?.to), target = room.players[to];
+      if (!target?.socketId || !room.voice?.has(room.players[seat].token) || !room.voice.has(target.token)) return;
+      const payload = data?.data;
+      if (!payload || JSON.stringify(payload).length > 20000) return;
+      io.to(target.socketId).emit('batak:signal', { from: seat, data: payload });
+    });
     // Maç bitince aynı masada yeniden.
     socket.on('batak:rematch', () => {
       const { room, seat } = where(socket);
@@ -329,6 +368,7 @@ function install({ io, Accounts, Avatars, Logger }) {
       if (!room || seat < 0 || room.players[seat].socketId !== socket.id) return;
       // Lobiden masa sayfasına geçerken eski bağlantı kopar; koltuk korunur, yeni sayfa batak:rejoin ile geri bağlanır.
       room.players[seat].socketId = null;
+      if (room.voice?.delete(room.players[seat].token)) voiceBroadcast(room);
       tidy(room);
       if (rooms.has(room.code) && room.turn === seat) schedule(room); else if (rooms.has(room.code)) emit(room);
     });

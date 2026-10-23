@@ -256,13 +256,24 @@ Lobideki BATAK kartı artık çalışıyor: **OYNA** (ihaleli, boş koltuklara 6
   - `public/batak.html`, `public/js/batak.js`, `public/css/batak.css`: masa sayfası.
   - `public/js/batak-cards.js`: kart çizimi.
   - Lobi tarafı `main.js` içindeki "Batak" bölümünde.
-- Kartlar klasik iskambil destesi görünümünde, SVG ile çiziliyor; görsel dosya yok (`batak-cards.js`). Kullanıcının gönderdiği klasik deste örnek alındı:
-  - Beyaz zemin, ince siyah kenar.
-  - Köşede dar, kalın rakam ve hemen altında küçük renk işareti; sağ altta aynısı ters.
-  - 2-10 için standart pip dizilimi. As'ta ortada tek simge, maça ası büyük.
-  - J/Q/K: çerçeve içinde sarı-kırmızı-mavi giysili, iri başlı, ayna simetrili figür. Papazda taç ve kılıç, kızda taç ve çiçek, valede şapka ve asa var.
-  - Arka yüz lacivert kafes deseni.
-  - Her kart bir kez çizilip önbelleğe alınıyor. Renk simgeleri sayfa açılınca `BatakCards.install()` ile ekleniyor.
+- **Kartlar kullanıcının gönderdiği deste resminden** (`public/asset/cards/klasik-deste.jpg`, 1200×900) kesiliyor (`batak-cards.js`, CSS `background-position`).
+  - Resimde 4 satır (sinek, maça, kupa, karo) × 13 sütun (2…10, J, Q, K, A) var. Her kart 90×121 piksel; sütunlar 92, satırlar 124 piksel arayla. İlk kart (1, 157) noktasında.
+  - Arka yüz ve renk simgeleri SVG.
+  - **Uyarı:** bu resim eski Windows Solitaire destesi (telif Microsoft'ta) ve düşük çözünürlüklü. Kullanıcıya söylendi, kullanıcı yine de bunu seçti. Değiştirmek gerekirse yalnızca bu resim ve `SPRITE` ölçüleri değişir. Önerilen seçenek: OpenGameArt'taki Byron Knoll destesi (CC0).
+- Yerleşim (`.bk-arena` grid): bütün oyuncu kutuları masanın **dışında**. Üst oyuncu masanın üstünde, sol/sağ oyuncular yanlarda, sen masanın altında ortada, elin en altta.
+  - Kutu (`.bk-pbox`): avatar (seviye, dağıtan D), ad ve etiketler (SEN/BOT/EŞİN/RAKİP), SÖZ–ALDI–PUAN, kalan kart sayısı ve sıradayken altta süre çubuğu.
+  - Kısa ekranda (yükseklik ≤ 560 px) üst oyuncu üst çubuğun ortasına, sen elin soluna geçiyorsun; masa bütün yüksekliği kullanıyor.
+- Üst çubukta gruplu araçlar var: Arkadaşlar, Sohbet, Sesli, İkram | Son el, Puan, Ses, Menü.
+- **İkram** (`batak-extras.js`, sunucuda `batak:treat`):
+  - Çay, Türk kahvesi, oralet, ayran, su, lokum, simit, kola (özel SVG çizimler). Sunucudaki `TREATS` listesiyle istemci aynı olmalı.
+  - Bir oyuncuya ya da bütün masaya ikram edilebiliyor; 3 saniyede bir.
+  - İkram uçarak gidiyor, alanın kutusunun köşesinde 90 saniye duruyor ve sohbet günlüğüne yazılıyor. Profil penceresinde de İKRAM ET var.
+- **Sesli sohbet** (WebRTC, `batak:voiceJoin` / `batak:voiceLeave` / `batak:signal`):
+  - Sunucu yalnızca kimin sesli sohbette olduğunu duyuruyor ve teklif/cevap/ICE iletilerini aynı masadaki hedefe aktarıyor. Ses doğrudan tarayıcılar arasında akıyor.
+  - Üyelik oyuncu jetonuyla tutuluyor, istemcide eşler oyuncu adıyla. Adı küçük olan teklif ediyor.
+  - Konuşan oyuncunun kutusu yeşil parlıyor (AudioContext seviye ölçümü); sesli sohbetteki oyuncuda mikrofon işareti var.
+  - Yalnızca STUN var (Google, Twilio), TURN sunucusu yok. Bazı kurumsal ve mobil ağlarda bağlantı kurulamayabilir; gerekirse bir TURN sunucusu eklenmeli.
+  - Tarayıcıda iki sekmeyle yapay ses kaynağıyla denendi: iki yönlü canlı ses kanalı kuruldu. Gerçek mikrofonla deneme Claude'un tarayıcı panelinde yapılamadı (mikrofon engelli).
 - Düğmeler sade ve modern ("oyuncak gibi" parlak 3B düğme yok):
   - Düz renk, ince kenar, çizgi ikonlu (SVG) üst düğmeler.
   - `bk-btn.primary` altın, `bk-btn.ghost` şeffaf.
@@ -304,7 +315,7 @@ Lobideki BATAK kartı artık çalışıyor: **OYNA** (ihaleli, boş koltuklara 6
 - Hesaplılara maç sonunda XP veriliyor (`Accounts.award`). Çip bahsi yok.
 - Masa sohbeti `batak:chat`: en çok 100 karakter, 1,2 saniyede bir mesaj.
 - Yapılmayanlar: King, Kanlı, OHEL, Gömmeli türleri ve Batak için çip bahsi.
-- Test: `tests/v41Batak.test.js`. Kurallar, ihale, puan ve 360 botlu el test ediliyor (her kart kurala uygun, 52 kart korunuyor). Ayrıca socket üzerinden 5 ellik maç, kural dışı kartın reddi ve sohbet test ediliyor.
+- Test: `tests/v41Batak.test.js`. Kurallar, ihale, puan ve 360 botlu el test ediliyor (her kart kurala uygun, 52 kart korunuyor). Ayrıca socket üzerinden 5 ellik maç, kural dışı kartın reddi, koltuk seçimi, ikram, sesli sohbet sinyal iletimi ve sohbet test ediliyor.
 
 ## 6. Teknoloji önerileri neden şimdilik gerekli değil
 

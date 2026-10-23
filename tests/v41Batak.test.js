@@ -124,6 +124,22 @@ h1.receive('batak:startBots');
 assert.equal(room2.players[3].name, 'Konuk', 'maç başında oyuncular koltuk sırasına dizilmeli');
 assert.deepEqual(room2.players.map(p => p.seat), [0, 1, 2, 3]);
 h2.receive('batak:changeSeat', { seat: 1 }); assert.match(h2.last('batak:error').message, /başladıktan/);
+// İkram: geçerli ikram herkese gider; geçersiz ikram ve kendine ikram reddedilir; art arda sınırlı.
+h2.receive('batak:treat', { item: 'cay', to: 0 });
+assert.deepEqual(h1.last('batak:treat'), { from: 3, to: 0, item: 'cay', name: 'Konuk' });
+h2.data.batakTreatAt = 0; // bekleme süresini atla
+h2.receive('batak:treat', { item: 'viski', to: 0 }); assert.match(h2.last('batak:error').message, /ikram yok/);
+h2.receive('batak:treat', { item: 'kahve', to: 3 }); assert.match(h2.last('batak:error').message, /Kime/);
+h2.receive('batak:treat', { item: 'kahve', to: -1 }); h2.receive('batak:treat', { item: 'kahve', to: -1 });
+assert.match(h2.last('batak:error').message, /bekle/);
+// Sesli sohbet: katılan listede görünür; sinyal yalnızca ikisi de sesli sohbetteyken hedefe iletilir.
+h2.receive('batak:signal', { to: 0, data: { description: { type: 'offer', sdp: 'x' } } });
+assert.equal(h1.last('batak:signal'), undefined, 'sesli sohbette olmayana sinyal gitmez');
+h1.receive('batak:voiceJoin'); h2.receive('batak:voiceJoin');
+assert.deepEqual(h1.last('batak:voice').list, [0, 3]);
+h2.receive('batak:signal', { to: 0, data: { description: { type: 'offer', sdp: 'x' } } });
+assert.deepEqual(h1.last('batak:signal'), { from: 3, data: { description: { type: 'offer', sdp: 'x' } } });
+h2.receive('batak:voiceLeave'); assert.deepEqual(h1.last('batak:voice').list, [0]);
 // Masa sohbeti: masadakilere gider, kontrol karakterleri ve uzunluk temizlenir, art arda yazma sınırlı.
 s1.receive('batak:chat', { text: 'Selam\u0007 ' + 'x'.repeat(200) });
 const chat = s1.last('batak:chat'); assert.equal(chat.seat, 0); assert.equal(chat.text.length, 100); assert(!chat.text.includes('\u0007'));

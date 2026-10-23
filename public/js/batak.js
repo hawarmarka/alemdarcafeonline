@@ -63,7 +63,8 @@ function render() {
   $('bkTrump').title = s.trump ? `Koz: ${SUIT_NAME[s.trump]}${s.trumpBroken ? '' : ' (henüz oynanmadı)'}` : 'Koz henüz seçilmedi';
   $('bkContract').textContent = s.contract ? `İhale: ${s.players[s.contract.seat].name} · ${s.contract.bid} el${s.contract.forced ? ' (zorunlu)' : ''}`
     : s.declare && s.phase === 'playing' ? 'Herkes söylediği kadar el almaya çalışıyor' : s.phase === 'bidding' ? 'İhale sürüyor…' : '';
-  renderSeats(); renderTrick(); renderHand(); renderPanels(); renderWait(); renderDummy(); renderTurnBar();
+  renderSeats(); renderTrick(); renderHand(); renderPanels(); renderWait(); renderDummy();
+  window.BatakExtras?.update();
   const notice = $('bkNotice'); notice.textContent = s.notice || ''; notice.classList.toggle('hidden', !s.notice);
   // Sesler: sıra bana geldi, el bitti
   if (prev && s.turn === s.me && prev.turn !== s.me && ['bidding', 'trump', 'playing'].includes(s.phase)) sfx.turn();
@@ -78,62 +79,53 @@ function renderSeats() {
   const s = state, active = ['bidding', 'trump', 'playing'].includes(s.phase), waiting = s.phase === 'waiting';
   for (let place = 0; place < 4; place++) {
     const seat = waiting ? waitingSeat(place) : place;
-    const box = $(SEAT_ID[waiting ? POS[place] : posOf(place)]), p = seat >= 0 ? s.players[seat] : null;
-    const bubble = box.querySelector('.bk-bubble');
-    box.replaceChildren(); box.className = 'bk-seat';
+    const slot = $(SEAT_ID[waiting ? POS[place] : posOf(place)]), p = seat >= 0 ? s.players[seat] : null;
+    const keep = [...slot.querySelectorAll('.bk-bubble')]; // balon yeniden çizimde kaybolmasın (ikramları batak-extras.js yeniden koyar)
+    slot.replaceChildren(); slot.dataset.seat = seat >= 0 ? String(seat) : '';
     if (!p) {
+      const empty = el('div', 'bk-empty');
       const sit = el('button', 'bk-sit', 'OTUR'); sit.type = 'button'; sit.title = 'Bu koltuğa geç';
       sit.onclick = () => socket.emit('batak:changeSeat', { seat: place });
-      box.append(sit, el('div', 'bk-plate muted', 'Boş koltuk'));
+      empty.append(el('span', null, 'Boş koltuk'), sit);
+      slot.append(empty);
       continue;
     }
-    box.classList.toggle('turn', active && s.turn === seat);
-    box.classList.toggle('away', !p.connected);
-    const av = el('button', 'bk-avatar'); av.type = 'button'; av.title = `${p.name} · profili gör`;
-    const img = el('img'); img.src = avatarSrc(p.avatar); img.alt = ''; av.append(img, el('span', 'bk-level', String(p.level || 1)));
-    av.onclick = () => showProfile(p);
-    if (active && s.turn === seat) { const ring = el('div', 'bk-ring'); av.prepend(ring); runRing(ring, box); }
-    if (s.dealer === seat && s.phase !== 'waiting') { const d = el('span', 'bk-dealer', 'D'); d.title = 'Dağıtan'; av.append(d); }
-    const plate = el('div', 'bk-plate');
-    plate.append(el('b', null, (seat === s.me ? 'SEN · ' : '') + (p.isBot ? '🤖 ' : '') + p.name + (p.connected ? '' : ' ⏳')));
-    const stats = el('div', 'bk-stats');
-    if (s.contract?.seat === seat) stats.append(el('span', 'bk-chip contract', `İHALE ${s.contract.bid}`));
-    else if (p.passed) stats.append(el('span', 'bk-chip pass', 'PAS'));
-    else if (p.bid != null) stats.append(el('span', 'bk-chip bid', s.declare ? (p.bid === 0 ? 'EL ALMAZ' : `SÖZ ${p.bid}`) : `${p.bid}`));
-    if (!['waiting', 'bidding'].includes(s.phase)) stats.append(el('span', 'bk-chip won', `EL ${p.tricks}`));
-    if (s.team && !waiting) stats.append(el('span', 'bk-chip team', seat % 2 === s.me % 2 ? 'TAKIMIN' : 'RAKİP'));
-    stats.append(el('span', 'bk-chip', `${p.total} P`));
-    plate.append(stats);
-    box.append(av, plate);
-    if (seat !== s.me && p.cards && !(s.revealed && s.revealed.seat === seat)) box.append(fan(p.cards, posOf(seat)));
-    if (bubble) box.append(bubble);
+    slot.append(playerBox(p, seat, active, waiting), ...keep);
   }
 }
-// Rakibin kapalı kartları yelpaze gibi
-function fan(n, pos) {
-  const f = el('div', 'bk-fan'), spread = Math.min(6, 60 / n);
-  for (let i = 0; i < n; i++) {
-    const c = Cards.el(null), a = (i - (n - 1) / 2) * spread;
-    c.style.transform = `translateX(-50%) rotate(${pos === 'top' ? 180 + a : a}deg)`;
-    f.append(c);
-  }
-  return f;
+// Oyuncu kutusu: avatar (seviye, dağıtan), ad ve etiketler, SÖZ / ALDI / PUAN, kalan kart sayısı, sıra süresi.
+function playerBox(p, seat, active, waiting) {
+  const s = state, mine = seat === s.me, turn = active && s.turn === seat;
+  const box = el('div', 'bk-pbox' + (mine ? ' me' : '') + (turn ? ' turn' : '') + (p.connected ? '' : ' away'));
+  box.dataset.seat = String(seat);
+  const av = el('button', 'pb-av'); av.type = 'button'; av.title = `${p.name} · profili gör`;
+  const img = el('img'); img.src = avatarSrc(p.avatar); img.alt = ''; av.append(img, el('span', 'pb-lv', String(p.level || 1)));
+  if (s.dealer === seat && !waiting) { const d = el('span', 'pb-dealer', 'D'); d.title = 'Dağıtan'; av.append(d); }
+  av.onclick = () => showProfile(p);
+  const main = el('div', 'pb-main');
+  const name = el('div', 'pb-name'); name.append(document.createTextNode(p.name));
+  if (mine) name.append(el('i', 'pb-tag me', 'SEN'));
+  else if (p.isBot) name.append(el('i', 'pb-tag', 'BOT'));
+  if (s.team && !waiting && !mine) name.append(el('i', 'pb-tag team', seat % 2 === s.me % 2 ? 'EŞİN' : 'RAKİP'));
+  if (!p.connected) name.append(el('i', 'pb-tag', 'BAĞLANIYOR'));
+  main.append(name);
+  const stats = el('div', 'pb-stats');
+  const stat = (cls, label, value) => { const sp = el('span', cls); sp.append(el('small', null, label), el('b', null, String(value))); stats.append(sp); };
+  if (s.contract?.seat === seat) stat('contract bid', 'İHALE', s.contract.bid);
+  else if (p.passed) stat('pass', 'SÖZ', 'PAS');
+  else stat('bid', s.declare ? 'SÖZ' : 'İHALE', p.bid == null ? '–' : s.declare && p.bid === 0 ? '0' : p.bid);
+  stat('won', 'ALDI', ['waiting', 'bidding'].includes(s.phase) ? '–' : p.tricks);
+  stat('', 'PUAN', p.total);
+  main.append(stats);
+  if (turn) main.append(el('div', 'pb-turn', mine ? (s.phase === 'playing' ? 'SIRA SENDE · KART AT' : s.phase === 'trump' ? 'KOZU SEÇ' : 'İHALE SIRASI SENDE') : 'DÜŞÜNÜYOR…'));
+  else if (!mine && p.cards && !waiting) { const c = el('div', 'pb-cards'); c.append(el('i'), document.createTextNode(`${p.cards} kart`)); main.append(c); }
+  box.append(av, main);
+  if (turn) { const t = el('div', 'pb-timer'), fill = el('b'); t.append(fill); box.append(t); runTimer(fill); }
+  return box;
 }
-// Sıra halkası: kalan süreye göre bir kez akar (her karede JS çalışmaz). Son 5 saniyede kırmızı.
-CSS.registerProperty?.({ name: '--p', syntax: '<percentage>', inherits: false, initialValue: '0%' });
-function runRing(ring, box) {
-  const total = state.turnMs || 25000, left = state.remainingMs || 0, start = `${100 * (1 - left / total)}%`;
-  ring.style.setProperty('--p', start);
-  ring.animate([{ '--p': start }, { '--p': '100%' }], { duration: Math.max(0, left), fill: 'forwards' });
-  clearTimeout(box.hurry); box.hurry = setTimeout(() => box.classList.add('hurry'), Math.max(0, left - 5000));
-}
-function renderTurnBar() {
-  const s = state, mine = s.turn === s.me && ['bidding', 'trump', 'playing'].includes(s.phase);
-  $('bkTurnBar').classList.toggle('hidden', !mine);
-  if (!mine) return;
-  $('bkTurnText').textContent = s.phase === 'playing' ? 'SIRA SENDE · KART AT' : s.phase === 'trump' ? 'KOZU SEÇ' : 'İHALE SIRASI SENDE';
-  const fill = $('bkTurnFill'), total = s.turnMs || 25000, left = s.remainingMs || 0;
-  fill.getAnimations().forEach(a => a.cancel());
+// Sıra süresi: kalan süreye göre bir kez akar (her karede JS çalışmaz).
+function runTimer(fill) {
+  const total = state.turnMs || 25000, left = state.remainingMs || 0;
   fill.animate([{ transform: `scaleX(${left / total})` }, { transform: 'scaleX(0)' }], { duration: Math.max(0, left), fill: 'forwards' });
 }
 // Ortadaki el: yeni kart oyuncunun yönünden kayarak gelir; el bitince kartlar alan oyuncuya doğru toplanır.
@@ -199,7 +191,7 @@ function renderHand() {
 // Kartlar arası bindirme ekran genişliğine göre: geniş ekranda açık, darda sık; renk arası boşluk için pay bırakılır.
 function layoutHand(box, n) {
   const w = box.querySelector('.card')?.offsetWidth || 80;
-  const side = innerHeight <= 520 ? 270 : 40; // kısa ekranda solda kendi panelin var
+  const side = innerHeight <= 560 ? 230 : 40; // kısa ekranda solda kendi kutun var
   const avail = Math.min(box.clientWidth - side, w * 9.5), step = n > 1 ? (avail - w - w * .18 * 3) / (n - 1) : w;
   box.style.setProperty('--overlap', `${Math.min(-w * .18, Math.max(-w * .72, step - w))}px`);
 }
@@ -336,6 +328,8 @@ async function showProfile(p) {
   add.classList.toggle('hidden', p.isBot || !p.account || mine);
   add.disabled = false; add.textContent = 'ARKADAŞ EKLE';
   $('bkProfileSub').textContent = p.isBot ? 'Bilgisayar oyuncusu' : p.account ? `Seviye ${p.level || 1}` : 'Misafir oyuncu (hesabı yok)';
+  $('bkProfileTreat').classList.toggle('hidden', !!mine);
+  $('bkProfileTreat').onclick = () => { closeModal('bkProfileModal'); window.BatakExtras?.openTreat(state.players.indexOf(p)); };
   stat('Bu maçta puan', p.total ?? 0);
   openModal('bkProfileModal');
   if (!p.account || p.isBot) return;
@@ -372,6 +366,10 @@ if (window.Social) Social.init({ socket, token: authToken, toast: m => toast(m, 
     socket.emit('batak:leave');
   } });
 $('bkInviteBtn').onclick = () => window.Social ? Social.open(true) : null;
+// İkram ve sesli sohbet (js/batak-extras.js): masadaki oyuncu kutularını ve sohbet günlüğünü kullanır.
+window.BatakExtras?.init({ socket, toast, getState: () => state, openModal, closeModal,
+  slotOf: seat => [...document.querySelectorAll('.bk-slot')].find(s => s.dataset.seat === String(seat)),
+  log: text => { const p = el('p', 'sys', text); $('bkChatLog').append(p); } });
 
 // ---------- Sohbet ----------
 function addChat(m) {
