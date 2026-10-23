@@ -69,7 +69,10 @@ async function recoverSession() {
   applyProfile();
 }
 // Arkadaşlar ve mesajlar (js/social.js). Davet veya arkadaşın masası: kodla o masaya otur.
-const joinRoom = code => { $('roomCodeInput').value = code; start('code'); };
+const joinRoom = (code, game = 'okey') => {
+  if (game === 'batak') return batakJoin('code', { code });
+  $('roomCodeInput').value = code; start('code');
+};
 Social.init({ socket, token: () => authToken, toast, avatarSrc, onJoin: joinRoom,
   buttons: () => [$('friendsBtn')].filter(Boolean),
   needAccount: () => { toast('Arkadaş eklemek ve mesajlaşmak için ücretsiz hesap aç.'); openAuth('register'); } });
@@ -183,10 +186,14 @@ function reenable() {
 document.querySelectorAll('.join-mode').forEach(btn => btn.onclick = () => start('random', btn.dataset.mode));
 // ODA SEÇ: bekleyen masalar tek tek, oval masa üstünde 4 koltukla gösterilir. Boş koltuğa OTUR ile o koltuğa oturulur.
 // Pencere açıkken liste 4 sn'de bir tazelenir; gösterilen masa (kodla) korunur.
-const tp = { list: [], code: null, filter: 'all', timer: null };
+// Okey ve Batak ortak: tp.game hangi oyunun masalarının gösterildiğini söyler (kaynak, süzgeç, kurallar, katılma farklı).
+const tp = { list: [], code: null, filter: 'all', timer: null, game: 'okey' };
 const TP_SEAT_CLASS = ['s-bottom', 's-right', 's-top', 's-left']; // sunucudaki koltuk sırası
-const tpMatch = r => tp.filter === 'all' || (tp.filter === 'tek' && !r.teamMode) || (tp.filter === 'esli' && r.teamMode)
-  || (tp.filter === 'katlamali' && r.stackingMode) || (tp.filter === 'yardimsiz' && !r.assisted);
+const TP_FILTERS = { okey: [['all', 'TÜMÜ'], ['tek', 'TEK'], ['esli', 'EŞLİ'], ['katlamali', 'KATLAMALI'], ['yardimsiz', 'YARDIMSIZ']],
+  batak: [['all', 'TÜMÜ'], ['ihaleli', 'İHALELİ'], ['kozmaca', 'KOZ MAÇA'], ['esli', 'EŞLİ']] };
+const BATAK_TYPE_NAME = { ihaleli: 'İhaleli', kozmaca: 'Koz Maça', esli: 'Eşli' };
+const tpMatch = r => tp.filter === 'all' || (tp.game === 'batak' ? r.type === tp.filter
+  : (tp.filter === 'tek' && !r.teamMode) || (tp.filter === 'esli' && r.teamMode) || (tp.filter === 'katlamali' && r.stackingMode) || (tp.filter === 'yardimsiz' && !r.assisted));
 function tpVisible() { return tp.list.filter(tpMatch); }
 function tpPaint() {
   const list = tpVisible(), box = $('tpTable');
@@ -199,11 +206,17 @@ function tpPaint() {
     box.append(el('p', 'tp-empty', 'Şu an bekleyen masa yok. MASA AÇ ile kendi masanı kur ya da HEMEN OYNA ile hemen eşleş.'));
     $('tpCount').textContent = ''; return;
   }
-  box.append(el('div', 'tp-bet', `🪙 ${Number(room.bet || 1000).toLocaleString('tr-TR')}`));
   const rules = el('div', 'tp-rules');
-  rules.append(el('span', null, room.teamMode ? 'Eşli' : 'Tek'), el('span', null, `${room.roundLimit || 4} El`),
-    el('span', 'wide ' + (room.assisted ? 'g' : ''), room.assisted ? 'Yardımlı' : 'Yardımsız'),
-    el('span', 'wide ' + (room.stackingMode ? 'r' : ''), room.stackingMode ? 'Katlamalı' : 'Katlamasız'));
+  if (tp.game === 'batak') {
+    box.classList.add('batak');
+    rules.append(el('span', 'wide g', 'BATAK'), el('span', null, BATAK_TYPE_NAME[room.type] || room.type), el('span', null, `${room.rounds} El`));
+  } else {
+    box.classList.remove('batak');
+    box.append(el('div', 'tp-bet', `🪙 ${Number(room.bet || 1000).toLocaleString('tr-TR')}`));
+    rules.append(el('span', null, room.teamMode ? 'Eşli' : 'Tek'), el('span', null, `${room.roundLimit || 4} El`),
+      el('span', 'wide ' + (room.assisted ? 'g' : ''), room.assisted ? 'Yardımlı' : 'Yardımsız'),
+      el('span', 'wide ' + (room.stackingMode ? 'r' : ''), room.stackingMode ? 'Katlamalı' : 'Katlamasız'));
+  }
   box.append(rules);
   (room.seats || []).forEach((p, s) => {
     const seat = el('div', 'tp-seat ' + TP_SEAT_CLASS[s]);
@@ -212,7 +225,11 @@ function tpPaint() {
       seat.append(img, el('b', null, (p.isBot ? '🤖 ' : '') + p.name));
     } else {
       const b = el('button', 'tp-sit', 'OTUR'); b.type = 'button';
-      b.addEventListener('click', () => { $('roomCodeInput').value = room.code; hideModal('modeListModal'); start('code', 'klasik', { seat: s }); });
+      b.addEventListener('click', () => {
+        hideModal('modeListModal');
+        if (tp.game === 'batak') return batakJoin('code', { code: room.code, seat: s });
+        $('roomCodeInput').value = room.code; start('code', 'klasik', { seat: s });
+      });
       seat.append(b);
     }
     box.append(seat);
@@ -220,7 +237,7 @@ function tpPaint() {
   $('tpCount').textContent = `Masa ${i + 1} / ${list.length} · ${room.host ? room.host + ' · ' : ''}${room.code}`;
 }
 async function tpLoad() {
-  try { tp.list = (await api('/api/rooms', null, 'GET')).waiting || []; } catch (e) { toast(e.message); }
+  try { tp.list = (await api(tp.game === 'batak' ? '/api/batak' : '/api/rooms', null, 'GET')).waiting || []; } catch (e) { toast(e.message); }
   tpPaint();
 }
 function tpStep(d) {
@@ -228,7 +245,15 @@ function tpStep(d) {
   const i = Math.max(0, list.findIndex(r => r.code === tp.code));
   tp.code = list[(i + d + list.length) % list.length].code; tpPaint();
 }
-async function showRoomList() {
+async function showRoomList(game = 'okey') {
+  tp.game = game; tp.filter = 'all'; tp.code = null;
+  $('modeListTitle').textContent = game === 'batak' ? 'BATAK · MASA SEÇ' : 'ODA SEÇ';
+  const f = $('tpFilter'); f.replaceChildren();
+  for (const [key, label] of TP_FILTERS[game]) {
+    const b = document.createElement('button'); b.type = 'button'; b.dataset.f = key; b.textContent = label; b.classList.toggle('on', key === 'all');
+    b.addEventListener('click', () => { tp.filter = key; tp.code = null; f.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); tpPaint(); });
+    f.append(b);
+  }
   showModal('modeListModal');
   await tpLoad();
   clearInterval(tp.timer);
@@ -236,14 +261,10 @@ async function showRoomList() {
 }
 $('tpPrev').onclick = () => tpStep(-1);
 $('tpNext').onclick = () => tpStep(1);
-$('tpCreate').onclick = () => { hideModal('modeListModal'); openCreate(true); };
-document.querySelectorAll('#tpFilter button').forEach(b => b.addEventListener('click', () => {
-  tp.filter = b.dataset.f; tp.code = null;
-  document.querySelectorAll('#tpFilter button').forEach(x => x.classList.toggle('on', x === b)); tpPaint();
-}));
+$('tpCreate').onclick = () => { hideModal('modeListModal'); if (tp.game === 'batak') showModal('batakModal'); else openCreate(true); };
 addEventListener('keydown', e => { if ($('modeListModal').classList.contains('hidden')) return; if (e.key === 'ArrowLeft') tpStep(-1); if (e.key === 'ArrowRight') tpStep(1); });
 document.querySelectorAll('.select-mode').forEach(btn => btn.onclick = () => showRoomList());
-$('modeAutoJoinBtn').onclick = () => { hideModal('modeListModal'); start('random', quickMode()); };
+$('modeAutoJoinBtn').onclick = () => { hideModal('modeListModal'); if (tp.game === 'batak') batakJoin('quick'); else start('random', quickMode()); };
 $('randomJoinBtn').onclick = () => start('random', quickMode());
 // MASA AÇ: KLASİK kartında herkese açık (Oda Seç listesinde), ÖZEL kartında yalnızca kodla katılınan masa
 let createPublic = true;
@@ -280,9 +301,10 @@ recoverSession(); loadRoomCounts(); setInterval(loadRoomCounts, 15000);
   let mode = null, invite = null;
   try { mode = sessionStorage.getItem('autoJoinMode'); sessionStorage.removeItem('autoJoinMode'); } catch {}
   // Masadayken kabul edilen davet: masa sayfası ayrılıp buraya döner, davet edilen masaya oturulur.
-  try { invite = sessionStorage.getItem('inviteJoin'); sessionStorage.removeItem('inviteJoin'); } catch {}
+  let inviteGame = 'okey';
+  try { invite = sessionStorage.getItem('inviteJoin'); inviteGame = sessionStorage.getItem('inviteGame') || 'okey'; sessionStorage.removeItem('inviteJoin'); sessionStorage.removeItem('inviteGame'); } catch {}
   if ((!mode && !invite) || !socketAvailable) return;
-  const go = () => invite ? joinRoom(invite) : start('random', mode);
+  const go = () => invite ? joinRoom(invite, inviteGame) : start('random', mode);
   if (socket.connected) go(); else socket.on('connect', function once() { socket.off?.('connect', once); go(); });
 })();
 
@@ -292,14 +314,15 @@ let batakPending = false;
 const BATAK_NOTES = { ihaleli: 'İhale en az 5; kimse girmezse dağıtanın sağındaki 4 el almak zorunda. İhaleyi alan kozu seçer.',
   kozmaca: 'Koz her zaman maça. Herkes kaç el alacağını söyler; 0 = el almaz (tutarsa +50, tutmazsa −50).',
   esli: 'Karşılıklı oturanlar takım. İhale en az 8; kimse girmezse dağıtan 7 almak zorunda. İhaleyi alanın eşi kartlarını açar.' };
-function batakJoin(mode) {
+// extra: { code } (davet, masa gezgini) ve { seat } (masa gezgininde seçilen koltuk).
+function batakJoin(mode, extra = {}) {
   if (!socket.connected) return toast('Oyun sunucusuna bağlanılamadı.');
   if (batakPending) return;
-  const code = $('batakCodeInput').value.trim().toUpperCase();
+  const code = (extra.code || $('batakCodeInput').value).trim().toUpperCase();
   if (mode === 'code' && !/^[A-Z0-9]{6}$/.test(code)) return toast('6 karakterli Batak masa kodunu yaz.');
   const token = [...crypto.getRandomValues(new Uint8Array(24))].map(b => b.toString(16).padStart(2, '0')).join('');
   batakPending = { token };
-  socket.emit('batak:join', { mode, code, token, type: $('batakType').value, rounds: Number($('batakRounds').value), authToken,
+  socket.emit('batak:join', { mode, code, token, seat: Number.isInteger(extra.seat) ? extra.seat : undefined, isPublic: extra.isPublic === true, type: $('batakType').value, rounds: Number($('batakRounds').value), authToken,
     playerName: currentUser?.username || $('playerNameInput').value.trim() || 'Oyuncu' + Math.floor(10000 + Math.random() * 89999),
     avatar: currentUser?.avatar || selectedAvatar });
   setTimeout(() => { batakPending = false; }, 5000);
@@ -310,10 +333,11 @@ socket.on('batak:joined', d => {
   if (window.AlemdarTransition) AlemdarTransition.leaveTo('/batak'); else location.assign('/batak');
 });
 socket.on('batak:error', d => { batakPending = false; toast(d.message || 'Batak masasına katılınamadı.'); });
-$('batakQuickBtn')?.addEventListener('click', () => batakJoin('quick'));
+$('batakQuickBtn')?.addEventListener('click', () => showRoomList('batak'));
 $('batakOpenBtn')?.addEventListener('click', () => showModal('batakModal'));
 $('batakPlayBtn')?.addEventListener('click', () => { hideModal('batakModal'); batakJoin('quick'); });
 $('batakPrivateBtn')?.addEventListener('click', () => { hideModal('batakModal'); batakJoin('create'); });
+$('batakPublicBtn')?.addEventListener('click', () => { hideModal('batakModal'); batakJoin('create', { isPublic: true }); });
 $('batakCodeBtn')?.addEventListener('click', () => batakJoin('code'));
 $('batakCodeInput')?.addEventListener('input', e => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); });
 document.querySelectorAll('[data-target=batakType] button').forEach(b => b.addEventListener('click', () => { $('batakRuleNote').textContent = BATAK_NOTES[b.dataset.value]; }));

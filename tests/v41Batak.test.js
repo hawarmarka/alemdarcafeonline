@@ -107,6 +107,23 @@ while (room.phase !== 'matchEnd' && guard++ < 2000) {
 assert.equal(room.phase, 'matchEnd'); assert.equal(room.history.length, 5);
 assert.equal(s1.last('batak:state').phase, 'matchEnd');
 assert.deepEqual(room.totals, [0, 1, 2, 3].map(i => room.history.reduce((n, h) => n + h.scores[i], 0)));
+// Koltuk seçimi: açık masada belirli koltuğa oturma, dolu koltuk hatası, beklerken koltuk değiştirme, maç başında koltuk sırası.
+const h1 = new FakeSocket(); Batak.onSocket(h1);
+h1.receive('batak:join', { mode: 'create', isPublic: true, type: 'esli', rounds: 5, token: 'h'.repeat(30), playerName: 'Host' });
+const room2 = Batak.rooms.get(h1.last('batak:joined').code);
+assert(Batak.stats().waiting.some(r => r.code === room2.code), 'açık masa listede görünmeli');
+const h2 = new FakeSocket(); Batak.onSocket(h2);
+h2.receive('batak:join', { mode: 'code', code: room2.code, seat: 2, token: 'k'.repeat(30), playerName: 'Konuk' });
+assert.deepEqual(Batak.stats().waiting.find(r => r.code === room2.code).seats.map(s => s?.name || null), ['Host', null, 'Konuk', null]);
+const h3 = new FakeSocket(); Batak.onSocket(h3);
+h3.receive('batak:join', { mode: 'code', code: room2.code, seat: 2, token: 'm'.repeat(30), playerName: 'Üçüncü' });
+assert.match(h3.last('batak:error').message, /koltuk/);
+h2.receive('batak:changeSeat', { seat: 3 }); h2.receive('batak:changeSeat', { seat: 0 });
+assert.match(h2.last('batak:error').message, /dolu/);
+h1.receive('batak:startBots');
+assert.equal(room2.players[3].name, 'Konuk', 'maç başında oyuncular koltuk sırasına dizilmeli');
+assert.deepEqual(room2.players.map(p => p.seat), [0, 1, 2, 3]);
+h2.receive('batak:changeSeat', { seat: 1 }); assert.match(h2.last('batak:error').message, /başladıktan/);
 // Masa sohbeti: masadakilere gider, kontrol karakterleri ve uzunluk temizlenir, art arda yazma sınırlı.
 s1.receive('batak:chat', { text: 'Selam\u0007 ' + 'x'.repeat(200) });
 const chat = s1.last('batak:chat'); assert.equal(chat.seat, 0); assert.equal(chat.text.length, 100); assert(!chat.text.includes('\u0007'));

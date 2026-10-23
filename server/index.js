@@ -100,6 +100,14 @@ const SocialHub = require('./socialHub').install({ app, io, rooms, authReq, from
 // Batak masaları (server/batak): kendi 'batak:' socket olayları, okey masalarından ayrı.
 const Batak = require('./batak').install({ io, Accounts, Avatars, Logger });
 app.get('/api/batak', (_req, res) => res.json(Batak.stats()));
+SocialHub.setGames({ batak: Batak });
+// Oyuncu profili (masada oyuncuya tıklayınca): yalnızca hesabı olanlar; herkese açık bilgiler.
+app.get('/api/profile', (req, res) => {
+  const u = Accounts.userByName(String(req.query.name || '').trim());
+  if (!u) return res.status(404).json({ error: 'Bu oyuncunun kayıtlı hesabı yok.' });
+  const c = Accounts.cleanUser(u);
+  res.json({ username: c.username, avatar: c.avatar, frame: c.frame, level: c.level, xp: c.xp, games: c.games, wins: c.wins, chips: c.chips });
+});
 RoomStore.init(rooms, reviveRoom); // masalar diske yazılır; güncelleme sonrası oyuncu dönünce geri yüklenir
 const POSITION = ['bottom', 'right', 'top', 'left'];
 const BASE_TURN_MS = 45000; // Standart sıra süresi

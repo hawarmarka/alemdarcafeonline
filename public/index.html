@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="/css/lobby-plus.css?v=4">
 <link rel="stylesheet" href="/css/lobby-pro.css?v=4">
 <link rel="stylesheet" href="/css/social.css?v=1">
-<link rel="stylesheet" href="/css/lobby-tables.css?v=3">
+<link rel="stylesheet" href="/css/lobby-tables.css?v=4">
 <script src="/js/transitions.js?v=2"></script>
 </head>
 <body class="lobby-page">
@@ -78,7 +78,7 @@
       <header><h2>BATAK</h2><h3>İHALELİ · KOZ MAÇA · EŞLİ</h3></header>
       <div class="lb-art art-batak"><svg class="art-svg" viewBox="0 0 220 180" aria-hidden="true"><g transform="rotate(-14 90 96)"><rect x="56" y="38" width="66" height="96" rx="9" fill="#fff" stroke="#9b958a" stroke-width="2"/><path d="M89 66 c-14 14 -22 22 -22 32 a10 10 0 0 0 18 6 l-4 14 h16 l-4 -14 a10 10 0 0 0 18 -6 c0 -10 -8 -18 -22 -32z" fill="#151515"/></g><g transform="rotate(10 132 96)"><rect x="100" y="38" width="66" height="96" rx="9" fill="#fff" stroke="#9b958a" stroke-width="2"/><path d="M133 70 c-10 -14 -30 -4 -20 12 l20 22 20 -22 c10 -16 -10 -26 -20 -12z" fill="#c8202a"/></g></svg>
         <small><b id="batakCount">0</b> oyuncu</small></div>
-      <div class="lb-card-btns"><button type="button" class="lb-btn blue" id="batakQuickBtn" title="İhaleli Batak, boş koltuklara botlar oturur">OYNA</button><button type="button" class="lb-btn orange" id="batakOpenBtn">MASA AÇ</button></div>
+      <div class="lb-card-btns"><button type="button" class="lb-btn blue" id="batakQuickBtn" title="Bekleyen Batak masaları, istediğin koltuğa otur">ODA SEÇ</button><button type="button" class="lb-btn orange" id="batakOpenBtn">MASA AÇ</button></div>
     </article>
     <article class="lb-card c-soon c-tavla">
       <header><h2>TAVLA</h2><h3>YAKINDA</h3></header>
@@ -194,7 +194,7 @@
     <select id="batakRounds"><option value="5" selected>5</option><option value="7">7</option><option value="9">9</option><option value="11">11</option></select>
   </div>
   <p class="create-note" id="batakRuleNote">İhale en az 5; kimse girmezse dağıtanın sağındaki 4 el almak zorunda. İhaleyi alan kozu seçer.</p>
-  <div class="tp-actions"><button type="button" class="tp-btn orange" id="batakPrivateBtn">ÖZEL MASA AÇ</button><button type="button" class="tp-btn green" id="batakPlayBtn">HEMEN OYNA</button></div>
+  <div class="tp-actions"><button type="button" class="tp-btn orange" id="batakPublicBtn" title="Masa listesinde görünür, başkaları istediği koltuğa oturur">MASA AÇ</button><button type="button" class="tp-btn orange" id="batakPrivateBtn" title="Yalnızca kodu verdiğin arkadaşların katılır">ÖZEL MASA</button><button type="button" class="tp-btn green" id="batakPlayBtn">HEMEN OYNA</button></div>
 </div></div>
 
 <!-- ODA SEÇ (açık masalar) -->
@@ -228,4 +228,4 @@
 
 <div id="rotateHint" role="alert"><div class="rotate-phone"></div><div>Daha rahat oynamak için telefonunu yan çevir</div><small>Alemdar Cafe yatay ekranda oynanır</small></div>
 <div id="errorToast" class="toast hidden" role="alert"><span class="toast-message"></span></div>
-<script src="/socket.io/socket.io.js"></script><script src="/js/social.js?v=1"></script><script src="/js/main.js?v=11"></script></body></html>
+<script src="/socket.io/socket.io.js"></script><script src="/js/social.js?v=2"></script><script src="/js/main.js?v=12"></script></body></html>

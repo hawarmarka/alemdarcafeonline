@@ -223,9 +223,9 @@ function leave() {
 Social.init({ socket, token: () => userAuth, toast, avatarSrc, buttons: () => [$('twFriends')],
     currentRoom: () => session?.roomCode,
     needAccount: () => toast('Arkadaş davet etmek ve mesajlaşmak için lobiden hesabınla giriş yap.', true),
-    onJoin: code => {
+    onJoin: (code, game) => {
         if (state && !window.confirm('Bu masadan ayrılıp davet edilen masaya geçilsin mi? Oyun devam ediyorsa yerine bot geçer.')) return;
-        try { sessionStorage.setItem('inviteJoin', code); } catch (_) {}
+        try { sessionStorage.setItem('inviteJoin', code); sessionStorage.setItem('inviteGame', game || 'okey'); } catch (_) {}
         action('leaveGame');
     } });
 $('twInvite').addEventListener('click', () => Social.open(true));

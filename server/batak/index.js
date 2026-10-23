@@ -29,10 +29,17 @@ function install({ io, Accounts, Avatars, Logger }) {
   }
   const seatOfToken = (room, token) => room.players.findIndex(p => p.token === token);
   const humans = room => room.players.filter(p => !p.isBot);
+  // Koltuklar (0 alt, 1 sağ, 2 üst, 3 sol; eşlide 0-2 ve 1-3 takım). Beklerken oyuncu istediği boş koltuğa oturur;
+  // maç başlarken room.players koltuk sırasına dizilir, ondan sonra sıra numarası = koltuk.
+  function freeSeat(room, wanted) {
+    const taken = new Set(room.players.map(p => p.seat));
+    if (Number.isInteger(wanted) && wanted >= 0 && wanted < 4) return taken.has(wanted) ? -1 : wanted;
+    return [0, 1, 2, 3].find(s => !taken.has(s)) ?? -1;
+  }
   function addBot(room) {
     const used = new Set(room.players.map(p => p.name));
     const name = BOT_NAMES.find(n => !used.has(n)) || `Bot ${room.players.length + 1}`;
-    room.players.push({ token: 'bot-' + crypto.randomBytes(6).toString('hex'), socketId: null, name, avatar: Avatars.randomAvatar(), isBot: true, accountId: null });
+    room.players.push({ token: 'bot-' + crypto.randomBytes(6).toString('hex'), socketId: null, name, avatar: Avatars.randomAvatar(), isBot: true, accountId: null, level: 1, seat: freeSeat(room) });
   }
 
   // ---------- Görünüm ----------
@@ -42,8 +49,9 @@ function install({ io, Accounts, Avatars, Logger }) {
     return {
       code: room.code, type: room.type, team: L.TYPES[room.type].team, declare: !!L.TYPES[room.type].declare,
       roundLimit: room.roundLimit, round: room.round, phase: room.phase, me: seat, isHost: room.players[seat]?.token === room.hostToken,
-      isPublic: room.isPublic, notice: room.notice,
+      isPublic: room.isPublic, autoBots: room.autoBots, notice: room.notice,
       players: room.players.map((p, i) => ({ name: p.name, avatar: p.avatar, isBot: !!p.isBot, connected: !!p.socketId || !!p.isBot,
+        seat: Number.isInteger(p.seat) ? p.seat : i, account: !!p.accountId, level: p.level || 1,
         bid: b ? b.bids[i] : null, passed: b ? b.passed[i] : false, tricks: room.tricks[i], total: room.totals[i], cards: room.hands?.[i]?.length || 0 })),
       hand, legal: playing ? L.legalCards(hand, room.trick, room.trump, room.trumpBroken).map(c => c.id) : [],
       turn: room.turn, deadline: room.deadline, remainingMs: Math.max(0, room.deadline - Date.now()), turnMs: room.turnMs || PLAY_MS, dealer: room.dealer,
@@ -58,12 +66,17 @@ function install({ io, Accounts, Avatars, Logger }) {
     room.players.forEach((p, i) => { if (p.socketId) io.to(p.socketId).emit('batak:state', snapshot(room, i)); });
   }
   function lobbyInfo(room) {
-    return { code: room.code, type: room.type, rounds: room.roundLimit, players: room.players.length,
-      seats: [0, 1, 2, 3].map(i => room.players[i] ? { name: room.players[i].name, avatar: room.players[i].avatar, isBot: !!room.players[i].isBot } : null) };
+    const host = room.players.find(p => p.token === room.hostToken) || room.players.find(p => !p.isBot);
+    return { code: room.code, type: room.type, rounds: room.roundLimit, players: room.players.length, host: host?.name || '',
+      seats: [0, 1, 2, 3].map(s => { const p = room.players.find(q => q.seat === s); return p ? { name: p.name, avatar: p.avatar, isBot: !!p.isBot, level: p.level || 1 } : null; }) };
   }
 
   // ---------- Akış ----------
   function startMatch(room) {
+    if (room.round === 0 || room.phase === 'waiting') {
+      room.players.sort((a, b) => (a.seat ?? 9) - (b.seat ?? 9));
+      room.players.forEach((p, i) => { p.seat = i; });
+    }
     room.round = 0; room.totals = [0, 0, 0, 0]; room.history = []; room.dealer = crypto.randomInt(4);
     clear(room, 'fillTimer');
     startRound(room, true);
@@ -201,8 +214,11 @@ function install({ io, Accounts, Avatars, Logger }) {
   function seatPlayer(room, socket, data, account) {
     const name = account ? account.username : String(data?.playerName || '').replace(/[^\p{L}\p{N} _.-]/gu, '').replace(/\s+/g, ' ').trim().slice(0, 20) || 'Oyuncu';
     if (room.players.some(p => p.name.toLowerCase() === name.toLowerCase())) return 'Bu masada aynı isim var.';
+    const wanted = data?.seat == null ? null : Number(data.seat), seat = freeSeat(room, wanted);
+    if (seat < 0) return wanted == null ? 'Masa dolu.' : 'Bu koltuk az önce doldu, başka bir koltuk seç.';
     const avatar = Avatars.ref(account?.avatar || (Avatars.BUILTIN.includes(data?.avatar) ? data.avatar : 'default.svg'));
-    room.players.push({ token: String(data.token), socketId: socket.id, name, avatar, isBot: false, accountId: account?.id || null });
+    room.players.push({ token: String(data.token), socketId: socket.id, name, avatar, isBot: false, accountId: account?.id || null,
+      level: Accounts.cleanUser?.(account)?.level || 1, seat });
     if (!room.hostToken) room.hostToken = String(data.token);
     socket.data.batakCode = room.code; socket.data.batakToken = String(data.token);
     socket.emit('batak:joined', { code: room.code });
@@ -231,7 +247,7 @@ function install({ io, Accounts, Avatars, Logger }) {
         const type = L.TYPES[data.type] ? data.type : 'ihaleli';
         room = [...rooms.values()].find(r => r.isPublic && r.autoBots && r.phase === 'waiting' && r.type === type && r.players.length < 4)
           || makeRoom({ type, rounds: data.rounds, isPublic: true, autoBots: true });
-      } else if (data.mode === 'create') room = makeRoom({ type: data.type, rounds: data.rounds, isPublic: false, autoBots: false });
+      } else if (data.mode === 'create') room = makeRoom({ type: data.type, rounds: data.rounds, isPublic: data.isPublic === true, autoBots: false }); // açık: masa listesinde görünür
       else if (data.mode === 'code') {
         room = rooms.get(String(data.code || '').trim().toUpperCase());
         if (!room) return fail('Bu kodda Batak masası bulunamadı.');
@@ -264,6 +280,15 @@ function install({ io, Accounts, Avatars, Logger }) {
       if (!room || seat < 0 || room.phase !== 'bidding' || !untouched(room) || !L.canCancel(room.hands[seat])) return fail('El iptal yalnızca ihale başlamadan ve elinde 10\'dan büyük kart yokken istenebilir.');
       room.notice = `${room.players[seat].name} el iptal etti, kartlar yeniden dağıtıldı.`;
       room.cancelGuard = true; redeal(room);
+    });
+    // Beklerken boş bir koltuğa geç (masadaki OTUR).
+    socket.on('batak:changeSeat', data => {
+      const { room, seat } = where(socket);
+      if (!room || seat < 0) return fail('Masada değilsin.');
+      if (room.phase !== 'waiting') return fail('Oyun başladıktan sonra koltuk değiştirilemez.');
+      const to = freeSeat(room, Number(data?.seat));
+      if (to < 0 || !Number.isInteger(Number(data?.seat))) return fail('Bu koltuk dolu.');
+      room.players[seat].seat = to; emit(room);
     });
     // Masayı açan: bot ekle / botlarla başlat (bekleme sırasında).
     socket.on('batak:addBot', () => {

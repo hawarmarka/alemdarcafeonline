@@ -4,6 +4,7 @@
 const socket = typeof io === 'function' ? io() : { on() {}, emit() {}, connected: false };
 const $ = id => document.getElementById(id);
 const Cards = window.BatakCards;
+Cards.install(); // renk simgeleri (koz kutusu, koz seçimi) ilk karttan önce de görünsün
 const SUIT_NAME = Cards.SUIT_NAME, RANK = Cards.RANK;
 const TYPE_NAME = { ihaleli: 'İHALELİ BATAK', kozmaca: 'KOZ MAÇA', esli: 'EŞLİ BATAK' };
 const POS = ['bottom', 'right', 'top', 'left']; // koltuk farkı → ekrandaki yer (saatin tersi: sıradaki sağda)
@@ -38,7 +39,7 @@ function beep(freq, ms, type = 'sine', gain = .08, slide = 0) {
 }
 const sfx = { card: () => beep(520, 70, 'triangle', .07, .6), win: () => { beep(660, 120); setTimeout(() => beep(880, 160), 110); },
   turn: () => beep(740, 140, 'sine', .06, 1.3), bad: () => beep(180, 160, 'square', .04) };
-function paintSound() { $('bkSoundIcon').textContent = soundOn() ? '🔊' : '🔇'; }
+function paintSound() { $('bkSoundWave').classList.toggle('hidden', !soundOn()); $('bkSoundOff').classList.toggle('hidden', soundOn()); }
 
 // ---------- Bağlantı ----------
 socket.on('connect', () => socket.emit('batak:rejoin', { code: session.code, token: session.token }));
@@ -47,6 +48,7 @@ socket.on('batak:error', d => { sent = false; sfx.bad(); toast(d.message || 'İ�
 socket.on('batak:replaced', () => toast('Masa başka bir sekmede açıldı.'));
 socket.on('batak:left', goLobby);
 socket.on('batak:chat', m => addChat(m));
+socket.on('batak:info', d => toast(d.message, true));
 socket.on('disconnect', () => toast('Bağlantı koptu, yeniden bağlanılıyor…', true));
 function goLobby() { sessionStorage.removeItem('batakSession'); location.assign('/'); }
 const send = (event, data) => { if (sent) return; sent = true; socket.emit(event, data); setTimeout(() => { sent = false; }, 3000); };
@@ -69,16 +71,27 @@ function render() {
   if ((s.phase === 'roundEnd' || s.phase === 'matchEnd') && shownResultRound !== s.round + (s.phase === 'matchEnd' ? 100 : 0)) { shownResultRound = s.round + (s.phase === 'matchEnd' ? 100 : 0); showScores(); }
   if (s.phase === 'bidding' && $('bkScoreModal').dataset.auto === '1') closeModal('bkScoreModal');
 }
+// Beklerken koltuklar sabit yerinde (0 alt, 1 sağ, 2 üst, 3 sol) ve boş koltukta OTUR var; oyun başlayınca herkes
+// kendini altta görür. Oyun sırasında oyuncu dizisi koltuk sırasındadır (sunucu maç başında dizer).
+const waitingSeat = s => state.players.findIndex(p => p.seat === s);
 function renderSeats() {
-  const s = state, active = ['bidding', 'trump', 'playing'].includes(s.phase);
-  for (let seat = 0; seat < 4; seat++) {
-    const box = $(SEAT_ID[posOf(seat)]), p = s.players[seat];
+  const s = state, active = ['bidding', 'trump', 'playing'].includes(s.phase), waiting = s.phase === 'waiting';
+  for (let place = 0; place < 4; place++) {
+    const seat = waiting ? waitingSeat(place) : place;
+    const box = $(SEAT_ID[waiting ? POS[place] : posOf(place)]), p = seat >= 0 ? s.players[seat] : null;
     const bubble = box.querySelector('.bk-bubble');
     box.replaceChildren(); box.className = 'bk-seat';
-    if (!p) { box.append(el('div', 'bk-plate', 'Boş koltuk')); continue; }
+    if (!p) {
+      const sit = el('button', 'bk-sit', 'OTUR'); sit.type = 'button'; sit.title = 'Bu koltuğa geç';
+      sit.onclick = () => socket.emit('batak:changeSeat', { seat: place });
+      box.append(sit, el('div', 'bk-plate muted', 'Boş koltuk'));
+      continue;
+    }
     box.classList.toggle('turn', active && s.turn === seat);
     box.classList.toggle('away', !p.connected);
-    const av = el('div', 'bk-avatar'); const img = el('img'); img.src = avatarSrc(p.avatar); img.alt = ''; av.append(img);
+    const av = el('button', 'bk-avatar'); av.type = 'button'; av.title = `${p.name} · profili gör`;
+    const img = el('img'); img.src = avatarSrc(p.avatar); img.alt = ''; av.append(img, el('span', 'bk-level', String(p.level || 1)));
+    av.onclick = () => showProfile(p);
     if (active && s.turn === seat) { const ring = el('div', 'bk-ring'); av.prepend(ring); runRing(ring, box); }
     if (s.dealer === seat && s.phase !== 'waiting') { const d = el('span', 'bk-dealer', 'D'); d.title = 'Dağıtan'; av.append(d); }
     const plate = el('div', 'bk-plate');
@@ -88,7 +101,7 @@ function renderSeats() {
     else if (p.passed) stats.append(el('span', 'bk-chip pass', 'PAS'));
     else if (p.bid != null) stats.append(el('span', 'bk-chip bid', s.declare ? (p.bid === 0 ? 'EL ALMAZ' : `SÖZ ${p.bid}`) : `${p.bid}`));
     if (!['waiting', 'bidding'].includes(s.phase)) stats.append(el('span', 'bk-chip won', `EL ${p.tricks}`));
-    if (s.team) stats.append(el('span', 'bk-chip team', seat % 2 === s.me % 2 ? 'TAKIMIN' : 'RAKİP'));
+    if (s.team && !waiting) stats.append(el('span', 'bk-chip team', seat % 2 === s.me % 2 ? 'TAKIMIN' : 'RAKİP'));
     stats.append(el('span', 'bk-chip', `${p.total} P`));
     plate.append(stats);
     box.append(av, plate);
@@ -231,8 +244,9 @@ function renderWait() {
   if (!waiting) return;
   $('bkCode').textContent = s.code;
   const free = 4 - s.players.length;
-  $('bkWaitText').textContent = s.isPublic ? `${free} koltuk boş · birkaç saniye içinde botlar oturacak` : `${free} koltuk boş · arkadaşlarına masa kodunu gönder`;
-  $('bkHostBtns').classList.toggle('hidden', !s.isHost || s.isPublic);
+  $('bkWaitText').textContent = s.autoBots ? `${free} koltuk boş · birkaç saniye içinde botlar oturacak`
+    : s.isPublic ? `${free} koltuk boş · masa, masa listesinde görünüyor` : `${free} koltuk boş · arkadaşlarına masa kodunu gönder`;
+  $('bkHostBtns').classList.toggle('hidden', !s.isHost || s.autoBots);
 }
 function renderDummy() {
   const s = state, box = $('bkDummy');
@@ -311,13 +325,62 @@ function showRules() {
   openModal('bkRulesModal');
 }
 
+// ---------- Profil, arkadaşlar, davet (js/social.js) ----------
+const authToken = () => localStorage.getItem('okeyAuthToken') || '';
+async function showProfile(p) {
+  $('bkProfileAvatar').src = avatarSrc(p.avatar);
+  $('bkProfileName').textContent = p.name;
+  const stats = $('bkProfileStats'); stats.replaceChildren();
+  const stat = (label, value) => { const d = el('div'); d.append(el('b', null, String(value)), el('small', null, label)); stats.append(d); };
+  const add = $('bkProfileAdd'), mine = state && state.players[state.me]?.name === p.name;
+  add.classList.toggle('hidden', p.isBot || !p.account || mine);
+  add.disabled = false; add.textContent = 'ARKADAŞ EKLE';
+  $('bkProfileSub').textContent = p.isBot ? 'Bilgisayar oyuncusu' : p.account ? `Seviye ${p.level || 1}` : 'Misafir oyuncu (hesabı yok)';
+  stat('Bu maçta puan', p.total ?? 0);
+  openModal('bkProfileModal');
+  if (!p.account || p.isBot) return;
+  try {
+    const r = await fetch('/api/profile?name=' + encodeURIComponent(p.name)).then(x => x.ok ? x.json() : null);
+    if (!r) return;
+    $('bkProfileSub').textContent = `Seviye ${r.level} · ${Number(r.xp).toLocaleString('tr-TR')} XP`;
+    stat('Oyun', r.games); stat('Zafer', r.wins); stat('Çip', Number(r.chips || 0).toLocaleString('tr-TR'));
+    // Zaten arkadaşsa ya da istek bekliyorsa düğme bunu söyler.
+    if (authToken() && !mine) {
+      const f = await fetch('/api/friends', { headers: { Authorization: 'Bearer ' + authToken() } }).then(x => x.ok ? x.json() : null);
+      if (f?.friends?.some(u => u.username === p.name)) { add.textContent = 'ARKADAŞSINIZ'; add.disabled = true; }
+      else if (f?.outgoing?.some(u => u.username === p.name)) { add.textContent = 'İSTEK GÖNDERİLDİ'; add.disabled = true; }
+    }
+  } catch (_) {}
+}
+$('bkProfileAdd').onclick = async () => {
+  if (!authToken()) return toast('Arkadaş eklemek için lobiden hesabınla giriş yap.');
+  const btn = $('bkProfileAdd'); btn.disabled = true;
+  try {
+    const res = await fetch('/api/friends/request', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + authToken() }, body: JSON.stringify({ username: $('bkProfileName').textContent }) });
+    const out = await res.json();
+    if (!res.ok) throw Error(out.error || 'İstek gönderilemedi.');
+    btn.textContent = out.result === 'accepted' ? 'ARTIK ARKADAŞSINIZ' : 'İSTEK GÖNDERİLDİ';
+  } catch (err) { btn.disabled = false; toast(err.message); }
+};
+$('bkMenuProfile').onclick = () => { menu.classList.add('hidden'); if (state) showProfile(state.players[state.me]); };
+if (window.Social) Social.init({ socket, token: authToken, toast: m => toast(m, true), avatarSrc, buttons: () => [$('bkFriendsBtn')],
+  currentRoom: () => session?.code,
+  needAccount: () => toast('Arkadaşlar ve davet için lobiden hesabınla giriş yap.'),
+  onJoin: (code, game) => {
+    if (state && state.phase !== 'waiting' && state.phase !== 'matchEnd' && !confirm('Bu masadan ayrılıp davet edilen masaya geçilsin mi? Yerine bot geçer.')) return;
+    try { sessionStorage.setItem('inviteJoin', code); sessionStorage.setItem('inviteGame', game || 'okey'); } catch (_) {}
+    socket.emit('batak:leave');
+  } });
+$('bkInviteBtn').onclick = () => window.Social ? Social.open(true) : null;
+
 // ---------- Sohbet ----------
 function addChat(m) {
   const log = $('bkChatLog'), p = el('p'); p.append(el('b', null, m.name + ': '), document.createTextNode(m.text));
   log.append(p); log.scrollTop = log.scrollHeight;
   while (log.children.length > 60) log.firstChild.remove();
   if (state) {
-    const box = $(SEAT_ID[posOf(m.seat)]); box.querySelector('.bk-bubble')?.remove();
+    const place = state.phase === 'waiting' ? POS[state.players[m.seat]?.seat ?? 0] : posOf(m.seat);
+    const box = $(SEAT_ID[place]); box.querySelector('.bk-bubble')?.remove();
     const b = el('div', 'bk-bubble', m.text); box.append(b); setTimeout(() => b.remove(), 4500);
   }
   if ($('bkChat').classList.contains('hidden') && m.seat !== state?.me) { chatUnread++; paintChatDot(); }

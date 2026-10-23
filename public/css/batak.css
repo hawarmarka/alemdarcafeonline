@@ -1,5 +1,5 @@
 /* Batak masası (public/batak.html, js/batak.js, js/batak-cards.js). Kartlar SVG olarak çizilir. */
-:root{--gold:#f2c14e;--gold2:#c98a12;--ink:#071c33;--panel:rgba(6,22,40,.86);--line:rgba(140,190,255,.35);--red:#d0242c;--green:#3fbf45;
+:root{--gold:#e8b84a;--gold2:#b4851f;--ink:#0a1714;--panel:rgba(8,22,19,.82);--line:rgba(255,255,255,.12);--red:#d0242c;--green:#3fbf45;
   --card-w:clamp(44px,min(6vw,11.5vh),100px);--card-h:calc(var(--card-w)*1.4)}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden;color:#fff;font-family:Barlow,Arial,sans-serif;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
@@ -14,16 +14,19 @@ button{font-family:inherit}
 .bk-top{display:flex;align-items:center;gap:10px;min-height:52px;position:relative;z-index:20}
 .bk-info{display:flex;flex-direction:column;padding:6px 14px;border-radius:14px;background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(6px)}
 .bk-info b{font:700 17px/1.1 Oswald,Arial,sans-serif;letter-spacing:1.2px;color:var(--gold)}
-.bk-info span{font-size:13px;color:#cfe3ff}
-.bk-trump{display:flex;align-items:center;gap:8px;height:48px;padding:0 12px 0 14px;border-radius:14px;background:linear-gradient(#fff,#efe9da);color:#161616;border:2px solid var(--gold);box-shadow:0 3px 0 var(--gold2),0 6px 18px rgba(0,0,0,.35)}
+.bk-info span{font-size:13px;color:#b9cdc6}
+.bk-trump{display:flex;align-items:center;gap:8px;height:44px;padding:0 12px 0 14px;border-radius:12px;background:#fff;color:#161616;border:1px solid rgba(0,0,0,.15);box-shadow:0 6px 16px rgba(0,0,0,.3)}
 .bk-trump small{font:700 12px Oswald,Arial,sans-serif;letter-spacing:1.4px;color:#6b6352}
 .bk-trump i{display:block;width:30px;height:30px}
 .bk-trump i svg{width:100%;height:100%}
 .bk-trump.none i{opacity:.25}
 .bk-contract{flex:1;min-width:0;font:600 15px Oswald,Arial,sans-serif;letter-spacing:.5px;color:#ffe08a;text-shadow:0 1px 2px #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bk-top-btns{display:flex;gap:8px;position:relative}
-.bk-icon{position:relative;width:46px;height:46px;border-radius:14px;border:1px solid var(--line);background:linear-gradient(#1d4f88,#0e2c52);color:#fff;font-size:21px;cursor:pointer;box-shadow:0 3px 0 #061a33,0 6px 14px rgba(0,0,0,.3);transition:transform .1s}
-.bk-icon:hover{filter:brightness(1.15)}.bk-icon:active{transform:translateY(2px);box-shadow:0 1px 0 #061a33}
+/* Sade çizgi ikonlu düğmeler (3B gölge/parlama yok) */
+.bk-icon{position:relative;display:grid;place-items:center;width:44px;height:44px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(8,24,20,.72);color:#e8f2ee;cursor:pointer;transition:background .15s,border-color .15s;backdrop-filter:blur(6px)}
+.bk-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.bk-icon:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.28)}.bk-icon:active{background:rgba(255,255,255,.2)}
+.bk-icon:focus-visible,.bk-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .bk-icon .dot{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:var(--red);font:700 11px/18px Barlow,Arial;padding:0 4px}
 .bk-menu{position:absolute;right:0;top:54px;display:flex;flex-direction:column;min-width:210px;padding:6px;border-radius:14px;background:var(--panel);border:1px solid var(--line);box-shadow:0 14px 34px rgba(0,0,0,.5);backdrop-filter:blur(8px)}
 .bk-menu button{text-align:left;padding:11px 12px;border:0;border-radius:10px;background:transparent;color:#fff;font:600 16px Barlow,Arial;cursor:pointer}
@@ -47,7 +50,7 @@ button{font-family:inherit}
 .bk-seat[data-pos=right]{left:93.5%;top:47%;flex-direction:column}
 .bk-seat[data-pos=bottom]{left:13%;top:91%}
 .bk-avatar{position:relative;width:clamp(48px,4.6vw,72px);aspect-ratio:1;border-radius:50%;flex:none}
-.bk-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;background:var(--ink);border:3px solid #0b2a55;box-shadow:0 0 0 2px rgba(111,176,255,.7),0 6px 14px rgba(0,0,0,.45)}
+.bk-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;background:var(--ink);border:2px solid rgba(255,255,255,.85);box-shadow:0 6px 14px rgba(0,0,0,.45)}
 .bk-seat.turn .bk-avatar img{box-shadow:0 0 0 3px var(--gold),0 0 22px rgba(242,193,78,.85)}
 .bk-seat.away .bk-avatar img{filter:grayscale(1) brightness(.7)}
 .bk-ring{position:absolute;inset:-7px;border-radius:50%;background:conic-gradient(from 0deg,var(--gold) var(--p,0%),rgba(255,255,255,.12) 0);
@@ -60,7 +63,7 @@ button{font-family:inherit}
 .bk-chip{padding:1px 8px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid var(--line);white-space:nowrap;font-weight:600}
 .bk-chip.bid{background:#7a4f07;border-color:var(--gold);color:#ffe9b0}.bk-chip.pass{opacity:.55}
 .bk-chip.won{background:#1f7a2a;border-color:#8fe07f}.bk-chip.contract{background:var(--red);border-color:#ff9aa0}
-.bk-chip.team{background:#1d4f9a;border-color:#8cbcff}
+.bk-chip.team{background:rgba(43,98,179,.35);border-color:rgba(140,188,255,.5)}
 /* Rakiplerin kapalı kartları: yelpaze */
 .bk-fan{position:relative;height:calc(var(--card-w)*.75);width:calc(var(--card-w)*1.9)}
 .bk-fan .card{position:absolute;left:50%;bottom:0;--card-w:calc(clamp(44px,min(6vw,11.5vh),100px)*.5);transform-origin:50% 100%}
@@ -98,23 +101,41 @@ button{font-family:inherit}
 
 /* ---------- İhale / koz paneli ---------- */
 .bk-panel{position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);z-index:9;display:flex;flex-direction:column;align-items:center;gap:8px;
-  padding:14px 18px;border-radius:20px;background:linear-gradient(160deg,rgba(20,69,126,.97),rgba(7,28,51,.97));border:2px solid var(--gold);box-shadow:0 18px 44px rgba(0,0,0,.6);max-width:min(620px,92%);animation:bkPanel .2s ease-out}
+  padding:14px 18px;border-radius:20px;background:rgba(10,24,21,.96);border:1px solid rgba(232,184,74,.55);box-shadow:0 18px 44px rgba(0,0,0,.6);max-width:min(620px,92%);animation:bkPanel .2s ease-out}
 @keyframes bkPanel{from{opacity:0;transform:translate(-50%,-44%)}}
 .bk-panel b{font:700 21px Oswald,Arial,sans-serif;letter-spacing:1.2px}
 .bk-panel small{color:#cfe3ff;font-size:14px;text-align:center}
 .bk-bid-row{display:flex;flex-wrap:wrap;gap:7px;justify-content:center}
-.bk-btn{min-width:48px;height:48px;padding:0 15px;border-radius:13px;color:#fff;font:700 19px/1 Oswald,Arial,sans-serif;letter-spacing:.5px;cursor:pointer;text-shadow:0 1px 2px rgba(0,0,0,.45);transition:transform .08s,filter .1s}
-.bk-btn:hover{filter:brightness(1.1)}.bk-btn:active{transform:translateY(3px);box-shadow:none!important}
-.bk-btn.green{border:1px solid #1b6e0a;background:linear-gradient(#7fe35a,#2f9a1b);box-shadow:0 4px 0 #1b5e0a}
-.bk-btn.blue{border:1px solid #0b2a4f;background:linear-gradient(#4aa0f0,#1b5fb8);box-shadow:0 4px 0 #0b2a4f}
-.bk-btn.orange{border:1px solid #7a4f07;background:linear-gradient(#ffd36b,#e0941a);box-shadow:0 4px 0 #7a4f07}
-.bk-btn.red{border:1px solid #5c0d12;background:linear-gradient(#ef5a61,#b0202a);box-shadow:0 4px 0 #5c0d12}
-.bk-btn.grey{border:1px solid #333;background:linear-gradient(#8a8f99,#555b66);box-shadow:0 4px 0 #333}
-.bk-suit{width:84px;height:96px;border-radius:16px;border:2px solid var(--gold);background:linear-gradient(#fff,#ece5d3);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
-  box-shadow:0 4px 0 var(--gold2),0 8px 18px rgba(0,0,0,.35);transition:transform .1s}
-.bk-suit:hover{transform:translateY(-3px)}.bk-suit svg{width:44px;height:44px}
-.bk-suit span{font:600 14px Oswald,Arial,sans-serif;color:#333;letter-spacing:.5px}
-.bk-suit.best{box-shadow:0 0 0 3px var(--gold),0 4px 0 var(--gold2),0 0 22px rgba(242,193,78,.7)}
+/* Düğmeler: düz renk, ince kenar, yumuşak köşe. primary = altın, ghost = şeffaf, diğerleri renkli. */
+.bk-btn{min-width:46px;height:44px;padding:0 16px;border-radius:10px;border:1px solid transparent;color:#fff;font:600 15px/1 Barlow,Arial,sans-serif;letter-spacing:.8px;cursor:pointer;transition:background .15s,border-color .15s,transform .08s}
+.bk-btn:active{transform:scale(.97)}
+.bk-btn:disabled{opacity:.5;cursor:default}
+.bk-btn.primary,.bk-btn.orange{background:var(--gold);color:#1d1500;border-color:var(--gold)}.bk-btn.primary:hover,.bk-btn.orange:hover{background:#ffd56c}
+.bk-btn.green{background:#2f9e57;border-color:#2f9e57}.bk-btn.green:hover{background:#38b565}
+.bk-btn.blue{background:#2b62b3;border-color:#2b62b3}.bk-btn.blue:hover{background:#3572cc}
+.bk-btn.red{background:#c23b3f;border-color:#c23b3f}.bk-btn.red:hover{background:#d54a4e}
+.bk-btn.grey,.bk-btn.ghost{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.22)}.bk-btn.grey:hover,.bk-btn.ghost:hover{background:rgba(255,255,255,.14)}
+/* İhale sayıları: eşit kareler */
+.bk-bid-row .bk-btn{min-width:48px;height:48px;padding:0 10px;font:600 19px/1 Barlow,Arial;letter-spacing:0}
+.bk-bid-row .bk-btn.green{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.25)}.bk-bid-row .bk-btn.green:hover{background:var(--gold);color:#1d1500;border-color:var(--gold)}
+.bk-suit{width:88px;height:100px;border-radius:12px;border:1px solid rgba(0,0,0,.2);background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;transition:transform .12s,box-shadow .12s}
+.bk-suit:hover{transform:translateY(-3px);box-shadow:0 10px 22px rgba(0,0,0,.35)}.bk-suit svg{width:42px;height:42px}
+.bk-suit span{font:600 13px Barlow,Arial,sans-serif;color:#333;letter-spacing:.4px}
+.bk-suit.best{box-shadow:0 0 0 3px var(--gold)}
+/* Boş koltuk: OTUR */
+.bk-sit{width:clamp(48px,4.6vw,72px);aspect-ratio:1;border-radius:50%;border:2px dashed rgba(255,255,255,.45);background:rgba(0,0,0,.25);color:#fff;font:600 13px Barlow,Arial;letter-spacing:1px;cursor:pointer;transition:all .15s}
+.bk-sit:hover{border-style:solid;border-color:var(--gold);background:rgba(242,193,78,.18);color:var(--gold)}
+.bk-plate.muted{opacity:.6}
+.bk-level{position:absolute;left:-4px;bottom:-3px;min-width:22px;height:22px;padding:0 5px;border-radius:11px;background:#2b62b3;border:2px solid #081814;font:700 11px/18px Barlow,Arial;text-align:center;color:#fff}
+.bk-avatar{border:0;padding:0;background:none;cursor:pointer}
+.bk-wait-hint{display:block;margin-top:12px;color:#b9cdc6;font-size:13px}
+/* Profil penceresi */
+.bk-profile{align-items:center;text-align:center}
+.bk-profile img{width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);background:var(--ink)}
+.bk-profile h2{margin:10px 0 2px}.bk-profile p{margin:0 0 14px;color:#cfe3ff}
+.bk-profile-stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.bk-profile-stats div{min-width:92px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}
+.bk-profile-stats b{display:block;font:700 20px Barlow,Arial;color:#fff}.bk-profile-stats small{color:#b9cdc6;font-size:12.5px}
 
 /* ---------- Sıra çubuğu ve el ---------- */
 .bk-turnbar{justify-self:center;display:flex;align-items:center;gap:10px;margin:0 0 4px;padding:5px 14px;border-radius:999px;background:var(--panel);border:1px solid rgba(242,193,78,.7);z-index:12}
@@ -134,7 +155,7 @@ button{font-family:inherit}
 .bk-hand .card.leaving{opacity:0;translate:0 -80px;transition:all .2s}
 
 /* ---------- Sohbet ---------- */
-.bk-chat{position:fixed;right:12px;top:72px;bottom:12px;width:min(320px,90vw);z-index:25;display:flex;flex-direction:column;border-radius:18px;background:rgba(6,22,40,.95);border:1px solid var(--line);box-shadow:0 20px 50px rgba(0,0,0,.55);overflow:hidden;animation:bkModalIn .2s ease-out}
+.bk-chat{position:fixed;right:12px;top:72px;bottom:12px;width:min(320px,90vw);z-index:25;display:flex;flex-direction:column;border-radius:18px;background:rgba(10,24,21,.97);border:1px solid var(--line);box-shadow:0 20px 50px rgba(0,0,0,.55);overflow:hidden;animation:bkModalIn .2s ease-out}
 .bk-chat-head{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--line)}
 .bk-chat-head b{font:700 16px Oswald,Arial,sans-serif;letter-spacing:1px}
 .bk-chat-head button{width:32px;height:32px;border:0;border-radius:10px;background:rgba(255,255,255,.1);color:#fff;cursor:pointer}
@@ -143,12 +164,12 @@ button{font-family:inherit}
 .bk-quick{display:flex;flex-wrap:wrap;gap:5px;padding:8px 10px;border-top:1px solid var(--line)}
 .bk-quick button{padding:5px 9px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#fff;font-size:13px;cursor:pointer}
 .bk-chat-form{display:flex;gap:6px;padding:8px 10px 10px}
-.bk-chat-form input{flex:1;min-width:0;height:38px;border-radius:10px;border:1px solid var(--line);background:#031326;color:#fff;padding:0 10px;font-size:15px}
-.bk-chat-form button{width:44px;border:0;border-radius:10px;background:linear-gradient(#7fe35a,#2f9a1b);color:#fff;font-size:18px;cursor:pointer}
+.bk-chat-form input{flex:1;min-width:0;height:38px;border-radius:10px;border:1px solid var(--line);background:#06110e;color:#fff;padding:0 10px;font-size:15px}
+.bk-chat-form button{width:44px;border:0;border-radius:10px;background:var(--gold);color:#1d1500;font-size:18px;cursor:pointer}
 
 /* ---------- Pencereler ---------- */
 .bk-modal{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:rgba(2,10,20,.66);padding:16px;backdrop-filter:blur(3px)}
-.bk-modal-box{width:min(760px,100%);max-height:calc(100vh - 32px);display:flex;flex-direction:column;padding:18px 20px;border-radius:20px;background:linear-gradient(160deg,#14457e,#071c33);border:2px solid rgba(111,176,255,.6);box-shadow:0 24px 70px rgba(0,0,0,.65);animation:bkModalIn .2s ease-out}
+.bk-modal-box{width:min(760px,100%);max-height:calc(100vh - 32px);display:flex;flex-direction:column;padding:18px 20px;border-radius:20px;background:#0d1d19;border:1px solid rgba(255,255,255,.14);box-shadow:0 24px 70px rgba(0,0,0,.65);animation:bkModalIn .2s ease-out}
 @keyframes bkModalIn{from{opacity:0;transform:scale(.94)}}
 .bk-modal-box.small{width:min(520px,100%)}
 .bk-modal-box h2{margin:0 0 12px;text-align:center;font:700 26px Oswald,Arial,sans-serif;letter-spacing:1.6px;color:var(--gold)}

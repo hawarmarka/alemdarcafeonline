@@ -7,10 +7,16 @@ function install({ app, io, rooms, authReq, fromToken }) {
   const online = new Map(); // hesap id → socket id kümesi
   const notify = (uid, event, payload) => { for (const sid of online.get(uid) || []) io.to(sid).emit(event, payload); };
   // Arkadaş masada mı? (yalnızca bağlı olduğu, bitmemiş masa)
+  // Diğer oyunların masaları (Batak…): index.js setGames ile bağlar. Her biri { rooms: Map } verir.
+  let batakRooms = new Map();
   const tableOf = uid => {
     for (const room of rooms.values()) {
       if (room.matchEnded) continue;
-      if (room.players.some(p => p.accountId === uid && p.socketId)) return { code: room.code, started: !!room.started, seats: room.players.length };
+      if (room.players.some(p => p.accountId === uid && p.socketId)) return { game: 'okey', code: room.code, started: !!room.started, seats: room.players.length };
+    }
+    for (const room of batakRooms.values()) {
+      if (room.phase === 'matchEnd') continue;
+      if (room.players.some(p => p.accountId === uid && p.socketId)) return { game: 'batak', code: room.code, started: room.phase !== 'waiting', seats: room.players.length };
     }
     return null;
   };
@@ -63,21 +69,26 @@ function install({ app, io, rooms, authReq, fromToken }) {
     });
     // Masadaki oyuncu çevrimiçi bir arkadaşını bu masaya çağırır.
     socket.on('inviteFriend', data => {
-      const uid = socket.data.uid, room = rooms.get(socket.data.roomCode);
-      if (!uid) return socket.emit('gameError', { message: 'Davet için hesabınla giriş yapmalısın.' });
-      if (!room || room.matchEnded) return socket.emit('gameError', { message: 'Önce bir masaya otur.' });
+      const uid = socket.data.uid, okeyRoom = rooms.get(socket.data.roomCode);
+      const batak = !okeyRoom && batakRooms.get(socket.data.batakCode);
+      const room = okeyRoom || batak;
+      const fail = message => socket.emit(batak ? 'batak:error' : 'gameError', { message });
+      if (!uid) return fail('Davet için hesabınla giriş yapmalısın.');
+      if (!room || room.matchEnded || room.phase === 'matchEnd') return fail('Önce bir masaya otur.');
       const now = Date.now();
-      if (now - (socket.data.lastInviteAt || 0) < 3000) return socket.emit('gameError', { message: 'Davetleri biraz daha yavaş gönder.' });
+      if (now - (socket.data.lastInviteAt || 0) < 3000) return fail('Davetleri biraz daha yavaş gönder.');
       socket.data.lastInviteAt = now;
       const friend = Social.list({ id: uid, username: socket.data.username }).friends.find(f => f.username === String(data?.username || ''));
-      if (!friend) return socket.emit('gameError', { message: 'Yalnızca arkadaşlarını davet edebilirsin.' });
-      if (!online.has(friend.id)) return socket.emit('gameError', { message: `${friend.username} şu an çevrimiçi değil.` });
-      notify(friend.id, 'invite', { from: socket.data.username, roomCode: room.code, bet: room.bet, seats: room.players.length, started: !!room.started,
+      if (!friend) return fail('Yalnızca arkadaşlarını davet edebilirsin.');
+      if (!online.has(friend.id)) return fail(`${friend.username} şu an çevrimiçi değil.`);
+      if (batak) notify(friend.id, 'invite', { game: 'batak', from: socket.data.username, roomCode: room.code, batakType: room.type, roundLimit: room.roundLimit,
+        seats: room.players.length, started: room.phase !== 'waiting' });
+      else notify(friend.id, 'invite', { game: 'okey', from: socket.data.username, roomCode: room.code, bet: room.bet, seats: room.players.length, started: !!room.started,
         teamMode: room.teamMode, assisted: room.assisted, stackingMode: room.stackingMode, roundLimit: room.roundLimit });
-      socket.emit('actionSuccess', { message: `${friend.username} masaya davet edildi.` });
+      socket.emit(batak ? 'batak:info' : 'actionSuccess', { message: `${friend.username} masaya davet edildi.` });
     });
     socket.on('disconnect', forget);
   }
-  return { onSocket, notify, isOnline: uid => online.has(uid) };
+  return { onSocket, notify, isOnline: uid => online.has(uid), setGames: g => { if (g.batak) batakRooms = g.batak.rooms; } };
 }
 module.exports = { install };

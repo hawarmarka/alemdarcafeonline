@@ -6,7 +6,8 @@
 <meta name="theme-color" content="#06231c">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/batak.css?v=10">
+<link rel="stylesheet" href="/css/social.css?v=1">
+<link rel="stylesheet" href="/css/batak.css?v=11">
 </head>
 <body class="batak-page">
 <div class="bk-stage" id="bkStage">
@@ -16,15 +17,17 @@
     <div class="bk-trump" id="bkTrump" title="Koz"><small>KOZ</small><i id="bkTrumpSuit"></i></div>
     <div class="bk-contract" id="bkContract"></div>
     <nav class="bk-top-btns" aria-label="Masa düğmeleri">
-      <button type="button" id="bkChatBtn" class="bk-icon" title="Masa sohbeti" aria-label="Masa sohbeti"><span>💬</span></button>
-      <button type="button" id="bkLastBtn" class="bk-icon" title="Son el" aria-label="Son eli göster"><span>⟲</span></button>
-      <button type="button" id="bkScoreBtn" class="bk-icon" title="Puan tablosu" aria-label="Puan tablosu"><span>📊</span></button>
-      <button type="button" id="bkSoundBtn" class="bk-icon" title="Ses" aria-label="Sesi aç/kapat"><span id="bkSoundIcon">🔊</span></button>
-      <button type="button" id="bkMenuBtn" class="bk-icon" title="Menü" aria-label="Menü" aria-expanded="false"><span>☰</span></button>
+      <button type="button" id="bkFriendsBtn" class="bk-icon" title="Arkadaşlar" aria-label="Arkadaşlar ve davet"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.3-6 6.5-6s5.9 2.4 6.5 6"/><path d="M16 4.6a3.4 3.4 0 0 1 0 6.8M18 14.4c2 .8 3.2 2.8 3.5 5.6"/></svg></button>
+      <button type="button" id="bkChatBtn" class="bk-icon" title="Masa sohbeti" aria-label="Masa sohbeti"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg></button>
+      <button type="button" id="bkLastBtn" class="bk-icon" title="Son el" aria-label="Son eli göster"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.7"/><path d="M4 4v4h4"/><path d="M12 8v4l3 2"/></svg></button>
+      <button type="button" id="bkScoreBtn" class="bk-icon" title="Puan tablosu" aria-label="Puan tablosu"><svg viewBox="0 0 24 24"><path d="M5 20V11M12 20V5M19 20v-6"/></svg></button>
+      <button type="button" id="bkSoundBtn" class="bk-icon" title="Ses" aria-label="Sesi aç/kapat"><svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path id="bkSoundWave" d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/><path id="bkSoundOff" class="hidden" d="M16 9l5 6M21 9l-5 6"/></svg></button>
+      <button type="button" id="bkMenuBtn" class="bk-icon" title="Menü" aria-label="Menü" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
       <div class="bk-menu hidden" id="bkMenu" role="menu">
-        <button type="button" role="menuitem" id="bkRulesBtn">📖 Kurallar</button>
-        <button type="button" role="menuitem" id="bkMenuScore">📊 Puan tablosu</button>
-        <button type="button" role="menuitem" id="bkLeaveBtn" class="danger">🚪 Masadan ayrıl</button>
+        <button type="button" role="menuitem" id="bkRulesBtn">Kurallar</button>
+        <button type="button" role="menuitem" id="bkMenuScore">Puan tablosu</button>
+        <button type="button" role="menuitem" id="bkMenuProfile">Profilim</button>
+        <button type="button" role="menuitem" id="bkLeaveBtn" class="danger">Masadan ayrıl</button>
       </div>
     </nav>
   </header>
@@ -44,9 +47,11 @@
       <b>MASA <span id="bkCode">------</span></b>
       <p id="bkWaitText">Oyuncular bekleniyor…</p>
       <div class="bk-wait-btns">
-        <button type="button" class="bk-btn orange" id="bkCopyCode">📋 KODU KOPYALA</button>
-        <span id="bkHostBtns"><button type="button" class="bk-btn blue" id="bkAddBot">🤖 BOT EKLE</button><button type="button" class="bk-btn green" id="bkStartBots">▶ BOTLARLA BAŞLAT</button></span>
+        <button type="button" class="bk-btn ghost" id="bkCopyCode">KODU KOPYALA</button>
+        <button type="button" class="bk-btn ghost" id="bkInviteBtn">ARKADAŞ DAVET ET</button>
+        <span id="bkHostBtns"><button type="button" class="bk-btn ghost" id="bkAddBot">BOT EKLE</button><button type="button" class="bk-btn primary" id="bkStartBots">BOTLARLA BAŞLAT</button></span>
       </div>
+      <small class="bk-wait-hint">Boş koltuklardaki OTUR ile istediğin koltuğa geçebilirsin. Eşlide karşındaki eşindir.</small>
     </div>
     <!-- İhale / koz / el iptal: masanın ortasında -->
     <section class="bk-panel hidden" id="bkBidPanel" aria-live="polite">
@@ -100,9 +105,20 @@
     <div class="bk-modal-btns"><button type="button" class="bk-btn blue" data-close="bkRulesModal">TAMAM</button></div>
   </div>
 </div>
+<!-- Oyuncu profili (avatara tıklayınca) -->
+<div class="bk-modal hidden" id="bkProfileModal" role="dialog" aria-modal="true" aria-labelledby="bkProfileName">
+  <div class="bk-modal-box small bk-profile">
+    <img id="bkProfileAvatar" src="/asset/avatar-default.svg" alt="">
+    <h2 id="bkProfileName">Oyuncu</h2>
+    <p id="bkProfileSub"></p>
+    <div class="bk-profile-stats" id="bkProfileStats"></div>
+    <div class="bk-modal-btns"><button type="button" class="bk-btn primary" id="bkProfileAdd">ARKADAŞ EKLE</button><button type="button" class="bk-btn ghost" data-close="bkProfileModal">KAPAT</button></div>
+  </div>
+</div>
 <div class="bk-toast hidden" id="bkToast" role="alert"></div>
 <div id="rotateHint" role="alert"><div>Daha rahat oynamak için telefonunu yan çevir</div></div>
 <script src="/socket.io/socket.io.js"></script>
-<script src="/js/batak-cards.js?v=1"></script>
-<script src="/js/batak.js?v=8"></script>
+<script src="/js/social.js?v=2"></script>
+<script src="/js/batak-cards.js?v=3"></script>
+<script src="/js/batak.js?v=11"></script>
 </body></html>

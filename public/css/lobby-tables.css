@@ -36,6 +36,14 @@
 .tp-btn.green{border:2px solid #1b6e0a;background:linear-gradient(180deg,#8ff05a,#3aa81d);box-shadow:inset 0 2px 0 rgba(255,255,255,.35),0 5px 0 #1b6e0a}
 .tp-btn.orange{border:2px solid #7a4f07;background:linear-gradient(180deg,#ffd36b,#e0941a);box-shadow:inset 0 2px 0 rgba(255,255,255,.35),0 5px 0 #7a4f07}
 .tp-btn:active{transform:translateY(3px)}
+/* Lobi Batak penceresi: kod satırı ve üç düğme pencerenin içinde kalsın */
+#batakModal .modal-panel{height:auto!important;min-height:0!important;padding-bottom:22px!important}
+#batakModal .batak-code{position:static!important;display:flex!important;gap:8px;width:auto!important;margin:0!important;transform:none!important}
+#batakModal .batak-code input{width:170px!important;height:40px!important;position:static!important;font-size:18px;text-align:center;letter-spacing:3px}
+#batakModal .batak-code button{position:static!important;height:40px!important;padding:0 16px}
+#batakModal .tp-actions{flex-wrap:wrap;gap:12px;margin-top:16px}
+#batakModal .tp-btn{min-width:160px;height:52px;font-size:20px;position:static}
+#batakModal .create-note{position:static!important;margin:12px 0 0}
 @media (max-width:720px),(max-height:520px){
   .tp-table{height:260px;border-width:10px}
   .tp-seat img{width:52px;height:52px}.tp-sit{width:64px;height:64px;font-size:16px}

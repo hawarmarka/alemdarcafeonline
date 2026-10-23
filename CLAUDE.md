@@ -245,6 +245,8 @@ Doğrulama (2026-10-23): `tests/v34Stability.test.js` yukarıdakileri test ediyo
 
 ## 5c. Batak (2026-10-24)
 
+**Kural (kullanıcı isteği):** Lobiye eklenen her yeni oyun (Pişti, Domino, Tavla…) okeydeki ortak özelliklerle gelmeli: profil penceresi, arkadaş ekleme/mesaj/masaya davet, masa gezgininden istenen koltuğa oturma ve beklerken koltuk değiştirme, sohbet, bot doldurma, yeniden bağlanma. Görünüm modern ve sade olmalı; kart oyunlarında kartlar klasik deste gibi. Kullanıcıyla Türkçe konuşulur.
+
 Lobideki BATAK kartı artık çalışıyor: **OYNA** (ihaleli, boş koltuklara 6 sn sonra botlar oturur) ve **MASA AÇ** (tür, el sayısı, HEMEN OYNA / ÖZEL MASA AÇ / kodla katıl). Masa sayfası `/batak`.
 
 - Dosyalar:
@@ -254,11 +256,23 @@ Lobideki BATAK kartı artık çalışıyor: **OYNA** (ihaleli, boş koltuklara 6
   - `public/batak.html`, `public/js/batak.js`, `public/css/batak.css`: masa sayfası.
   - `public/js/batak-cards.js`: kart çizimi.
   - Lobi tarafı `main.js` içindeki "Batak" bölümünde.
-- Kartlar gerçek iskambil kartı gibi SVG ile çiziliyor, görsel dosya yok (`batak-cards.js`):
-  - İki köşede değer ve renk, 2-10 için standart pip dizilimi.
-  - As'ta büyük ortada simge; J/Q/K çerçeveli ve ayna simetrili resimli.
-  - Arka yüz desenli.
-  - Her kart bir kez çizilip önbelleğe alınıyor.
+- Kartlar klasik iskambil destesi görünümünde, SVG ile çiziliyor; görsel dosya yok (`batak-cards.js`). Kullanıcının gönderdiği klasik deste örnek alındı:
+  - Beyaz zemin, ince siyah kenar.
+  - Köşede dar, kalın rakam ve hemen altında küçük renk işareti; sağ altta aynısı ters.
+  - 2-10 için standart pip dizilimi. As'ta ortada tek simge, maça ası büyük.
+  - J/Q/K: çerçeve içinde sarı-kırmızı-mavi giysili, iri başlı, ayna simetrili figür. Papazda taç ve kılıç, kızda taç ve çiçek, valede şapka ve asa var.
+  - Arka yüz lacivert kafes deseni.
+  - Her kart bir kez çizilip önbelleğe alınıyor. Renk simgeleri sayfa açılınca `BatakCards.install()` ile ekleniyor.
+- Düğmeler sade ve modern ("oyuncak gibi" parlak 3B düğme yok):
+  - Düz renk, ince kenar, çizgi ikonlu (SVG) üst düğmeler.
+  - `bk-btn.primary` altın, `bk-btn.ghost` şeffaf.
+- Okeydeki ortak özellikler Batak'ta da var (her yeni oyunda olmalı, bkz. aşağıdaki kural):
+  - **Koltuk seçimi:** lobide Batak kartındaki ODA SEÇ, okeyle ortak masa gezginini açıyor (`showRoomList('batak')`, `/api/batak` → `seats`). Boş koltuğa OTUR ile o koltuğa oturuluyor. Beklerken masada koltuklar sabit yerinde, boş koltukta OTUR var (`batak:changeSeat`). Maç başında `room.players` koltuk sırasına diziliyor.
+  - **Herkese açık masa:** lobideki Batak penceresinde MASA AÇ (listede görünür, botları masayı açan ekler), ÖZEL MASA (yalnız kodla) ve HEMEN OYNA (6 sn sonra botlar) var.
+  - **Profil:** avatara tıklayınca seviye, oyun, zafer, çip (`/api/profile?name=`) ve ARKADAŞ EKLE çıkıyor; zaten arkadaşsa "ARKADAŞSINIZ" yazıyor. Menüde "Profilim" var.
+  - **Arkadaşlar ve davet:** üstte arkadaşlar düğmesi (`social.js`), bekleme ekranında ARKADAŞ DAVET ET.
+    - `socialHub` Batak masalarını da tanıyor (`setGames`). Davette `game: 'batak'` gidiyor; arkadaş listesinde "Batak oynuyor" yazıyor.
+    - KATIL ve MASAYA GİT doğru oyuna götürüyor (`joinRoom(code, game)`, `sessionStorage.inviteGame`).
 - Masa görünümü (2026-10-24 yenilendi):
   - Oval keçe masa, ahşap kenar.
   - Rakiplerin kapalı kartları yelpaze halinde.
