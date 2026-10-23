@@ -34,7 +34,7 @@ Akış: istemci `socket.emit(olay)` gönderir. Sunucu doğrular, durumu değişt
 
 ## 3. Çalışma kuralları
 
-- Değişiklikten sonra mutlaka `npm test` çalıştırılmalı (16 dosya). Testlerin hepsi geçmeden iş bitmiş sayılmaz.
+- Değişiklikten sonra mutlaka `npm test` çalıştırılmalı (17 dosya). Testlerin hepsi geçmeden iş bitmiş sayılmaz.
 - Yeni bir socket hamlesi eklenirse istemcide `MOVE_EVENTS` listesine de eklenmeli. Sunucu bu hamleye her durumda `gameState` veya `gameError` ile cevap vermeli, yoksa istemci 5 sn boyunca yeni hamle göndermez.
 - Yeni bir oda zamanlayıcısı `guardedTimer(room, ad, fn)` ile kurulmalı.
 - Testler `DATA_DIR` değişkenine bakar. Gerçek hesap dosyası bozulmasın diye testleri geçici bir klasörle çalıştırın: `$env:DATA_DIR="$env:TEMP\okey-test-data"; npm test`
@@ -208,6 +208,12 @@ Doğrulama (2026-10-23): `tests/v34Stability.test.js` yukarıdakileri test ediyo
     - Gelen davet üstte bir kartla gösteriliyor (KATIL / HAYIR).
     - Masadayken bir davet kabul edilirse oyuncu önce masadan ayrılıyor, ardından lobide `sessionStorage.inviteJoin` ile davet edilen masaya oturuyor.
   - Test: `tests/v37Social.test.js`. Tarayıcıda iki hesapla denendi; istek, kabul, sohbet, davet ve masadayken davete katılma çalıştı.
+- ✅ Koltuk seçimi (2026-10-24, Okey Plus'taki gibi). ODA SEÇ artık liste değil, masa gezgini: masalar tek tek oval masa olarak görünüyor; dolu koltukta oyuncu, boş koltukta **OTUR** var. Oklar (ve klavye ←/→) masa değiştiriyor, üstte TÜMÜ/TEK/EŞLİ/KATLAMALI/YARDIMSIZ süzgeci var, liste 4 sn'de bir tazeleniyor (`main.js` `tp*`, `css/lobby-tables.css`). Bekleme ekranında panelin üstünde aynı mini masa var: boş koltuğa OTUR ile geçiliyor (`changeSeat`), kendi koltuğun "SEN" (`css/table-wait.css`).
+  - Sunucu: oyuncunun `seat` alanı (0 alt, 1 sağ, 2 üst, 3 sol; eşlide 0-2 ve 1-3 takım). `joinGame` `seat` alıyor, dolu koltukta hata dönüyor. `room.players` bekleme sırasında katılış sırasında kalıyor; **maçın ilk elinde `seatPlayers` oyuncuları koltuğa göre diziyor**, ondan sonra sıra numarası = koltuk. Eski kayıtlarda `seat` yoksa sıra numarası kullanılıyor (`seatOf`). `/api/rooms` her bekleyen masa için `seats` dönüyor. Test: `tests/v38Seats.test.js`.
+- ✅ Çift açma artık soru penceresi açmıyor: ÇİFT AÇ'a basınca yeterli çift varsa hemen açılıyor; katlamalı sınırını sunucu denetliyor.
+- ✅ Masa sayfasından eski, görünmeyen parçalar silindi (parçacıklar, eski bekleme listesi, sağ üst durum kutusu, kalan taş sayacı, "Ana Yerde Aç", eski skor düğmesi, çift açma penceresi).
+- Başlayan oyuncu kuralı kontrol edildi: başlayan 22 taş alıyor ve `hasDrawn=true`, yani taş çekmeden atıyor (`v38Seats` testi doğruluyor).
+- Bot gücü ölçüldü (2026-10-24, `oldBot` karşılaştırması, 600 maç): ilk tur beklememe, açtıktan sonra "çıkış" hesabı, çiftte ölü taşı önce atma ve 101'e kalan farkla sınırlı değerleme denendi. Hiçbiri gürültünün ötesinde fark yaratmadı (ör. ceza 59,5'e karşı 56,1; katlamalıda 96,7'ye karşı 96,7), hepsi geri alındı. Bot sezgisel olarak tavana yakın; gerçek güç artışı için gelecekteki çekişleri benzeten (Monte Carlo) ve `worker_threads` içinde çalışan bir bot gerekir. Ölçümde dikkat: destede dağıtımdan sonra 20 taş kalıyor, oyuncu başına ~5 çekiş var ve ellerin ~%52'si deste bitince kazanansız bitiyor.
 
 **Bizde olmayan mekanikler (öncelik önerisi):**
 1. ✅ **Çip ekonomisi (sanal, ücretsiz):** başlangıç çipi, masa bahsi (ör. 3.750), kazanana kazanç ve %7 masa ücreti. Dağıtım: yalnız bir kişi açtıysa bütün ortayı o alır; birden çok açan varsa birinci ortanın 3/4'ünü, ikinci 1/4'ünü alır; eşitlikte paylaştırılır. Hesap tablosuna `chips` sütunu, lobide çip göstergesi, bahis seviyeli odalar.

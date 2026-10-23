@@ -1,0 +1,18 @@
+/* Masa bekleme paneli: koltuk haritası (oval masa, 4 koltuk, boş koltukta OTUR). Panelin üstünde durur. bkz. game.js showLobby */
+#tableWaitPanel .tw-players.tw-seatmap{position:absolute!important;left:50%!important;right:auto!important;top:auto!important;bottom:104%;margin:0!important;
+  transform:translateX(-50%);width:560px;height:220px;display:block!important;border-radius:110px;
+  background:radial-gradient(ellipse at 50% 40%,#3d8fb8,#1d5f86 70%,#164b6b);border:10px solid #8a4b1c;
+  box-shadow:inset 0 0 0 3px #c47a35,inset 0 8px 24px rgba(0,0,0,.35),0 0 0 3px #4a240a,0 12px 26px rgba(0,0,0,.45)}
+#tableWaitPanel .tw-seat-mid{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:5px 12px;border-radius:8px;background:#0b2747;border:1px solid #4b7bb0;
+  color:#dbe9f8;font:600 14px/1.2 'Oswald','Arial Narrow',sans-serif;letter-spacing:.6px;white-space:nowrap}
+#tableWaitPanel .tw-seat{position:absolute;display:flex;align-items:center;gap:6px;transform:translate(-50%,-50%)}
+#tableWaitPanel .tw-seat.s-bottom{left:50%;top:84%}#tableWaitPanel .tw-seat.s-top{left:50%;top:16%}
+#tableWaitPanel .tw-seat.s-left{left:16%;top:50%}#tableWaitPanel .tw-seat.s-right{left:84%;top:50%}
+#tableWaitPanel .tw-seat img{width:50px;height:50px;border-radius:50%;object-fit:cover;background:#0b2747;border:3px solid #0b2a55;box-shadow:0 0 0 2px #6fb0ff}
+#tableWaitPanel .tw-seat.mine img{box-shadow:0 0 0 3px #ffd36b,0 0 14px #ffd36b}
+#tableWaitPanel .tw-seat b{padding:4px 8px;border-radius:7px;background:#0b2747;border:1px solid #4b7bb0;color:#fff;font:600 13px 'Oswald','Arial Narrow',sans-serif;
+  white-space:nowrap;max-width:130px;overflow:hidden;text-overflow:ellipsis}
+#tableWaitPanel .tw-seat.mine b{background:#7a4f07;border-color:#ffd36b}
+#tableWaitPanel .tw-sit{width:60px;height:60px;border-radius:50%;border:3px solid #1b6e0a;background:radial-gradient(circle at 45% 35%,#8ff05a,#3aa81d 70%);color:#fff;
+  font:700 16px 'Oswald','Arial Narrow',sans-serif;letter-spacing:.5px;text-shadow:0 1px 2px rgba(0,0,0,.5);cursor:pointer;box-shadow:inset 0 2px 0 rgba(255,255,255,.4),0 4px 0 #144f08}
+#tableWaitPanel .tw-sit:active{transform:translateY(2px)}

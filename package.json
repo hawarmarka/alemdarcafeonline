@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server/index.js",
     "dev": "node server/index.js",
-    "test": "node tests/gameLogic.test.js && node tests/advanced.test.js && node tests/accounts.test.js && node tests/v10Board.test.js && node tests/v10Server.test.js && node tests/v19Controls.test.js && node tests/v22Rules.test.js && node tests/penalties.test.js && node tests/botSimulation.test.js && node tests/okeyFuzz.test.js && node tests/hostBots.test.js && node tests/v33Rules.test.js && node tests/v34Stability.test.js && node tests/v35Persistence.test.js && node tests/v36Economy.test.js && node tests/v37Social.test.js"
+    "test": "node tests/gameLogic.test.js && node tests/advanced.test.js && node tests/accounts.test.js && node tests/v10Board.test.js && node tests/v10Server.test.js && node tests/v19Controls.test.js && node tests/v22Rules.test.js && node tests/penalties.test.js && node tests/botSimulation.test.js && node tests/okeyFuzz.test.js && node tests/hostBots.test.js && node tests/v33Rules.test.js && node tests/v34Stability.test.js && node tests/v35Persistence.test.js && node tests/v36Economy.test.js && node tests/v37Social.test.js && node tests/v38Seats.test.js"
   },
   "dependencies": {
     "express": "^4.18.2",

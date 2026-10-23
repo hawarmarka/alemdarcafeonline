@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="/css/lobby-plus.css?v=4">
 <link rel="stylesheet" href="/css/lobby-pro.css?v=4">
 <link rel="stylesheet" href="/css/social.css?v=1">
+<link rel="stylesheet" href="/css/lobby-tables.css?v=3">
 <script src="/js/transitions.js?v=2"></script>
 </head>
 <body class="lobby-page">
@@ -179,11 +180,22 @@
 </div></div>
 
 <!-- ODA SEÇ (açık masalar) -->
-<div id="modeListModal" class="premium-modal hidden" role="dialog" aria-modal="true" aria-labelledby="modeListTitle"><div class="modal-panel room-dialog">
+<!-- Masalar tek tek gösterilir; boş koltuğa OTUR ile oturulur (oklarla masa değiştirilir) -->
+<div id="modeListModal" class="premium-modal hidden" role="dialog" aria-modal="true" aria-labelledby="modeListTitle"><div class="modal-panel tp-panel">
   <button class="round-x" data-close="modeListModal" aria-label="Kapat"></button>
-  <div class="dialog-head"><b id="modeListTitle">ODA SEÇ</b><small>Bekleyen bir masaya otur</small></div>
-  <div id="modeListRows" class="mode-list-rows"></div>
-  <button id="modeAutoJoinBtn" class="round-ok" type="button" aria-label="Hemen oyna"></button>
+  <div class="tp-head"><b id="modeListTitle">ODA SEÇ</b>
+    <div class="tp-filter" id="tpFilter"><button type="button" data-f="all" class="on">TÜMÜ</button><button type="button" data-f="tek">TEK</button><button type="button" data-f="esli">EŞLİ</button><button type="button" data-f="katlamali">KATLAMALI</button><button type="button" data-f="yardimsiz">YARDIMSIZ</button></div>
+  </div>
+  <div class="tp-stage">
+    <button type="button" class="tp-arrow" id="tpPrev" aria-label="Önceki masa">‹</button>
+    <div class="tp-table" id="tpTable"></div>
+    <button type="button" class="tp-arrow" id="tpNext" aria-label="Sonraki masa">›</button>
+  </div>
+  <div class="tp-count" id="tpCount"></div>
+  <div class="tp-actions">
+    <button type="button" class="tp-btn orange" id="tpCreate">＋ MASA AÇ</button>
+    <button type="button" class="tp-btn green" id="modeAutoJoinBtn">HEMEN OYNA</button>
+  </div>
 </div></div>
 
 <!-- ÖZEL ODA SEÇ: kodla katıl -->
@@ -198,4 +210,4 @@
 
 <div id="rotateHint" role="alert"><div class="rotate-phone"></div><div>Daha rahat oynamak için telefonunu yan çevir</div><small>Alemdar Cafe yatay ekranda oynanır</small></div>
 <div id="errorToast" class="toast hidden" role="alert"><span class="toast-message"></span></div>
-<script src="/socket.io/socket.io.js"></script><script src="/js/social.js?v=1"></script><script src="/js/main.js?v=9"></script></body></html>
+<script src="/socket.io/socket.io.js"></script><script src="/js/social.js?v=1"></script><script src="/js/main.js?v=10"></script></body></html>

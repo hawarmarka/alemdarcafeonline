@@ -84,7 +84,9 @@ app.get('/api/rooms', (_req, res) => {
     waitingRooms: list.filter(r => r.modeKey === m && !r.started).length
   }])), online: io.engine?.clientsCount || 0, waiting: list.filter(r => !r.started && !r.game && !r.matchEnded && r.players.length < 4).map(r => ({ code: r.code, modeKey: r.modeKey, players: r.players.length, custom: !!r.custom,
     teamMode: r.teamMode, stackingMode: r.stackingMode, assisted: r.assisted, roundLimit: r.roundLimit, bet: r.bet,
-    host: (r.players.find(p => p.token === r.hostToken) || r.players.find(p => !p.isBot))?.name || '' })) });
+    host: (r.players.find(p => p.token === r.hostToken) || r.players.find(p => !p.isBot))?.name || '',
+    // Masa listesinde koltuklar: dolu koltukta oyuncu, boşta OTUR düğmesi
+    seats: [0, 1, 2, 3].map(s => { const p = r.players.find(q => seatOf(r, q) === s); return p ? { name: p.name, avatar: p.avatar, isBot: !!p.isBot, level: p.level || 1 } : null; }) })) });
 });
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, { maxHttpBufferSize: 1e5 });
@@ -115,6 +117,18 @@ function botName(room) {
     room.nextBotId = n + 1;
     return name;
 }
+// Koltuklar (0 alt, 1 sağ, 2 üst, 3 sol; eşlide 0-2 ve 1-3 takım). Oyun başlamadan oyuncu istediği boş koltuğa oturur;
+// room.players sırası katılış sırasıdır, oyun başlarken koltuğa göre dizilir (bkz. newRound). Eski kayıtlarda seat yoksa sıra numarası kullanılır.
+const seatOf = (room, p) => Number.isInteger(p.seat) ? p.seat : room.players.indexOf(p);
+function freeSeat(room, wanted) {
+    const taken = new Set(room.players.map(p => seatOf(room, p)));
+    if (Number.isInteger(wanted) && wanted >= 0 && wanted < 4) return taken.has(wanted) ? -1 : wanted;
+    return [0, 1, 2, 3].find(s => !taken.has(s)) ?? -1;
+}
+function seatPlayers(room) {
+    room.players.sort((a, b) => seatOf(room, a) - seatOf(room, b));
+    room.players.forEach((p, i) => { p.seat = i; });
+}
 function addBotToRoom(room, seatIndex = room.players.length) {
     if (room.players.length >= 4 && seatIndex >= room.players.length) return null;
     const name = botName(room);
@@ -128,8 +142,9 @@ function addBotToRoom(room, seatIndex = room.players.length) {
         accountId: null,
         isBot: true
     };
-    if (seatIndex >= room.players.length) room.players.push(bot);
-    else room.players.splice(seatIndex, 0, bot);
+    // Bekleyen masada ilk boş koltuğa; oyun sırasında (yerine geçme) verilen sıraya oturur.
+    if (seatIndex >= room.players.length) { bot.seat = room.game ? room.players.length : freeSeat(room); room.players.push(bot); }
+    else { bot.seat = seatIndex; room.players.splice(seatIndex, 0, bot); }
     if (!room.teamMode) room.scores[name] = room.scores[name] || 0;
     else if (!('team1' in room.scores)) room.scores = { team1: 0, team2: 0 };
     return bot;
@@ -557,7 +572,7 @@ function settleMatch(room) {
     });
 }
 function summary(room) {
-    return room.players.map((p, i) => ({ name: p.name, avatar: p.avatar, index: i,
+    return room.players.map((p, i) => ({ name: p.name, avatar: p.avatar, index: i, seat: seatOf(room, p),
         position: POSITION[i], team: room.teamMode ? i % 2 + 1 : null, level: p.accountId ? p.level : 1, frame: p.frame || 'gold',
         connected: !!p.socketId || !!p.isBot, isBot: !!p.isBot, hasOpened: !!room.game?.playerStates[i]?.hasOpened,
         openType: room.game?.playerStates[i]?.openType || null,
@@ -618,7 +633,7 @@ function newRound(room) {
     room.gifts = [0,0,0,0];
     room.roundExtras = [0,0,0,0];
     room.nextRoundReady = new Set();
-    if (room.completedRounds === 0) takeBets(room); // çip maç başında bir kez alınır
+    if (room.completedRounds === 0) { seatPlayers(room); takeBets(room); } // koltuk sırası ve çip maç başında bir kez
     room.game.startGame(room.players);
     room.minimumOpenScore = 101;
     room.minimumPairs = 5;
@@ -1062,9 +1077,13 @@ io.on('connection', socket => {
         if (room.started || room.game || room.matchEnded || room.players.length >= 4) return issue(socket, 'Oda dolu veya oyun başlamış.');
         if (room.players.some(p => p.name.toLowerCase() === name.toLowerCase())) return issue(socket, 'Bu odada aynı isim zaten var.');
         if (lacksChips(account, room.bet)) return issue(socket, notEnoughChips(account, room.bet));
+        // Masa listesinden belirli bir koltuğa (OTUR) oturulabilir; o koltuk dolmuşsa hata döner.
+        const wantedSeat = data?.seat == null ? null : Number(data.seat);
+        const seat = freeSeat(room, wantedSeat);
+        if (seat < 0) return issue(socket, wantedSeat == null ? 'Oda dolu.' : 'Bu koltuk az önce doldu, başka bir koltuk seç.');
         // Mesajlarda resmin kendisi değil kısa adresi gider (Avatars.ref).
         const avatar = Avatars.ref(account?.avatar || (Avatars.BUILTIN.includes(data.avatar) || (typeof data.avatar === 'string' && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]{1,90000}$/.test(data.avatar)) ? data.avatar : 'default.svg'));
-        room.players.push({ token, socketId: socket.id, name, avatar, frame: account?.frame || (['gold','silver','royal','emerald','neon','rose'].includes(data?.frame) ? data.frame : 'gold'), accountId: account?.id || null, level: Accounts.cleanUser(account)?.level || 1,
+        room.players.push({ token, socketId: socket.id, name, avatar, seat, frame: account?.frame || (['gold','silver','royal','emerald','neon','rose'].includes(data?.frame) ? data.frame : 'gold'), accountId: account?.id || null, level: Accounts.cleanUser(account)?.level || 1,
             chips: account ? Accounts.chipsOf(account.id) : null });
         socket.join(room.code);
         socket.data.roomCode = room.code;
@@ -1127,6 +1146,16 @@ io.on('connection', socket => {
         if (!Number.isInteger(i) || !room.players[i]?.isBot) return issue(socket, 'Bu koltukta bot yok.');
         const [bot] = room.players.splice(i, 1);
         if (!room.teamMode) delete room.scores[bot.name];
+        lobby(room);
+    });
+    // Bekleyen masada boş bir koltuğa geç (masa ekranındaki OTUR).
+    socket.on('changeSeat', data => {
+        const { room, index } = getRoomAndSeat(socket);
+        if (!room || index < 0) return issue(socket, 'Masada değilsiniz.');
+        if (room.started || room.game || room.matchEnded) return issue(socket, 'Oyun başladıktan sonra koltuk değiştirilemez.');
+        const seat = freeSeat(room, Number(data?.seat));
+        if (seat < 0) return issue(socket, 'Bu koltuk dolu.');
+        room.players[index].seat = seat;
         lobby(room);
     });
     socket.on('startWithBots', () => {

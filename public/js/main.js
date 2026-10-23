@@ -157,7 +157,7 @@ document.querySelectorAll('.rack-options button').forEach(btn => btn.onclick = (
 });
 document.querySelectorAll('.rack-options button').forEach(b => b.classList.toggle('selected', b.dataset.istaka === selectedIstaka));
 const modes = { klasik: { stackingMode: false, assisted: true }, katlamali: { stackingMode: true, assisted: true }, yardimli: { stackingMode: false, assisted: true }, yardimsiz: { stackingMode: false, assisted: false } };
-function start(mode, modeKey = 'klasik') {
+function start(mode, modeKey = 'klasik', extra = {}) {
   if (!socketAvailable || !socket.connected) return toast('Oyun sunucusuna bağlanılamadı. Uygulamayı npm start ile çalıştırın ve bağlantınızı kontrol edin.');
   if (pendingJoin) return;
   const playerName = currentUser?.username || $('playerNameInput').value.trim() || 'Oyuncu' + Math.floor(10000 + Math.random() * 89999);
@@ -167,7 +167,7 @@ function start(mode, modeKey = 'klasik') {
   const setting = mode === 'create' ? {stackingMode: $('roomStack').value === 'true', assisted: $('roomAssist').value === 'true'} : (modes[modeKey] || modes.klasik);
   // Masa bahsi: Masa Aç'ta seçilen; HEMEN OYNA en düşük bahisli masaya (1.000 çip) oturur.
   const bet = mode === 'create' ? Number($('roomBet').value) || 1000 : 1000;
-  pendingJoin = { mode, modeKey, ...setting, bet, playerName, token, roomCode, isPublic: mode === 'create' ? createPublic : undefined,
+  pendingJoin = { mode, modeKey, ...setting, bet, playerName, token, roomCode, seat: Number.isInteger(extra.seat) ? extra.seat : undefined, isPublic: mode === 'create' ? createPublic : undefined,
     authToken, avatar: currentUser?.avatar || selectedAvatar,
     frame: currentUser?.frame || selectedFrame, roundLimit: Number($('roundLimit').value), teamMode: mode === 'create' && $('roomTeam').value === 'takim', penaltyMode: mode === 'create' ? $('penaltyModeToggle').checked : true };
   localStorage.setItem('okeyPlayerName', playerName);
@@ -181,31 +181,68 @@ function reenable() {
   document.querySelectorAll('.join-mode, #randomJoinBtn, #createRoomBtn, #joinCodeBtn, #confirmCreateBtn').forEach(b => b.disabled = false);
 }
 document.querySelectorAll('.join-mode').forEach(btn => btn.onclick = () => start('random', btn.dataset.mode));
-let selectedModeList = 'klasik';
-async function showRoomList(mode) {
-  selectedModeList = mode;
-  $('modeListTitle').textContent = 'ODA SEÇ';
-  const rows = $('modeListRows'); rows.replaceChildren();
-  try {
-    const data = await api('/api/rooms', null, 'GET');
-    const waiting = data.waiting || [];
-    if (!waiting.length) { const p = document.createElement('p'); p.className = 'mode-list-empty'; p.textContent = 'Şu an bekleyen masa yok. MASA AÇ ile kendi masanı kurabilir veya ✓ ile hızlı eşleşmeye girebilirsin.'; rows.append(p); }
-    waiting.forEach(room => {
-      const row = document.createElement('div'); row.className = 'mode-list-row';
-      const info = document.createElement('div'); info.className = 'ml-info';
-      const title = document.createElement('strong'); title.textContent = (room.host ? room.host + ' · ' : '') + 'Masa ' + room.code;
-      const chips = document.createElement('div'); chips.className = 'ml-chips';
-      [`${Number(room.bet || 1000).toLocaleString('tr-TR')} ÇİP`, room.teamMode ? 'EŞLİ' : 'TEK', `${room.roundLimit || 4} EL`, room.assisted ? 'YARDIMLI' : 'YARDIMSIZ', room.stackingMode ? 'KATLAMALI' : 'KATLAMASIZ']
-        .forEach(t => { const s = document.createElement('span'); s.textContent = t; chips.append(s); });
-      const seats = document.createElement('small'); seats.textContent = room.players + '/4 oyuncu';
-      info.append(title, chips, seats);
-      const btn = document.createElement('button'); btn.className = 'lb-btn green'; btn.type = 'button'; btn.textContent = 'OTUR';
-      btn.addEventListener('click', () => { $('roomCodeInput').value = room.code; hideModal('modeListModal'); start('code'); });
-      row.append(info, btn); rows.append(row);
-    });
-  } catch (e) { toast(e.message); }
+// ODA SEÇ: bekleyen masalar tek tek, oval masa üstünde 4 koltukla gösterilir. Boş koltuğa OTUR ile o koltuğa oturulur.
+// Pencere açıkken liste 4 sn'de bir tazelenir; gösterilen masa (kodla) korunur.
+const tp = { list: [], code: null, filter: 'all', timer: null };
+const TP_SEAT_CLASS = ['s-bottom', 's-right', 's-top', 's-left']; // sunucudaki koltuk sırası
+const tpMatch = r => tp.filter === 'all' || (tp.filter === 'tek' && !r.teamMode) || (tp.filter === 'esli' && r.teamMode)
+  || (tp.filter === 'katlamali' && r.stackingMode) || (tp.filter === 'yardimsiz' && !r.assisted);
+function tpVisible() { return tp.list.filter(tpMatch); }
+function tpPaint() {
+  const list = tpVisible(), box = $('tpTable');
+  let i = Math.max(0, list.findIndex(r => r.code === tp.code));
+  const room = list[i]; tp.code = room?.code || null;
+  $('tpPrev').disabled = $('tpNext').disabled = list.length < 2;
+  box.replaceChildren();
+  const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+  if (!room) {
+    box.append(el('p', 'tp-empty', 'Şu an bekleyen masa yok. MASA AÇ ile kendi masanı kur ya da HEMEN OYNA ile hemen eşleş.'));
+    $('tpCount').textContent = ''; return;
+  }
+  box.append(el('div', 'tp-bet', `🪙 ${Number(room.bet || 1000).toLocaleString('tr-TR')}`));
+  const rules = el('div', 'tp-rules');
+  rules.append(el('span', null, room.teamMode ? 'Eşli' : 'Tek'), el('span', null, `${room.roundLimit || 4} El`),
+    el('span', 'wide ' + (room.assisted ? 'g' : ''), room.assisted ? 'Yardımlı' : 'Yardımsız'),
+    el('span', 'wide ' + (room.stackingMode ? 'r' : ''), room.stackingMode ? 'Katlamalı' : 'Katlamasız'));
+  box.append(rules);
+  (room.seats || []).forEach((p, s) => {
+    const seat = el('div', 'tp-seat ' + TP_SEAT_CLASS[s]);
+    if (p) {
+      const img = el('img'); img.src = avatarSrc(p.avatar); img.alt = '';
+      seat.append(img, el('b', null, (p.isBot ? '🤖 ' : '') + p.name));
+    } else {
+      const b = el('button', 'tp-sit', 'OTUR'); b.type = 'button';
+      b.addEventListener('click', () => { $('roomCodeInput').value = room.code; hideModal('modeListModal'); start('code', 'klasik', { seat: s }); });
+      seat.append(b);
+    }
+    box.append(seat);
+  });
+  $('tpCount').textContent = `Masa ${i + 1} / ${list.length} · ${room.host ? room.host + ' · ' : ''}${room.code}`;
+}
+async function tpLoad() {
+  try { tp.list = (await api('/api/rooms', null, 'GET')).waiting || []; } catch (e) { toast(e.message); }
+  tpPaint();
+}
+function tpStep(d) {
+  const list = tpVisible(); if (!list.length) return;
+  const i = Math.max(0, list.findIndex(r => r.code === tp.code));
+  tp.code = list[(i + d + list.length) % list.length].code; tpPaint();
+}
+async function showRoomList() {
   showModal('modeListModal');
-}document.querySelectorAll('.select-mode').forEach(btn => btn.onclick = () => showRoomList(btn.dataset.mode));
+  await tpLoad();
+  clearInterval(tp.timer);
+  tp.timer = setInterval(() => { if ($('modeListModal').classList.contains('hidden')) clearInterval(tp.timer); else tpLoad(); }, 4000);
+}
+$('tpPrev').onclick = () => tpStep(-1);
+$('tpNext').onclick = () => tpStep(1);
+$('tpCreate').onclick = () => { hideModal('modeListModal'); openCreate(true); };
+document.querySelectorAll('#tpFilter button').forEach(b => b.addEventListener('click', () => {
+  tp.filter = b.dataset.f; tp.code = null;
+  document.querySelectorAll('#tpFilter button').forEach(x => x.classList.toggle('on', x === b)); tpPaint();
+}));
+addEventListener('keydown', e => { if ($('modeListModal').classList.contains('hidden')) return; if (e.key === 'ArrowLeft') tpStep(-1); if (e.key === 'ArrowRight') tpStep(1); });
+document.querySelectorAll('.select-mode').forEach(btn => btn.onclick = () => showRoomList());
 $('modeAutoJoinBtn').onclick = () => { hideModal('modeListModal'); start('random', quickMode()); };
 $('randomJoinBtn').onclick = () => start('random', quickMode());
 // MASA AÇ: KLASİK kartında herkese açık (Oda Seç listesinde), ÖZEL kartında yalnızca kodla katılınan masa

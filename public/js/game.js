@@ -175,11 +175,9 @@ function joinGameSocket() {
 }
 socket.on('connect', () => {
     $('connectionBanner').classList.add('hidden');
-    if ($('lobbyConnectionAlert')) $('lobbyConnectionAlert').classList.add('hidden');
-    if ($('lobbyHomeBtn')) $('lobbyHomeBtn').classList.add('hidden');
-    if ($('lobbyLeaveBtn')) $('lobbyLeaveBtn').classList.remove('hidden');
-    if ($('lobbyStatusText')) $('lobbyStatusText').textContent = 'Oyuncular bekleniyor...';
-    if (document.querySelector('.lobby-waiting')) document.querySelector('.lobby-waiting').classList.remove('hidden');
+    $('lobbyConnectionAlert').classList.add('hidden');
+    $('lobbyHomeBtn').classList.add('hidden');
+    $('lobbyOverlay').classList.remove('has-problem');
     joinGameSocket();
 });
 socket.on('disconnect', () => {
@@ -205,9 +203,6 @@ function showLobbyProblem(message){
     alert.classList.remove('hidden');
     $('lobbyOverlay').classList.add('has-problem'); // hata mesajı klasik kutuda görünsün
     $('lobbyHomeBtn').classList.remove('hidden');
-    $('lobbyStatusText').textContent = 'Masa bağlantısı kurulamadı';
-    document.querySelector('.lobby-waiting').classList.add('hidden');
-    $('lobbyLeaveBtn').classList.add('hidden');
     $('lobbyRoomCode').textContent = session?.roomCode || '------';
     $('lobbyOverlay').classList.remove('hidden');
     $('gameContainer').classList.add('hidden');
@@ -234,26 +229,15 @@ Social.init({ socket, token: () => userAuth, toast, avatarSrc, buttons: () => [$
         action('leaveGame');
     } });
 $('twInvite').addEventListener('click', () => Social.open(true));
-$('lobbyLeaveBtn').addEventListener('click', leave);
-$('leaveTableBtn').addEventListener('click', leave);
-$('lobbyCopyBtn').addEventListener('click', async () => {
+async function copyRoomCode() {
     try { await navigator.clipboard.writeText(session.roomCode); toast('Oda kodu kopyalandı.'); }
     catch { toast('Oda kodu: ' + session.roomCode); }
-});
+}
 function showLobby(data) {
     $('lobbyOverlay').classList.remove('hidden');
     document.body.classList.add('waiting-table'); // bekleme panelinin arkasında boş masa görünür
     $('gameContainer').classList.add('hidden');
     $('lobbyRoomCode').textContent = data.code || session.roomCode;
-    $('lobbyTeamBadge').classList.toggle('hidden', !data.teamMode);
-    $('lobbyPlayerCount').textContent = `(${data.players.length}/4)`;
-    document.querySelectorAll('.lobby-player-slot').forEach((element, i) => {
-        const player = data.players[i];
-        element.classList.toggle('empty', !player);
-        element.classList.toggle('filled', !!player);
-        element.querySelector('.player-name').textContent = player ? player.name + (player.connected ? '' : ' (bağlanıyor)') : 'Bekleniyor...';
-    });
-    document.querySelector('.lobby-waiting span').textContent = `${4 - data.players.length} oyuncu bekleniyor...`;
     // Okey Plus masa bekleme paneli
     $('lobbyOverlay').classList.remove('has-problem');
     $('twTop').textContent = 'MASA ' + (data.code || session.roomCode || '------') + (data.bet ? ` · ${Number(data.bet).toLocaleString('tr-TR')} ÇİP` : '');
@@ -263,17 +247,32 @@ function showLobby(data) {
     $('twStack').textContent = data.stackingMode ? 'Katlamalı' : 'Katlamasız';
     // Masayı açan kişi (özel masa) bot ekleyip çıkarabilir ve botlarla hemen başlatabilir.
     const isHost = data.hostIndex >= 0 && data.players[data.hostIndex]?.name === session?.playerName;
-    const seats = $('twPlayers'); seats.replaceChildren();
-    for (let i = 0; i < 4; i++) {
-        const p = data.players[i], s = document.createElement('span');
-        s.textContent = p ? (p.isBot ? '🤖 ' : '') + p.name + (i === data.hostIndex ? ' 👑' : '') + (p.connected ? '' : ' ⏳') : 'Boş koltuk';
-        if (!p) s.className = 'empty';
-        if (p?.isBot && isHost) {
-            const x = document.createElement('button'); x.type = 'button'; x.className = 'tw-kick'; x.textContent = '✕'; x.title = 'Botu çıkar';
-            x.addEventListener('click', () => action('removeBot', { index: i }));
-            s.append(x);
+    // Koltuklar oval masa üstünde (0 alt, 1 sağ, 2 üst, 3 sol; eşlide karşılıklı oturanlar takım). Boş koltukta OTUR ile koltuk değiştirilir.
+    const seats = $('twPlayers'); seats.replaceChildren(); seats.classList.add('tw-seatmap');
+    const SEAT_CLASS = ['s-bottom', 's-right', 's-top', 's-left'];
+    const rules = document.createElement('div'); rules.className = 'tw-seat-mid'; rules.textContent = data.teamMode ? 'EŞLİ' : 'TEK'; rules.title = data.teamMode ? 'Karşılıklı oturanlar takım olur' : '';
+    seats.append(rules);
+    for (let s = 0; s < 4; s++) {
+        const i = data.players.findIndex(q => (q.seat ?? q.index) === s), p = data.players[i];
+        const box = document.createElement('div'); box.className = 'tw-seat ' + SEAT_CLASS[s];
+        if (p) {
+            const mine = p.name === session?.playerName;
+            const img = document.createElement('img'); img.src = avatarSrc(p.avatar); img.alt = '';
+            const name = document.createElement('b');
+            name.textContent = (mine ? 'SEN · ' : '') + (p.isBot ? '🤖 ' : '') + p.name + (i === data.hostIndex ? ' 👑' : '') + (p.connected ? '' : ' ⏳');
+            box.classList.toggle('mine', mine);
+            box.append(img, name);
+            if (p.isBot && isHost) {
+                const x = document.createElement('button'); x.type = 'button'; x.className = 'tw-kick'; x.textContent = '✕'; x.title = 'Botu çıkar';
+                x.addEventListener('click', () => action('removeBot', { index: i }));
+                box.append(x);
+            }
+        } else {
+            const sit = document.createElement('button'); sit.type = 'button'; sit.className = 'tw-sit'; sit.textContent = 'OTUR'; sit.title = 'Bu koltuğa geç';
+            sit.addEventListener('click', () => action('changeSeat', { seat: s }));
+            box.append(sit);
         }
-        seats.append(s);
+        seats.append(box);
     }
     const hostBar = $('twHostBar');
     hostBar.classList.toggle('hidden', !isHost || data.players.length >= 4);
@@ -297,7 +296,7 @@ setInterval(updateWaitStatus, 500);
 $('twLeave').addEventListener('click', leave);
 $('twAddBot').addEventListener('click', () => action('addBot'));
 $('twStartBots').addEventListener('click', () => action('startWithBots'));
-$('twCopy').addEventListener('click', () => $('lobbyCopyBtn').click());
+$('twCopy').addEventListener('click', copyRoomCode);
 socket.on('lobbyUpdate', data => { if (!data.started && !state && !finished) showLobby(data); });
 socket.on('roundCancelled', d => {
     settleDiscard(); moveAnswered();
@@ -391,7 +390,6 @@ socket.on('gameState', data => {
     setText($('gamebarRoom'), state.roomCode);
     setText($('gamebarAssist'), state.assisted ? 'Yardımlı' : 'Yardımsız');
     setText($('gamebarMode'), (state.teamMode ? 'TAKIM' : 'TEK') + ' · ' + (state.assisted ? 'YARDIMLI' : 'YARDIMSIZ') + ' · ' + (state.stackingMode ? 'KATLAMALI' : 'KATLAMASIZ') + ` · EL ${(state.roundsCompleted || 0) + 1}/${state.roundLimit || 4}`);
-    setText($('tableOptions'), `${state.teamMode ? 'Takım' : 'Tek'} · ${state.assisted ? 'Yardımlı' : 'Yardımsız'} · ${state.stackingMode ? `Katlamalı · Açılış ${state.minimumOpenScore}+` : 'Katlamasız'} · ${(state.roundsCompleted || 0) + 1}/${state.roundLimit} El`);
     syncTurnClock(data);
     // Yardımsız masada ıstakayı oyuncu kendisi dizer: SERİ DİZ / ÇİFT DİZ kapalı.
     for (const id of ['sortSeriesBtn', 'sortPairsBtn']) {
@@ -452,7 +450,6 @@ socket.on('gameFinished', data => {
     $('lobbyOverlay').classList.add('hidden');
     $('gameContainer').classList.remove('hidden');
     finished = true;
-    $('openPairsModal').classList.add('hidden');
     $('openHandModal').classList.add('hidden');
     $('winnerText').textContent = data.matchEnded ? 'OYUN SONUCU' : `EL SONUCU · ${data.completedRounds}/${data.roundLimit}`;
     // Okey Plus: sağdaki yeşil yuvarlak düğme hep yerinde (simetri). Maç bitince YENİ OYUNA BAŞLA, ara ellerde SONRAKİ EL geri sayımı.
@@ -981,8 +978,6 @@ function updateIndicator() {
     setMode('modeAssist', state.assisted ? 'Yardımlı' : 'Yardımsız', state.assisted);
     setMode('modeStack', state.stackingMode ? 'Katlamalı' : 'Katlamasız', state.stackingMode);
     setMode('modeRound', `${(state.roundsCompleted || 0) + 1}/${state.roundLimit || 4} El`, false);
-    const odo = $('pileOdometer');
-    setText(odo, String(state.pileCount ?? 0).padStart(3, '0').split('').join(' '));
 }
 function getScore(group) {
     if (group.length < 3) return 0;
@@ -1171,9 +1166,6 @@ function renderPlayers() {
         if (!gift) { gift = document.createElement('span'); gift.className = 'player-gift-badge'; info.append(gift); }
         if (gift.textContent !== (lastGifts[i] || '')) gift.textContent = lastGifts[i] || '';
     }
-    setText($('currentPlayerName'), state.players[state.currentPlayer]?.name || '-');
-    $('turnIndicator').classList.toggle('my-turn', canPlay());
-    setText($('pileCount'), state.pileCount);
     setText($('pileCountCenter'), state.pileCount);
     const selfPlayer = state.players[state.playerIndex];
     // Sol üst 🪙 kutusu: kendi sanal çipin (misafirde masa bahsi gösterilir; puan skor tablosunda).
@@ -1310,7 +1302,6 @@ function renderActions() {
         $(id).classList.toggle('action-unavailable', blocked);
         $(id).setAttribute('aria-disabled', String(blocked));
     }
-    $('openCentralBtn').disabled = !!getOpenBlockReason('normal');
     // Okey Plus'taki gibi işlem düğmeleri yalnızca o an yapılabiliyorsa görünür.
     const ready = canTakeAction && state.hasDrawn;
     let canSeries = false, canPairs = false;
@@ -1414,34 +1405,12 @@ function findAvailablePairs(tiles = state?.tiles) {
         if (!naturalPairs().length || state.tiles.length <= 2) return toast('İndirilecek çiftin yok (elde bitiş taşı kalmalı).', true);
         return action('openWithPairs');
     }
-    const pairs = findAvailablePairs();
-    const needPairs = state.minimumPairs || 5;
-    $('pairsCountText').textContent = `Bulunan çift: ${pairs.length} / ${needPairs} ${pairs.length >= needPairs ? '✅ Açmaya hazır!' : `· En az ${needPairs} çift gerekli.`}`;
-    const preview = $('pairPreview'); preview.replaceChildren();
-    pairs.forEach((pair, i) => {
-        const group = document.createElement('div'); group.className = 'pair-preview-group';
-        if (i < needPairs) group.classList.add('pair-counted');
-        pair.forEach(tile => group.append(miniTile(tile)));
-        preview.append(group);
-    });
-    if (!pairs.length) {
-        const label = document.createElement('p'); label.className = 'pair-empty';
-        label.textContent = 'Henüz aynı renk ve aynı sayıdan bir çiftiniz yok.';
-        preview.append(label);
-    }
-    $('confirmPairsBtn').disabled = pairs.length < needPairs;
-    $('confirmPairsBtn').textContent = `✅ ${Math.max(needPairs, pairs.length)} ÇİFTİ AÇ`;
-    $('openPairsModal').classList.remove('hidden');
+    // İlk çift açılış: soru penceresi yok. Yeterli çift varsa hemen açılır; katlamalı sınırı ve diğer kuralları sunucu denetler.
+    const pairs = findAvailablePairs(), needPairs = state.minimumPairs || 5;
+    if (pairs.length < needPairs) return toast(`Çift açmak için en az ${needPairs} çift gerekli (elinde ${pairs.length} çift var).`, true);
+    action('openWithPairs');
 }
 $('openPairsBtn').addEventListener('click', showPairsModal);
-$('cancelPairsBtn').addEventListener('click', () => $('openPairsModal').classList.add('hidden'));
-$('confirmPairsBtn').addEventListener('click', () => {
-    if ($('confirmPairsBtn').disabled) return;
-    const block = getOpenBlockReason('pairs');
-    if (block) return toast(block, true);
-    $('openPairsModal').classList.add('hidden');
-    action('openWithPairs');
-});
 // GERİ TOPLA: bu tur masaya indirilenleri geri al (açılış geri alınırsa 101 ceza).
 $('undoDiscardBtn').addEventListener('click', () => {
     if (!canPlay()) return toast('Sıra sizde değil.', true);
@@ -1559,7 +1528,6 @@ $('sortSeriesBtn').addEventListener('click',()=>{
 // Open-hand modal: explicit tile ownership and group selection. Scores are advisory; server computes the real result.
 const modal = $('openHandModal');
 function closeOpen() { modal.classList.add('hidden'); opening = { selected: new Set(), groups: [] }; }
-$('openCentralBtn').addEventListener('click', () => $('openHandBtn').click());
 $('openHandBtn').addEventListener('click', () => {
     const block = getOpenBlockReason('normal');
     if (block) return toast(block, true);
@@ -1726,10 +1694,8 @@ $('scoreboardClose')?.addEventListener('click', () => scoreboardPanel?.classList
 function toggleScorePanel(){
     if (!scoreboardPanel) return;
     scoreboardPanel.classList.toggle('hidden');
-    $('toggleScoreBtn')?.classList.toggle('is-active', !scoreboardPanel.classList.contains('hidden'));
     $('toggleScoreTop')?.classList.toggle('is-active', !scoreboardPanel.classList.contains('hidden'));
 }
-$('toggleScoreBtn')?.addEventListener('click', toggleScorePanel);
 $('toggleScoreTop')?.addEventListener('click', toggleScorePanel);
 // Görünür sayaç: gerçek oturum başlangıcından geçen süre; bakiyeyi taklit etmez.
 const sessionStartedAt = Date.now();
