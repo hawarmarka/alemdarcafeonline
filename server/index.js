@@ -398,7 +398,7 @@ function chooseBotDiscard(room, index, opts = {}) {
         const valueOrder = (state.hasOpened || game.oldBotSeats?.has(index)) ? (a, b) => game.getTileValue(b) - game.getTileValue(a) : (a, b) => game.getTileValue(a) - game.getTileValue(b);
         ranked = candidates.sort((a, b) => (usefulness(a) + danger(a) * 2) - (usefulness(b) + danger(b) * 2) || valueOrder(a, b) || a.id.localeCompare(b.id));
     }
-    const mcInput = !state.hasOpened && smart && ranked.length > 1 && useMonteCarlo(game, index) ? monteCarloInput(room, index, ranked) : null;
+    const mcInput = !state.hasOpened && smart && ranked.length > 1 && useMonteCarlo(room, index) ? monteCarloInput(room, index, ranked) : null;
     if (!mcInput) return ranked[0];
     // Sunucuda hesap worker'da yapılır (runBotTurn); burada yalnızca istenirse eşzamanlı (ölçüm ve testler).
     if (opts.deferMonteCarlo) return { deferred: true, fallback: ranked[0], mcInput };
@@ -414,7 +414,14 @@ const MC_MAX_CANDIDATES = Number(process.env.BOT_MC_CANDIDATES) || 8;
 // BOT_MC_SYNC=1: hesap ana iş parçacığında (ölçüm betiği). Normalde worker_threads havuzunda (server/botPool.js).
 const MC_IN_WORKER = process.env.BOT_MC_SYNC !== '1';
 const MC_TIMEOUT_MS = Number(process.env.BOT_MC_TIMEOUT_MS) || 2500;
-function useMonteCarlo(game, index) { return (game.botAI || BOT_AI) === 'mc' && !game.baselineSeats?.has(index); }
+// Ölçüm (2026-10-24, 5.600'er el): katlamasızda MC 54,5 / eski 58,4 ceza (fark 3,9 ± 1,0). Katlamalıda ceza aynı
+// (96,5 / 97,4, fark 1,0 ± 1,5) ama MC daha az el bitirdi (753 / 835); bu yüzden katlamalı masada sezgisel kural kalır.
+// BOT_MC_STACKING=1 katlamalıda da açar (yeniden ölçmek için).
+const MC_IN_STACKING = process.env.BOT_MC_STACKING === '1';
+function useMonteCarlo(room, index) {
+    const game = room.game;
+    return (game.botAI || BOT_AI) === 'mc' && !game.baselineSeats?.has(index) && (!room.stackingMode || MC_IN_STACKING);
+}
 // Worker'a gidecek girdi: yalnızca botun görebildiği bilgiler (kendi eli, okey, görünmeyen taşların türleri ve sayıları).
 function monteCarloInput(room, index, ranked) {
     const game = room.game, hand = game.playerTiles[index];

@@ -34,7 +34,7 @@ Akış: istemci `socket.emit(olay)` gönderir. Sunucu doğrular, durumu değişt
 
 ## 3. Çalışma kuralları
 
-- Değişiklikten sonra mutlaka `npm test` çalıştırılmalı (17 dosya). Testlerin hepsi geçmeden iş bitmiş sayılmaz.
+- Değişiklikten sonra mutlaka `npm test` çalıştırılmalı (20 dosya). Testlerin hepsi geçmeden iş bitmiş sayılmaz.
 - Yeni bir socket hamlesi eklenirse istemcide `MOVE_EVENTS` listesine de eklenmeli. Sunucu bu hamleye her durumda `gameState` veya `gameError` ile cevap vermeli, yoksa istemci 5 sn boyunca yeni hamle göndermez.
 - Yeni bir oda zamanlayıcısı `guardedTimer(room, ad, fn)` ile kurulmalı.
 - Testler `DATA_DIR` değişkenine bakar. Gerçek hesap dosyası bozulmasın diye testleri geçici bir klasörle çalıştırın: `$env:DATA_DIR="$env:TEMP\okey-test-data"; npm test`
@@ -214,6 +214,23 @@ Doğrulama (2026-10-23): `tests/v34Stability.test.js` yukarıdakileri test ediyo
 - ✅ Masa sayfasından eski, görünmeyen parçalar silindi (parçacıklar, eski bekleme listesi, sağ üst durum kutusu, kalan taş sayacı, "Ana Yerde Aç", eski skor düğmesi, çift açma penceresi).
 - Başlayan oyuncu kuralı kontrol edildi: başlayan 22 taş alıyor ve `hasDrawn=true`, yani taş çekmeden atıyor (`v38Seats` testi doğruluyor).
 - Bot gücü ölçüldü (2026-10-24, `oldBot` karşılaştırması, 600 maç): ilk tur beklememe, açtıktan sonra "çıkış" hesabı, çiftte ölü taşı önce atma ve 101'e kalan farkla sınırlı değerleme denendi. Hiçbiri gürültünün ötesinde fark yaratmadı (ör. ceza 59,5'e karşı 56,1; katlamalıda 96,7'ye karşı 96,7), hepsi geri alındı. Bot sezgisel olarak tavana yakın; gerçek güç artışı için gelecekteki çekişleri benzeten (Monte Carlo) ve `worker_threads` içinde çalışan bir bot gerekir. Ölçümde dikkat: destede dağıtımdan sonra 20 taş kalıyor, oyuncu başına ~5 çekiş var ve ellerin ~%52'si deste bitince kazanansız bitiyor.
+- ✅ Monte Carlo bot (2026-10-24). Açmadan önceki taş atışı benzetimle seçiliyor (`server/botMC.js`). Sezgisel kural adayları sıralıyor (aynı türden biri, en fazla 8). Her aday için görünmeyen taşlardan rastgele gelecekler üretiliyor: kalan çekişler ve soldaki oyuncunun atacağı taşlar. Bot bu geleceği basit kuralla oynuyor, seri ya da çift açıp açamadığına bakılıyor; erken açılış biraz daha değerli. Bütün adaylar aynı rastgele geleceklerle deneniyor. Eşitlikte sezgisel seçim kalıyor. Açtıktan sonraki kararlar değişmedi.
+  - Hesap `worker_threads` havuzunda (`server/botPool.js`, `botWorker.js`). `runBotTurn` cevabı bekliyor ve event loop serbest kalıyor. Cevap gelince masa hâlâ aynı durumdaysa taş atılıyor. Worker çökerse, 2,5 sn'de cevap gelmezse ya da havuz kapalıysa sezgisel seçim atılıyor.
+  - Ölçüm (yarı koltuklar eski bot, yarısı yeni; maçlar arası koltuk değişiyor; 14 paralel süreç):
+    - Katlamasız (5.600 el): MC 54,5 ceza, eski bot 58,4. Fark 3,9 ± 1,0, yani anlamlı (~%7 daha az ceza). El kazanma 1.361'e karşı 1.338.
+    - Katlamalı (5.600 el): ceza 96,5'e karşı 97,4, fark 1,0 ± 1,5 (yok). Ama MC daha az el bitirdi: 753'e karşı 835.
+    - **Bu yüzden katlamalı masada sezgisel kural kullanılıyor** (`useMonteCarlo`). Katlamalıda da açmak için: `BOT_MC_STACKING=1`.
+  - Tarayıcıda (bilgisayar aynı anda ölçüm de çalıştırırken): bot turu medyan 2,1 sn, p90 2,6 sn (1,2 sn bekleme dahil). 0 hata. `v40BotAsync` testinde karar beklenirken en uzun event-loop arası 10 ms.
+  - Ortam değişkenleri:
+    - `BOT_AI`: `mc` ya da `basic`. Production'da varsayılan `mc`, başka yerde `basic`; testler `basic` ile çalışır. `.claude/launch.json` `mc` verir.
+    - `BOT_MC_SAMPLES`: aday başına gelecek sayısı (varsayılan 40).
+    - `BOT_MC_CANDIDATES`: en fazla aday sayısı (8).
+    - `BOT_MC_TIMEOUT_MS`: worker cevap süresi (2500).
+    - `BOT_WORKERS`: havuz boyutu (çekirdek − 1, en fazla 4).
+    - `BOT_MC_SYNC=1`: hesap ana iş parçacığında yapılır, yalnızca ölçüm betiği için.
+    - `BOT_MC_STACKING=1`: katlamalıda da MC.
+  - Ölçüm için `game.baselineSeats` (Set) o koltukları eski kurala bırakır.
+  - Testler: `tests/v39BotMC.test.js` (çift sayımı GameLogic ile aynı, bariz karar, tohumla tekrarlanabilirlik, worker sonucu aynı, süre aşımında null) ve `tests/v40BotAsync.test.js` (gerçek eşzamansız yol, 106 taş, sıra ilerliyor).
 
 **Bizde olmayan mekanikler (öncelik önerisi):**
 1. ✅ **Çip ekonomisi (sanal, ücretsiz):** başlangıç çipi, masa bahsi (ör. 3.750), kazanana kazanç ve %7 masa ücreti. Dağıtım: yalnız bir kişi açtıysa bütün ortayı o alır; birden çok açan varsa birinci ortanın 3/4'ünü, ikinci 1/4'ünü alır; eşitlikte paylaştırılır. Hesap tablosuna `chips` sütunu, lobide çip göstergesi, bahis seviyeli odalar.
