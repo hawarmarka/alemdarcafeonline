@@ -10,6 +10,7 @@ const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, '..', 'data');
 const DB_FILE = path.join(DATA_DIR, 'accounts.db');
 const LEGACY_FILE = path.join(DATA_DIR, 'accounts.json');
 const SESSION_MS = 30 * 86400000;
+let storageMode = 'disk';
 function openDb() {
   try {
     fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -17,10 +18,27 @@ function openDb() {
   } catch (err) {
     // Coolify'da kalıcı depolama yazılamıyorsa oyun çökmesin; hesaplar bu çalışma boyunca bellekte tutulur.
     console.error(`UYARI: ${DB_FILE} açılamadı; hesaplar kalıcı olmaz (${err.message}). Coolify'da /app/data için kalıcı depolama ekleyin.`);
+    storageMode = 'memory';
     return new DatabaseSync(':memory:');
   }
 }
 const db = openDb();
+// Veri klasörü gerçekten kalıcı bir diske mi bağlı? Docker'da kalıcı depolama (volume) yoksa klasör container'ın
+// kendi katmanındadır ve her güncellemede (yeni container) hesaplar silinir. Linux'ta bağlama noktalarından anlaşılır.
+function detectStorage() {
+  if (storageMode === 'memory') return 'memory';
+  try {
+    const target = path.resolve(DATA_DIR);
+    const mounts = fs.readFileSync('/proc/self/mountinfo', 'utf8').split('\n').map(l => l.split(' ')[4]).filter(Boolean);
+    const best = mounts.filter(m => target === m || target.startsWith(m.endsWith('/') ? m : m + '/')).sort((a, b) => b.length - a.length)[0];
+    return best && best !== '/' ? 'persistent' : 'ephemeral';
+  } catch { return 'unknown'; } // Linux değil (ör. Windows'ta geliştirme): kontrol edilemez
+}
+const storage = detectStorage();
+if (storage === 'ephemeral' && process.env.NODE_ENV === 'production') {
+  console.error(`!!! DİKKAT: ${DATA_DIR} kalıcı depolamaya bağlı DEĞİL. Bir sonraki güncellemede BÜTÜN HESAPLAR SİLİNİR. ` +
+    `Coolify → uygulama → Storages → Add → Volume, Destination Path: ${DATA_DIR}`);
+}
 db.exec(`
   PRAGMA journal_mode = WAL;
   PRAGMA synchronous = NORMAL;
@@ -92,6 +110,21 @@ migrateLegacy();
 const purgeSessions = () => { try { db.prepare('DELETE FROM sessions WHERE expires < ?').run(Date.now()); } catch (err) { console.error('Oturum temizliği başarısız:', err.message); } };
 purgeSessions();
 setInterval(purgeSessions, 6 * 3600000).unref();
+// Günlük yedek: DATA_DIR/backups/accounts-YYYY-MM-DD.db (son 7 gün tutulur). Bozulma veya yanlış silmeye karşı;
+// kalıcı depolama yoksa yedek de kaybolur, asıl koruma volume'dur.
+const BACKUP_DIR = path.join(DATA_DIR, 'backups');
+function dailyBackup() {
+  if (storageMode === 'memory') return;
+  try {
+    fs.mkdirSync(BACKUP_DIR, { recursive: true });
+    const file = path.join(BACKUP_DIR, `accounts-${new Date().toISOString().slice(0, 10)}.db`);
+    if (!fs.existsSync(file)) db.exec(`VACUUM INTO '${file.replace(/'/g, "''")}'`);
+    const old = fs.readdirSync(BACKUP_DIR).filter(f => /^accounts-\d{4}-\d{2}-\d{2}\.db$/.test(f)).sort().slice(0, -7);
+    for (const f of old) fs.rmSync(path.join(BACKUP_DIR, f), { force: true });
+  } catch (err) { console.error('Hesap yedeği alınamadı:', err.message); }
+}
+dailyBackup();
+setInterval(dailyBackup, 6 * 3600000).unref();
 // Asenkron: şifre hash'i libuv iş parçacığında hesaplanır, event loop (ve masalardaki oyuncular) beklemez.
 function hash(password, salt) {
   return new Promise((resolve, reject) => crypto.scrypt(password, salt, 64, (err, key) => err ? reject(err) : resolve(key.toString('hex'))));
@@ -164,5 +197,7 @@ function leaderboard(n = 25) {
     .sort((a, b) => b.xp - a.xp || b.wins - a.wins || a.username.localeCompare(b.username, 'tr'))
     .map(u => ({ username: u.username, avatar: u.avatar, frame: u.frame, level: u.level, xp: u.xp, wins: u.wins, games: u.games }));
 }
-function close() { db.close(); }
-module.exports = { register, login, cleanUser, fromToken, logout, updateAvatar, updateFrame, award, leaderboard, close };
+function close() { try { db.close(); } catch {} }
+// /health için: hesaplar kalıcı diskte mi ('persistent'), container içinde mi ('ephemeral'), bellekte mi ('memory')?
+const storageStatus = () => storage;
+module.exports = { register, login, cleanUser, fromToken, logout, updateAvatar, updateFrame, award, leaderboard, close, storageStatus };

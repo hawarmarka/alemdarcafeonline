@@ -28,9 +28,9 @@ npm test
    - **Dockerfile Location:** `/Dockerfile`
    - **Ports Exposes:** `3000`
    - **Domain:** kendi alan adın (Coolify HTTPS sertifikasını kendisi alır)
-4. **Storages → Add → Volume:** Destination Path `/app/data`. Hesaplar (kullanıcı adı, şifre özeti, XP, profil fotoğrafı) burada saklanır. Kalıcı depolama eklenmezse her güncellemede hesaplar silinir.
+4. **Storages → Add → Volume:** Destination Path `/app/data`. **Bu adım zorunlu.** Hesaplar (kullanıcı adı, şifre özeti, XP, profil fotoğrafı), günlük yedekler (`backups/`) ve süren masalar (`rooms/`) burada saklanır. Kalıcı depolama eklenmezse **her güncellemede bütün hesaplar silinir.**
 5. **Health Check:** yol `/health`, port `3000` (Dockerfile'da da tanımlı).
-6. Deploy. Tarayıcıda `https://alan-adin/health` adresi `{"status":"ok"}` göstermeli.
+6. Deploy. Tarayıcıda `https://alan-adin/health` adresi `{"status":"ok","storage":"persistent",...}` göstermeli. `"storage":"ephemeral"` görürsen 4. adım eksiktir: hesaplar bir sonraki güncellemede silinir. Sunucu logunda da büyük harfli bir uyarı çıkar.
 
 ### Ortam değişkenleri (isteğe bağlı)
 
@@ -43,7 +43,8 @@ npm test
 
 ### Bilinmesi gerekenler
 
-- Oyun masaları sunucu belleğinde tutulur. Coolify yeni sürüme geçerken veya sunucu yeniden başlarken süren eller kapanır (oyunculara "Sunucu güncelleniyor" mesajı gider). Arkadaşlarla oynarken güncelleme yapma.
+- Süren masalar 2 saniyede bir ve kapanışta `/app/data/rooms/` altına yazılır. Güncelleme sırasında oyuncular birkaç saniye "bağlantı koptu" görür, sonra otomatik olarak aynı masaya ve aynı ele döner. 60 saniye içinde dönmeyen oyuncunun yerine bot geçer. 30 dakikadan eski masa kayıtları silinir.
+- Hesap veritabanının günlük yedeği `/app/data/backups/` altında tutulur (son 7 gün).
 - Tek kopya (1 replika) çalıştır; birden fazla kopya masaları paylaşamaz.
 
 ## GitHub'a gönderme

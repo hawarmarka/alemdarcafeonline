@@ -8,6 +8,7 @@ const path = require('path');
 const GameLogic = require('./gameLogic');
 const Accounts = require('./accounts');
 const Avatars = require('./avatars');
+const RoomStore = require('./roomStore');
 const Melds = require('../public/js/meldSolver');
 const app = express();
 app.disable('x-powered-by');
@@ -64,7 +65,8 @@ app.use(express.static(path.join(__dirname, '..', 'public'), {
     setHeaders(res, file) { if (file.endsWith('.html')) res.setHeader('Cache-Control', 'no-cache'); }
 }));
 app.get('/game', (_req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'game.html')));
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+// storage: 'persistent' olmalı. 'ephemeral' ise Coolify'da /app/data için kalıcı depolama yok, güncellemede hesaplar silinir.
+app.get('/health', (_req, res) => res.json({ status: 'ok', storage: Accounts.storageStatus(), rooms: rooms.size }));
 app.get('/api/leaderboard', (_req, res) => res.json({ top: Accounts.leaderboard(25) }));
 app.get('/api/rooms', (_req, res) => {
   const list = [...rooms.values()].filter(r => r.isPublic);
@@ -79,6 +81,7 @@ app.get('/api/rooms', (_req, res) => {
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, { maxHttpBufferSize: 1e5 });
 const rooms = new Map();
+RoomStore.init(rooms, reviveRoom); // masalar diske yazılır; güncelleme sonrası oyuncu dönünce geri yüklenir
 const POSITION = ['bottom', 'right', 'top', 'left'];
 const BASE_TURN_MS = 45000; // Standart sıra süresi
 const OPEN_EXTRA_MS = 60000; // El açılan sırada bir defalık ek işlem süresi
@@ -531,6 +534,7 @@ function summary(room) {
         tileCount: room.game ? room.game.playerTiles[i].length : 0 }));
 }
 function lobby(room) {
+    RoomStore.markDirty(room);
     // Masayı açan ayrıldıysa yönetim masadaki ilk gerçek oyuncuya geçer
     if (!room.isPublic && !room.players.some(p => p.token === room.hostToken)) room.hostToken = room.players.find(p => !p.isBot)?.token || null;
     io.to(room.code).emit('lobbyUpdate', { code: room.code, isPublic: room.isPublic,
@@ -560,6 +564,7 @@ function snapshot(room, index) {
         retractPenalty: canRetract(room, index) && !room.turnSnap.states[index].hasOpened && !!game.playerStates[index].hasOpened, drawnFromDiscardTileId: game.playerStates[index].drawnFromDiscardTile?.id || null };
 }
 function broadcastGame(room) {
+    RoomStore.markDirty(room); // her durum değişikliği yayınlanır; masa 2 sn içinde diske yazılır
     if (!room.game || !room.started) return;
     room.players.forEach((p, i) => {
         if (p.socketId) io.to(p.socketId).emit('gameState', snapshot(room, i));
@@ -755,20 +760,22 @@ function finishRound(room, winnerIndex, result) {
         matchEnded: room.matchEnded, champion: room.matchEnded ? standings[0]?.[1] : null
     };
     io.to(room.code).emit('gameFinished', room.lastRoundResult);
-    // Skor tablosu tam 5 saniye görünür; ardından bütün oyuncular aynı anda yeni ele geçer.
-    if (!room.matchEnded) {
-        room.nextRoundTimer = setTimeout(guardedTimer(room, 'Yeni el', () => {
-            room.nextRoundTimer = null;
-            if (!room.started && !room.matchEnded) {
-                fillMissingSeatsWithBots(room);
-                if (!newRound(room)) {
-                    ensureBotFill(room, 500);
-                    if (!newRound(room)) io.to(room.code).emit('roundWaiting', {message:'Yeni el için oyuncular veya botlar hazırlanıyor.'});
-                }
+    if (!room.matchEnded) scheduleNextRound(room);
+}
+// Skor tablosu tam 5 saniye görünür; ardından bütün oyuncular aynı anda yeni ele geçer.
+function scheduleNextRound(room) {
+    if (room.nextRoundTimer) clearTimeout(room.nextRoundTimer);
+    room.nextRoundTimer = setTimeout(guardedTimer(room, 'Yeni el', () => {
+        room.nextRoundTimer = null;
+        if (!room.started && !room.matchEnded) {
+            fillMissingSeatsWithBots(room);
+            if (!newRound(room)) {
+                ensureBotFill(room, 500);
+                if (!newRound(room)) io.to(room.code).emit('roundWaiting', {message:'Yeni el için oyuncular veya botlar hazırlanıyor.'});
             }
-        }), 5000);
-        room.nextRoundTimer.unref?.();
-    }
+        }
+    }), 5000);
+    room.nextRoundTimer.unref?.();
 }
 function abandonRound(room, reason) {
     if(room.nextRoundTimer)clearTimeout(room.nextRoundTimer);room.nextRoundTimer=null;
@@ -788,6 +795,7 @@ function deleteIfEmpty(room) {
     for (const key of ['botFillTimer', 'nextRoundTimer']) { if (room[key]) clearTimeout(room[key]); room[key] = null; }
     room.started = false;
     rooms.delete(room.code);
+    RoomStore.remove(room.code);
 }
 function getRoomAndSeat(socket) {
     const room = rooms.get(socket.data.roomCode);
@@ -866,6 +874,51 @@ function canRetract(room, index) {
 function removeSelected(game, index, used) {
     game.playerTiles[index] = game.playerTiles[index].filter(tile => !used.has(tile.id));
 }
+// Bağlantısı kopan (veya sunucu yeniden başladıktan sonra geri dönmeyen) oyuncu 60 sn içinde dönmezse:
+// oyun sürüyorsa yerine bot geçer, oyun başlamadıysa koltuğu boşalır. Masada hiç gerçek oyuncu kalmazsa masa kapanır.
+function scheduleSeatTakeover(room, oldToken) {
+    const timeout = setTimeout(guardedTimer(room, 'Bağlantı kopması', () => {
+        if (rooms.get(room.code) !== room) return;
+        const seat = room.players.findIndex(p => p.token === oldToken);
+        if (seat < 0) return;
+        const missing = room.players[seat];
+        if (missing.socketId || missing.isBot) return;
+        if (room.started || (room.game && !room.matchEnded)) {
+            room.players[seat] = {
+                token: `bot-replace-${room.code}-${Date.now()}-${seat}`,
+                socketId: null,
+                name: missing.name,
+                avatar: 'default.svg',
+                frame: 'silver',
+                level: 1,
+                accountId: null,
+                isBot: true
+            };
+            if (!room.teamMode) room.scores[room.players[seat].name] = room.scores[missing.name] || 0;
+            io.to(room.code).emit('tableChatMessage', { from: 'Sistem', message: `${missing.name} bağlantıyı kaybetti. Yerine bot geçti.`, at: Date.now() });
+            lobby(room);
+            broadcastGame(room);
+            if (room.game?.currentPlayer === seat) beginTurn(room);
+            deleteIfEmpty(room); // yalnız botlar kaldıysa masa sonsuza dek kendi kendine oynamasın
+        } else {
+            removeSeats(room, p => p === missing);
+            lobby(room);
+            ensureBotFill(room);
+            deleteIfEmpty(room);
+        }
+    }), 60000);
+    timeout.unref?.();
+}
+// Diskten geri yüklenen masa (güncelleme/yeniden başlatma sonrası): oyun nesnesi, zamanlayıcılar ve botlar yeniden kurulur.
+// Gerçek oyuncular bağlantısı kopmuş sayılır; dönenler kaldığı yerden devam eder, dönmeyenlerin yerine 60 sn sonra bot geçer.
+function reviveRoom(room) {
+    if (room.game) room.game = Object.assign(new GameLogic(), room.game);
+    for (const key of ['turnTimer', 'botTurnTimer', 'botFillTimer', 'nextRoundTimer']) room[key] = null;
+    for (const p of room.players) { p.socketId = null; if (!p.isBot) scheduleSeatTakeover(room, p.token); }
+    if (room.started && room.game) beginTurn(room);
+    else if (room.lastRoundResult && !room.matchEnded) scheduleNextRound(room);
+    else if (!room.game) ensureBotFill(room);
+}
 function playerLeave(socket, deliberate = false) {
     const { room, index } = getRoomAndSeat(socket);
     if (!room || index < 0) return;
@@ -876,37 +929,7 @@ function playerLeave(socket, deliberate = false) {
         player.socketId = null;
         lobby(room);
         if (room.started) broadcastGame(room);
-        const oldToken = player.token;
-        const timeout = setTimeout(guardedTimer(room, 'Bağlantı kopması', () => {
-            if (!rooms.has(room.code)) return;
-            const seat = room.players.findIndex(p => p.token === oldToken);
-            if (seat < 0) return;
-            const missing = room.players[seat];
-            if (missing.socketId || missing.isBot) return;
-            if (room.started || (room.game && !room.matchEnded)) {
-                room.players[seat] = {
-                    token: `bot-replace-${room.code}-${Date.now()}-${seat}`,
-                    socketId: null,
-                    name: missing.name,
-                    avatar: 'default.svg',
-                    frame: 'silver',
-                    level: 1,
-                    accountId: null,
-                    isBot: true
-                };
-                if (!room.teamMode) room.scores[room.players[seat].name] = room.scores[missing.name] || 0;
-                io.to(room.code).emit('tableChatMessage', { from: 'Sistem', message: `${missing.name} bağlantıyı kaybetti. Yerine bot geçti.`, at: Date.now() });
-                lobby(room);
-                broadcastGame(room);
-                if (room.game?.currentPlayer === seat) beginTurn(room);
-            } else {
-                removeSeats(room, p => p === missing);
-                lobby(room);
-                ensureBotFill(room);
-                deleteIfEmpty(room);
-            }
-        }), 60000);
-        timeout.unref?.();
+        scheduleSeatTakeover(room, player.token);
         return;
     }
     // Maç sürerken (eller arasında da) koltuk sırası korunur; skor sütunları kaymasın.
@@ -926,6 +949,7 @@ function playerLeave(socket, deliberate = false) {
         lobby(room);
         broadcastGame(room);
         if (room.game?.currentPlayer === index) beginTurn(room);
+        deleteIfEmpty(room); // son gerçek oyuncu da ayrıldıysa botlar kendi kendine oynamasın
     } else {
         removeSeats(room, p => p === player);
         lobby(room);
@@ -965,7 +989,15 @@ io.on('connection', socket => {
         const mode = data?.mode;
         let room;
         if (mode === 'random') {
-            room = [...rooms.values()].find(r => r.isPublic && !r.custom && r.modeKey === (data?.modeKey || 'klasik') && !r.started && !r.game && r.players.length < 4);
+            // HEMEN OYNA: aynı türde bekleyen herkese açık bir masa varsa oraya oturur. Oyuncunun "Masa Aç" ile açtığı masaya
+            // yalnızca kuralları seçilen türle aynıysa girilir (eşli/katlamalı/yardımsız farkı habersiz gelmesin; onlar ODA SEÇ'te).
+            // İçinde gerçek oyuncu bekleyen ve daha dolu masa önce seçilir; yoksa yeni masa açılır.
+            const modeKey = MODE_PRESETS[data?.modeKey] ? data.modeKey : 'klasik', preset = MODE_PRESETS[modeKey];
+            const sameRules = r => !r.custom || (!r.teamMode && r.stackingMode === preset.stackingMode && r.assisted === preset.assisted);
+            const waiting = [...rooms.values()].filter(r => r.isPublic && r.modeKey === modeKey && sameRules(r) && !r.started && !r.game && !r.matchEnded && r.players.length < 4
+                && !r.players.some(p => p.name.toLowerCase() === name.toLowerCase()));
+            const humans = r => r.players.filter(p => !p.isBot && p.socketId).length;
+            room = waiting.sort((a, b) => humans(b) - humans(a) || b.players.length - a.players.length)[0];
             if (!room) room = makeRoom(roomCode(), true, data);
         } else if (mode === 'create') {
             // isPublic: true → 'Oda Seç' listesinde görünür; false → yalnızca kodla katılınır
@@ -974,7 +1006,7 @@ io.on('connection', socket => {
         } else if (mode === 'code') {
             const code = String(data?.roomCode || '').trim().toUpperCase();
             if (!/^[A-Z0-9]{6}$/.test(code)) return issue(socket, '6 karakterli oda kodu yazın.');
-            room = rooms.get(code);
+            room = rooms.get(code) || RoomStore.load(code);
             if (!room) return issue(socket, 'Bu kodda oda bulunamadı.');
         } else return issue(socket, 'Bir giriş şekli seçin.');
         if (room.started || room.game || room.matchEnded || room.players.length >= 4) return issue(socket, 'Oda dolu veya oyun başlamış.');
@@ -996,7 +1028,8 @@ io.on('connection', socket => {
     socket.on('rejoinRoom', data => {
         const code = String(data?.roomCode || '').toUpperCase();
         const token = String(data?.token || '');
-        const room = rooms.get(code);
+        // Sunucu güncellendiyse masa bellekte yoktur: eski sürümün kapanırken diske yazdığı halinden geri yüklenir.
+        const room = rooms.get(code) || RoomStore.load(code);
         const index = room?.players.findIndex(p => p.token === token) ?? -1;
         if (!room || index < 0) return issue(socket, 'Oturum bulunamadı veya oda kapandı. Ana sayfadan tekrar katılın.');
         const player = room.players[index];
@@ -1073,6 +1106,7 @@ io.on('connection', socket => {
         const msg={from:room.players[index].name,message,at:now};
         room.chatHistory.push(msg);
         if(room.chatHistory.length>50)room.chatHistory.shift();
+        RoomStore.markDirty(room);
         io.to(room.code).emit('tableChatMessage',msg);
     });
     socket.on('sendGift', data => {
@@ -1380,7 +1414,10 @@ httpServer.listen(PORT, '0.0.0.0', () => console.log(`Alemdar Cafe 101 Okey sunu
 // Coolify yeni sürüme geçerken SIGTERM gönderir: oyunculara haber ver, bağlantıları kapat, hızlı çık.
 function shutdown(signal) {
     console.log(`${signal} alındı, sunucu kapanıyor...`);
-    io.emit('tableChatMessage', { from: 'Sistem', message: 'Sunucu güncelleniyor. Birkaç saniye içinde tekrar bağlanın.', at: Date.now() });
+    // Önce bütün masalar diske yazılır: yeni sürüm, oyuncular yeniden bağlanınca masaları bu halden geri yükler.
+    RoomStore.flushAll();
+    io.emit('tableChatMessage', { from: 'Sistem', message: 'Sunucu güncelleniyor. Masanız korunuyor, birkaç saniye içinde otomatik olarak geri bağlanacaksınız.', at: Date.now() });
+    Accounts.close();
     io.close();
     httpServer.close(() => process.exit(0));
     setTimeout(() => process.exit(0), 3000).unref();

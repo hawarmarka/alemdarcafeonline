@@ -25,7 +25,7 @@ Son inceleme: 2026-10-22. Bütün testler geçiyordu (`npm test`, 12 dosya).
 | Sunucu | Node.js ≥22.13, Express 4, Socket.IO 4, düz JavaScript (CommonJS) | `server/index.js` (oda, tur, bot, tüm socket olayları), `server/gameLogic.js` (taş, doğrulama, puan), `server/accounts.js` (hesap/oturum, yerleşik `node:sqlite`), `server/avatars.js` (yüklenen profil resimleri, `/api/avatar/<id>`), `server/logger.js` |
 | Ortak | Seri/per çözücü, hem tarayıcıda hem sunucuda çalışır. `probeGains` botun hızlı "çıkış" hesabı | `public/js/meldSolver.js` |
 | İstemci | Düz HTML/CSS/JS, derleme adımı yok, DOM tabanlı çizim | `public/game.html` + `public/js/game.js` (masa), `public/index.html` + `public/js/main.js` (lobi), `public/js/tableGrid.js`, `stage-fit.js`, `transitions.js` |
-| Veri | `data/accounts.db` (SQLite, `DATA_DIR` ile değişir). Eski `accounts.json` ilk açılışta bir kez aktarılır ve yedek olarak bırakılır. Masalar ve misafir avatarları yalnızca RAM'de | — |
+| Veri | `DATA_DIR` (Coolify'da `/app/data`, **kalıcı volume zorunlu**): `accounts.db` (SQLite), `backups/` (günlük yedek), `rooms/` (süren masalar). Eski `accounts.json` ilk açılışta bir kez aktarılır ve yedek olarak bırakılır. Misafir avatarları yalnızca RAM'de | `server/accounts.js`, `server/roomStore.js` |
 | Dağıtım | Dockerfile (node:22-alpine), Coolify, port 3000, `/health` | `Dockerfile`, `BASLAT-WINDOWS.bat` |
 
 Akış: istemci `socket.emit(olay)` gönderir. Sunucu doğrular, durumu değiştirir ve `broadcastGame()` ile **her oyuncuya o oyuncunun tam görüntüsünü** (`snapshot`) yollar. İstemci `gameState` gelince `render()` ile her şeyi yeniden çizer.
@@ -168,7 +168,10 @@ Doğrulama (2026-10-23): `tests/v34Stability.test.js` yukarıdakileri test ediyo
 - [ ] İsteğe bağlı: JSDoc tipleri + `// @ts-check` ile TypeScript'in faydasını derleme adımı eklemeden al.
 
 ### Faz 5 — Büyüme (sadece ihtiyaç olunca)
-- [ ] H3: Oda durumunu kalıcılaştır (SQLite/Redis), deploy'da oyun kaybolmasın.
+- [x] H3 (2026-10-24): `server/roomStore.js` her masayı `DATA_DIR/rooms/<KOD>.json` dosyasına yazıyor. Değişen masalar 2 sn'de bir, kapanışta (SIGTERM) hepsi yazılıyor; masa kapanınca dosyası siliniyor, 30 dk'dan eski dosya yüklenmiyor. Yükleme açılışta değil, `rejoinRoom` / kodla katılmada eksik masa istenince yapılıyor (`RoomStore.load`). Sebep: Coolify yeni sürümü eskisi kapanmadan başlatır; eski sürüm kapanırken son hali yazar, oyuncular ancak ondan sonra yeni sürüme bağlanır. `reviveRoom` oyun nesnesini (`GameLogic`) ve zamanlayıcıları yeniden kuruyor; dönmeyen gerçek oyuncunun yerine 60 sn sonra bot geçiyor (`scheduleSeatTakeover`). Tarayıcıda denendi: sunucu kapatılıp açıldı, aynı el, taşlar, ıstaka dizilimi ve atıklar geri geldi, oyun devam etti. Test: `tests/v35Persistence.test.js`. **Yeni kural:** odaya zamanlayıcı dışında kalıcı olmaması gereken alan eklenirse adı `...Timer` ile bitmeli ya da `roomStore` replacer'ına eklenmeli.
+- [x] Veri güvenliği (2026-10-24): `/health` artık `storage` döndürüyor: `persistent` / `ephemeral` / `memory` / `unknown`. `/proc/self/mountinfo` ile `DATA_DIR` gerçek bir bağlama noktasında mı diye bakılıyor. `ephemeral` ise production'da büyük bir log uyarısı çıkıyor. Hesap veritabanının günlük yedeği alınıyor (`VACUUM INTO`, `backups/`, son 7 gün). Kapanışta veritabanı kapatılıyor. **Asıl koruma Coolify'da `/app/data` volume'üdür; kod bunu yapamaz, sadece görünür kılar.**
+- [x] HEMEN OYNA (2026-10-24): aynı türde bekleyen herkese açık masaya oturuyor. Oyuncunun "Masa Aç" ile açtığı masaya yalnızca kuralları seçilen türle aynıysa giriyor (tekli, aynı katlama/yardım). İçinde gerçek oyuncu bekleyen masa önce seçiliyor.
+- [x] Yalnız bot kalan masa kapanıyor (2026-10-24): oyun sürerken son gerçek oyuncu ayrılınca ya da bağlantısı 60 sn kopunca masa siliniyor; önceden botlar sonsuza dek kendi kendine oynuyordu.
 - [ ] Birden fazla sunucu gerekirse: Redis + `@socket.io/redis-adapter`, odaları sunucuya sabitle (sticky session).
 - [ ] Ölçüm hâlâ istemci tarafında takılma gösteriyorsa: yalnızca masa/ıstaka alanını Pixi.js'e taşı. Lobi ve menüler HTML kalabilir.
 

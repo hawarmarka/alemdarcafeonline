@@ -64,6 +64,8 @@ _testing.extendTurnAfterOpening(room,0);
 assert.equal(room.turnTimer._idleTimeout,duration,'Süre aynı sırada iki kere uzamamalı');
 _testing.beginTurn(room);assert.equal(room.turnTimer._idleTimeout,45000);
 // Leaving a started game replaces the player with bot without canceling.
+// (Masada başka bir gerçek oyuncu var; son gerçek oyuncu ayrılırsa yalnız bot kalan masa kapanır, bkz. v35Persistence.)
+room.players[1].isBot = false; room.players[1].socketId = 'baska-oyuncu';
 first.receive('leaveGame');
 assert.equal(room.players.length,4);
 assert.equal(room.players[0].isBot,true);
