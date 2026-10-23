@@ -64,6 +64,13 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS users_rank ON users(xp DESC, wins DESC);
   CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 `);
+// Sanal çip ekonomisi (gerçek para yok): başlangıç çipi, birkaç saatte bir ücretsiz hediye çip, seviye ödülü.
+// Eski veritabanlarına sütunlar burada eklenir; mevcut hesaplar başlangıç çipiyle başlar.
+const START_CHIPS = 10000, BONUS_EVERY_MS = 4 * 3600000, BONUS_BASE = 1000, SUPPORT_CHIPS = 5000;
+const userCols = new Set(db.prepare('PRAGMA table_info(users)').all().map(c => c.name));
+if (!userCols.has('chips')) db.exec(`ALTER TABLE users ADD COLUMN chips INTEGER NOT NULL DEFAULT ${START_CHIPS}`);
+if (!userCols.has('bonus_at')) db.exec('ALTER TABLE users ADD COLUMN bonus_at INTEGER NOT NULL DEFAULT 0');
+const levelOf = xp => Math.floor(Math.sqrt((xp || 0) / 120)) + 1;
 const usernameKey = s => String(s).toLocaleLowerCase('tr');
 const q = {
   byKey: db.prepare('SELECT * FROM users WHERE username_key = ?'),
@@ -75,6 +82,11 @@ const q = {
   setFrame: db.prepare('UPDATE users SET frame = ? WHERE id = ?'),
   award: db.prepare('UPDATE users SET games = games + 1, wins = wins + ?, xp = xp + ? WHERE id = ?'),
   leaderboard: db.prepare('SELECT * FROM users WHERE games > 0 ORDER BY xp DESC, wins DESC LIMIT ?'),
+  leaderboardChips: db.prepare('SELECT * FROM users WHERE games > 0 ORDER BY chips DESC, xp DESC LIMIT ?'),
+  byId: db.prepare('SELECT * FROM users WHERE id = ?'),
+  takeChips: db.prepare('UPDATE users SET chips = chips - ? WHERE id = ? AND chips >= ?'),
+  addChips: db.prepare('UPDATE users SET chips = chips + ? WHERE id = ?'),
+  claimBonus: db.prepare('UPDATE users SET chips = chips + ?, bonus_at = ? WHERE id = ? AND bonus_at = ?'),
 };
 function transaction(fn) {
   db.exec('BEGIN');
@@ -130,13 +142,30 @@ function hash(password, salt) {
   return new Promise((resolve, reject) => crypto.scrypt(password, salt, 64, (err, key) => err ? reject(err) : resolve(key.toString('hex'))));
 }
 function rowToUser(r) {
-  return r ? { id: r.id, username: r.username, avatar: r.avatar, frame: r.frame, xp: r.xp, games: r.games, wins: r.wins } : null;
+  return r ? { id: r.id, username: r.username, avatar: r.avatar, frame: r.frame, xp: r.xp, games: r.games, wins: r.wins, chips: r.chips, bonusAt: r.bonus_at } : null;
 }
 function cleanUser(u) {
   if (!u) return null;
   return { id: u.id, username: u.username, avatar: Avatars.ref(u.avatar || 'default.svg'), frame: u.frame || 'gold', xp: u.xp || 0,
-    level: Math.floor(Math.sqrt((u.xp || 0) / 120)) + 1,
-    games: u.games || 0, wins: u.wins || 0 };
+    level: levelOf(u.xp), games: u.games || 0, wins: u.wins || 0,
+    chips: u.chips ?? START_CHIPS, nextBonusAt: (u.bonusAt || 0) + BONUS_EVERY_MS };
+}
+// ---------- Çip ----------
+const userById = id => rowToUser(q.byId.get(String(id)));
+const chipsOf = id => userById(id)?.chips ?? 0;
+// Bahis alma: yeterli çip yoksa hiçbir şey düşülmez ve false döner (tek SQL cümlesi, eşzamanlı isteklerde eksiye düşmez).
+function takeChips(id, amount) { return amount <= 0 || q.takeChips.run(amount, id, amount).changes === 1; }
+function addChips(id, amount) { if (amount > 0) q.addChips.run(Math.floor(amount), id); }
+// Ücretsiz hediye çip: 4 saatte bir, seviyeyle artar; çipi azalan oyuncuya destek miktarı verilir.
+function bonusAmount(u) { return Math.max(BONUS_BASE + 100 * (levelOf(u.xp) - 1), (u.chips ?? 0) < BONUS_BASE ? SUPPORT_CHIPS : 0); }
+function claimBonus(user) {
+  const u = userById(user.id);
+  if (!u) throw Error('Hesap bulunamadı.');
+  const now = Date.now(), next = (u.bonusAt || 0) + BONUS_EVERY_MS;
+  if (now < next) throw Error(`Sonraki hediye çip ${Math.ceil((next - now) / 60000)} dakika sonra.`);
+  const amount = bonusAmount(u);
+  if (q.claimBonus.run(amount, now, u.id, u.bonusAt || 0).changes !== 1) throw Error('Hediye zaten alındı.');
+  return { amount, user: cleanUser(userById(u.id)) };
 }
 function usernameValid(s) { return typeof s === 'string' && /^[\p{L}\p{N}_-]{3,18}$/u.test(s); }
 async function register(username, password) {
@@ -183,21 +212,30 @@ function updateAvatar(user, avatar) {
   q.setAvatar.run(avatar, user.id);
   user.avatar = avatar; return cleanUser(user);
 }
+// Oyun sonu XP; seviye atlayan oyuncuya yeni seviye × 500 çip ödülü. Seviye atladıysa { level, reward } döner.
 function award(id, won) {
+  const before = userById(id);
   q.award.run(won ? 1 : 0, won ? 200 : 40, id);
+  const after = userById(id);
+  if (!before || !after || levelOf(after.xp) <= levelOf(before.xp)) return null;
+  const level = levelOf(after.xp), reward = level * 500;
+  addChips(id, reward);
+  return { level, reward };
 }
 function updateFrame(user, frame) {
   if (!['gold', 'silver', 'royal', 'emerald', 'neon', 'rose'].includes(frame)) throw Error('Geçersiz çerçeve.');
   q.setFrame.run(frame, user.id);
   user.frame = frame; return cleanUser(user);
 }
-// Lobi sıralaması: XP'ye göre ilk N oyuncu (şifre/oturum bilgisi dönmez).
-function leaderboard(n = 25) {
-  return q.leaderboard.all(n).map(r => cleanUser(rowToUser(r)))
-    .sort((a, b) => b.xp - a.xp || b.wins - a.wins || a.username.localeCompare(b.username, 'tr'))
-    .map(u => ({ username: u.username, avatar: u.avatar, frame: u.frame, level: u.level, xp: u.xp, wins: u.wins, games: u.games }));
+// Lobi sıralaması: XP'ye veya çipe göre ilk N oyuncu (şifre/oturum bilgisi dönmez).
+function leaderboard(n = 25, by = 'xp') {
+  const chips = by === 'chips';
+  return (chips ? q.leaderboardChips : q.leaderboard).all(n).map(r => cleanUser(rowToUser(r)))
+    .sort((a, b) => (chips ? b.chips - a.chips : 0) || b.xp - a.xp || b.wins - a.wins || a.username.localeCompare(b.username, 'tr'))
+    .map(u => ({ username: u.username, avatar: u.avatar, frame: u.frame, level: u.level, xp: u.xp, wins: u.wins, games: u.games, chips: u.chips }));
 }
 function close() { try { db.close(); } catch {} }
 // /health için: hesaplar kalıcı diskte mi ('persistent'), container içinde mi ('ephemeral'), bellekte mi ('memory')?
 const storageStatus = () => storage;
-module.exports = { register, login, cleanUser, fromToken, logout, updateAvatar, updateFrame, award, leaderboard, close, storageStatus };
+module.exports = { register, login, cleanUser, fromToken, logout, updateAvatar, updateFrame, award, leaderboard, close, storageStatus,
+  chipsOf, takeChips, addChips, claimBonus, START_CHIPS };

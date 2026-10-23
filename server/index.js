@@ -9,6 +9,7 @@ const GameLogic = require('./gameLogic');
 const Accounts = require('./accounts');
 const Avatars = require('./avatars');
 const RoomStore = require('./roomStore');
+const Economy = require('./economy');
 const Melds = require('../public/js/meldSolver');
 const app = express();
 app.disable('x-powered-by');
@@ -67,7 +68,14 @@ app.use(express.static(path.join(__dirname, '..', 'public'), {
 app.get('/game', (_req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'game.html')));
 // storage: 'persistent' olmalı. 'ephemeral' ise Coolify'da /app/data için kalıcı depolama yok, güncellemede hesaplar silinir.
 app.get('/health', (_req, res) => res.json({ status: 'ok', storage: Accounts.storageStatus(), rooms: rooms.size }));
-app.get('/api/leaderboard', (_req, res) => res.json({ top: Accounts.leaderboard(25) }));
+app.get('/api/leaderboard', (req, res) => res.json({ top: Accounts.leaderboard(25, req.query.by === 'chips' ? 'chips' : 'xp') }));
+// Ücretsiz hediye çip (4 saatte bir); yalnızca hesabı olanlar.
+app.post('/api/bonus', (req, res) => {
+  const user = authReq(req);
+  if (!user) return res.status(401).json({ error: 'Hediye çip için giriş yapın.' });
+  try { res.json(Accounts.claimBonus(user)); }
+  catch (e) { res.status(400).json({ error: e.message }); }
+});
 app.get('/api/rooms', (_req, res) => {
   const list = [...rooms.values()].filter(r => r.isPublic);
   const modes = ['klasik', 'katlamali', 'yardimli', 'yardimsiz'];
@@ -75,7 +83,7 @@ app.get('/api/rooms', (_req, res) => {
     players: list.filter(r => r.modeKey === m).reduce((n,r) => n + r.players.length, 0),
     waitingRooms: list.filter(r => r.modeKey === m && !r.started).length
   }])), online: io.engine?.clientsCount || 0, waiting: list.filter(r => !r.started && !r.game && !r.matchEnded && r.players.length < 4).map(r => ({ code: r.code, modeKey: r.modeKey, players: r.players.length, custom: !!r.custom,
-    teamMode: r.teamMode, stackingMode: r.stackingMode, assisted: r.assisted, roundLimit: r.roundLimit,
+    teamMode: r.teamMode, stackingMode: r.stackingMode, assisted: r.assisted, roundLimit: r.roundLimit, bet: r.bet,
     host: (r.players.find(p => p.token === r.hostToken) || r.players.find(p => !p.isBot))?.name || '' })) });
 });
 const httpServer = http.createServer(app);
@@ -519,8 +527,32 @@ function makeRoom(code, isPublic, options = {}) {
     // Açık masalar botlarla otomatik dolar; özel masada botları masayı açan kişi ekler (testler autoBots:true verebilir).
     room.custom = !!options.custom;
     room.autoBots = (isPublic && !room.custom) || options.autoBots === true;
+    // Sanal çip: masa bahsi (maç başında alınır, maç sonunda dağıtılır) ve maç boyunca elini açmış koltuklar.
+    room.bet = Economy.normalizeBet(options.bet);
+    room.betsTaken = false;
+    room.openedEver = [false, false, false, false];
     rooms.set(code, room);
     return room;
+}
+// Maç başında hesabı olan her oyuncunun bahsi alınır. Çipi yetmeyen (ör. arada harcadıysa) bahis vermeden oynar, pay da almaz.
+function takeBets(room) {
+    if (room.betsTaken) return;
+    room.betsTaken = true;
+    for (const p of room.players) {
+        p.betPaid = !!(p.accountId && !p.isBot && Accounts.takeChips(p.accountId, room.bet));
+        if (p.betPaid) p.chips = Accounts.chipsOf(p.accountId);
+    }
+}
+// Maç sonu: potu kurala göre dağıt (economy.settle), yalnızca bahsini ödemiş hesaplara çip yaz. Koltuk başına sonuç döner.
+function settleMatch(room) {
+    const totals = [0, 1, 2, 3].map(i => room.roundHistory.reduce((n, r) => n + (r?.[i] || 0), 0));
+    const result = Economy.settle({ bet: room.bet, teamMode: room.teamMode, totals, opened: room.openedEver });
+    return room.players.map((p, i) => {
+        const paid = !!p.betPaid && !!p.accountId && !p.isBot;
+        if (paid) { Accounts.addChips(p.accountId, result[i].payout); p.chips = Accounts.chipsOf(p.accountId); }
+        return { payout: paid ? result[i].payout : 0, fee: paid ? result[i].fee : 0, net: paid ? result[i].payout - room.bet : 0,
+            refund: !!result[i].refund, paid, chips: paid ? p.chips : null };
+    });
 }
 function summary(room) {
     return room.players.map((p, i) => ({ name: p.name, avatar: p.avatar, index: i,
@@ -541,7 +573,7 @@ function lobby(room) {
         players: summary(room), teamMode: room.teamMode, started: room.started,
         // Bekleme paneli: masa ayarları ve botların masayı ne zaman dolduracağı
         assisted: room.assisted, stackingMode: room.stackingMode, roundLimit: room.roundLimit, botFillAt: room.botFillTimer ? room.botFillAt : 0,
-        hostIndex: room.players.findIndex(p => p.token === room.hostToken), autoBots: !!room.autoBots });
+        hostIndex: room.players.findIndex(p => p.token === room.hostToken), autoBots: !!room.autoBots, bet: room.bet });
 }
 function snapshot(room, index) {
     const game = room.game;
@@ -551,7 +583,8 @@ function snapshot(room, index) {
         scores: room.scores, roundHistory: room.roundHistory, minimumOpenScore: room.minimumOpenScore, minimumPairs: room.stackingMode ? room.minimumPairs : 5,
         // Masadaki açılış rozetleri: en yüksek seri açılış puanı ve en çok çift sayısı (açılış yoksa 0).
         openInfo: { series: Math.max(0, ...game.playerStates.filter(s => s.openType === 'normal').map(s => s.openScore || 0)), pairs: Math.max(0, ...game.playerStates.filter(s => s.openType === 'pairs').map(s => s.openPairs || 0)) },
-        roundsCompleted: room.completedRounds, roundLimit: room.roundLimit,
+        roundsCompleted: room.completedRounds, roundLimit: room.roundLimit, bet: room.bet, pot: room.bet * 4,
+        myChips: room.players[index]?.chips ?? null, // hesabı olanın çipi (misafirde null)
         tiles: game.playerTiles[index], currentPlayer: game.currentPlayer,
         hasDrawn: game.hasDrawn, indicator: game.indicator, okey: game.okey,
         pileCount: game.getRemainingTileCount(),
@@ -583,6 +616,7 @@ function newRound(room) {
     room.gifts = [0,0,0,0];
     room.roundExtras = [0,0,0,0];
     room.nextRoundReady = new Set();
+    if (room.completedRounds === 0) takeBets(room); // çip maç başında bir kez alınır
     room.game.startGame(room.players);
     room.minimumOpenScore = 101;
     room.minimumPairs = 5;
@@ -741,9 +775,14 @@ function finishRound(room, winnerIndex, result) {
     room.nextRoundReady = new Set();
     room.completedRounds++;
     room.matchEnded = room.completedRounds >= room.roundLimit;
+    // Çip sıralamasına yalnızca maç boyunca en az bir kez elini açanlar girer.
+    room.openedEver = (room.openedEver || [false, false, false, false]).map((v, i) => v || !!game.playerStates[i]?.hasOpened || i === winnerIndex);
     if (winnerIndex !== null) room.players.forEach((player, i) => {
-        if (player.accountId) Accounts.award(player.accountId, i === winnerIndex);
+        if (!player.accountId) return;
+        const up = Accounts.award(player.accountId, i === winnerIndex);
+        if (up && player.socketId) io.to(player.socketId).emit('levelUp', up); // seviye atladı: çip ödülü
     });
+    const chips = room.matchEnded ? settleMatch(room) : null;
     const scores = { ...room.scores };
     broadcastGame(room);
     room.started = false;
@@ -757,7 +796,8 @@ function finishRound(room, winnerIndex, result) {
         winner: winnerIndex,
         winnerName: winnerIndex === null ? 'Deste bitti' : room.players[winnerIndex].name,
         points: roundTotalPoints, roundHistory: room.roundHistory, players: summary(room), teamMode: room.teamMode, assisted: room.assisted, stackingMode: room.stackingMode, scores, completedRounds: room.completedRounds, roundLimit: room.roundLimit,
-        matchEnded: room.matchEnded, champion: room.matchEnded ? standings[0]?.[1] : null
+        matchEnded: room.matchEnded, champion: room.matchEnded ? standings[0]?.[1] : null,
+        bet: room.bet, pot: room.bet * 4, chips
     };
     io.to(room.code).emit('gameFinished', room.lastRoundResult);
     if (!room.matchEnded) scheduleNextRound(room);
@@ -914,6 +954,7 @@ function scheduleSeatTakeover(room, oldToken) {
 function reviveRoom(room) {
     if (room.game) room.game = Object.assign(new GameLogic(), room.game);
     for (const key of ['turnTimer', 'botTurnTimer', 'botFillTimer', 'nextRoundTimer']) room[key] = null;
+    room.bet ??= Economy.DEFAULT_BET; room.openedEver ??= [false, false, false, false]; // çip ekonomisinden önceki kayıtlar
     for (const p of room.players) { p.socketId = null; if (!p.isBot) scheduleSeatTakeover(room, p.token); }
     if (room.started && room.game) beginTurn(room);
     else if (room.lastRoundResult && !room.matchEnded) scheduleNextRound(room);
@@ -958,6 +999,9 @@ function playerLeave(socket, deliberate = false) {
     }
     socket.emit('leftGame');
 }
+// Masaya oturmak için hesabın çipi masa bahsine yetmeli. Misafirler çipsiz oynar (bahis alınmaz, pay da almaz).
+const lacksChips = (account, bet) => !!account && Accounts.chipsOf(account.id) < bet;
+const notEnoughChips = (account, bet) => `Bu masa için ${bet.toLocaleString('tr-TR')} çip gerekli, sende ${Accounts.chipsOf(account.id).toLocaleString('tr-TR')} var. Lobiden hediye çip topla veya daha düşük bahisli masa seç.`;
 // Hediye albümü (istemcideki GIFTS listesiyle aynı kimlikler); hediyeler ücretsiz ve semboliktir, elde 5 hak.
 const GIFT_IDS = ['cay', 'gul', 'opucuk', 'goz', 'kahkaha', 'domates', 'alkis', 'ortaparmak', 'uyku', 'ates', 'kalp', 'hediye'];
 // Socket başına olay hız sınırı (token bucket): normal oyun saniyede birkaç olay üretir; seli keser.
@@ -994,12 +1038,15 @@ io.on('connection', socket => {
             // İçinde gerçek oyuncu bekleyen ve daha dolu masa önce seçilir; yoksa yeni masa açılır.
             const modeKey = MODE_PRESETS[data?.modeKey] ? data.modeKey : 'klasik', preset = MODE_PRESETS[modeKey];
             const sameRules = r => !r.custom || (!r.teamMode && r.stackingMode === preset.stackingMode && r.assisted === preset.assisted);
-            const waiting = [...rooms.values()].filter(r => r.isPublic && r.modeKey === modeKey && sameRules(r) && !r.started && !r.game && !r.matchEnded && r.players.length < 4
+            const bet = Economy.normalizeBet(data?.bet);
+            if (lacksChips(account, bet)) return issue(socket, notEnoughChips(account, bet));
+            const waiting = [...rooms.values()].filter(r => r.isPublic && r.modeKey === modeKey && sameRules(r) && r.bet === bet && !r.started && !r.game && !r.matchEnded && r.players.length < 4
                 && !r.players.some(p => p.name.toLowerCase() === name.toLowerCase()));
             const humans = r => r.players.filter(p => !p.isBot && p.socketId).length;
             room = waiting.sort((a, b) => humans(b) - humans(a) || b.players.length - a.players.length)[0];
             if (!room) room = makeRoom(roomCode(), true, data);
         } else if (mode === 'create') {
+            if (lacksChips(account, Economy.normalizeBet(data?.bet))) return issue(socket, notEnoughChips(account, Economy.normalizeBet(data?.bet)));
             // isPublic: true → 'Oda Seç' listesinde görünür; false → yalnızca kodla katılınır
             room = makeRoom(roomCode(), data?.isPublic === true, { ...data, custom: true });
             room.hostToken = token; // masayı açan kişi bot ekleyip çıkarabilir
@@ -1011,9 +1058,11 @@ io.on('connection', socket => {
         } else return issue(socket, 'Bir giriş şekli seçin.');
         if (room.started || room.game || room.matchEnded || room.players.length >= 4) return issue(socket, 'Oda dolu veya oyun başlamış.');
         if (room.players.some(p => p.name.toLowerCase() === name.toLowerCase())) return issue(socket, 'Bu odada aynı isim zaten var.');
+        if (lacksChips(account, room.bet)) return issue(socket, notEnoughChips(account, room.bet));
         // Mesajlarda resmin kendisi değil kısa adresi gider (Avatars.ref).
         const avatar = Avatars.ref(account?.avatar || (Avatars.BUILTIN.includes(data.avatar) || (typeof data.avatar === 'string' && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]{1,90000}$/.test(data.avatar)) ? data.avatar : 'default.svg'));
-        room.players.push({ token, socketId: socket.id, name, avatar, frame: account?.frame || (['gold','silver','royal','emerald','neon','rose'].includes(data?.frame) ? data.frame : 'gold'), accountId: account?.id || null, level: Accounts.cleanUser(account)?.level || 1 });
+        room.players.push({ token, socketId: socket.id, name, avatar, frame: account?.frame || (['gold','silver','royal','emerald','neon','rose'].includes(data?.frame) ? data.frame : 'gold'), accountId: account?.id || null, level: Accounts.cleanUser(account)?.level || 1,
+            chips: account ? Accounts.chipsOf(account.id) : null });
         socket.join(room.code);
         socket.data.roomCode = room.code;
         socket.data.token = token;

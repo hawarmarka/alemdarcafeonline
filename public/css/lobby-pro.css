@@ -113,6 +113,15 @@ body.lobby-page{font-family:var(--txt);background:radial-gradient(ellipse at 50%
 .splash .splash-logo.logo-img{position:absolute;left:50%;top:7%;width:min(44vw,62vh);transform:translateX(-50%);filter:drop-shadow(0 14px 22px rgba(0,0,0,.45))}
 .auth-dialog .modal-logo{width:190px!important;margin:-6px auto 4px!important;display:block}
 
+/* Hediye çip düğmesi (üst çubuk) ve sıralama sekmeleri */
+.lb-chip.chip-bonus{cursor:pointer;border:0;font:inherit;color:inherit;text-align:inherit}
+.lb-chip.chip-bonus.ready{animation:bonusGlow 1.2s ease-in-out infinite alternate}
+.lb-chip.chip-bonus.ready b{color:#ffe36a}
+@keyframes bonusGlow{from{filter:brightness(1)}to{filter:brightness(1.35) drop-shadow(0 0 8px rgba(255,214,90,.8))}}
+.leader-tabs{display:flex;align-items:center;gap:8px}
+.leader-tabs .lb-tab{margin-left:auto;padding:6px 14px;border-radius:999px;border:1px solid rgba(160,205,255,.35);background:rgba(255,255,255,.08);color:#dcecff;font:500 15px/1 var(--pro);letter-spacing:.8px;cursor:pointer}
+.leader-tabs .lb-tab + .lb-tab{margin-left:0}
+.leader-tabs .lb-tab.on{background:linear-gradient(180deg,#4aa0f0,#1b5fb8);color:#fff}
 /* Hazır avatar seçimi (profil penceresi) */
 .avatar-options{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:8px 0 14px}
 .avatar-options button{aspect-ratio:1;padding:3px;border-radius:50%;border:2px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);cursor:pointer;transition:transform .12s,border-color .12s}

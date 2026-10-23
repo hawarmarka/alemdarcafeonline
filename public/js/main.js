@@ -34,6 +34,9 @@ function applyProfile() {
   $('xpFill').style.width = Math.max(0, Math.min(100, 100 * (xp - base) / (next - base))) + '%';
   $('headerGames').textContent = currentUser?.games || 0;
   $('headerWins').textContent = currentUser?.wins || 0;
+  // Sanal çip: yalnızca hesabı olanlarda; misafir çipsiz oynar.
+  $('headerChips').textContent = currentUser ? Number(currentUser.chips || 0).toLocaleString('tr-TR') : 'Misafir';
+  paintBonus();
   $('logoutBtn').classList.toggle('hidden', !currentUser);
   $('loginOpenBtn').classList.toggle('hidden', !!currentUser);
   $('registerOpenBtn').classList.toggle('hidden', !!currentUser);
@@ -42,6 +45,22 @@ function applyProfile() {
   $('accountStatus').textContent = currentUser ? '✅ Profilin kayıtlı · Oyun kazan, XP topla!' : 'Misafir hesabının ilerlemesi kaydedilmez.';
 
 }
+// Ücretsiz hediye çip düğmesi: hazırsa "TOPLA" (parlar), değilse kalan süre; misafire hesap açmayı önerir.
+function paintBonus() {
+  const btn = $('bonusBtn'), label = $('bonusLabel'); if (!btn) return;
+  if (!currentUser) { label.textContent = 'HESAP AÇ'; btn.classList.remove('ready'); return; }
+  const left = (currentUser.nextBonusAt || 0) - Date.now();
+  btn.classList.toggle('ready', left <= 0);
+  if (left <= 0) { label.textContent = 'TOPLA'; return; }
+  const s = Math.ceil(left / 1000), pad = n => String(n).padStart(2, '0');
+  label.textContent = `${pad(Math.floor(s / 3600))}:${pad(Math.floor(s / 60) % 60)}:${pad(s % 60)}`;
+}
+setInterval(paintBonus, 1000);
+$('bonusBtn')?.addEventListener('click', async () => {
+  if (!currentUser) { toast('Hediye çip ve çip kazanmak için ücretsiz hesap aç.'); return openAuth('register'); }
+  try { const r = await api('/api/bonus'); currentUser = r.user; applyProfile(); toast(`🎁 +${r.amount.toLocaleString('tr-TR')} hediye çip!`); }
+  catch (err) { toast(err.message); }
+});
 async function recoverSession() {
   if (authToken) {
     try { currentUser = (await api('/api/me', undefined, 'GET')).user; }
@@ -139,7 +158,9 @@ function start(mode, modeKey = 'klasik') {
   if (mode === 'code' && !/^[A-Z0-9]{6}$/.test(roomCode)) return toast('6 karakterli geçerli bir oda kodu gir.');
   const token = [...crypto.getRandomValues(new Uint8Array(24))].map(b => b.toString(16).padStart(2, '0')).join('');
   const setting = mode === 'create' ? {stackingMode: $('roomStack').value === 'true', assisted: $('roomAssist').value === 'true'} : (modes[modeKey] || modes.klasik);
-  pendingJoin = { mode, modeKey, ...setting, playerName, token, roomCode, isPublic: mode === 'create' ? createPublic : undefined,
+  // Masa bahsi: Masa Aç'ta seçilen; HEMEN OYNA en düşük bahisli masaya (1.000 çip) oturur.
+  const bet = mode === 'create' ? Number($('roomBet').value) || 1000 : 1000;
+  pendingJoin = { mode, modeKey, ...setting, bet, playerName, token, roomCode, isPublic: mode === 'create' ? createPublic : undefined,
     authToken, avatar: currentUser?.avatar || selectedAvatar,
     frame: currentUser?.frame || selectedFrame, roundLimit: Number($('roundLimit').value), teamMode: mode === 'create' && $('roomTeam').value === 'takim', penaltyMode: mode === 'create' ? $('penaltyModeToggle').checked : true };
   localStorage.setItem('okeyPlayerName', playerName);
@@ -167,7 +188,7 @@ async function showRoomList(mode) {
       const info = document.createElement('div'); info.className = 'ml-info';
       const title = document.createElement('strong'); title.textContent = (room.host ? room.host + ' · ' : '') + 'Masa ' + room.code;
       const chips = document.createElement('div'); chips.className = 'ml-chips';
-      [room.teamMode ? 'EŞLİ' : 'TEK', `${room.roundLimit || 4} EL`, room.assisted ? 'YARDIMLI' : 'YARDIMSIZ', room.stackingMode ? 'KATLAMALI' : 'KATLAMASIZ']
+      [`${Number(room.bet || 1000).toLocaleString('tr-TR')} ÇİP`, room.teamMode ? 'EŞLİ' : 'TEK', `${room.roundLimit || 4} EL`, room.assisted ? 'YARDIMLI' : 'YARDIMSIZ', room.stackingMode ? 'KATLAMALI' : 'KATLAMASIZ']
         .forEach(t => { const s = document.createElement('span'); s.textContent = t; chips.append(s); });
       const seats = document.createElement('small'); seats.textContent = room.players + '/4 oyuncu';
       info.append(title, chips, seats);
@@ -272,21 +293,26 @@ document.querySelectorAll('.set-stepper [data-step]').forEach(b => b.addEventLis
   localStorage.setItem('okeyQuickMode', QUICK[n][0]); syncQuick();
 }));
 syncQuick();
-// Sıralama: En İyi 25
-$('leaderboardBtn')?.addEventListener('click', async () => {
+// Sıralama: En İyi 25, çipe (varsayılan) veya seviyeye göre
+async function loadLeaderboard(by = 'chips') {
   const list = $('leaderList'); list.replaceChildren();
+  document.querySelectorAll('.leader-tabs .lb-tab').forEach(b => b.classList.toggle('on', b.dataset.by === by));
   try {
-    const { top } = await api('/api/leaderboard', null, 'GET');
+    const { top } = await api('/api/leaderboard?by=' + by, null, 'GET');
     if (!top.length) { const li = document.createElement('li'); li.className = 'empty'; li.textContent = 'Henüz kayıtlı oyuncu yok. Hesap açıp oynayan oyuncular burada görünür.'; list.append(li); }
     top.forEach((u, i) => {
       const li = document.createElement('li');
       const rank = document.createElement('b'); rank.className = 'rank'; rank.textContent = (i + 1) + '.';
       const img = document.createElement('img'); img.src = avatarSrc(u.avatar); img.alt = '';
       const info = document.createElement('div'); const n = document.createElement('strong'); n.textContent = u.username;
-      const s = document.createElement('small'); s.textContent = `Seviye ${u.level} · ${u.xp.toLocaleString('tr-TR')} XP · ${u.wins} zafer`;
+      const s = document.createElement('small'); s.textContent = `🪙 ${Number(u.chips || 0).toLocaleString('tr-TR')} çip · Seviye ${u.level} · ${u.wins} zafer`;
       info.append(n, s); li.append(rank, img, info); list.append(li);
     });
   } catch (e) { toast(e.message); }
+}
+document.querySelectorAll('.leader-tabs .lb-tab').forEach(b => b.addEventListener('click', () => loadLeaderboard(b.dataset.by)));
+$('leaderboardBtn')?.addEventListener('click', async () => {
+  await loadLeaderboard('chips');
   showModal('leaderboardModal');
 });
 // Açılış ekranı (oturumda bir kez): yükleme çubuğu bağlantı kurulunca dolar, ardından taş geçişiyle lobiye

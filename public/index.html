@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/lobby-plus.css?v=4">
-<link rel="stylesheet" href="/css/lobby-pro.css?v=3">
+<link rel="stylesheet" href="/css/lobby-pro.css?v=4">
 <script src="/js/transitions.js?v=2"></script>
 </head>
 <body class="lobby-page">
@@ -31,8 +31,9 @@
     <button type="button" class="lb-link" id="sidebarAvatarBtn" title="Profilimi düzenle" aria-label="Profilimi düzenle"></button>
     <div class="lb-xp" title="Deneyim puanı"><i class="lb-gem"></i><div class="lb-xp-track"><div class="lb-xp-fill" id="xpFill"></div><span id="xpLabel">0 XP</span></div></div>
     <img class="lb-logo-img" src="/asset/ui/alemdar-logo.svg" alt="Alemdar Cafe">
-    <div class="lb-chip chip-wins" title="Kazanılan oyun"><i class="lb-coin">🏆</i><b id="headerWins">0</b><small>ZAFER</small></div>
-    <div class="lb-chip chip-games" title="Oynanan oyun"><i class="lb-ticket">🎮</i><b id="headerGames">0</b><small>OYUN</small></div>
+    <div class="lb-chip chip-wins" title="Sanal çip (gerçek para değildir)"><i class="lb-coin">🪙</i><b id="headerChips">0</b><small>ÇİP</small></div>
+    <button type="button" class="lb-chip chip-games chip-bonus" id="bonusBtn" title="Ücretsiz hediye çip (4 saatte bir)"><i class="lb-ticket">🎁</i><b id="bonusLabel">TOPLA</b><small>HEDİYE ÇİP</small></button>
+    <span hidden><b id="headerWins">0</b><b id="headerGames">0</b></span>
     <button type="button" class="lb-account" id="profileOpenBtn" title="Hesap ve ayarlar" aria-label="Hesap ve ayarlar"></button>
   </header>
 
@@ -127,7 +128,7 @@
 <div id="leaderboardModal" class="premium-modal hidden" role="dialog" aria-modal="true" aria-labelledby="lbTitle">
   <div class="modal-panel leader-panel">
     <button class="modal-x" data-close="leaderboardModal" aria-label="Kapat"></button>
-    <div class="leader-tabs"><span class="on" id="lbTitle">EN İYİ 25</span></div>
+    <div class="leader-tabs"><span class="on" id="lbTitle">EN İYİ 25</span><button type="button" class="lb-tab" data-by="chips">ÇİP</button><button type="button" class="lb-tab" data-by="xp">SEVİYE</button></div>
     <ol id="leaderList" class="leader-list"></ol>
   </div>
 </div>
@@ -161,6 +162,7 @@
     <div class="opt-row"><span>YARDIM</span><div class="seg" data-target="roomAssist"><button type="button" data-value="true">YARDIMLI</button><button type="button" data-value="false">YARDIMSIZ</button></div></div>
     <div class="opt-row"><span>AÇILIŞ</span><div class="seg" data-target="roomStack"><button type="button" data-value="false">KATLAMASIZ</button><button type="button" data-value="true">KATLAMALI</button></div></div>
     <div class="opt-row"><span>CEZA</span><div class="seg" data-target="penaltyModeToggle"><button type="button" data-value="true">AÇIK</button><button type="button" data-value="false">KAPALI</button></div></div>
+    <div class="opt-row"><span>BAHİS</span><div class="seg" data-target="roomBet"><button type="button" data-value="1000">1K</button><button type="button" data-value="5000">5K</button><button type="button" data-value="25000">25K</button><button type="button" data-value="100000">VIP 100K</button></div></div>
   </div>
   <div class="hidden-selects" hidden>
     <select id="roomTeam"><option value="tek">Tek</option><option value="takim">Eşli</option></select>
@@ -168,6 +170,7 @@
     <select id="roomAssist"><option value="true">Yardımlı</option><option value="false">Yardımsız</option></select>
     <select id="roomStack"><option value="false">Katlamasız</option><option value="true">Katlamalı</option></select>
     <input type="checkbox" id="penaltyModeToggle" checked>
+    <select id="roomBet"><option value="1000" selected>1000</option><option value="5000">5000</option><option value="25000">25000</option><option value="100000">100000</option></select>
   </div>
   <p class="create-note">Masaya oturunca eksik koltuklara <b>BOT EKLE</b> ile bilgisayar oyuncusu koyabilirsin.</p>
   <button id="confirmCreateBtn" class="round-ok" type="button" aria-label="Masayı aç"></button>
@@ -193,4 +196,4 @@
 
 <div id="rotateHint" role="alert"><div class="rotate-phone"></div><div>Daha rahat oynamak için telefonunu yan çevir</div><small>Alemdar Cafe yatay ekranda oynanır</small></div>
 <div id="errorToast" class="toast hidden" role="alert"><span class="toast-message"></span></div>
-<script src="/socket.io/socket.io.js"></script><script src="/js/main.js?v=7"></script></body></html>
+<script src="/socket.io/socket.io.js"></script><script src="/js/main.js?v=8"></script></body></html>

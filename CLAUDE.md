@@ -178,6 +178,36 @@ Doğrulama (2026-10-23): `tests/v34Stability.test.js` yukarıdakileri test ediyo
 
 ---
 
+## 5b. 101 Okey Plus (Zynga) karşılaştırması (2026-10-24)
+
+101okeyplus.com incelendi: lobi, masa, kurallar sayfası. **İlke:** mekanikler ve kurallar kendi kodumuz ve kendi görsellerimizle yapılır. Zynga'nın görselleri, kodu, logosu ve markası kopyalanmaz (telif ve marka hakkı). Gerçek parayla satış yapılmaz.
+
+**Kurallar (bizde zaten aynı):** 21/22 taş, 101 veya 5 çift ile açma, katlamalı (sonraki açan +1 puan / +1 çift), turlu (1-4 el), yardımlı/yardımsız, bir gruba turda en fazla 2 taş işleme, işlek/okey atma ve hatalı açma/geri toplama cezası 101, 12-13-1 geçersiz, yerden alınan taşla açma zorunluluğu.
+
+**Kural farkları:**
+- Kazanan: Okey Plus'ta eli bitiren olmasa da **elini açıp en az cezayı alan** kazanır; açmayanlar kaybeder. Bizde puan tablosu var, kazanan en düşük toplam puan; çip dağıtımı yok.
+- Okey: Okey Plus'ta yardımlı masada okey ters, yardımsızda yüzü açık. Bizde kullanıcı isteğiyle her yerde ters.
+- "Seri açan çift işleme yapabilir": bizde masada çift açan varken yapılabiliyor (kullanıcının tarif ettiği kural).
+
+**Yapılanlar (2026-10-24):**
+- ✅ Çip ekonomisi: `server/economy.js` (`settle`, `BET_LEVELS` = 1.000 / 5.000 / 25.000 / 100.000 VIP, `FEE_RATE` = %7). Hesaplarda `chips` (başlangıç 10.000) ve `bonus_at` sütunları var; eski veritabanına `ALTER TABLE` ile ekleniyor. Bahis maç başında (`takeBets`, ilk elde) alınıyor; çip değişimi maç sonunda (`settleMatch`) oluyor. Çipi yetmeyen hesap masaya oturamıyor. Misafir çipsiz oynuyor: bahis alınmıyor, pay da almıyor. Botların payı yok oluyor. Oyun ortasında ayrılanın bahsi gidiyor (yerine geçen botun hesabı yok). `room.openedEver`: maç boyunca açan koltuklar. Eşli oyunda kazanan takım potu paylaşıyor.
+- ✅ Hediye çip: `POST /api/bonus`, 4 saatte bir `1.000 + 100 × (seviye-1)`; çipi 1.000'in altındaysa 5.000 destek. Lobide geri sayımlı "HEDİYE ÇİP" düğmesi var.
+- ✅ Seviye ödülü: `Accounts.award` seviye atlayınca `seviye × 500` çip veriyor, oyuncuya `levelUp` olayı gidiyor.
+- ✅ Lobi: üst çubukta çip miktarı (ZAFER/OYUN yerine), Masa Aç'ta BAHİS seçimi, Oda Seç'te masa bahsi, sıralamada ÇİP / SEVİYE sekmesi (`/api/leaderboard?by=chips`). HEMEN OYNA 1.000'lik masalara oturuyor.
+- ✅ Masa: sol üst 🪙 kendi çipin (`myChips`), bekleme panelinde masa bahsi, maç sonunda kazanç/kayıp ve masa ücreti.
+- Test: `tests/v36Economy.test.js`.
+
+**Bizde olmayan mekanikler (öncelik önerisi):**
+1. ✅ **Çip ekonomisi (sanal, ücretsiz):** başlangıç çipi, masa bahsi (ör. 3.750), kazanana kazanç ve %7 masa ücreti. Dağıtım: yalnız bir kişi açtıysa bütün ortayı o alır; birden çok açan varsa birinci ortanın 3/4'ünü, ikinci 1/4'ünü alır; eşitlikte paylaştırılır. Hesap tablosuna `chips` sütunu, lobide çip göstergesi, bahis seviyeli odalar.
+2. ✅ **Günlük ücretsiz çip / hediye toplama** (ör. 4 saatte bir 1.000 çip) ve çipi biten oyuncuya destek çipi.
+3. ✅ **Seviye ödülleri:** XP zaten var; seviye atlayınca çip ödülü (rozet yok).
+4. **Rizikolu 51 / iki kişilik masa:** 2 oyunculu, daha kısa ve riskli mod. Kuralları netleştirilmeli.
+5. **Etkinlikler ve sıralama:** haftalık şampiyona (kazanılan çip/puan sıralaması), geri sayımlı etkinlik kartları. Sıralama zaten var, genişletilir.
+6. **Arkadaşlar ve mesajlar:** arkadaş ekleme, masaya davet, gelen kutusu.
+7. **VIP / kulüp odaları:** yüksek bahisli veya seviye şartlı özel odalar.
+8. **Mini oyunlar:** tren tahmini, kahve falı sürprizi (eğlence amaçlı, sanal çiple).
+9. Mağaza ve gerçek parayla satın alma: **yapılmaz** (ödeme ve yasal sorumluluk; ayrıca kullanıcı istemedi).
+
 ## 6. Teknoloji önerileri neden şimdilik gerekli değil
 
 | Öneri | Karar | Neden |

@@ -246,7 +246,7 @@ function showLobby(data) {
     document.querySelector('.lobby-waiting span').textContent = `${4 - data.players.length} oyuncu bekleniyor...`;
     // Okey Plus masa bekleme paneli
     $('lobbyOverlay').classList.remove('has-problem');
-    $('twTop').textContent = 'MASA ' + (data.code || session.roomCode || '------');
+    $('twTop').textContent = 'MASA ' + (data.code || session.roomCode || '------') + (data.bet ? ` · ${Number(data.bet).toLocaleString('tr-TR')} ÇİP` : '');
     $('twTeam').textContent = data.teamMode ? 'Eşli' : 'Tek';
     $('twRounds').textContent = `${data.roundLimit || 4} El`;
     $('twAssist').textContent = data.assisted === false ? 'Yardımsız' : 'Yardımlı';
@@ -403,6 +403,8 @@ socket.on('gameState', data => {
     render();
 });
 socket.on('autoDiscard', data => toast(data.message));
+// Seviye atlayınca çip ödülü (sunucu hesaba yazdı).
+socket.on('levelUp', d => { showBanner({ tone: 'success', title: `SEVİYE ${d.level}!`, value: `+${Number(d.reward).toLocaleString('tr-TR')}`, note: 'çip ödülü', ms: 3500 }); toast(`Seviye ${d.level}! +${Number(d.reward).toLocaleString('tr-TR')} çip ödülü`); });
 // Ceza: oyuncunun panelinde kırmızı "+101" uçar, herkes sebebini görür.
 // Masanın ortasında büyük bildirim kartı (ceza, açılış, okey alma gibi önemli olaylar)
 let bannerTimer = null;
@@ -458,8 +460,14 @@ socket.on('gameFinished', data => {
         nextRoundCountdown = setInterval(() => { left--; paint(); if (left <= 0) clearInterval(nextRoundCountdown); }, 1000);
     }
     $('autoRoundNotice').classList.toggle('hidden', false);
-    $('autoRoundNotice').textContent = data.matchEnded ? (data.champion ? `Şampiyon: ${data.champion}` : 'Maç bitti.')
-        : (data.winner === null ? 'Taşlar bitti, kimse bitiremedi' : `${data.winnerName} eli bitirdi`) + ` · ${data.completedRounds}/${data.roundLimit}. el tamamlandı`;
+    // Maç sonu çip sonucu (yalnızca bahsini ödemiş hesaplarda): kazanç/kayıp ve masa ücreti.
+    const myChip = data.matchEnded ? data.chips?.[state?.playerIndex] : null;
+    const chipLine = !myChip?.paid ? '' : myChip.refund ? ' · Kimse açmadı, bahsin iade edildi'
+        : myChip.net >= 0 ? ` · 🪙 +${myChip.net.toLocaleString('tr-TR')} çip kazandın (masa ücreti ${myChip.fee.toLocaleString('tr-TR')})`
+        : ` · 🪙 ${myChip.net.toLocaleString('tr-TR')} çip`;
+    if (myChip?.paid && !myChip.refund && myChip.net > 0) showBanner({ tone: 'success', title: 'KAZANDIN', value: `+${myChip.net.toLocaleString('tr-TR')}`, note: 'çip', ms: 3500 });
+    $('autoRoundNotice').textContent = (data.matchEnded ? (data.champion ? `Şampiyon: ${data.champion}` : 'Maç bitti.')
+        : (data.winner === null ? 'Taşlar bitti, kimse bitiremedi' : `${data.winnerName} eli bitirdi`) + ` · ${data.completedRounds}/${data.roundLimit}. el tamamlandı`) + chipLine;
     $('gameEndModal').classList.remove('peeking');
     $('peekReturnBtn')?.remove();
     nb.disabled = !data.matchEnded;
@@ -1158,7 +1166,8 @@ function renderPlayers() {
     setText($('pileCount'), state.pileCount);
     setText($('pileCountCenter'), state.pileCount);
     const selfPlayer = state.players[state.playerIndex];
-    if (selfPlayer) setText($('refHudScore'), Number(playerTotalScore(state.playerIndex)).toLocaleString('tr-TR'));
+    // Sol üst 🪙 kutusu: kendi sanal çipin (misafirde masa bahsi gösterilir; puan skor tablosunda).
+    if (selfPlayer) setText($('refHudScore'), state.myChips != null ? Number(state.myChips).toLocaleString('tr-TR') : `Masa ${Number(state.bet || 0).toLocaleString('tr-TR')}`);
     renderFancyScoreboard();
     renderOpenStatusBadges();
 }
