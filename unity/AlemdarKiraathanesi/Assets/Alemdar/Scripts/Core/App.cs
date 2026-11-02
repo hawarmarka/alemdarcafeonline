@@ -51,6 +51,7 @@ namespace Alemdar
             yield return null;
             BakeNavMesh();
             Destroy(loading.gameObject);
+            if (server.Offline) Ui.Toast("Çevrimiçi sunucuya ulaşılamadı: botlarla bu bilgisayarda oynuyorsun.", 6);
 
             MyName = DevShots.Arg("-ad") is { Length: > 1 } devName ? devName : PlayerPrefs.GetString("ad", "");
             if (MyName.Length < 2) { bool done = false; Hud.AskName(n => { MyName = n; PlayerPrefs.SetString("ad", n); done = true; }); while (!done) yield return null; }

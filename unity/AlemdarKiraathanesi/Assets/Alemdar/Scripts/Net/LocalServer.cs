@@ -1,6 +1,6 @@
 // Oyun sunucusu (Node) uygulamanın içinde, bu bilgisayarda çalışır: botlu oyun internetsiz ve gecikmesiz.
 // Derlemede: <oyun klasörü>/Server/{node.exe, server/, node_modules/}. Editörde depo kökündeki sunucu kullanılır.
-// Oyun klasöründe config.json { "serverUrl": "https://..." } varsa çevrimiçi sunucuya bağlanılır.
+// Oyun klasöründe config.json { "serverUrl": "https://..." } varsa çevrimiçi sunucuya bağlanılır; ulaşılamazsa yerel sunucu açılır.
 using System;
 using System.Collections;
 using System.Diagnostics;
@@ -20,16 +20,25 @@ namespace Alemdar.Net
         public string Url { get; private set; }
         public string Error { get; private set; }
         public bool Online { get; private set; }
+        public bool Offline { get; private set; } // çevrimiçi sunucuya ulaşılamadı, yerel sunucuyla açıldı
 
         static string GameDir => Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
 
         public IEnumerator Run(Action<string> ready)
         {
             var cfg = Path.Combine(GameDir, "config.json");
-            if (File.Exists(cfg))
+            if (File.Exists(cfg) && DevShots.Arg("-senaryo") == null && DevShots.Arg("-yerel") == null) // denetim ve -yerel her zaman bu bilgisayarda
             {
                 try { var u = (string)JObject.Parse(File.ReadAllText(cfg))["serverUrl"]; if (!string.IsNullOrWhiteSpace(u)) { Url = u.TrimEnd('/'); Online = true; } }
                 catch (Exception e) { Debug.LogWarning("config.json okunamadı: " + e.Message); }
+            }
+            if (Online)
+            {
+                bool ok = false;
+                yield return Wait(Url, 8f, r => ok = r);
+                if (ok) { ready(Url); yield break; }
+                Debug.LogWarning("Çevrimiçi sunucuya ulaşılamadı, bu bilgisayardaki sunucu açılıyor: " + Url);
+                Url = null; Online = false; Offline = true;
             }
             if (Url == null)
             {
@@ -60,18 +69,26 @@ namespace Alemdar.Net
                 proc.Start(); proc.BeginOutputReadLine(); proc.BeginErrorReadLine();
                 Url = "http://127.0.0.1:" + port;
             }
-            // sunucu hazır olana kadar bekle
-            float until = Time.realtimeSinceStartup + 25f;
+            bool up = false;
+            yield return Wait(Url, 25f, r => up = r);
+            if (up) { ready(Url); yield break; }
+            Error = "Oyun sunucusu açılamadı.";
+            ready(null);
+        }
+
+        // sunucu hazır olana kadar /health dener
+        static IEnumerator Wait(string url, float seconds, Action<bool> done)
+        {
+            float until = Time.realtimeSinceStartup + seconds;
             while (Time.realtimeSinceStartup < until)
             {
-                using var req = UnityWebRequest.Get(Url + "/health");
-                req.timeout = 2;
+                using var req = UnityWebRequest.Get(url + "/health");
+                req.timeout = 3;
                 yield return req.SendWebRequest();
-                if (req.result == UnityWebRequest.Result.Success) { ready(Url); yield break; }
-                yield return new WaitForSecondsRealtime(0.2f);
+                if (req.result == UnityWebRequest.Result.Success) { done(true); yield break; }
+                yield return new WaitForSecondsRealtime(0.3f);
             }
-            Error = Online ? "Çevrimiçi sunucuya bağlanılamadı." : "Oyun sunucusu açılamadı.";
-            ready(null);
+            done(false);
         }
 
         static int FreePort()

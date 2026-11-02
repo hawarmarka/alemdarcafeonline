@@ -150,6 +150,8 @@ namespace Alemdar.EditorTools
             so.ApplyModifiedProperties();
         }
 
+        const string OnlineUrl = "https://okey.hawarserver.com";
+
         public static void Windows()
         {
             Setup();
@@ -157,6 +159,8 @@ namespace Alemdar.EditorTools
             var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions { scenes = new[] { ScenePath }, locationPathName = exe, target = BuildTarget.StandaloneWindows64, options = BuildOptions.None });
             if (report.summary.result != UnityEditor.Build.Reporting.BuildResult.Succeeded) throw new System.Exception("Derleme başarısız: " + report.summary.result);
             CopyServer(Path.Combine(outDir, "Server"));
+            // arkadaşlar aynı salonda buluşsun diye çevrimiçi sunucu; ulaşılamazsa oyun yerel sunucuyla açılır
+            File.WriteAllText(Path.Combine(outDir, "config.json"), "{\n  \"serverUrl\": \"" + OnlineUrl + "\"\n}\n");
             Debug.Log("DERLEME TAMAM: " + exe);
         }
 
