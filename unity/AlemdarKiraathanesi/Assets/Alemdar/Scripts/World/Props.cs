@@ -42,8 +42,14 @@ namespace Alemdar.World
             Brown = M(new Color(.22f, .13f, .08f), .25f);
             White = M(new Color(.93f, .93f, .91f), .3f);
             Marble = MN(Color.white, .75f, L.marbleD, L.marbleN, new Vector2(1, 1), .4f);
-            Glass = Transparent(new Color(.9f, .95f, .97f, .22f)); Glass.color = new Color(.9f, .95f, .97f, .22f);
-            Tea = Emissive(new Color(.45f, .08f, .02f), .25f); Tea.SetFloat("_Glossiness", .9f);
+            // ince cam: az yansıma, içindeki tavşan kanı çay koyu kırmızı görünsün
+            Glass = Transparent(new Color(.92f, .96f, .98f, .1f), .55f); Glass.color = new Color(.92f, .96f, .98f, .1f);
+            Tea = Emissive(new Color(.5f, .1f, .03f), .55f); Tea.SetFloat("_Glossiness", .85f);
+            // yazı tipi: kullanılan bütün karakterler baştan hazırlanır (oyun sırasında doku yeniden kurulup takılma yapmasın)
+            const string chars = "ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZXWQabcçdefgğhıijklmnoöprsştuüvyzxwq0123456789 .,:;!?%+-−·/()[]◀▶♠♥♦♣●'\"&";
+            UiFont.RequestCharactersInTexture(chars, 96, FontStyle.Bold); UiFont.RequestCharactersInTexture(chars, 192, FontStyle.Bold);
+            UiFont.RequestCharactersInTexture(chars, 96, FontStyle.Normal);
+            foreach (int size in new[] { 16, 20, 21, 22, 24, 26, 30 }) { UiFont.RequestCharactersInTexture(chars, size, FontStyle.Normal); UiFont.RequestCharactersInTexture(chars, size, FontStyle.Bold); } // arayüz yazıları
             Saucer = M(Color.white, .7f, 0, Tex.Saucer());
             Wall = MN(new Color(1.02f, 1.02f, 1.04f), .08f, L.plasterD, L.plasterN, new Vector2(1, 1), .8f);
             Plaster = MN(new Color(1.05f, 1.05f, 1.06f), .06f, L.plasterD, L.plasterN, new Vector2(.6f, .6f), .6f);
@@ -263,6 +269,15 @@ namespace Alemdar.World
             return c;
         }
 
+        // Gerçek fotoğraf tablosu (Wikimedia Commons, lisanslar Photos/CREDITS.txt): yükseklik fotoğrafın oranından; koyu ahşap çerçeve + paspartu.
+        public static void Photo(Transform p, Texture2D photo, float w, Vector3 pos, float ry)
+        {
+            float h = w * photo.height / photo.width;
+            var g = new GameObject("tablo_" + photo.name).transform; g.SetParent(p, false); g.localPosition = pos; g.localRotation = Quaternion.Euler(0, ry, 0);
+            Box(g, new Vector3(w + .08f, h + .08f, .035f), WoodDark, Vector3.zero);
+            Box(g, new Vector3(w + .02f, h + .02f, .002f), White, new Vector3(0, 0, .018f), 0, false, false);
+            Quad(g, new Vector2(w, h), M(Color.white, .45f, 0, photo), new Vector3(0, 0, .0195f), Quaternion.Euler(0, 180, 0));
+        }
         public static void Painting(Transform p, string kind, float w, float h, Vector3 pos, float ry)
         {
             var g = new GameObject("tablo").transform; g.SetParent(p, false); g.localPosition = pos; g.localRotation = Quaternion.Euler(0, ry, 0);

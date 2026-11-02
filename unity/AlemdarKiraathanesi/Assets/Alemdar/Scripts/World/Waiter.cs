@@ -17,7 +17,7 @@ namespace Alemdar.World
         public void Init(Hall h)
         {
             hall = h;
-            body = Chars.Person.Create("Kahveci Rıza", transform, true, "waiter");
+            body = Chars.Person.Create("Kahveci Evdo", transform, true, "waiter");
             transform.position = hall.WaiterSpot;
             agent = gameObject.AddComponent<NavMeshAgent>();
             agent.radius = .25f; agent.height = 1.75f; agent.speed = 1.5f; agent.acceleration = 6; agent.angularSpeed = 420; agent.stoppingDistance = .05f; agent.autoBraking = true;

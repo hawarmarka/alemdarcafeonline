@@ -47,6 +47,9 @@ namespace Alemdar.EditorTools
             lib.marbleD = PH("marble_01", "diff"); lib.marbleN = PH("marble_01", "nor");
             lib.leatherD = PH("fabric_leather_02", "diff"); lib.leatherN = PH("fabric_leather_02", "nor");
             lib.fabricN = PH("fabric_pattern_07", "nor");
+            lib.photos = Directory.Exists("Assets/ThirdParty/Photos")
+                ? Directory.GetFiles("Assets/ThirdParty/Photos", "*.jpg").Select(f => AssetDatabase.LoadAssetAtPath<Texture2D>(f.Replace('\\', '/'))).Where(t => t).ToArray()
+                : new Texture2D[0];
             // normal haritalı ve duman şablonları (shader çeşitleri derlemeye girsin)
             var on = new Material(Shader.Find("Standard")) { enableInstancing = true }; on.SetTexture("_BumpMap", lib.plasterN); on.EnableKeyword("_NORMALMAP");
             AssetDatabase.DeleteAsset(Gen + "/OpakNormal.mat"); AssetDatabase.CreateAsset(on, Gen + "/OpakNormal.mat"); lib.opaqueNormal = on;

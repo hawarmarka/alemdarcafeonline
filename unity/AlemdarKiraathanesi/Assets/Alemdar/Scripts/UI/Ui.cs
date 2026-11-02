@@ -149,5 +149,7 @@ namespace Alemdar.UI
             return edge.rectTransform;
         }
         public static bool PointerOverUi => EventSystem.current && EventSystem.current.IsPointerOverGameObject();
+        // bir yazı kutusuna yazılıyorsa kısayol tuşları çalışmasın
+        public static bool TypingText => EventSystem.current && EventSystem.current.currentSelectedGameObject && EventSystem.current.currentSelectedGameObject.GetComponent<InputField>();
     }
 }

@@ -40,6 +40,11 @@ namespace Alemdar.EditorTools
                 ti.maxTextureSize = 1024; ti.anisoLevel = 8; ti.mipmapEnabled = true;
                 return;
             }
+            if (assetPath.Contains("ThirdParty/Photos"))
+            {
+                ti.maxTextureSize = 1024; ti.anisoLevel = 4; ti.mipmapEnabled = true; ti.npotScale = TextureImporterNPOTScale.None;
+                return;
+            }
             if (assetPath.Contains("ThirdParty/Rocketbox"))
             {
                 if (assetPath.EndsWith("_normal.png")) ti.textureType = TextureImporterType.NormalMap;

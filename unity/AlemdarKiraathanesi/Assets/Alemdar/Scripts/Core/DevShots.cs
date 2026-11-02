@@ -36,6 +36,11 @@ namespace Alemdar
             yield return CamShot(dir, "k1_ocak", new Vector3(.8f, 1.6f, -3.2f), new Vector3(.5f, 1.0f, -6f));
             yield return CamShot(dir, "k2_afis", new Vector3(4.4f, 1.7f, -3.4f), new Vector3(6.6f, 1.75f, -3.4f));
             yield return CamShot(dir, "k3_nargile", new Vector3(-3.2f, 1.3f, -2.0f), new Vector3(-3.25f, .7f, -3.35f));
+            yield return CamShot(dir, "k4_tabela", new Vector3(1.5f, 1.7f, World.Hall.TerraceZ + 5f), new Vector3(0, 2f, World.Hall.TerraceZ));
+            yield return CamShot(dir, "k5_salon", new Vector3(-5.8f, 2.3f, 4.6f), new Vector3(.5f, .5f, -1.5f));
+            yield return CamShot(dir, "k6_masalar", new Vector3(-2.6f, 1.45f, -1.6f), new Vector3(-4.2f, .76f, -3f));
+            yield return CamShot(dir, "k7_tv", new Vector3(3.6f, 1.7f, .2f), new Vector3(World.Hall.MaxX, 2.1f, 0));
+            yield return CamShot(dir, "k8_domino_tavla", new Vector3(1.2f, 1.5f, -1.6f), new Vector3(0, .76f, -3f));
             app.Me.InputLocked = false;
             app.Hud.ShowTable(7); yield return new WaitForSeconds(.6f); Shot(dir, "u1_masa_paneli"); yield return new WaitForSeconds(.2f); app.Hud.HideTable(); // görüntü kare sonunda alınır
             Phase("salon");

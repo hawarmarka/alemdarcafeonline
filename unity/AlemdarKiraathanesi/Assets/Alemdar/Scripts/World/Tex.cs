@@ -102,23 +102,24 @@ namespace Alemdar.World
             return c * (1 - n);
         }, false);
 
-        // Camekân yazısı: kendi logomuz (ince belli çay bardağı + ALEMDAR KIRAATHANESİ), arka planı saydam.
-        public static Texture2D Sign()
+        // EVDO logosu: koyu yeşil oval pano, altın çift çerçeve, üstte küçük çay bardağı simgesi; yazılar (EVDO / KIRAATHANESİ · 1987) 3B metinle üstüne yazılır.
+        // Kendi tasarımımız; başka bir oyunun logosu örnek alınmadı.
+        public static readonly Color EvdoGreen = new(.06f, .25f, .2f), EvdoGold = new(.86f, .69f, .36f);
+        public static Texture2D Badge(bool solid) => Make(512, 320, (x, y) =>
         {
-            int w = 512, h = 320; var t = new Texture2D(w, h, TextureFormat.RGBA32, true) { wrapMode = TextureWrapMode.Clamp };
-            var px = new Color[w * h]; var clear = new Color(0, 0, 0, 0); for (int i = 0; i < px.Length; i++) px[i] = clear;
-            var red = new Color(.77f, .09f, .11f, 1); float cx = w / 2f, cy = 150;
-            for (int y = 0; y < h; y++) for (int x = 0; x < w; x++)
-            {
-                float dx = x - cx, dy = y - cy, r = Mathf.Sqrt(dx * dx + dy * dy);
-                if (r > 112 && r < 128 && dy > 10) px[y * w + x] = red;                       // üst yay
-                float halfW = 26 + Mathf.Abs(y - cy + 10) * .35f;                              // bardak (belli)
-                if (y > cy - 60 && y < cy + 50 && Mathf.Abs(dx) < halfW * (y > cy - 10 ? 1 : .8f)) px[y * w + x] = new Color(.71f, .25f, .11f, 1);
-                if (Mathf.Pow(dx / 70f, 2) + Mathf.Pow((y - (cy - 68)) / 16f, 2) < 1) px[y * w + x] = Color.white; // tabak
-                if (Mathf.Pow(dx / 70f, 2) + Mathf.Pow((y - (cy - 68)) / 16f, 2) is var e && e > .75f && e < 1) px[y * w + x] = red;
-            }
-            t.SetPixels(px); t.Apply(true); return t;
-        }
+            float u = (x - 256) / 250f, v = (y - 160) / 150f, e = u * u + v * v; // oval
+            if (e > 1) return solid ? new Color(EvdoGreen.r, EvdoGreen.g, EvdoGreen.b, 1) : new Color(0, 0, 0, 0); // tabelada panoyla aynı yeşil
+            var gold = EvdoGold; gold.a = 1;
+            if (e > .9f || (e > .78f && e < .82f)) return gold;                     // çift çerçeve
+            // üstte çay bardağı simgesi (belli bardak + tabak)
+            float gx = x - 256, gy = y - 228;
+            float half = 9 + Mathf.Abs(gy + 4) * .32f;
+            if (gy > -26 && gy < 20 && Mathf.Abs(gx) < half) return new Color(.72f, .3f, .12f, 1);
+            if (Mathf.Pow(gx / 30f, 2) + Mathf.Pow((gy + 30) / 6f, 2) < 1) return gold;
+            if (!solid) return new Color(EvdoGreen.r, EvdoGreen.g, EvdoGreen.b, .82f); // camda hafif saydam
+            float n = Fbm(x / 20f, y / 20f, 11) * .06f;
+            return new Color(EvdoGreen.r * (1 - n), EvdoGreen.g * (1 - n), EvdoGreen.b * (1 - n), 1);
+        }, false);
 
         // Anten logosu (anten.memati.dev/favicon.svg ile aynı çizim): koyu yuvarlak kare, ortada nokta, iki yanda anten dalgaları.
         public static Texture2D AntenLogo() => Make(256, 256, (x, y) =>
@@ -141,6 +142,54 @@ namespace Alemdar.World
             int bottle = x / 14; if (x % 14 < 2 || y % 40 > 34) return new Color(.85f, .9f, .92f);
             var c = cols[(row + bottle) % cols.Length]; return x % 14 == 4 ? Color.Lerp(c, Color.white, .5f) : c;
         }, false);
+
+        // İskambil arkası: bordo, ince kafes, beyaz kenar.
+        public static Texture2D CardBack() => Make(64, 96, (x, y) =>
+        {
+            if (x < 3 || y < 3 || x > 60 || y > 92) return new Color(.97f, .97f, .95f);
+            bool lattice = ((x + y) % 8 < 1) || ((x - y + 96) % 8 < 1);
+            return lattice ? new Color(.85f, .6f, .45f) : new Color(.62f, .12f, .14f);
+        }, false);
+        // Zar ve domino noktaları: n (0..6) noktanın klasik dizilişi, [0,1] karesinde.
+        static readonly Vector2[][] Pips =
+        {
+            new Vector2[0], new[] { new Vector2(.5f, .5f) }, new[] { new Vector2(.25f, .25f), new Vector2(.75f, .75f) },
+            new[] { new Vector2(.25f, .25f), new Vector2(.5f, .5f), new Vector2(.75f, .75f) },
+            new[] { new Vector2(.25f, .25f), new Vector2(.75f, .25f), new Vector2(.25f, .75f), new Vector2(.75f, .75f) },
+            new[] { new Vector2(.25f, .25f), new Vector2(.75f, .25f), new Vector2(.5f, .5f), new Vector2(.25f, .75f), new Vector2(.75f, .75f) },
+            new[] { new Vector2(.25f, .2f), new Vector2(.75f, .2f), new Vector2(.25f, .5f), new Vector2(.75f, .5f), new Vector2(.25f, .8f), new Vector2(.75f, .8f) },
+        };
+        static bool Pip(int n, float u, float v, float r) { foreach (var p in Pips[n]) if ((new Vector2(u, v) - p).sqrMagnitude < r * r) return true; return false; }
+        // Domino: fildişi gövde, ortada çizgi, iki yarıda siyah noktalar (uzun kenar v boyunca).
+        public static Texture2D Domino(int a, int b) => Make(64, 128, (x, y) =>
+        {
+            float u = x / 64f, v = y / 128f;
+            if (Mathf.Abs(v - .5f) < .012f) return new Color(.2f, .2f, .2f);
+            bool pip = v < .5f ? Pip(a, u, v * 2, .1f) : Pip(b, u, (v - .5f) * 2, .1f);
+            return pip ? new Color(.07f, .07f, .08f) : new Color(.95f, .93f, .86f);
+        }, false);
+        public static Texture2D Die(int n) => Make(64, 64, (x, y) => Pip(n, x / 64f, y / 64f, .1f) ? (n == 1 ? new Color(.8f, .1f, .1f) : new Color(.1f, .1f, .1f)) : new Color(.97f, .97f, .95f), false);
+        // Tavla tahtası: koyu ahşap zemin, açık ve koyu sivri üçgenler (her yarıda 6+6).
+        public static Texture2D BackgammonBoard() => Make(512, 384, (x, y) =>
+        {
+            float u = x / 512f, v = y / 384f;
+            var baseC = Color.Lerp(new Color(.18f, .11f, .07f), new Color(.26f, .16f, .1f), Fbm(x / 30f, y / 6f, 21));
+            if (Mathf.Abs(u - .5f) < .02f) return new Color(.12f, .07f, .05f);
+            float half = u < .5f ? u / .48f : (u - .52f) / .48f; if (half < 0 || half > 1) return baseC;
+            int i = Mathf.FloorToInt(half * 6); float local = half * 6 - i;
+            bool topRow = v > .5f; float depth = topRow ? (1 - v) : v; // üçgen kenardan ortaya doğru sivrilir
+            float width = 1 - depth / .42f;
+            if (depth < .42f && Mathf.Abs(local - .5f) < width * .5f) return ((i + (topRow ? 1 : 0)) % 2 == 0) ? new Color(.86f, .8f, .66f) : new Color(.45f, .1f, .08f);
+            return baseC;
+        }, false);
+
+        // Kepenk: yatay oluklu metal çıtalar.
+        public static Texture2D Shutter() => Make(128, 128, (x, y) =>
+        {
+            float s = (y % 16) / 16f, rib = s < .12f ? .55f : s < .2f ? 1.08f : 1 - Mathf.Abs(s - .6f) * .25f;
+            float n = Fbm(x / 10f, y / 40f, 13) * .08f;
+            return new Color(rib - n, rib - n, rib - n);
+        });
 
         // Ferforje pencere: altıgen desen; alfa ile camdan görünür.
         public static Texture2D Grille() => Make(256, 256, (x, y) =>

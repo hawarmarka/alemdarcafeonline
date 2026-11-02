@@ -25,10 +25,11 @@ namespace Alemdar.UI
             // üst çubuk
             var top = Ui.Rect(root, "ust"); Ui.Anchor(top, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0, -38), new Vector2(0, 76));
             var shade = Ui.Box(top, new Color(0, 0, 0, .42f)); Ui.Stretch(shade.rectTransform); shade.raycastTarget = false;
-            var brand = Ui.Label(top, "ALEMDAR  <size=16><color=#D4A85A>KIRAATHANESİ</color></size>", 30, Ui.Ink, TextAnchor.MiddleLeft, FontStyle.Bold); brand.supportRichText = true;
+            var brand = Ui.Label(top, "EVDO  <size=16><color=#D4A85A>KIRAATHANESİ</color></size>", 30, Ui.Ink, TextAnchor.MiddleLeft, FontStyle.Bold); brand.supportRichText = true;
             Ui.Anchor(brand.rectTransform, new Vector2(0, .5f), new Vector2(0, .5f), new Vector2(200, 0), new Vector2(360, 60));
             online = Ui.Label(top, "", 20, Ui.Muted, TextAnchor.MiddleCenter); Ui.Anchor(online.rectTransform, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.zero, new Vector2(400, 40));
             var right = Ui.Row(top, 10, TextAnchor.MiddleRight); Ui.Anchor(right, new Vector2(1, .5f), new Vector2(1, .5f), new Vector2(-250, 0), new Vector2(480, 56));
+            Ui.Button(right, "TV", Ui.Kind.Plain, () => World.Tv.I?.ToggleRemote(), new Vector2(90, 50));
             Ui.Button(right, "KAHVECİ", Ui.Kind.Plain, ToggleOrder, new Vector2(170, 50));
             Ui.Button(right, "MENÜ", Ui.Kind.Ghost, () => menuPanel.gameObject.SetActive(!menuPanel.gameObject.activeSelf), new Vector2(130, 50));
             // yakınlık ipucu
