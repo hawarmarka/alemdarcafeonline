@@ -29,6 +29,23 @@ namespace Alemdar.EditorTools
                 var bounds = go.GetComponentsInChildren<Renderer>(true).Select(r => r.bounds).FirstOrDefault();
                 sb.AppendLine("  bounds=" + bounds.size);
             }
+            foreach (var f in Directory.GetFiles("Assets/ThirdParty/Rocketbox", "*.fbx", SearchOption.AllDirectories).Take(3))
+            {
+                var go = AssetDatabase.LoadAssetAtPath<GameObject>(f.Replace('\\', '/'));
+                var inst = Object.Instantiate(go);
+                var an = inst.GetComponent<Animator>();
+                sb.AppendLine("== " + f + " isHuman=" + (an && an.isHuman) + " valid=" + (an && an.avatar && an.avatar.isValid));
+                foreach (var smr in inst.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+                    sb.AppendLine($"  SMR {smr.name} verts={smr.sharedMesh.vertexCount} sub={smr.sharedMesh.subMeshCount} mats={string.Join("/", smr.sharedMaterials.Select(m => m ? m.name + "(" + (m.mainTexture ? m.mainTexture.name : "-") + ")" : "-"))}");
+                if (an && an.isHuman)
+                {
+                    Vector3 P(HumanBodyBones b) => an.GetBoneTransform(b) ? an.GetBoneTransform(b).position : Vector3.zero;
+                    var right = P(HumanBodyBones.RightUpperArm) - P(HumanBodyBones.LeftUpperArm);
+                    sb.AppendLine($"  boy(baş)={P(HumanBodyBones.Head).y:0.00} ayak={P(HumanBodyBones.LeftFoot).y:0.00} ön={Vector3.Cross(right, Vector3.up).normalized} kalça={P(HumanBodyBones.Hips)}");
+                }
+                sb.AppendLine("  bounds=" + inst.GetComponentsInChildren<Renderer>().Select(r => r.bounds).FirstOrDefault().size + " ölçek=" + inst.transform.localScale);
+                Object.DestroyImmediate(inst);
+            }
             File.WriteAllText(Path.Combine(Application.dataPath, "../probe.txt"), sb.ToString());
         }
     }

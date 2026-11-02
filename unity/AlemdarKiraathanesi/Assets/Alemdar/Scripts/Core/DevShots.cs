@@ -46,6 +46,7 @@ namespace Alemdar
                 app.SitAndJoin(4, 0, new { mode = "create", modeKey = "klasik", stackingMode = false, assisted = true, bet = 1000, roundLimit = 1, isPublic = true, seat = 0, teamMode = false, hallTable = 4 });
                 float until = Time.time + 20; while (app.Okey.State == null && Time.time < until) { if (app.SeatedTable >= 0) app.Io.Emit("startWithBots"); yield return new WaitForSeconds(1.5f); }
                 yield return new WaitForSeconds(3); Shot(dir, "5_masa");
+                report.Append("masadaki rakiplerin yönü: " + app.Okey.FacingReport() + "\n");
                 // otomatik oyun: sıram geldikçe çek ve at; sunucu hatalarını say; el sonunu bekle
                 int errors = 0, draws = 0, discards = 0; bool finished = false; string lastError = "";
                 app.Io.On("gameError", d => { errors++; lastError = (string)d["message"]; });
@@ -116,7 +117,7 @@ namespace Alemdar
             {
                 yield return new WaitForSeconds(.5f);
                 var p = app.Me.transform.position; var mv = p - last; mv.y = 0; last = p;
-                var body = Vector3.ProjectOnPlane(app.Me.Body.transform.TransformDirection(Vector3.back), Vector3.up);
+                var body = Vector3.ProjectOnPlane(app.Me.Body.BoneFront, Vector3.up);
                 if (mv.magnitude > .05f) report.Append($"yürüyüş: konum ({p.x:0.0},{p.z:0.0}) hareket-gövde açısı {Vector3.Angle(mv, body):0}°\n");
             }
         }

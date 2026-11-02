@@ -28,6 +28,7 @@ namespace Alemdar
             Application.targetFrameRate = -1; QualitySettings.vSyncCount = 1; // ekran tazelemesiyle eşit, takılmasız
             Ui.Init();
             if (DevShots.Arg("-cek") != null) gameObject.AddComponent<DevShots>();
+            if (DevShots.Arg("-uzun") != null) gameObject.AddComponent<DevLong>();
         }
 
         IEnumerator Start()
@@ -41,7 +42,7 @@ namespace Alemdar
             Io = gameObject.AddComponent<Net.SocketIO>(); Io.Connect(url);
             Io.On("gameError", d => Ui.Toast((string)d["message"]));
             Io.On("actionSuccess", d => Ui.Toast((string)d["message"]));
-            Io.On("penalty", d => Ui.Toast((string)d["message"] ?? "Ceza!"));
+            Io.On("penalty", d => Ui.Toast(((string)d["name"] == MyName ? "Ceza aldın" : (string)d["name"]) + $": {(string)d["reason"] ?? "ceza"} (+{(int?)d["amount"] ?? 101})"));
             Io.On("autoDiscard", d => Ui.Toast((string)d["message"]));
             Io.On("joinedGame", OnJoined);
             Io.On("leftGame", _ => LeaveTable(false));

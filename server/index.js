@@ -709,13 +709,15 @@ function snapshot(room, index) {
         discards: game.discardPiles, myOpenType: game.playerStates[index].openType,
         mustOpenThisTurn: !!game.playerStates[index].mustOpenThisTurn,
         canRetract: canRetract(room, index) && turnChanged(room, index),
+        // İŞLE düğmesi yalnızca masaya işlenebilecek taş varken açılsın (son taş elde kalır)
+        canProcess: !!room.assisted && !!game.playerStates[index].hasOpened && game.playerTiles[index].length > 1 && game.playerTiles[index].some(t => !game.isOkey(t) && findAttachTarget(game, t)),
         leftLocked: leftLocked(game, index),
         retractPenalty: canRetract(room, index) && !room.turnSnap.states[index].hasOpened && !!game.playerStates[index].hasOpened, drawnFromDiscardTileId: game.playerStates[index].drawnFromDiscardTile?.id || null };
 }
 // İzleyici görüntüsü: masaya 0 numaralı koltuğun yerinden bakar, hiçbir oyuncunun ıstakası gönderilmez.
 function spectatorSnapshot(room) {
     return { ...snapshot(room, 0), tiles: [], spectator: true, myChips: null, myOpenType: null, mustOpenThisTurn: false, canRetract: false,
-        leftLocked: false, retractPenalty: false, drawnFromDiscardTileId: null };
+        leftLocked: false, retractPenalty: false, canProcess: false, drawnFromDiscardTileId: null };
 }
 function broadcastGame(room) {
     RoomStore.markDirty(room); // her durum değişikliği yayınlanır; masa 2 sn içinde diske yazılır

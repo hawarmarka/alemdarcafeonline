@@ -38,6 +38,7 @@ namespace Alemdar.EditorTools
             lib.femaleSkins = new[] { Load<Texture2D>("Characters/Textures/T_Superhero_Female_Light_BaseColor.png"), Load<Texture2D>("Characters/Textures/T_Superhero_Female_Dark_BaseColor.png") };
             lib.maleNormal = Load<Texture2D>("Characters/Textures/T_Superhero_Male_Normal.png"); lib.femaleNormal = Load<Texture2D>("Characters/Textures/T_Superhero_Female_Normal.png");
             lib.controller = controller;
+            (lib.men, lib.waiterBody) = Rocketbox();
             (lib.opaque, lib.cutout, lib.transparent, lib.emissive, lib.character, lib.text) = mats;
             Texture2D PH(string id, string map) => AssetDatabase.LoadAssetAtPath<Texture2D>($"Assets/ThirdParty/PolyHaven/{id}/{map}.jpg");
             lib.plasterD = PH("painted_plaster_wall", "diff"); lib.plasterN = PH("painted_plaster_wall", "nor");
@@ -58,6 +59,51 @@ namespace Alemdar.EditorTools
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
             Settings();
             AssetDatabase.SaveAssets();
+        }
+
+        // Microsoft Rocketbox (MIT) erkek karakterleri: her model için gövde/baş/saydam malzemeleri dokulardan kurulur ve hazır kalıp kaydedilir.
+        // Business_Male_06 (beyaz gömlek) kahveci; diğerleri müşteri.
+        static (GameObject[], GameObject) Rocketbox()
+        {
+            const string RB = "Assets/ThirdParty/Rocketbox", Out = Gen + "/Rocketbox";
+            Directory.CreateDirectory(Out);
+            var std = Shader.Find("Standard");
+            GameObject waiter = null; var men = new System.Collections.Generic.List<GameObject>();
+            foreach (var dir in Directory.GetDirectories(RB).OrderBy(d => d))
+            {
+                string name = Path.GetFileName(dir), fbx = $"{RB}/{name}/{name}.fbx";
+                var model = AssetDatabase.LoadAssetAtPath<GameObject>(fbx); if (!model) continue;
+                Texture2D Tex(string file) => AssetDatabase.LoadAssetAtPath<Texture2D>($"{RB}/{name}/{file}");
+                var inst = (GameObject)PrefabUtility.InstantiatePrefab(model);
+                foreach (var smr in inst.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+                {
+                    var mats = smr.sharedMaterials.Select(src =>
+                    {
+                        string part = src ? src.name : "body"; // ör. m003_body, m003_head, m003_opacity
+                        bool alpha = part.Contains("opacity");
+                        var m = new Material(std) { name = part, enableInstancing = true };
+                        var col = Tex(part + "_color.jpg") ?? Tex(part + "_color.png"); var nor = Tex(part + "_normal.png");
+                        m.SetTexture("_MainTex", col);
+                        if (nor) { m.SetTexture("_BumpMap", nor); m.EnableKeyword("_NORMALMAP"); }
+                        m.SetFloat("_Glossiness", part.Contains("head") ? .32f : .18f); m.SetFloat("_Metallic", 0);
+                        if (alpha)
+                        {
+                            m.SetFloat("_Mode", 1); m.EnableKeyword("_ALPHATEST_ON"); m.SetFloat("_Cutoff", .45f);
+                            m.SetOverrideTag("RenderType", "TransparentCutout"); m.renderQueue = 2450;
+                        }
+                        string matPath = $"{Out}/{name}_{part}.mat";
+                        AssetDatabase.DeleteAsset(matPath); AssetDatabase.CreateAsset(m, matPath);
+                        if (!col) Debug.LogWarning($"Rocketbox dokusu yok: {name}/{part}");
+                        return m;
+                    }).ToArray();
+                    smr.sharedMaterials = mats;
+                }
+                var prefab = PrefabUtility.SaveAsPrefabAsset(inst, $"{Out}/{name}.prefab");
+                Object.DestroyImmediate(inst);
+                if (name == "Business_Male_06") waiter = prefab; else men.Add(prefab);
+            }
+            if (men.Count == 0) Debug.LogWarning("Rocketbox karakteri bulunamadı; Quaternius kullanılacak.");
+            return (men.ToArray(), waiter);
         }
 
         static T Load<T>(string rel) where T : Object

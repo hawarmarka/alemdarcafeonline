@@ -119,7 +119,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &587895666
+--- !u!1 &514518852
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -127,55 +127,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 587895668}
-  - component: {fileID: 587895667}
-  m_Layer: 0
-  m_Name: Uygulama
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &587895667
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 587895666}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5c81d788412335444bac65ec6c39b3d1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Alemdar.App
-  SeatedTable: -1
-  SeatedDir: -1
---- !u!4 &587895668
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 587895666}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1258716406
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1258716409}
-  - component: {fileID: 1258716408}
-  - component: {fileID: 1258716407}
+  - component: {fileID: 514518855}
+  - component: {fileID: 514518854}
+  - component: {fileID: 514518853}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -183,21 +137,21 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!81 &1258716407
+--- !u!81 &514518853
 AudioListener:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1258716406}
+  m_GameObject: {fileID: 514518852}
   m_Enabled: 1
---- !u!20 &1258716408
+--- !u!20 &514518854
 Camera:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1258716406}
+  m_GameObject: {fileID: 514518852}
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
@@ -242,13 +196,13 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!4 &1258716409
+--- !u!4 &514518855
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1258716406}
+  m_GameObject: {fileID: 514518852}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1.8, z: 9.5}
@@ -257,7 +211,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &2084037167
+--- !u!1 &1213797752
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -265,8 +219,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2084037169}
-  - component: {fileID: 2084037168}
+  - component: {fileID: 1213797754}
+  - component: {fileID: 1213797753}
   m_Layer: 0
   m_Name: Kutuphane
   m_TagString: Untagged
@@ -274,13 +228,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &2084037168
+--- !u!114 &1213797753
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2084037167}
+  m_GameObject: {fileID: 1213797752}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d53ea8e2c0dc2f3439e7aec15bebb58e, type: 3}
@@ -306,6 +260,22 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 02a215dccbc2fda4f88fe9374eda9680, type: 3}
   maleNormal: {fileID: 2800000, guid: 6308d3fceb9359c48968e734d2621514, type: 3}
   femaleNormal: {fileID: 2800000, guid: df845ab0b8ca8ad4e984a66bb76487aa, type: 3}
+  men:
+  - {fileID: 1495878293284745048, guid: 2b6b76ab59df95b4baa84468adac36a3, type: 3}
+  - {fileID: 2954398912699323795, guid: e2be3c226e537ed4ab89bf7d2d5c4175, type: 3}
+  - {fileID: 2069473266449751231, guid: 3c2940a9a29fe7949904ae90ba888f67, type: 3}
+  - {fileID: 1647940108044962749, guid: ffb4da73be4c09c41bc0790a582ce0e8, type: 3}
+  - {fileID: 379244394852519928, guid: 794018d65dac95c49a63cc5dc9191fd3, type: 3}
+  - {fileID: 6215775440667776868, guid: dfc1214980e027a4c82815a3c1fb9864, type: 3}
+  - {fileID: 5007671839384616451, guid: 0a0f0d2a2dbb04e4295065de0d984855, type: 3}
+  - {fileID: 6016146972240483897, guid: 7a6de74172ea8ac459b9262067edb021, type: 3}
+  - {fileID: 7616637939671892307, guid: 30059964053c0be48a6bb8356ce0b9ee, type: 3}
+  - {fileID: 3243778910533105086, guid: 71a2ea285e7d35b4f98f8849fae86c8f, type: 3}
+  - {fileID: 1364956742776600890, guid: aa5f17e668fee8149b2ad889882f2117, type: 3}
+  - {fileID: 7055661763793320193, guid: 46ffecac71f718648acb430e7aa9c6e7, type: 3}
+  - {fileID: 1719757869571565918, guid: a26545ec0ba618d468a1140a03c66458, type: 3}
+  - {fileID: 7444127249710791846, guid: 6e0cde9e3d05ee54682dae9f6761dc54, type: 3}
+  waiterBody: {fileID: 7145929436321741832, guid: efd16ee721247d444a27287d3d19b154, type: 3}
   controller: {fileID: 9100000, guid: 12f98ab934719254b8bfb631353c5a9c, type: 2}
   opaque: {fileID: 2100000, guid: 2744941d7e54d9847b30c88d9ed455aa, type: 2}
   opaqueNormal: {fileID: 2100000, guid: 643ba5f9e3e9b044088d9d314da0754d, type: 2}
@@ -327,13 +297,59 @@ MonoBehaviour:
   leatherN: {fileID: 2800000, guid: 386667aa36de4df47b08f2cb02ccc090, type: 3}
   fabricN: {fileID: 2800000, guid: ba6e25e873e8189409fc1486d1c6a7bf, type: 3}
   photos: []
---- !u!4 &2084037169
+--- !u!4 &1213797754
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2084037167}
+  m_GameObject: {fileID: 1213797752}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2005202340
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2005202342}
+  - component: {fileID: 2005202341}
+  m_Layer: 0
+  m_Name: Uygulama
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2005202341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2005202340}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c81d788412335444bac65ec6c39b3d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Alemdar.App
+  SeatedTable: -1
+  SeatedDir: -1
+--- !u!4 &2005202342
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2005202340}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -346,6 +362,6 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 1258716409}
-  - {fileID: 2084037169}
-  - {fileID: 587895668}
+  - {fileID: 514518855}
+  - {fileID: 1213797754}
+  - {fileID: 2005202342}

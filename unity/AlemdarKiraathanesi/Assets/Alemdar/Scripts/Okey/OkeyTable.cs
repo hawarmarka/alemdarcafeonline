@@ -14,6 +14,13 @@ namespace Alemdar.Okey
         public JObject State { get; private set; }
         public int TableIndex { get; private set; }
         public bool Spectating;
+        public int RackCount => slots.Count(s => s != null); // denetim: ıstakada duran taş sayısı
+        // denetim: oturan her rakibin gövdesi (omuz kemikleri) ile masa ortası arasındaki açı; 0° masaya bakıyor, 180° sırtı dönük
+        public string FacingReport() => string.Join(", ", people.Select(kv =>
+        {
+            var p = kv.Value; var to = Vector3.ProjectOnPlane(hall.Tables[TableIndex] - p.transform.position, Vector3.up);
+            return $"{p.Display} {Vector3.Angle(Vector3.ProjectOnPlane(p.BoneFront, Vector3.up), to):0}°";
+        }));
         public System.Action OnState;
 
         Net.SocketIO io; World.Hall hall; Chars.PlayerMotor me;
@@ -506,15 +513,23 @@ namespace Alemdar.Okey
 
         // Masadayken kamera kendi sandalyenden; kendi gövden gizlenir (görüşü kapatmasın).
         bool hiddenSelf;
+        const float SalonFov = 55f; // Build.Setup'taki kamera açısı
         void LateUpdate()
         {
             bool on = root && me && me.InputLocked;
-            if (hiddenSelf != on) { hiddenSelf = on; foreach (var r in me.Body.GetComponentsInChildren<Renderer>()) r.enabled = !on; }
+            if (hiddenSelf != on)
+            {
+                hiddenSelf = on; foreach (var r in me.Body.GetComponentsInChildren<Renderer>()) r.enabled = !on;
+                if (!on) me.Cam.fieldOfView = SalonFov;
+            }
             if (!on) return;
             if (!UI.Ui.PointerOverUi) zoom = Mathf.Clamp01(zoom - Input.mouseScrollDelta.y * .08f);
             var cam = me.Cam.transform;
+            // masada daha geniş açı: yandaki ve karşıdaki oyuncuların başı da kadraja girsin
+            me.Cam.fieldOfView = Mathf.Lerp(me.Cam.fieldOfView, Spectating ? SalonFov : Mathf.Lerp(58f, 64f, zoom), Time.deltaTime * 6);
             var toward = (TableCenter - SeatCamPos); toward.y = 0;
-            var look = TableCenter - toward.normalized * Mathf.Lerp(.24f, .02f, zoom); // yakında ıstakaya, uzakta masanın ortasına bakar
+            var look = TableCenter - toward.normalized * Mathf.Lerp(.24f, .02f, zoom) // yakında ıstakaya, uzakta masanın ortasına bakar
+                       + Vector3.up * Mathf.Lerp(.02f, .2f, zoom); // uzakta bakış biraz yukarı: rakiplerin yüzü görünsün
             cam.position = Vector3.Lerp(cam.position, SeatCamPos, Time.deltaTime * 6);
             cam.rotation = Quaternion.Slerp(cam.rotation, Quaternion.LookRotation(look - cam.position), Time.deltaTime * 6);
         }

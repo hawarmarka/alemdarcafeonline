@@ -7,6 +7,15 @@ namespace Alemdar.EditorTools
     {
         void OnPreprocessModel()
         {
+            if (assetPath.Contains("ThirdParty/Rocketbox"))
+            {
+                // Microsoft Rocketbox (MIT): insan iskeleti, malzemeler Build.Setup'ta dokulardan kurulur
+                var rb = (ModelImporter)assetImporter;
+                rb.animationType = ModelImporterAnimationType.Human; rb.importAnimation = false;
+                rb.materialImportMode = ModelImporterMaterialImportMode.ImportStandard;
+                rb.importCameras = false; rb.importLights = false; rb.importBlendShapes = false;
+                return;
+            }
             if (!assetPath.Contains("ThirdParty/Quaternius")) return;
             var mi = (ModelImporter)assetImporter;
             bool anim = assetPath.Contains("/Animations/");
@@ -29,6 +38,13 @@ namespace Alemdar.EditorTools
                 if (assetPath.EndsWith("/rough.jpg")) ti.sRGBTexture = false;
                 ti.isReadable = assetPath.Contains("marble_01/diff");
                 ti.maxTextureSize = 1024; ti.anisoLevel = 8; ti.mipmapEnabled = true;
+                return;
+            }
+            if (assetPath.Contains("ThirdParty/Rocketbox"))
+            {
+                if (assetPath.EndsWith("_normal.png")) ti.textureType = TextureImporterType.NormalMap;
+                if (assetPath.Contains("_opacity")) ti.alphaIsTransparency = true;
+                ti.maxTextureSize = 1024; ti.anisoLevel = 4; ti.mipmapEnabled = true;
                 return;
             }
             if (!assetPath.Contains("ThirdParty/Quaternius")) return;

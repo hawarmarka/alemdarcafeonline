@@ -10,6 +10,7 @@ namespace Alemdar
         [Header("Karakter")] public GameObject maleBody, femaleBody;
         public GameObject[] maleHair, femaleHair; public GameObject beard;
         public Texture2D[] maleSkins, femaleSkins; public Texture2D maleNormal, femaleNormal;
+        [Tooltip("Microsoft Rocketbox (MIT) erkek karakterleri, malzemeleri takılı hazır kalıplar")] public GameObject[] men; public GameObject waiterBody;
         public RuntimeAnimatorController controller;
         [Header("Malzeme şablonları")] public Material opaque, opaqueNormal, cutout, transparent, emissive, character, text, smoke;
         [Header("Poly Haven CC0 dokular (renk, normal)")]

@@ -241,7 +241,7 @@ namespace Alemdar.UI
             bSeriesSort.interactable = bPairsSort.interactable = assisted;
             bOpen.interactable = mine && drawn && (string)open != "pairs";
             bPairs.interactable = mine && drawn;
-            bProcess.interactable = mine && drawn && opened && assisted;
+            bProcess.interactable = mine && drawn && opened && assisted && (bool?)s["canProcess"] != false;
             bRetract.interactable = mine && (bool?)s["canRetract"] == true;
             bReturn.interactable = mine && fromLeft != null && fromLeft.Type != JTokenType.Null;
             bFinish.interactable = mine && opened && tiles != null && tiles.Count == 1;

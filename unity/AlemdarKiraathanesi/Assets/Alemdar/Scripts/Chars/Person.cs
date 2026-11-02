@@ -23,10 +23,25 @@ namespace Alemdar.Chars
         public static readonly Quaternion ModelFix = Quaternion.Euler(0, 180, 0);
         public static uint Hash(string s) { uint h = 2166136261; foreach (char c in s) { h ^= c; h *= 16777619; } return h; }
 
+        // Gövdenin, üst nesnenin önüne (+z) bakması için gereken yerel dönüş (animasyonlar gövdeyi -z'ye çevirir → 180°).
+        public Quaternion Fix { get; private set; } = ModelFix;
+        public Vector3 Front => transform.rotation * Quaternion.Inverse(Fix) * Vector3.forward;
+        // Gerçekte görünen yön: omuz kemiklerinden (animasyon sonrası). Denetim bununla yapılır, nesne yönüyle değil.
+        public Vector3 BoneFront
+        {
+            get
+            {
+                var l = Anim.GetBoneTransform(HumanBodyBones.LeftUpperArm); var r = Anim.GetBoneTransform(HumanBodyBones.RightUpperArm);
+                return l && r ? Vector3.Cross(r.position - l.position, Vector3.up).normalized : Front;
+            }
+        }
+
         public static Person Create(string name, Transform parent, bool nameTag = true, string role = null)
         {
-            var lib = Lib.I; uint h = Hash(name);
-            bool female = role == null && (h >> 5) % 4 == 0;
+            var lib = Lib.I;
+            if (lib.men != null && lib.men.Length > 0) return CreateRocketbox(name, parent, nameTag, role);
+            uint h = Hash(name);
+            const bool female = false; // kıraathane: yalnızca erkek karakterler (kullanıcı isteği)
             var go = Instantiate(female ? lib.femaleBody : lib.maleBody, parent);
             go.name = "Kisi_" + name;
             // Quaternius modellerinin önü kendi ekseninde -z; Unity'de ileri +z → gövde 180° çevrilir.
@@ -52,6 +67,24 @@ namespace Alemdar.Chars
             if (hairs.Length > 0) Attach(go, body, hairs[(h >> 20) % (uint)hairs.Length], h);
             if (!female && lib.beard && ((h >> 24) % 3 == 0 || role == "waiter")) Attach(go, body, lib.beard, h);
             if (role == "waiter") av.Apron(body);
+            if (nameTag) av.MakeTag(name);
+            return av;
+        }
+
+        // Rocketbox: gerçek kıyafet ve yüz dokulu hazır erkek karakterler; kişi adından seçilir (her istemcide aynı).
+        static Person CreateRocketbox(string name, Transform parent, bool nameTag, string role)
+        {
+            var lib = Lib.I; uint h = Hash(name);
+            var prefab = role == "waiter" && lib.waiterBody ? lib.waiterBody : lib.men[h % (uint)lib.men.Length];
+            var go = Instantiate(prefab, parent); go.name = "Kisi_" + name;
+            // Modelin kendisi +z'ye baksa da humanoid klipler (Quaternius, keepOriginalOrientation) gövdeyi -z'ye çevirir; düzeltme aynı 180°.
+            go.transform.localRotation = ModelFix;
+            var av = go.AddComponent<Person>(); av.Display = name; av.Fix = ModelFix;
+            av.Anim = go.GetComponent<Animator>(); av.Anim.runtimeAnimatorController = lib.controller; av.Anim.applyRootMotion = false;
+            av.Anim.cullingMode = AnimatorCullingMode.CullUpdateTransforms;
+            av.Head = av.Anim.GetBoneTransform(HumanBodyBones.Head);
+            foreach (var r in go.GetComponentsInChildren<SkinnedMeshRenderer>()) r.updateWhenOffscreen = false;
+            if (role == "waiter") av.Apron(null);
             if (nameTag) av.MakeTag(name);
             return av;
         }
@@ -104,8 +137,8 @@ namespace Alemdar.Chars
         {
             var hips = Anim.GetBoneTransform(HumanBodyBones.Hips);
             var a = GameObject.CreatePrimitive(PrimitiveType.Cube); Destroy(a.GetComponent<Collider>());
-            // ölçü ve yer dünya biriminde: kemik ölçeği (FBX) önlüğü büyütmesin. Modelin önü kendi ekseninde -z.
-            var front = -transform.TransformDirection(Vector3.forward);
+            // ölçü ve yer dünya biriminde: kemik ölçeği (FBX) önlüğü büyütmesin.
+            var front = Front;
             a.transform.SetPositionAndRotation(hips.position + front * .14f + Vector3.down * .1f, Quaternion.LookRotation(front));
             a.transform.SetParent(hips, true);
             var s = hips.lossyScale; a.transform.localScale = new Vector3(.34f / s.x, .5f / s.y, .008f / s.z);

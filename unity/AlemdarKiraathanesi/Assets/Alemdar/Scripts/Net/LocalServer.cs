@@ -27,7 +27,7 @@ namespace Alemdar.Net
         public IEnumerator Run(Action<string> ready)
         {
             var cfg = Path.Combine(GameDir, "config.json");
-            if (File.Exists(cfg) && DevShots.Arg("-senaryo") == null && DevShots.Arg("-yerel") == null) // denetim ve -yerel her zaman bu bilgisayarda
+            if (File.Exists(cfg) && DevShots.Arg("-senaryo") == null && DevShots.Arg("-yerel") == null && DevShots.Arg("-uzun") == null) // denetim ve -yerel her zaman bu bilgisayarda
             {
                 try { var u = (string)JObject.Parse(File.ReadAllText(cfg))["serverUrl"]; if (!string.IsNullOrWhiteSpace(u)) { Url = u.TrimEnd('/'); Online = true; } }
                 catch (Exception e) { Debug.LogWarning("config.json okunamadı: " + e.Message); }
