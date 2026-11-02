@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/asset/ui/alemdar-logo.svg" type="image/svg+xml">
+  <title>Alemdar Kıraathanesi</title>
+  <link rel="stylesheet" href="css/world.css?v=1">
+</head>
+<body>
+  <canvas id="world3d"></canvas>
+
+  <header class="w-top">
+    <div class="w-brand"><span class="w-glass" aria-hidden="true"></span><div><b>ALEMDAR</b><small>KIRAATHANESİ</small></div></div>
+    <div class="w-online"><i></i><span id="wOnline">0</span> kişi salonda</div>
+    <div class="w-actions">
+      <button id="wLobbyBtn" class="w-btn" type="button" title="Profil, arkadaşlar ve diğer oyunlar">LOBİ</button>
+      <button id="wFullBtn" class="w-btn ghost" type="button" title="Tam ekran (F11)">⛶</button>
+    </div>
+  </header>
+
+  <div id="wHint" class="w-hint">
+    <b>W A S D</b> ya da ok tuşlarıyla yürü · <b>Shift</b> koş · sürükleyerek etrafına bak · masaya tıkla ya da yanındayken <b>E</b>
+  </div>
+  <div id="wPrompt" class="w-prompt hidden"></div>
+
+  <aside id="wTable" class="w-panel hidden" aria-live="polite">
+    <button id="wTableClose" class="w-x" type="button" aria-label="Kapat">×</button>
+    <h2 id="wTableTitle">Masa</h2>
+    <p id="wTableInfo" class="w-sub"></p>
+    <div id="wSeats" class="w-seats"></div>
+    <div id="wCreate" class="w-create hidden">
+      <label>Tür
+        <select id="wMode"><option value="klasik">Klasik (yardımlı)</option><option value="yardimsiz">Yardımsız</option><option value="katlamali">Katlamalı</option></select>
+      </label>
+      <label>Bahis
+        <select id="wBet"><option value="1000">1.000</option><option value="5000">5.000</option><option value="25000">25.000</option><option value="100000">100.000 VIP</option></select>
+      </label>
+      <label>El
+        <select id="wRounds"><option value="1">1</option><option value="2">2</option><option value="4" selected>4</option></select>
+      </label>
+      <button id="wCreateBtn" class="w-btn primary" type="button">MASAYI KUR VE OTUR</button>
+    </div>
+  </aside>
+
+  <div id="wName" class="w-modal hidden">
+    <form id="wNameForm" class="w-card">
+      <h2>Kıraathaneye hoş geldin</h2>
+      <p class="w-sub">Masada görünecek adını yaz.</p>
+      <input id="wNameInput" maxlength="20" autocomplete="nickname" placeholder="Adın" required>
+      <button class="w-btn primary" type="submit">İÇERİ GİR</button>
+    </form>
+  </div>
+  <div id="wToast" class="w-toast hidden"></div>
+  <div id="wLoading" class="w-loading">Kıraathane hazırlanıyor…</div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="module" src="js/world/world.js?v=1"></script>
+</body>
+</html>

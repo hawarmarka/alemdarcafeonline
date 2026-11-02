@@ -1,0 +1,33 @@
+/* 3D masa (js/okey3d): sahne en arkada, 2D masa katmanı üstünde şeffaf durur. Yalnızca body.scene3d iken. */
+#okey3d { position: fixed; inset: 0; width: 100vw !important; height: 100vh !important; z-index: 0; display: block; pointer-events: none; }
+body.scene3d, html:has(body.scene3d) { background: #1b1c1e !important; }
+body.scene3d #gameContainer { background: transparent !important; position: relative; z-index: 1; }
+body.scene3d #gameContainer::before, body.scene3d #gameContainer::after { display: none !important; }
+body.scene3d .game-board, body.scene3d .table-center { background: transparent !important; box-shadow: none !important; }
+/* masadaki seri/per ve çift alanları: keçenin üstünde ince, yarı saydam ızgara */
+body.scene3d #openedTilesTable, body.scene3d #openedPairsZone {
+  background: rgba(10, 40, 30, .18) !important; border: 1px dashed rgba(255, 255, 255, .22) !important; box-shadow: none !important; border-radius: 10px;
+}
+body.scene3d .sboard { background: transparent !important; box-shadow: none !important; }
+body.scene3d .sboard::before { opacity: .08 !important; }
+/* rakiplerin atık kutuları 3D masada çiziliyor (sağ ve üst rakip) */
+body.scene3d #topDiscardTiles, body.scene3d #otherRightDiscardTiles { visibility: hidden; }
+body.scene3d #topDiscardTiles + *, body.scene3d .opponent-area.top .discard-label { visibility: hidden; }
+
+/* sesli / görüntülü sohbet düğmeleri */
+.av-btn { width: 38px; height: 38px; border-radius: 10px; border: 1px solid rgba(255,255,255,.22); background: rgba(10,14,20,.55);
+  color: #e9e4d8; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; margin: 0 4px; transition: background .15s, border-color .15s; }
+.av-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.av-btn .av-slash { stroke: #ff6b6b; }
+.av-btn.on { background: #1f8f5a; border-color: #43c486; color: #fff; }
+.av-btn.on .av-slash { display: none; }
+.av-btn:hover { border-color: rgba(255,255,255,.5); }
+.av-self { position: fixed; left: 14px; bottom: 14px; width: 168px; height: 126px; object-fit: cover; border-radius: 10px; border: 2px solid rgba(255,255,255,.7);
+  z-index: 60; background: #000; transform: scaleX(-1); box-shadow: 0 6px 18px rgba(0,0,0,.45); }
+.av-self.hidden { display: none; }
+#avAudio { position: fixed; left: -10px; top: -10px; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
+.player-info.av-in .player-name::after { content: ' 🎙'; }
+.player-info.talking { box-shadow: 0 0 0 2px #43c486, 0 0 14px rgba(67,196,134,.7) !important; }
+.av-panel-video { display: block; width: 120px; height: 90px; object-fit: cover; border-radius: 8px; margin-top: 4px; background: #000; }
+#okey3dFps { position: fixed; right: 8px; bottom: 8px; z-index: 99; font: 600 12px/1 Consolas, monospace; color: #9f9; background: rgba(0,0,0,.6); padding: 4px 6px; border-radius: 4px; pointer-events: none; }
+.qm-icon.qm-3d { font: 800 11px/1 system-ui, sans-serif; display: inline-flex; align-items: center; justify-content: center; }

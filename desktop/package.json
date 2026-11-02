@@ -1,0 +1,42 @@
+{
+  "name": "alemdar-kiraathanesi",
+  "productName": "Alemdar Kıraathanesi",
+  "version": "1.0.0",
+  "description": "Alemdar Kıraathanesi: okey, batak, pişti ve isim şehir",
+  "main": "main.js",
+  "private": true,
+  "author": "Alemdar Kıraathanesi",
+  "scripts": {
+    "start": "electron .",
+    "online": "electron . --server=http://localhost:3000",
+    "dist": "electron-builder --win nsis --x64"
+  },
+  "devDependencies": {
+    "electron": "45.2.1",
+    "electron-builder": "26.18.0"
+  },
+  "build": {
+    "appId": "com.alemdar.kiraathanesi",
+    "productName": "Alemdar Kıraathanesi",
+    "copyright": "Alemdar Kıraathanesi",
+    "directories": { "output": "dist", "buildResources": "build" },
+    "files": ["main.js", "preload.js", "config.json", "offline.html", "loading.html", "build/icon.png"],
+    "extraResources": [
+      { "from": "../server", "to": "server" },
+      { "from": "../public", "to": "public" },
+      { "from": "../node_modules", "to": "node_modules", "filter": ["**/*", "!.bin", "!**/*.md", "!**/*.d.ts", "!**/*.map", "!three/examples/**", "!three/src/**"] }
+    ],
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Alemdar Kıraathanesi",
+      "artifactName": "AlemdarKiraathanesi-Kurulum-${version}.exe"
+    }
+  }
+}

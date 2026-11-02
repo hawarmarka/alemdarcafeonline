@@ -1,4 +1,11 @@
 'use strict';
+// Kıraathane salonundan gelinen masadan çıkınca salona dönülür (LOBİ düğmesiyle gelindiyse lobide kalınır).
+if (sessionStorage.getItem('fromWorld') === '1' && !location.search.includes('lobi=1')) { sessionStorage.removeItem('fromWorld'); location.replace('/kiraathane'); }
+addEventListener('DOMContentLoaded', () => {
+  const b = document.createElement('a'); b.href = '/kiraathane'; b.className = 'kiraathane-enter'; b.textContent = 'KIRAATHANEYE GİR';
+  b.style.cssText = 'position:fixed;left:50%;bottom:86px;transform:translateX(-50%);z-index:50;background:#e3b04b;color:#1c1407;font:800 14px/1 system-ui,sans-serif;letter-spacing:1px;padding:12px 22px;border-radius:10px;text-decoration:none;box-shadow:0 6px 18px rgba(0,0,0,.35)';
+  document.body.append(b);
+});
 const socketAvailable = typeof io === 'function';
 const socket = socketAvailable ? io() : {connected:false,on(){return this;},emit(){}};
 const $ = id => document.getElementById(id);

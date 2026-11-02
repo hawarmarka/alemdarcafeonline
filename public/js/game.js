@@ -1386,6 +1386,9 @@ function render() {
     renderGroups();
     updateTurnClock();
     runPendingFlights();
+    // 3D masa (js/okey3d) ve görüntülü sohbet aynı durumu okur.
+    window.okeyLastState = spectating ? { ...state, spectator: true } : state;
+    document.dispatchEvent(new CustomEvent('okey:render', { detail: window.okeyLastState }));
 }
 // The pile is handled by pointer events for both mouse and touch.
 $('leftDiscardTiles').addEventListener('click', e => { if (e.target === e.currentTarget) draw(true); });
@@ -1678,6 +1681,7 @@ $('menuToggleSound')?.addEventListener('click', () => {
     toast(soundEnabled ? 'Masa sesi açıldı.' : 'Masa sesi kapatıldı.');
 });
 $('menuLeaveTable')?.addEventListener('click', () => { setMenuOpen(false); leave(); });
+$('menuToggle3d')?.addEventListener('click', () => { setMenuOpen(false); if (window.Okey3D) Okey3D.toggle(); else toast('3D masa bu cihazda açılamadı.', true); });
 $('menuShowRules')?.addEventListener('click', () => { $('rulesModal')?.classList.remove('hidden'); setMenuOpen(false); });
 $('closeRulesModal')?.addEventListener('click', () => $('rulesModal')?.classList.add('hidden'));
 $('rulesModal')?.addEventListener('click', e => { if (e.target === $('rulesModal')) $('rulesModal').classList.add('hidden'); });

@@ -11,3 +11,22 @@ Thumbs.db
 # Ruflo yerel verisi ve eski kopya klasör (asıl klasör burası)
 .claude-flow/
 alemdarcafeonline/
+# Masaüstü uygulaması derleme çıktısı
+desktop/dist/
+# Unity: üretilen klasörler, derleme, indirilen arşivler, gömülü Node (nodejs.org'dan indirilir, bkz. CLAUDE.md 5h)
+unity/AlemdarKiraathanesi/Library/
+unity/AlemdarKiraathanesi/Temp/
+unity/AlemdarKiraathanesi/Logs/
+unity/AlemdarKiraathanesi/obj/
+unity/AlemdarKiraathanesi/UserSettings/
+unity/AlemdarKiraathanesi/NodeRuntime/
+unity/AlemdarKiraathanesi/probe.txt
+unity/AlemdarKiraathanesi/*.csproj
+unity/AlemdarKiraathanesi/*.sln
+unity/AlemdarKiraathanesi/*.slnx
+unity/AlemdarKiraathanesi/.vscode/
+unity/Build/
+unity/shots/
+unity/assets-dl/
+unity/runtime/
+unity/*.log

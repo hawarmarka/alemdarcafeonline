@@ -74,7 +74,8 @@ class GameLogic {
     }
 
     // Oyunu başlat
-    startGame(players) {
+    // starter: ilk oynayacak koltuk (dağıtanın sağındaki); verilmezse rastgele.
+    startGame(players, starter) {
         this.createTiles();
         this.shuffleTiles();
 
@@ -94,7 +95,7 @@ class GameLogic {
 
         // Tamamen rastgele dağıtım: karıştırılmış desteden başlayana 22, diğerlerine 21 taş.
         // (Önceki sürüm güçlü elleri seçiyordu; bu yüzden herkes ilk turda açabiliyordu.)
-        this.currentPlayer = crypto.randomInt(4);
+        this.currentPlayer = Number.isInteger(starter) && starter >= 0 && starter < 4 ? starter : crypto.randomInt(4);
         this.playerTiles = Array.from({ length: 4 }, (_, i) => this.tiles.splice(-(i === this.currentPlayer ? 22 : 21)));
         this.playerStates=Array.from({length:4},()=>this.createPlayerState());
         this.tableGroups=[];
@@ -379,7 +380,8 @@ class GameLogic {
     // ============================================
 
     // Normal el açma kontrolü (101+ puan)
-    canOpenHand(playerIndex, groupsToOpen) {
+    // minimum: açmak için gereken puan (tek açışta bütün taşlarını açıp biten oyuncu için 0).
+    canOpenHand(playerIndex, groupsToOpen, minimum = 101) {
         const state = this.playerStates[playerIndex];
 
         if (state.hasOpened) {
@@ -399,7 +401,7 @@ class GameLogic {
             totalScore += this.calculateGroupValue(group);
         }
 
-        if (totalScore < 101) {
+        if (totalScore < minimum) {
             return {
                 valid: false,
                 message: `101 puana ulaşamadınız! (Mevcut: ${totalScore})`
@@ -647,7 +649,8 @@ class GameLogic {
 
     // Her tur sonunda ceza puanları: düşük toplam kazanır.
     // Son taşın joker olması / elden bitiş / çift bitiş için çarpan uygulanır.
-    calculatePoints(winnerIndex, result) {
+    // teamMode: eşlerden biri biterse diğer eşin cezası silinir (açmamış olsa bile).
+    calculatePoints(winnerIndex, result, teamMode = false) {
         const points = [0, 0, 0, 0];
         const last = winnerIndex == null ? null : this.discardPiles[winnerIndex].at(-1);
         const jokerFinish = Boolean(last && this.isOkey(last));
@@ -657,6 +660,7 @@ class GameLogic {
         if (winnerIndex !== null && winnerIndex !== undefined) points[winnerIndex] = -101 * winnerMultiplier;
         for (let i = 0; i < 4; i++) {
             if (i === winnerIndex) continue;
+            if (teamMode && winnerIndex != null && i === (winnerIndex + 2) % 4) continue; // bitenin eşi ceza almaz
             const st = this.playerStates[i];
             let base = st.hasOpened ? this.handPenalty(i) : 202;
             if (st.openType === 'pairs') base *= 2;

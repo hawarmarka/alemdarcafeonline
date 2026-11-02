@@ -1,0 +1,2 @@
+﻿CC0 1.0 (Public Domain) - https://polyhaven.com/license
+Textures: floor_tiles_06, painted_plaster_wall, dark_wood, fine_grained_wood, marble_01, fabric_leather_02, fabric_pattern_07

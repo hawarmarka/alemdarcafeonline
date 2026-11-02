@@ -424,6 +424,71 @@ Lobide kartların arasında **EKSTRA** ayracı ve İSİM ŞEHİR kartı var.
   - Kart gölgeleri ve parlamaları `filter` yerine `box-shadow`; pencerelerde `backdrop-filter` kaldırıldı.
   - Ölçüm (masaüstü): Pişti'de 15 sn oyun, en uzun kare 20 ms, uzun görev yok.
 
+## 5g. Alemdar Kıraathanesi: Windows uygulaması, 3D salon, görüntülü sohbet (2026-11-02)
+
+**Masaüstü uygulaması** (`desktop/`, Electron 45.2.1, kendi `package.json`'ı; Docker imajına girmez):
+- `desktop/main.js`: varsayılan olarak oyun sunucusunu **uygulamanın içinde** başlatır (`ELECTRON_RUN_AS_NODE`, `127.0.0.1`, boş port, `DATA_DIR` = `%APPDATA%/Alemdar Kıraathanesi/data`, `BOT_AI=mc`). Sayfalar, 3D ve botlu oyun tamamen yerel. `config.json`'da (uygulama klasörü ya da `userData`) `"serverUrl"` verilirse çevrimiçi sunucuya bağlanır; arkadaşlarla oynamak için bu gerekli.
+- Pencere `/kiraathane` açar. F11 tam ekran, F5 yenile, Ctrl+Shift+I geliştirici araçları. Kamera/mikrofon izni yalnızca sunucu adresine verilir.
+- GPU bayrakları: `ignore-gpu-blocklist`, `force_high_performance_gpu`, arka plan kısma kapalı.
+- Derleme: `cd desktop; npx electron-builder --win nsis --x64` → `desktop/dist/AlemdarKiraathanesi-Kurulum-1.0.0.exe`. `server/`, `public/`, kök `node_modules/` `extraResources` ile kopyalanır; **sunucu veya sayfa değişince kurulum yeniden derlenmeli**. İmzasız (Windows SmartScreen "yine de çalıştır" sorar).
+- Sunucu `HOST` ortam değişkenini okur (uygulamada `127.0.0.1`, güvenlik duvarı sormaz).
+
+**Yürünen salon** (`/kiraathane`, `public/kiraathane.html`, `public/js/world/world.js`, `public/css/world.css`, sunucu `server/world.js`):
+- WASD/oklar, Shift koşar, sürükleyerek bakış, tekerlek yakınlaştırma, tıklanan yere yürüme. Duvar, kapı boşluğu, masa, kolon, tezgah çarpışması (`hall.colliders`).
+- Masaya tıkla ya da yanındayken E: boş masada MASAYI KUR (tür, bahis, el), bekleyen masada boş koltukta OTUR, oyunu sürende MASAYI İZLE. Karakter sandalyeye yürür, oturur, sonra `joinGame` ile okey masasına geçer.
+- Gerçek masalar salondaki masalara masa koduna göre sırayla yerleşir (`/api/rooms` → `waiting` + yeni `playing` alanı). Oturanlar adlarıyla masada oturur görünür.
+- Varlık: `world:enter` / `world:move` (istemci ≤ 9/sn, yalnızca değişince) / `world:state` (sunucu 8/sn toplu) / `world:leave`. En fazla 80 kişi; konum salon sınırına kırpılır. `socket.id` istemciye gitmez.
+- Salondan gelinen masadan çıkınca lobi `sessionStorage.fromWorld` görüp salona döner. Lobide "KIRAATHANEYE GİR" düğmesi var.
+
+**3D sahne** (`public/js/okey3d/`, three.js 0.187.0, sunucu `/vendor/three` altında `node_modules/three/build`'i dağıtır):
+- `props.js` eşyalar (masa, InstancedMesh sandalyeler, çay bardağı, çaydanlık, dolap, tablolar, gerçek saat), `hall.js` salon (3×3 masa + 2 teras masası, ortadaki `HOME` = okey masası), `people.js` karakterler (ada göre sabit görünüm; `sit`/`stand`/`walk`), `tiles.js` 3D taşlar, `index.js` okey masası sahnesi.
+- Okey sayfasında sahne en arkada; ıstaka, sürükle-bırak, seri/per alanı, yerden alma DOM'da kalır. `game.js` `render()` sonunda `okey:render` olayı yollar. Menüde "3D Masa" aç/kapa (`localStorage.okey3d`).
+- 3D'de: rakip karakterler (sırası gelen öne eğilir, diğerleri ona bakar, konuşurken ağzı oynar), rakip ıstakaları (taş sayısı kadar), deste, gösterge, sağ ve üst rakibin atıkları.
+- FPS koruması: iki saniyede bir ölçülür, 50 altında çizim çözünürlüğü iner (en az 0,6×), rahatsa geri çıkar; çok düşükse gölgeler kapanır. `?fps=1` sayaç gösterir. Sekme gizliyken çizim durur.
+- Alt modül içe aktarmaları `?v=1` ile sürümlü; bir modül değişince **hepsinde** aynı numara artırılmalı (farklı numara aynı modülün iki kopyasını yükler).
+- Görseller kendi çizimimiz (canvas): başka bir oyunun logosu, düzeni veya modeli kopyalanmadı.
+
+**Okey sesli + görüntülü sohbet** (`public/js/okey-av.js`, sunucu `tableExtras` önek `okey`):
+- Üst çubukta mikrofon ve kamera düğmeleri. WebRTC eşler arası, "perfect negotiation" (kamera sonradan açılıp kapanabilir), ICE adayları 250 ms toplu gider (olay hız sınırına takılmasın). Görüntü 320×240, 15 FPS, en fazla 300 kbps.
+- 3D açıkken görüntü karakterin başının üstündeki çerçevede (`OkeyAV.videoFor`), kapalıyken oyuncu panelinde. Kendi görüntün sol altta.
+- Koltuk sırası değişince (`seatPlayers`, `removeSeats`, ayrılma) liste yeniden duyurulur. `room.voice` diske yazılmaz.
+
+**TURN** (`server/ice.js`, `rtc:ice` olayı): `TURN_URLS` ve `TURN_SECRET` ortam değişkenleri verilirse coturn "use-auth-secret" ile 6 saatlik geçici kimlik üretilir; yalnızca masada oturan/izleyen bağlantıya verilir. Yoksa yalnızca STUN. Batak/Pişti/İsim Şehir de sohbete katılırken aynı ayarı ister. **coturn'ün Coolify'da kurulması (UDP 3478 ve 49152-65535 açık) kullanıcıya kaldı.**
+
+## 5h. Unity istemcisi: Alemdar Kıraathanesi (2026-11-02, kullanıcı kararı: "Unity'ye geç")
+
+**Ana yön artık Unity.** Kullanıcı Steam'de yayın istiyor. Oyunun bütün görüntüsü (salon, karakterler, ıstaka, taşlar, düğmeler, tablolar, tabela) Unity'de. Node sunucusu aynı kalır: kurallar, hesaplar, botlar orada (server-authoritative). Web istemcisi (`public/`) ve Electron (`desktop/`) eski yol; yeni özellik Unity'ye yapılır.
+
+- Proje: `unity/AlemdarKiraathanesi` (Unity 6000.6.6f1, Built-in pipeline, Linear). Sahne ve ayarlar kodla kurulur. Derleme:
+  `Unity.exe -batchmode -quit -projectPath unity/AlemdarKiraathanesi -executeMethod Alemdar.EditorTools.Build.Windows -logFile unity/build.log`
+  Çıktı `unity/Build/AlemdarKiraathanesi.exe`; `Build/Server/` altına `node.exe` + `server/` + `node_modules/` + `public/js/meldSolver.js` kopyalanır.
+- `unity/AlemdarKiraathanesi/NodeRuntime/node.exe` depoda yok (95 MB). nodejs.org'dan `node-v26.13.0-win-x64.zip` indirilip SHA256SUMS ile doğrulanır, `node.exe` ve `LICENSE` buraya konur.
+- Denetim için: `AlemdarKiraathanesi.exe -ad Deneme -cek <klasör> -oyna -kapat` sırayla ekran görüntüsü alır, botlarla masa kurar, FPS yazar ve kapanır (`Core/DevShots.cs`).
+- Gömülü sunucu (`Net/LocalServer.cs`): `127.0.0.1` + boş port, `DATA_DIR` = `%USERPROFILE%/AppData/LocalLow/Alemdar/Alemdar Kıraathanesi/data`. Oyun klasöründe `config.json {"serverUrl": "..."}` varsa çevrimiçi sunucuya bağlanır.
+- `Net/SocketIO.cs`: kendi küçük Socket.IO v4 istemcimiz (WebSocket). Olaylar ana iş parçacığında.
+- Kod: `Scripts/World` (Hall, Props, Tex, Waiter, WorldNet), `Scripts/Chars` (Person, PlayerMotor), `Scripts/Okey` (OkeyTable, Tiles), `Scripts/UI` (Ui, Hud), `Scripts/Core` (App, Lib), `Editor` (Build, ModelImport, Probe), `Shaders` (Character, Text3D).
+- Karakterler: Quaternius Universal Base Characters + Universal Animation Library (**CC0**, ticari yayına uygun; `Assets/ThirdParty/Quaternius/License_*.txt`). Kıyafet: en ağır kemiğe göre köşe rengi maskesi (gömlek/pantolon/ayakkabı), `Alemdar/Character` shader'ı boyar. Görünüm adın hash'inden türetilir.
+- Malzemeler `Lib`'deki şablonlardan türetilir (`Props.M/Transparent/Cutout/Emissive`). Yeni malzeme `new Material(Shader.Find(...))` ile açılmamalı: derlemede shader çeşidi atılır, pembe görünür.
+- Koltuk eşlemesi: sunucu koltuğu `s` ↔ sandalye yönü `(4 - s) % 4` (0 güney/+z, 1 doğu, 2 kuzey, 3 batı); sıradaki oyuncu sağda.
+- Salondaki masa yeri: Unity'den kurulan masa `hallTable` gönderir; `/api/rooms` `waiting` ve `playing` içinde döner. Diğer masalar boş masalara koda göre yerleşir.
+- Sunucu ekleri: `okey:arrange` (`server/okeyAssist.js`, SERİ DİZ/ÇİFT DİZ önerisi, ack ile), `world:order` → `world:serve` (kahveci). Açı: sunucudaki `ry` web kuralında (ileri = -z); Unity +180° çevirir. Test: `tests/v44Unity.test.js`.
+- Kullanıcı istekleri (2026-11-02): sesli/görüntülü sohbet **Unity'ye eklenmeyecek**; oyun mekaniklerine odaklanılacak. Oyunlar: 101 Okey, Düz Okey, Batak, Pişti, Domino (İsim Şehir kaldırılacak). Kahveci çayı tepsiyle getirir, tabak + kaşık + şekerle önüne koyar. Duvarda televizyon (kanal yayın hakkı nedeniyle oyuna gömülü kanal yok; kullanıcının girdiği yasal adresler).
+
+## 5i. 101 turnuva kuralları (kullanıcının gönderdiği metin, 2026-11-02: "harfiyen hepsini yap")
+
+Uygulananlar (`tests/v45Rules101.test.js`):
+- Eşli oyunda biten oyuncunun eşi ceza almaz (açmamış olsa bile) — `calculatePoints(winner, result, teamMode)`.
+- Dağıtım: maçın ilk elinde dağıtan kurayla, sonra her elde bir sonraki oyuncu (`room.dealer`); dağıtanın sağındaki 22 taşla başlar, taş çekmeden oynar (`startGame(players, starter)`).
+- Yandan alıp geri bırakmak 101 ceza (GERİ BIRAK ve süre dolunca otomatik geri bırakma).
+- Yandan alınan taşın elde eşi varsa açılışta eşi kullanılabilir (`usesPickup`).
+- 101'i bulmasa da tek açışta bütün taşlarını açan (elde yalnızca bitiş taşı kalan) biter (`canOpenHand(..., minimum)`, `finishWithLastTile`).
+- Elden bitme yalnızca diğerlerinin hiçbiri açmamışken aynı turda açıp bitmek.
+- Unity: atılan taşlar tam üst üste, alttakiler görünmez.
+
+Zaten öyleydi: 12-13-1 yok; hatalı açış geri toplanır + 101; açmayan 202; elde okey 101; normal −101, okey/çift −202, çiftten okey −404; elden 2 kat, elden okey 4 kat; çift açanın cezası 2 kat; bir gruba bir seferde 2 taş; okey ve işlek atma 101; herkes çift açarsa el iptal; bitiş taşı şart.
+
+Açık kalanlar: "devam" bitişinin tanımı (kullanıcıya sorulacak), zar + 7'li balya dağıtım görüntüsü, çift açanın yerdeki taşları açtırabilmesi, 11 el / 3 maç turnuva ve eleme düzeni, işlek cezasının yalnızca rakip fark edip "işlek" derse yazılması (şu an otomatik).
+
 ## 6. Teknoloji önerileri neden şimdilik gerekli değil
 
 | Öneri | Karar | Neden |

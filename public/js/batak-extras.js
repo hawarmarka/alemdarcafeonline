@@ -85,7 +85,12 @@ window.BatakExtras = (function () {
   }
 
   // ---------- Sesli sohbet ----------
-  const ICE = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:global.stun.twilio.com:3478' }] };
+  // Sunucu TURN ayarlıysa 'rtc:ice' geçici kimlikli TURN adresini verir (mobil/kurumsal ağlar için).
+  let ICE = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:global.stun.twilio.com:3478' }] };
+  const loadIce = () => new Promise(done => {
+    const t = setTimeout(done, 1500);
+    ctx.socket.emit('rtc:ice', cfg => { clearTimeout(t); if (cfg?.iceServers?.length) ICE = cfg; done(); });
+  });
   const voice = { on: false, stream: null, list: [], peers: new Map(), audio: null, meters: new Map() };
   const myName = () => { const s = ctx.getState(); return s?.players[s.me]?.name; };
   const seatOfName = name => ctx.getState()?.players.findIndex(p => p.name === name) ?? -1;
@@ -95,6 +100,7 @@ window.BatakExtras = (function () {
     try {
       voice.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
     } catch (_) { return ctx.toast('Mikrofon izni verilmedi. Tarayıcının adres çubuğundan mikrofona izin ver.'); }
+    await loadIce();
     voice.on = true; paintVoiceBtn();
     meter(myName(), voice.stream);
     ctx.socket.emit(ev('voiceJoin'));

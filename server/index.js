@@ -68,6 +68,9 @@ app.use(express.static(path.join(__dirname, '..', 'public'), {
     maxAge: process.env.NODE_ENV === 'production' ? '7d' : 0,
     setHeaders(res, file) { if (file.endsWith('.html')) res.setHeader('Cache-Control', 'no-cache'); }
 }));
+// 3D masa için three.js (sürüm package.json'da sabit, dosya değişmez).
+app.use('/vendor/three', express.static(path.join(__dirname, '..', 'node_modules', 'three', 'build'), { maxAge: '30d', immutable: true }));
+app.get('/kiraathane', (_req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'kiraathane.html')));
 app.get('/game', (_req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'game.html')));
 app.get('/batak', (_req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'batak.html')));
 app.get('/pisti', (_req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'pisti.html')));
@@ -88,11 +91,14 @@ app.get('/api/rooms', (_req, res) => {
   res.json({ modes: Object.fromEntries(modes.map(m => [m, {
     players: list.filter(r => r.modeKey === m).reduce((n,r) => n + r.players.length, 0),
     waitingRooms: list.filter(r => r.modeKey === m && !r.started).length
-  }])), online: io.engine?.clientsCount || 0, waiting: list.filter(r => !r.started && !r.game && !r.matchEnded && r.players.length < 4).map(r => ({ code: r.code, modeKey: r.modeKey, players: r.players.length, custom: !!r.custom,
+  }])), online: io.engine?.clientsCount || 0, waiting: list.filter(r => !r.started && !r.game && !r.matchEnded && r.players.length < 4).map(r => ({ code: r.code, modeKey: r.modeKey, players: r.players.length, custom: !!r.custom, hallTable: r.hallTable ?? null,
     teamMode: r.teamMode, stackingMode: r.stackingMode, assisted: r.assisted, roundLimit: r.roundLimit, bet: r.bet,
     host: (r.players.find(p => p.token === r.hostToken) || r.players.find(p => !p.isBot))?.name || '',
     // Masa listesinde koltuklar: dolu koltukta oyuncu, boşta OTUR düğmesi
-    seats: [0, 1, 2, 3].map(s => { const p = r.players.find(q => seatOf(r, q) === s); return p ? { name: p.name, avatar: p.avatar, isBot: !!p.isBot, level: p.level || 1 } : null; }) })) });
+    seats: [0, 1, 2, 3].map(s => { const p = r.players.find(q => seatOf(r, q) === s); return p ? { name: p.name, avatar: p.avatar, isBot: !!p.isBot, level: p.level || 1 } : null; }) })),
+    // Kıraathane salonunda oyunu süren masalar (oturanlar görünür, İZLE ile seyredilir)
+    playing: list.filter(r => r.started && r.game).slice(0, 24).map(r => ({ code: r.code, modeKey: r.modeKey, bet: r.bet, teamMode: r.teamMode, hallTable: r.hallTable ?? null,
+      seats: r.players.map(p => ({ name: p.name, isBot: !!p.isBot })) })) });
 });
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, { maxHttpBufferSize: 1e5 });
@@ -101,6 +107,12 @@ const rooms = new Map();
 const SocialHub = require('./socialHub').install({ app, io, rooms, authReq, fromToken: t => Accounts.fromToken(t) });
 // Batak masaları (server/batak): kendi 'batak:' socket olayları, okey masalarından ayrı.
 const Batak = require('./batak').install({ io, Accounts, Avatars, Logger });
+const Ice = require('./ice');
+const OkeyAssist = require('./okeyAssist');
+const World = require('./world').install({ io, fromToken: t => Accounts.fromToken(t) }); // yürünen kıraathane salonu
+const okeyExtras = require('./tableExtras').create({ io, prefix: 'okey' });
+// Koltuk numaraları değişince (maç başı dizilim, ayrılan) sesli sohbet listesi yeniden duyurulur.
+const voiceRefresh = room => { if (room.voice?.size) setTimeout(() => rooms.has(room.code) && okeyExtras.voiceBroadcast(room), 0); };
 app.get('/api/batak', (_req, res) => res.json(Batak.stats()));
 // Pişti masaları (server/pisti): 'pisti:' olayları.
 const Pisti = require('./pisti').install({ io, Accounts, Avatars, Logger });
@@ -157,6 +169,7 @@ function freeSeat(room, wanted) {
 function seatPlayers(room) {
     room.players.sort((a, b) => seatOf(room, a) - seatOf(room, b));
     room.players.forEach((p, i) => { p.seat = i; });
+    voiceRefresh(room);
 }
 function addBotToRoom(room, seatIndex = room.players.length) {
     if (room.players.length >= 4 && seatIndex >= room.players.length) return null;
@@ -183,6 +196,8 @@ function removeSeats(room, shouldRemove) {
     const gone = room.players.filter(shouldRemove);
     room.players = room.players.filter(p => !shouldRemove(p));
     if (!room.teamMode) for (const p of gone) delete room.scores[p.name];
+    for (const p of gone) room.voice?.delete(p.token);
+    voiceRefresh(room);
 }
 function ensureBotFill(room, delay = BOT_FILL_DELAY_MS) {
     if (!room || room.started || room.matchEnded) return;
@@ -724,13 +739,32 @@ function newRound(room) {
     room.roundExtras = [0,0,0,0];
     room.nextRoundReady = new Set();
     if (room.completedRounds === 0) { seatPlayers(room); takeBets(room); } // koltuk sırası ve çip maç başında bir kez
-    room.game.startGame(room.players);
+    // Dağıtım: maçın ilk elinde dağıtan kurayla, sonraki her elde bir sonraki oyuncu dağıtır.
+    // Dağıtanın sağındaki (sıradaki) oyuncu 22 taşla başlar ve ilk eli taş çekmeden oynar.
+    room.dealer = room.completedRounds === 0 || !Number.isInteger(room.dealer) ? crypto.randomInt(4) : (room.dealer + 1) % 4;
+    room.game.startGame(room.players, (room.dealer + 1) % 4);
     room.minimumOpenScore = 101;
     room.minimumPairs = 5;
     room.started = true;
     beginTurn(room);
     broadcastGame(room);
     return true;
+}
+// Yandan alınan taş kullanıldı mı: taşın kendisi ya da elde bulunan aynı renk ve sayıdaki eşi (okey sayılmaz).
+function usesPickup(game, index, used, picked) {
+    if (used.has(picked.id)) return true;
+    if (picked.isFakeJoker || game.isOkey(picked)) return false;
+    return game.playerTiles[index].some(t => used.has(t.id) && !t.isFakeJoker && !game.isOkey(t) && t.color === picked.color && t.number === picked.number);
+}
+// Bitiş: son taş bitiş taşı olarak atılır. Elden bitme yalnızca diğer oyuncuların hiçbiri açmamışken, aynı turda açıp bitmektir.
+function finishWithLastTile(room, index) {
+    const game = room.game, state = game.playerStates[index];
+    const final = game.playerTiles[index][0];
+    if (final) game.discardPiles[index].push(final);
+    game.playerTiles[index] = [];
+    const othersOpened = game.playerStates.some((s, i) => i !== index && s.hasOpened);
+    const type = state.openType === 'pairs' ? 'pairs' : state.openedAtTurn === (game.turnSerial || 0) && !othersOpened ? 'instant' : 'normal';
+    finishRound(room, index, { type });
 }
 // Yandan alınan taş açılışta veya işlemede kullanıldı: zorunluluk kalkar.
 // (101 Okey Plus'ta taşı atan oyuncuya ceza yazılmaz.)
@@ -854,6 +888,7 @@ function timeoutMove(room) {
         state.drawnFromDiscardTile = null;
         state.mustOpenThisTurn = false;
         game.hasDrawn = false;
+        if (room.penaltyMode) addPenalty(room, index, 101, 'Yandan aldığı taşla el açamadı'); // aldı, açamadı, geri bıraktı
     }
     if (!game.hasDrawn) {
         const tile = game.drawFromPile(index);
@@ -872,7 +907,7 @@ function finishRound(room, winnerIndex, result) {
     if (!room.started || !room.game) return;
     stopTurn(room);
     const game = room.game;
-    const points = winnerIndex === null ? game.calculateExhaustedPoints() : game.calculatePoints(winnerIndex, result);
+    const points = winnerIndex === null ? game.calculateExhaustedPoints() : game.calculatePoints(winnerIndex, result, room.teamMode);
     if (room.teamMode) {
         room.scores.team1 = (room.scores.team1 || 0) + points[0] + points[2];
         room.scores.team2 = (room.scores.team2 || 0) + points[1] + points[3];
@@ -1073,6 +1108,7 @@ function playerLeave(socket, deliberate = false) {
     const player = room.players[index];
     socket.leave(room.code);
     socket.data.roomCode = null;
+    if (room.voice?.delete(player.token)) voiceRefresh(room);
     if (!deliberate) {
         player.socketId = null;
         lobby(room);
@@ -1134,6 +1170,11 @@ io.on('connection', socket => {
     Batak.onSocket(socket); // 'batak:*'
     Pisti.onSocket(socket); // 'pisti:*'
     IsimSehir.onSocket(socket); // 'isim:*'
+    Ice.onSocket(socket); // 'rtc:ice' (TURN geçici kimlik)
+    World.onSocket(socket); // 'world:*' (salonda yürüyenler, kahveci siparişi)
+    OkeyAssist.attach(socket, getRoomAndSeat); // 'okey:arrange' (Unity istemcisinde SERİ DİZ / ÇİFT DİZ)
+    // Okey masası sesli + görüntülü sohbet sinyali ('okey:voiceJoin', 'okey:signal'…).
+    okeyExtras.attach(socket, s => { const { room, index } = getRoomAndSeat(s); return { room, seat: room ? index : -1 }; });
     socket.on('joinGame', data => {
         if (socket.data.roomCode) return issue(socket, 'Zaten bir odadasınız.');
         const account = Accounts.fromToken(data?.authToken);
@@ -1161,6 +1202,8 @@ io.on('connection', socket => {
             // isPublic: true → 'Oda Seç' listesinde görünür; false → yalnızca kodla katılınır
             room = makeRoom(roomCode(), data?.isPublic === true, { ...data, custom: true });
             room.hostToken = token; // masayı açan kişi bot ekleyip çıkarabilir
+            // Unity kıraathanesi: masanın salondaki yeri (her istemcide aynı masada görünsün)
+            if (Number.isInteger(data?.hallTable) && data.hallTable >= 0 && data.hallTable < 32) room.hallTable = data.hallTable;
         } else if (mode === 'code') {
             const code = String(data?.roomCode || '').trim().toUpperCase();
             if (!/^[A-Z0-9]{6}$/.test(code)) return issue(socket, '6 karakterli oda kodu yazın.');
@@ -1344,6 +1387,8 @@ io.on('connection', socket => {
         game.hasDrawn = false;
         game.returnedLeft = { index, serial: game.turnSerial || 0, tileId: picked.id };
         game.pickLog?.[index]?.pop();
+        // Kural: el açamayacaksan yandan taş alınmaz; alıp geri bırakan 101 ceza alır (cezasız masada yazılmaz).
+        if (room.penaltyMode) addPenalty(room, index, 101, 'Yandan aldığı taşı geri bıraktı');
         broadcastGame(room);
     });
     socket.on('discardTile', data => {
@@ -1369,7 +1414,7 @@ io.on('connection', socket => {
             const picked = opened.drawnFromDiscardTile;
             opened.openedGroups.push(...extra.groups.map(g => canonicalizeGroup(game, g)));
             removeSelected(game, index, extra.used);
-            if (picked && extra.used.has(picked.id)) applySidePickup(room, index, picked);
+            if (picked && usesPickup(game, index, extra.used, picked)) applySidePickup(room, index, picked);
             broadcastGame(room);
             return socket.emit('actionSuccess', { message: `${extra.groups.length} yeni seri/per masaya indirildi.` });
         }
@@ -1379,14 +1424,16 @@ io.on('connection', socket => {
         const pickup = game.playerStates[index].drawnFromDiscardTile;
         if (room.stackingMode && pickup && game.playerStates[(index + 3)%4].openType === 'pairs')
             return issue(socket, 'Katlamalı masada çift açmış oyuncunun taşını alıp seri açamazsınız.');
-        const validation = game.canOpenHand(index, parsed.groups);
+        // Tek açışta bütün taşlarını açan (elde yalnızca bitiş taşı kalan) oyuncu 101'i bulmasa da açıp biter.
+        const allOut = parsed.used.size === game.playerTiles[index].length - 1;
+        const validation = game.canOpenHand(index, parsed.groups, allOut ? 0 : 101);
         if (!validation.valid) return issue(socket, addOpenAttemptPenalty(room, game, index, validation.message));
         const minimum = room.stackingMode ? room.minimumOpenScore : 101;
-        if (validation.score < minimum) {
+        if (validation.score < minimum && !allOut) {
             return issue(socket, addOpenAttemptPenalty(room, game, index, `Açmak için en az ${minimum} puan gerekir (${validation.score}).`));
         }
         const state = game.playerStates[index];
-        if (state.drawnFromDiscardTile && !parsed.used.has(state.drawnFromDiscardTile.id)) return issue(socket, 'Yerden aldığınız taşı açtığınız grupta kullanmalısınız.');
+        if (state.drawnFromDiscardTile && !usesPickup(game, index, parsed.used, state.drawnFromDiscardTile)) return issue(socket, 'Yerden aldığınız taşı (ya da elinizdeki eşini) açtığınız grupta kullanmalısınız.');
         state.hasOpened = true;
         state.openedAtTurn = game.turnSerial || 0;
         state.openType = 'normal';
@@ -1396,6 +1443,11 @@ io.on('connection', socket => {
         state.drawnFromDiscardTile = null;
         removeSelected(game, index, parsed.used);
         if (pickup) applySidePickup(room, index, pickup);
+        if (allOut && validation.score < minimum) {
+            // Sayı tutmadan tek açışta bitiş: kalan taş bitiş taşı olarak atılır, el biter.
+            socket.emit('actionSuccess', { message: `Tek açışta bütün taşlar açıldı (${validation.score}); el bitti.` });
+            return finishWithLastTile(room, index);
+        }
         if (room.stackingMode) room.minimumOpenScore = validation.score + 1;
         extendTurnAfterOpening(room, index);
         broadcastGame(room);
@@ -1540,10 +1592,7 @@ io.on('connection', socket => {
         if (!ctx) return;
         const { room, game, index } = ctx;
         if (!game.playerStates[index].hasOpened || game.playerTiles[index].length !== 1 || game.playerStates[index].mustOpenThisTurn) return issue(socket, 'Bitirmek için el açmış, yerden alınan taşı masaya işlemiş ve son atılacak 1 taşınız kalmış olmalı.');
-        const final = game.playerTiles[index][0];
-        game.discardPiles[index].push(final);
-        game.playerTiles[index] = [];
-        finishRound(room, index, { type: game.playerStates[index].openType === 'pairs' ? 'pairs' : game.playerStates[index].openedAtTurn === (game.turnSerial || 0) ? 'instant' : 'normal' });
+        finishWithLastTile(room, index);
     });
     socket.on('newRound', () => {
         const { room, index } = getRoomAndSeat(socket);
@@ -1605,7 +1654,11 @@ io.on('connection', socket => {
     socket.on('disconnect', () => playerLeave(socket, false));
 });
 const PORT = Number(process.env.PORT) || 3000;
-httpServer.listen(PORT, '0.0.0.0', () => console.log(`Alemdar Cafe 101 Okey sunucusu: ${PORT}`));
+// Oyunun içinde gömülü çalışırken (Unity/Electron) oyun kapanınca ya da çökünce sunucu da kapanır; arkada açık kalmaz.
+const parentPid = Number(process.env.PARENT_PID);
+if (parentPid > 0) setInterval(() => { try { process.kill(parentPid, 0); } catch (_) { process.exit(0); } }, 2000).unref();
+// HOST: masaüstü uygulamasında 127.0.0.1 (yalnızca bu bilgisayar, güvenlik duvarı sormaz)
+httpServer.listen(PORT, process.env.HOST || '0.0.0.0', () => console.log(`Alemdar Cafe 101 Okey sunucusu: ${PORT}`));
 // Coolify yeni sürüme geçerken SIGTERM gönderir: oyunculara haber ver, bağlantıları kapat, hızlı çık.
 function shutdown(signal) {
     console.log(`${signal} alındı, sunucu kapanıyor...`);
