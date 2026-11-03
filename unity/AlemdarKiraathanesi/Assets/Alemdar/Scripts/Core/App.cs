@@ -1,5 +1,6 @@
 ﻿// Uygulamanın akışı: sunucu (gömülü ya da çevrimiçi) → bağlantı → salon → karakter → salon ağı, kahveci, okey masası, arayüz.
 using System.Collections;
+using System.Linq;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
@@ -123,6 +124,7 @@ namespace Alemdar
         {
             Ui.Tick();
             if (Input.GetKeyDown(KeyCode.Escape) && Watching) { LeaveTable(); return; } // izleyici Esc ile kalkar
+            if (Input.GetKeyDown(KeyCode.Tab) && Watching) WatchNext(); // yancı sıradaki oyuncunun yanına geçer
             if (!Input.GetKeyDown(KeyCode.E) || !Me || SeatedTable >= 0 || Ui.TypingText) return;
             if (Me.Seated) { Me.StandUp(); return; }                       // bankta/çay bahçesinde oturuyorsa kalk
             int t = NearTable(); if (t >= 0) { Hud.ShowTable(t); return; }
@@ -176,38 +178,59 @@ namespace Alemdar
         }
         void OnJoined(JToken d)
         {
-            joining = false; okeyCode = (string)d["code"]; okeyToken = pendingToken;
+            joining = false; okeyCode = (string)d["code"]; okeyToken = pendingToken; MoveToServerSeat(d);
             Okey.Spectating = false; Okey.Attach(SeatedTable, SeatedDir);
             Me.InputLocked = true; Hud.ShowGame(true);
         }
         void OnBatakJoined(JToken d)
         {
-            joining = false; batakCode = (string)d["code"]; batakToken = pendingToken;
+            joining = false; batakCode = (string)d["code"]; batakToken = pendingToken; MoveToServerSeat(d);
             Batak.Spectating = false; Batak.Attach(SeatedTable, SeatedDir);
             Me.InputLocked = true; Hud.HideTable(); BatakUi.Show(true);
         }
-        public void WatchBatak(int table, string code)
+        // Sunucu başka koltuk verdiyse (masaya dönen oyuncu kendi eski yerine oturur) karakter o sandalyeye geçer.
+        void MoveToServerSeat(JToken d)
+        {
+            int? seat = (int?)d["seat"]; if (seat == null || SeatedTable < 0) return;
+            int dir = (4 - seat.Value) % 4; if (dir == SeatedDir) return;
+            SeatedDir = dir; var p = Hall.Seat(SeatedTable, dir);
+            Me.SitAt(p, Quaternion.LookRotation(Hall.Tables[SeatedTable] - p));
+        }
+        // Yancı: masanın yanındaki tabureye oturur, yanındaki oyuncunun ıstakasını/elini omzunun üstünden görür.
+        // İlk olarak karaktere en yakın sandalyedeki oyuncu seçilir; YANINA GEÇ (Tab) sıradaki oyuncuya geçer.
+        public int WatchDir { get; private set; } = -1;
+        public void WatchBatak(int table, string code) => Watch(table, code, true);
+        public void Watch(int table, string code, bool batak = false)
         {
             Hud.HideTable();
-            var stool = Hall.Stool(table, 0);
+            int dir = Enumerable.Range(0, 4).OrderBy(d => (Hall.Seat(table, d) - Me.transform.position).sqrMagnitude).First();
+            var stool = YanciStool(table, dir);
             Me.WalkTo(stool + (stool - Hall.Tables[table]).normalized * .4f, () =>
             {
-                Me.SitAt(stool, Quaternion.LookRotation(Hall.Tables[table] - stool)); SeatedTable = table; SeatedDir = -1;
-                Batak.Spectating = true; Batak.Attach(table, 0); Me.InputLocked = true; BatakUi.Show(true);
-                batakCode = code; batakToken = null; Io.Emit("batak:watch", new { code });
+                Me.SitAt(stool, Quaternion.LookRotation(Hall.Tables[table] - stool)); SeatedTable = table; SeatedDir = -1; WatchDir = dir; Me.InputLocked = true;
+                int seat = (4 - dir) % 4;
+                if (batak) { Batak.Spectating = true; Batak.Attach(table, dir); Batak.Stool = stool; BatakUi.Show(true); batakCode = code; batakToken = null; Io.Emit("batak:watch", new { code, seat }); }
+                else
+                {
+                    Okey.Spectating = true; Okey.Attach(table, dir); Okey.Stool = stool; okeyCode = code; okeyToken = null;
+                    Io.Emit("watchGame", new { roomCode = code, seat }); // sunucu roomCode bekler
+                    Hud.ShowGame(true);
+                }
             });
         }
-        public void Watch(int table, string code)
+        public void WatchNext()
         {
-            Hud.HideTable();
-            int k = 0; var stool = Hall.Stool(table, k);
-            Me.WalkTo(stool + (stool - Hall.Tables[table]).normalized * .4f, () =>
-            {
-                Me.SitAt(stool, Quaternion.LookRotation(Hall.Tables[table] - stool)); SeatedTable = table; SeatedDir = -1;
-                Okey.Spectating = true; Okey.Attach(table, 0); okeyCode = code; okeyToken = null; Me.InputLocked = true;
-                Io.Emit("watchGame", new { roomCode = code }); // sunucu roomCode bekler
-                Hud.ShowGame(true);
-            });
+            if (!Watching || WatchDir < 0) return;
+            int table = SeatedTable; WatchDir = (WatchDir + 1) % 4; int seat = (4 - WatchDir) % 4;
+            var stool = YanciStool(table, WatchDir); Me.SitAt(stool, Quaternion.LookRotation(Hall.Tables[table] - stool));
+            if (Batak.Active) { Batak.Attach(table, WatchDir); Batak.Stool = stool; Io.Emit("batak:follow", new { seat }); }
+            else { Okey.Attach(table, WatchDir); Okey.Stool = stool; Io.Emit("watchFollow", new { seat }); }
+        }
+        // Oyuncunun yanındaki yancı taburesi (masanın iki köşesinde birer tabure; her biri iki sandalyeye komşu)
+        Vector3 YanciStool(int table, int dir)
+        {
+            var seat = Hall.Seat(table, dir);
+            return (Hall.Stool(table, 0) - seat).sqrMagnitude <= (Hall.Stool(table, 1) - seat).sqrMagnitude ? Hall.Stool(table, 0) : Hall.Stool(table, 1);
         }
         public void LeaveTable(bool tellServer = true)
         {
@@ -217,7 +240,7 @@ namespace Alemdar
                 Batak.Detach(); BatakUi.Show(false);
             }
             if (tellServer && okeyCode != null) Io.Emit(okeyToken == null ? "unwatchGame" : "leaveGame"); // oyun başlamadan kalkınca da haber verilir
-            okeyCode = okeyToken = batakCode = batakToken = null; joining = false;
+            okeyCode = okeyToken = batakCode = batakToken = null; joining = false; WatchDir = -1;
             Okey.Detach(); Hud.ShowGame(false);
             Me.InputLocked = false; Me.StandUp(); SeatedTable = -1; SeatedDir = -1;
         }

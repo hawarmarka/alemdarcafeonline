@@ -1,7 +1,9 @@
 ﻿// Geliştirici denetimi: arkadaşla aynı masa. İki oyun aynı sunucuya bağlanır (-sunucu URL).
 // -arkadas kur:   masayı salondaki 5. masada kurar, ikinci oyuncu oturunca botlarla başlatır.
 // -arkadas katil: salonda o masayı bulur, kendi kullandığı arayüz yolundan (masa paneli → OTUR) oturur.
-// Rapor -rapor klasöründe arkadas_<ad>.txt; -kapat ile biter.
+// -arkadas kurbot: masayı kurar, hemen botlarla başlatır, sonra kalkar ve aynı masaya geri oturur (kendi koltuğu geri gelmeli).
+// -arkadas devral: oyun süren masada bir botun yerine oturur. -arkadas izle: yancı olur, yanındakinin ıstakasını görür, sonra yanına geçer.
+// Rapor -rapor klasöründe arkadas_<ad>.txt (ve ekran görüntüleri); -kapat ile biter.
 using System.Collections;
 using System.IO;
 using System.Linq;
@@ -14,11 +16,14 @@ namespace Alemdar
     public class DevFriends : MonoBehaviour
     {
         readonly System.Text.StringBuilder log = new();
+        string dir;
+        IEnumerator Shot(string name) { yield return new WaitForEndOfFrame(); ScreenCapture.CaptureScreenshot(Path.Combine(dir, $"{App.I.MyName}_{name}.png")); yield return null; }
+        static string Seats(App app) => app.Okey.State == null ? "-" : string.Join(", ", ((JArray)app.Okey.State["players"]).Select(p => $"{(string)p["name"]}{((bool?)p["isBot"] == true ? "(bot)" : "")}"));
         void L(string s) { log.Append($"[{Time.time:0.0}] {s}\n"); Debug.Log("ARKADAS " + s); }
 
         IEnumerator Start()
         {
-            string role = DevShots.Arg("-arkadas"), dir = DevShots.Arg("-rapor") ?? Application.persistentDataPath;
+            string role = DevShots.Arg("-arkadas"); dir = DevShots.Arg("-rapor") ?? Application.persistentDataPath;
             var app = App.I;
             while (!app.Hud || app.Me == null) yield return null;
             yield return new WaitForSeconds(3);
@@ -39,6 +44,46 @@ namespace Alemdar
                     if (app.Okey.State == null && app.SeatedTable >= 0 && LastLobbyCount(app) >= 2) { yield return new WaitForSeconds(2); L("ikinci oyuncu geldi, botlarla başlatılıyor"); app.Io.Emit("startWithBots"); yield return new WaitForSeconds(3); }
                 }
             }
+            else if (role == "kurbot")
+            {
+                app.Hud.ShowTable(table); yield return new WaitForSeconds(.5f);
+                app.Hud.DebugCreate(); yield return new WaitForSeconds(4);
+                app.Io.Emit("startWithBots");
+                float until = Time.time + 20; while (!started && Time.time < until) yield return null;
+                yield return new WaitForSeconds(14); yield return Shot("1_oyunda");
+                int myIdx = (int?)app.Okey.State?["playerIndex"] ?? -1; L($"oturdu: sıra {myIdx}, masa: {Seats(app)}");
+                app.LeaveTable(); yield return new WaitForSeconds(4);
+                L($"kalktı: masada {app.SeatedTable}");
+                app.Hud.ShowTable(table); yield return new WaitForSeconds(4);
+                L("panel: " + app.Hud.DebugTableText());
+                L(app.Hud.DebugPressSit() ? "YERİNE OTUR'a basıldı" : "panelde OTUR yok");
+                yield return new WaitForSeconds(9);
+                int back = (int?)app.Okey.State?["playerIndex"] ?? -1;
+                L($"geri oturdu: sıra {back} (önce {myIdx}), ıstaka {((app.Okey.State?["tiles"] as JArray)?.Count ?? 0)} taş, masa: {Seats(app)}");
+                yield return Shot("2_geri_oturdu");
+                yield return new WaitForSeconds(30);
+            }
+            else if (role == "devral")
+            {
+                float until = Time.time + 90; bool sat = false;
+                while (Time.time < until && !sat)
+                {
+                    yield return new WaitForSeconds(3);
+                    using var req = UnityWebRequest.Get(app.Io.Url + "/api/rooms"); yield return req.SendWebRequest();
+                    var playing = (JObject.Parse(req.downloadHandler.text)["playing"] as JArray) ?? new JArray();
+                    var mine = playing.FirstOrDefault(r => (int?)r["hallTable"] == table);
+                    if (mine == null || !((JArray)mine["seats"]).Any(x => (bool?)x["isBot"] == true)) continue;
+                    yield return new WaitForSeconds(36); // kurucu kalkıp geri otursun
+                    app.Me.WalkTo(app.Hall.Tables[table] + new Vector3(1.6f, 0, 0)); yield return new WaitForSeconds(5);
+                    app.Hud.ShowTable(table); yield return new WaitForSeconds(4);
+                    L("panel: " + app.Hud.DebugTableText());
+                    sat = app.Hud.DebugPressSit(); L(sat ? "YERİNE OTUR'a basıldı" : "panelde OTUR yok");
+                }
+                yield return new WaitForSeconds(10);
+                L($"devraldı: izleyici {app.Okey.Spectating}, sıra {(int?)app.Okey.State?["playerIndex"]}, ıstaka {((app.Okey.State?["tiles"] as JArray)?.Count ?? 0)} taş, masa: {Seats(app)}");
+                yield return Shot("devral");
+                yield return new WaitForSeconds(15);
+            }
             else if (role == "izle")
             {
                 // oyun süren masayı izle, izleyici görüntüsü gelsin, sonra izlemeyi bırakıp kalk
@@ -54,7 +99,11 @@ namespace Alemdar
                 if (code != null)
                 {
                     app.Watch(table, code); yield return new WaitForSeconds(9);
-                    L($"izleyici görüntüsü: {(app.Okey.State != null)}, izliyor {app.Watching}");
+                    L($"izleyici görüntüsü: {(app.Okey.State != null)}, izliyor {app.Watching}, yanındaki {app.WatchDir}, ıstaka {((app.Okey.State?["tiles"] as JArray)?.Count ?? 0)} taş");
+                    yield return Shot("yanci1");
+                    app.WatchNext(); yield return new WaitForSeconds(4);
+                    L($"yanına geçti: yanındaki {app.WatchDir}, sıra {(int?)app.Okey.State?["playerIndex"]}, ıstaka {((app.Okey.State?["tiles"] as JArray)?.Count ?? 0)} taş");
+                    yield return Shot("yanci2");
                     app.LeaveTable(); yield return new WaitForSeconds(2);
                     L($"kalktı: masa {app.SeatedTable}, izliyor {app.Watching}");
                 }

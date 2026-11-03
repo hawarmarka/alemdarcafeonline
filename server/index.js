@@ -713,8 +713,10 @@ function snapshot(room, index) {
         retractPenalty: canRetract(room, index) && !room.turnSnap.states[index].hasOpened && !!game.playerStates[index].hasOpened, drawnFromDiscardTileId: game.playerStates[index].drawnFromDiscardTile?.id || null };
 }
 // İzleyici görüntüsü: masaya 0 numaralı koltuğun yerinden bakar, hiçbir oyuncunun ıstakası gönderilmez.
-function spectatorSnapshot(room) {
-    return { ...snapshot(room, 0), tiles: [], spectator: true, myChips: null, myOpenType: null, mustOpenThisTurn: false, canRetract: false,
+// İzleyici görüntüsü. follow: yancının yanında oturduğu oyuncu (o oyuncunun ıstakası görünür); yoksa 0 numaralı koltuktan, ıstaka boş.
+function spectatorSnapshot(room, follow = -1) {
+    const view = snapshot(room, follow >= 0 ? follow : 0);
+    return { ...view, tiles: follow >= 0 ? view.tiles : [], spectator: true, myChips: null, myOpenType: null, mustOpenThisTurn: false, canRetract: false,
         leftLocked: false, retractPenalty: false, canProcess: false, drawnFromDiscardTileId: null };
 }
 function broadcastGame(room) {
@@ -723,7 +725,14 @@ function broadcastGame(room) {
     room.players.forEach((p, i) => {
         if (p.socketId) io.to(p.socketId).emit('gameState', snapshot(room, i));
     });
-    if (room.watchers?.size) { const view = spectatorSnapshot(room); for (const id of room.watchers) io.to(id).emit('gameState', view); }
+    if (room.watchers?.size) {
+        const views = new Map();
+        for (const id of room.watchers) {
+            const seat = io.sockets.sockets.get(id)?.data.followSeat ?? -1;
+            if (!views.has(seat)) views.set(seat, spectatorSnapshot(room, seat));
+            io.to(id).emit('gameState', views.get(seat));
+        }
+    }
 }
 function newRound(room) {
     if (room.matchEnded || room.players.length !== 4 || room.players.some(p => !p.socketId && !p.isBot)) return false;
@@ -971,8 +980,20 @@ function abandonRound(room, reason) {
     ensureBotFill(room);
 }
 // Masada hiç gerçek oyuncu kalmadıysa botların sonsuza dek oynamasını engelle ve odayı kapat.
-function deleteIfEmpty(room) {
-    if (room.players.some(p => !p.isBot)) return;
+// Son gerçek oyuncu kalkınca oyun süren masa hemen kapanmaz: 90 sn bekler, bu arada kalkan geri dönebilir ya da
+// biri botun yerine oturabilir. İzleyen varken de kapanmaz. Süre dolunca masada yine gerçek oyuncu yoksa silinir.
+const EMPTY_GRACE_MS = 90000;
+function deleteIfEmpty(room, force = false) {
+    if (room.players.some(p => !p.isBot)) { if (room.emptyTimer) clearTimeout(room.emptyTimer); room.emptyTimer = null; return; }
+    if (!force && room.game && !room.matchEnded) {
+        if (!room.emptyTimer) {
+            room.emptyTimer = setTimeout(guardedTimer(room, 'Boş masa', () => { room.emptyTimer = null; if (rooms.get(room.code) === room) deleteIfEmpty(room, !room.watchers?.size); }), EMPTY_GRACE_MS);
+            room.emptyTimer.unref?.();
+        }
+        return;
+    }
+    if (room.emptyTimer) clearTimeout(room.emptyTimer);
+    room.emptyTimer = null;
     stopTurn(room);
     for (const key of ['botFillTimer', 'nextRoundTimer']) { if (room[key]) clearTimeout(room[key]); room[key] = null; }
     room.started = false;
@@ -1095,7 +1116,7 @@ function scheduleSeatTakeover(room, oldToken) {
 // Gerçek oyuncular bağlantısı kopmuş sayılır; dönenler kaldığı yerden devam eder, dönmeyenlerin yerine 60 sn sonra bot geçer.
 function reviveRoom(room) {
     if (room.game) room.game = Object.assign(new GameLogic(), room.game);
-    for (const key of ['turnTimer', 'botTurnTimer', 'botFillTimer', 'nextRoundTimer']) room[key] = null;
+    for (const key of ['turnTimer', 'botTurnTimer', 'botFillTimer', 'nextRoundTimer', 'emptyTimer']) room[key] = null;
     room.bet ??= Economy.DEFAULT_BET; room.openedEver ??= [false, false, false, false]; // çip ekonomisinden önceki kayıtlar
     for (const p of room.players) { p.socketId = null; if (!p.isBot) scheduleSeatTakeover(room, p.token); }
     if (room.started && room.game) beginTurn(room);
@@ -1141,6 +1162,33 @@ function playerLeave(socket, deliberate = false) {
         deleteIfEmpty(room);
     }
     socket.emit('leftGame');
+}
+// Oyun sürerken gerçek oyuncu bir botun koltuğuna geçer; taşlar, açılmış eller ve skor o koltukta kalır.
+// Masadan kalkıp geri dönen oyuncu önce kendi bıraktığı koltuğa (kendi adındaki bota) oturur.
+function takeBotSeat(socket, room, data, { token, name, account }) {
+    const lower = name.toLowerCase(), wanted = data?.seat == null ? null : Number(data.seat);
+    let index = room.players.findIndex(p => p.isBot && p.name.toLowerCase() === lower);
+    if (index < 0 && Number.isInteger(wanted)) index = room.players.findIndex(p => p.isBot && seatOf(room, p) === wanted);
+    if (index < 0) index = room.players.findIndex(p => p.isBot);
+    if (index < 0) return issue(socket, 'Masa dolu, oyun sürüyor. İZLE ile seyredebilirsin.');
+    if (room.players.some((p, i) => i !== index && p.name.toLowerCase() === lower)) return issue(socket, 'Bu odada aynı isim zaten var.');
+    if (lacksChips(account, room.bet)) return issue(socket, notEnoughChips(account, room.bet));
+    const bot = room.players[index];
+    const avatar = Avatars.ref(account?.avatar || (Avatars.BUILTIN.includes(data?.avatar) ? data.avatar : 'default.svg'));
+    room.players[index] = { token, socketId: socket.id, name, avatar, seat: seatOf(room, bot), frame: account?.frame || 'gold', accountId: account?.id || null,
+        level: Accounts.cleanUser(account)?.level || 1, chips: account ? Accounts.chipsOf(account.id) : null }; // bahis maç başında alındı; yeni gelen pay almaz (betPaid yok)
+    if (!room.teamMode && bot.name !== name) { room.scores[name] = room.scores[bot.name] || 0; delete room.scores[bot.name]; }
+    if (room.watchers?.delete(socket.id)) { socket.data.watchCode = null; io.to(room.code).emit('watchersUpdate', { count: room.watchers.size }); }
+    socket.join(room.code);
+    socket.data.roomCode = room.code;
+    socket.data.token = token;
+    socket.emit('joinedGame', { code: room.code, seat: seatOf(room, room.players[index]) });
+    socket.emit('chatHistory', room.chatHistory);
+    io.to(room.code).emit('tableChatMessage', { from: 'Sistem', message: `${name} masaya oturdu, botun yerine oynuyor.`, at: Date.now() });
+    deleteIfEmpty(room); // masada yine gerçek oyuncu var: boş masa sayacı durur
+    lobby(room);
+    broadcastGame(room);
+    if (room.started && room.game.currentPlayer === index) beginTurn(room); // botun bekleyen hamlesi iptal, süre yeniden başlar
 }
 // Masaya oturmak için hesabın çipi masa bahsine yetmeli. Misafirler çipsiz oynar (bahis alınmaz, pay da almaz).
 const lacksChips = (account, bet) => !!account && Accounts.chipsOf(account.id) < bet;
@@ -1210,6 +1258,7 @@ io.on('connection', socket => {
             room = rooms.get(code) || RoomStore.load(code);
             if (!room) return issue(socket, 'Bu kodda oda bulunamadı.');
         } else return issue(socket, 'Bir giriş şekli seçin.');
+        if (mode === 'code' && room.game && !room.matchEnded) return takeBotSeat(socket, room, data, { token, name, account });
         if (room.started || room.game || room.matchEnded || room.players.length >= 4) return issue(socket, 'Oda dolu veya oyun başlamış.');
         if (room.players.some(p => p.name.toLowerCase() === name.toLowerCase())) return issue(socket, 'Bu odada aynı isim zaten var.');
         if (lacksChips(account, room.bet)) return issue(socket, notEnoughChips(account, room.bet));
@@ -1226,7 +1275,7 @@ io.on('connection', socket => {
         socket.data.token = token;
         if (!room.teamMode) room.scores[name] = 0;
         else if (!('team1' in room.scores)) room.scores = { team1: 0, team2: 0 };
-        socket.emit('joinedGame', { code: room.code });
+        socket.emit('joinedGame', { code: room.code, seat });
         socket.emit('chatHistory', room.chatHistory);
         lobby(room);
         ensureBotFill(room);
@@ -1308,11 +1357,18 @@ io.on('connection', socket => {
         if (socket.data.roomCode) return issue(socket, 'Masadayken başka masa izlenemez.');
         room.watchers = room.watchers || new Set(); room.watchers.add(socket.id);
         socket.data.watchCode = room.code; socket.join(room.code);
+        socket.data.followSeat = Number.isInteger(data?.seat) && data.seat >= 0 && data.seat < 4 ? data.seat : -1;
         socket.emit('chatHistory', room.chatHistory);
         socket.emit('lobbyUpdate', { code: room.code, isPublic: room.isPublic, players: summary(room), teamMode: room.teamMode, started: room.started, spectator: true,
             assisted: room.assisted, stackingMode: room.stackingMode, roundLimit: room.roundLimit, botFillAt: 0, hostIndex: -1, autoBots: !!room.autoBots, bet: room.bet });
-        if (room.started && room.game) socket.emit('gameState', spectatorSnapshot(room));
+        if (room.started && room.game) socket.emit('gameState', spectatorSnapshot(room, socket.data.followSeat));
         io.to(room.code).emit('watchersUpdate', { count: room.watchers.size });
+    });
+    // Yancı başka bir oyuncunun yanına geçti: o oyuncunun ıstakasını görür.
+    socket.on('watchFollow', data => {
+        const room = rooms.get(socket.data.watchCode); if (!room?.watchers?.has(socket.id)) return;
+        socket.data.followSeat = Number.isInteger(data?.seat) && data.seat >= 0 && data.seat < 4 ? data.seat : -1;
+        if (room.started && room.game) socket.emit('gameState', spectatorSnapshot(room, socket.data.followSeat));
     });
     const unwatch = () => {
         const room = rooms.get(socket.data.watchCode); socket.data.watchCode = null;

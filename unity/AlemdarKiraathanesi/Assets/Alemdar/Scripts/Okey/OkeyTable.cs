@@ -89,6 +89,7 @@ namespace Alemdar.Okey
 
         // ---------- durum ----------
         int MyIndex => (int?)State?["playerIndex"] ?? 0;
+        bool Following => Spectating && ((State?["tiles"] as JArray)?.Count ?? 0) > 0; // yancı: yanındakinin taşları geliyor
         JToken Okey => State?["okey"];
         public bool MyTurn => State != null && !Spectating && !RoundOver && (int)State["currentPlayer"] == MyIndex;
         public bool RoundOver { get; private set; } // el bitti, yenisi dağıtılana kadar hamle yok
@@ -106,7 +107,7 @@ namespace Alemdar.Okey
             bool newRound = (string)s["roundId"] != roundId;
             var before = State;
             State = s;
-            if (newRound) { roundId = (string)s["roundId"]; RoundOver = false; for (int i = 0; i < Slots; i++) slots[i] = null; LoadRack(); }
+            if (newRound) { roundId = (string)s["roundId"]; RoundOver = false; for (int i = 0; i < Slots; i++) slots[i] = null; if (!Spectating) LoadRack(); }
             if (newRound) { sig.Clear(); dealt = false; }
             var prevPiles = pileCounts.ToArray();
             SyncRack(); dealt = true;
@@ -141,6 +142,11 @@ namespace Alemdar.Okey
         {
             var tiles = (State["tiles"] as JArray) ?? new JArray();
             var ids = new HashSet<string>(tiles.Select(t => (string)t["id"]));
+            if (Spectating) // yancının gördüğü ıstaka: oyuncunun dizilimi bilinmez, renk ve sayıya göre sıralanır
+            {
+                var order = tiles.OrderBy(t => (string)t["color"]).ThenBy(t => (int)t["number"]).Select(t => (string)t["id"]).ToList();
+                for (int i = 0; i < Slots; i++) slots[i] = i < order.Count ? order[i] : null;
+            }
             for (int i = 0; i < Slots; i++) if (slots[i] != null && !ids.Contains(slots[i])) slots[i] = null;
             foreach (var t in tiles)
             {
@@ -154,7 +160,7 @@ namespace Alemdar.Okey
                 if (!rack.TryGetValue(id, out var v)) { v = TileView.Make(rackRoot); rack[id] = v; }
                 v.Set(t, TileView.IsOkey(t, Okey));
             }
-            LayoutRack(); SaveRack();
+            LayoutRack(); if (!Spectating) SaveRack();
         }
         int FreeSlot() { for (int i = 0; i < Slots; i++) if (slots[i] == null) return i; return -1; }
         static Vector3 SlotPos(int i) => RackSpot(i / Row, i % Row);
@@ -407,7 +413,7 @@ namespace Alemdar.Okey
             foreach (Transform c in oppRoot) Destroy(c.gameObject);
             for (int i = 0; i < Players.Count; i++)
             {
-                if (!Spectating && i == MyIndex) continue;
+                if (i == MyIndex && (!Spectating || Following)) continue; // yancının takip ettiği oyuncunun ıstakası açık çizilir
                 int d = DirOf(i), n = Mathf.Min(26, (int?)Players[i]["tileCount"] ?? 0);
                 var r = new GameObject("raf").transform; r.SetParent(oppRoot, false);
                 r.SetLocalPositionAndRotation(World.Hall.SeatRot(d) * new Vector3(0, World.Props.TableTop + .004f, RackZ), World.Hall.SeatRot(d));
@@ -515,7 +521,9 @@ namespace Alemdar.Okey
         // Tekerlekle yakınlaştırma: 0 ıstakaya yakın, 1 bütün masa. Varsayılan taşlar rahat okunsun.
         float zoom = .35f;
         public float Zoom { get => zoom; set => zoom = Mathf.Clamp01(value); }
-        public Vector3 SeatCamPos => Spectating ? hall.Stool(TableIndex, 0) + (hall.Stool(TableIndex, 0) - hall.Tables[TableIndex]).normalized * .2f + Vector3.up * 1.6f
+        // Yancının taburesi; kamera onun başından, yanındaki oyuncunun ıstakasına omzunun üstünden bakar.
+        public Vector3 Stool;
+        public Vector3 SeatCamPos => Spectating ? Vector3.Lerp(Stool, hall.Seat(TableIndex, myDir, .3f), .62f) + Vector3.up * 1.48f
                                                 : hall.Seat(TableIndex, myDir, Mathf.Lerp(.05f, .42f, zoom)) + Vector3.up * Mathf.Lerp(1.36f, 1.72f, zoom);
         public Vector3 TableCenter => hall.Tables[TableIndex] + Vector3.up * World.Props.TableTop;
 
@@ -534,10 +542,11 @@ namespace Alemdar.Okey
             if (!UI.Ui.PointerOverUi) zoom = Mathf.Clamp01(zoom - Input.mouseScrollDelta.y * .08f);
             var cam = me.Cam.transform;
             // masada daha geniş açı: yandaki ve karşıdaki oyuncuların başı da kadraja girsin
-            me.Cam.fieldOfView = Mathf.Lerp(me.Cam.fieldOfView, Spectating ? SalonFov : Mathf.Lerp(58f, 64f, zoom), Time.deltaTime * 6);
+            me.Cam.fieldOfView = Mathf.Lerp(me.Cam.fieldOfView, Mathf.Lerp(58f, 64f, zoom), Time.deltaTime * 6);
             var toward = (TableCenter - SeatCamPos); toward.y = 0;
             var look = TableCenter - toward.normalized * Mathf.Lerp(.24f, .02f, zoom) // yakında ıstakaya, uzakta masanın ortasına bakar
                        + Vector3.up * Mathf.Lerp(.02f, .2f, zoom); // uzakta bakış biraz yukarı: rakiplerin yüzü görünsün
+            if (Spectating) look = Vector3.Lerp(rackRoot.position + Vector3.up * .05f, TableCenter, zoom); // yancı: yanındakinin ıstakası, uzaklaşınca masa
             cam.position = Vector3.Lerp(cam.position, SeatCamPos, Time.deltaTime * 6);
             cam.rotation = Quaternion.Slerp(cam.rotation, Quaternion.LookRotation(look - cam.position), Time.deltaTime * 6);
         }

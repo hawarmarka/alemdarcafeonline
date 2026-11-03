@@ -86,7 +86,7 @@ class FakeSocket {
   on(e, fn) { this.handlers[e] = fn; } emit(e, d) { this.out.push({ event: e, data: d }); }
   receive(e, d) { return this.handlers[e](d); } last(e) { return this.out.filter(x => x.event === e).at(-1)?.data; }
 }
-const io = { to: id => ({ emit: (e, d) => sockets.get(id)?.out.push({ event: e, data: d }) }) };
+const io = { sockets: { sockets }, to: id => ({ emit: (e, d) => sockets.get(id)?.out.push({ event: e, data: d }) }) };
 const Batak = require('../server/batak').install({ io, Accounts: { fromToken: () => null, award() {} }, Avatars: { ref: a => a, BUILTIN: ['default.svg'], randomAvatar: () => 'av01.svg' }, Logger: { error() {} } });
 const fire = (room, key) => { const t = room[key]; if (!t) return false; const cb = t._onTimeout; clearTimeout(t); room[key] = null; cb(); return true; };
 const s1 = new FakeSocket(); Batak.onSocket(s1);
@@ -149,5 +149,28 @@ assert.equal(s1.last('batak:state').turnMs > 0, true, 'süre halkası için turn
 const s2 = new FakeSocket(); Batak.onSocket(s2);
 s2.receive('batak:rejoin', { code: room.code, token: 'z'.repeat(30) });
 assert.equal(s2.last('batak:state').me, 0);
+// Koltuk devri: oyun sürerken kalkan oyuncunun yerine bot geçer; aynı oyuncu dönünce kendi koltuğuna oturur,
+// başka bir oyuncu da kalan botun koltuğuna geçip oyunu devam ettirir.
+h2.receive('batak:leave');
+assert.equal(room2.players[3].name, 'Konuk (bot)'); assert(room2.players[3].isBot);
+const h2b = new FakeSocket(); Batak.onSocket(h2b);
+h2b.receive('batak:join', { mode: 'code', code: room2.code, seat: 1, token: 'n'.repeat(30), playerName: 'Konuk' });
+assert.deepEqual(h2b.last('batak:joined'), { code: room2.code, seat: 3 }, 'dönen oyuncu kendi koltuğuna oturur');
+assert.equal(room2.players[3].name, 'Konuk'); assert(!room2.players[3].isBot);
+assert.equal(h2b.last('batak:state').me, 3); assert.equal(h2b.last('batak:state').hand.length, room2.hands[3].length);
+const h4 = new FakeSocket(); Batak.onSocket(h4);
+h4.receive('batak:join', { mode: 'code', code: room2.code, seat: 1, token: 'p'.repeat(30), playerName: 'Yeni' });
+assert.equal(h4.last('batak:joined').seat, 1); assert.equal(room2.players[1].name, 'Yeni'); assert(!room2.players[1].isBot);
+const h5 = new FakeSocket(); Batak.onSocket(h5);
+h5.receive('batak:join', { mode: 'code', code: room2.code, seat: 2, token: 'q'.repeat(30), playerName: 'Fazla' });
+assert.equal(h5.last('batak:error'), undefined, 'son bot koltuğu da alınabilir');
+const h6 = new FakeSocket(); Batak.onSocket(h6);
+h6.receive('batak:join', { mode: 'code', code: room2.code, token: 'r'.repeat(30), playerName: 'Geç' });
+assert.match(h6.last('batak:error').message, /dolu/);
+// Yancı (Batak): izleyen, takip ettiği oyuncunun elini görür.
+const wb = new FakeSocket(); Batak.onSocket(wb);
+wb.receive('batak:watch', { code: room2.code, seat: 0 });
+assert.deepEqual(wb.last('batak:state').hand.map(c => c.id), room2.hands[0].map(c => c.id)); assert.equal(wb.last('batak:state').spectator, true);
+wb.receive('batak:follow', { seat: -1 }); assert.equal(wb.last('batak:state').hand.length, 0);
 console.log(`v41Batak: kurallar, ihale, puan, ${rounds} botlu el (3 tür) ve socket üzerinden 5 ellik maç geçti${triedIllegal ? '; kural dışı kart reddedildi' : ''}`);
 process.exit(0);

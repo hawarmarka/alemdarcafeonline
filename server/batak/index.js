@@ -227,10 +227,32 @@ function install({ io, Accounts, Avatars, Logger }) {
       level: Accounts.cleanUser?.(account)?.level || 1, seat });
     if (!room.hostToken) room.hostToken = String(data.token);
     socket.data.batakCode = room.code; socket.data.batakToken = String(data.token);
-    socket.emit('batak:joined', { code: room.code });
+    socket.emit('batak:joined', { code: room.code, seat });
     if (room.players.length === 4) startMatch(room);
     else { if (room.autoBots) timer(room, 'fillTimer', FILL_MS, 'bot doldur', () => fillWithBots(room)); emit(room); }
     return null;
+  }
+  // Oyun sürerken gerçek oyuncu bir botun koltuğuna geçer; eli, aldığı eller ve puanı o koltukta kalır.
+  // Masadan kalkıp dönen oyuncu önce kendi yerine geçen bota ("Ad (bot)") oturur.
+  function takeBotSeat(room, socket, data, account) {
+    const fail = msg => { socket.emit('batak:error', { message: msg }); return false; };
+    const name = account ? account.username : String(data?.playerName || '').replace(/[^\p{L}\p{N} _.-]/gu, '').replace(/\s+/g, ' ').trim().slice(0, 20) || 'Oyuncu';
+    const lower = name.toLowerCase(), wanted = data?.seat == null ? null : Number(data.seat);
+    let i = room.players.findIndex(p => p.isBot && p.name.toLowerCase() === lower + ' (bot)');
+    if (i < 0 && Number.isInteger(wanted)) i = room.players.findIndex(p => p.isBot && p.seat === wanted);
+    if (i < 0) i = room.players.findIndex(p => p.isBot);
+    if (i < 0) return fail('Masa dolu, oyun sürüyor. İZLE ile seyredebilirsin.');
+    if (room.players.some((p, k) => k !== i && p.name.toLowerCase() === lower)) return fail('Bu masada aynı isim var.');
+    const p = room.players[i];
+    Object.assign(p, { token: String(data.token), socketId: socket.id, name, isBot: false, accountId: account?.id || null,
+      avatar: Avatars.ref(account?.avatar || (Avatars.BUILTIN.includes(data?.avatar) ? data.avatar : 'default.svg')), level: Accounts.cleanUser?.(account)?.level || 1 });
+    if (!room.hostToken || !room.players.some(q => q.token === room.hostToken && !q.isBot)) room.hostToken = p.token;
+    socket.data.batakCode = room.code; socket.data.batakToken = p.token;
+    socket.emit('batak:joined', { code: room.code, seat: p.seat });
+    room.notice = `${name} masaya oturdu, botun yerine oynuyor.`;
+    tidy(room);
+    if (['bidding', 'trump', 'playing'].includes(room.phase) && room.turn === i) schedule(room); else emit(room);
+    return true;
   }
   // Bekleyen masayı botlarla doldur; bu arada bağlantısı kopup dönmeyen oyuncular koltuğu kilitlemesin.
   function fillWithBots(room) {
@@ -258,6 +280,7 @@ function install({ io, Accounts, Avatars, Logger }) {
       else if (data.mode === 'code') {
         room = rooms.get(String(data.code || '').trim().toUpperCase());
         if (!room) return fail('Bu kodda Batak masası bulunamadı.');
+        if (room.phase !== 'waiting' && room.phase !== 'matchEnd') return takeBotSeat(room, socket, data, account) && undefined;
         if (room.phase !== 'waiting' || room.players.length >= 4) return fail('Masa dolu veya oyun başladı.');
       } else return fail('Bir giriş şekli seçin.');
       const err = seatPlayer(room, socket, data, account);

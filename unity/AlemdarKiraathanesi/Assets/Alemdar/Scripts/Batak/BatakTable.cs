@@ -14,6 +14,7 @@ namespace Alemdar.Batak
         public JObject State { get; private set; }
         public int TableIndex { get; private set; } = -1;
         public bool Spectating;
+        public Vector3 Stool; // yancının taburesi
         public bool Active => root;
         public System.Action OnState;
 
@@ -141,7 +142,7 @@ namespace Alemdar.Batak
             int revSeat = rev?.Type == JTokenType.Object ? (int)rev["seat"] : -1;
             for (int i = 0; i < Players.Count; i++)
             {
-                if (!Spectating && i == Me) continue;
+                if (i == Me) continue; // kendi elim (ya da yancıysam yanımdakinin eli) masanın kenarında açık durur
                 int d = DirOf(i), n = (int?)Players[i]["cards"] ?? 0;
                 if (i == revSeat)
                 {
@@ -263,10 +264,11 @@ namespace Alemdar.Batak
             if (!on) return;
             var cam = me.Cam.transform;
             var center = hall.Tables[TableIndex] + Vector3.up * Top;
-            var pos = Spectating ? hall.Stool(TableIndex, 0) + (hall.Stool(TableIndex, 0) - hall.Tables[TableIndex]).normalized * .2f + Vector3.up * 1.6f
+            var pos = Spectating ? Vector3.Lerp(Stool, hall.Seat(TableIndex, myDir, .3f), .62f) + Vector3.up * 1.48f // yancı: yanındakinin omzunun üstünden
                                  : hall.Seat(TableIndex, myDir, .22f) + Vector3.up * 1.5f;
             var toward = center - pos; toward.y = 0;
             var look = center - toward.normalized * .12f + Vector3.up * .05f;
+            if (Spectating && Me >= 0) look = Vector3.Lerp(look, hall.Seat(TableIndex, myDir, -.35f) + Vector3.up * (Top + .12f), .5f); // elini ve ortayı birlikte görür
             me.Cam.fieldOfView = Mathf.Lerp(me.Cam.fieldOfView, 60, Time.deltaTime * 6);
             cam.position = Vector3.Lerp(cam.position, pos, Time.deltaTime * 6);
             cam.rotation = Quaternion.Slerp(cam.rotation, Quaternion.LookRotation(look - cam.position), Time.deltaTime * 6);

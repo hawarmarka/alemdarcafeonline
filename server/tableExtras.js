@@ -73,7 +73,13 @@ function create({ io, prefix }) {
       unwatch();
       room.watchers = room.watchers || new Set(); room.watchers.add(socket.id);
       socket.data[key] = room.code;
+      socket.data[`${prefix}Follow`] = followSeat(data?.seat);
       emitAll(room);
+    });
+    // Yancı: izleyen, yanında oturduğu oyuncunun elini görür (kıraathanede masanın yanına oturan gibi). Hamle yapamaz.
+    socket.on(ev('follow'), data => {
+      const room = rooms.get(socket.data[key]); if (!room) return;
+      socket.data[`${prefix}Follow`] = followSeat(data?.seat); emitAll(room);
     });
     socket.on(ev('unwatch'), unwatch);
     socket.on('disconnect', unwatch);
@@ -81,9 +87,14 @@ function create({ io, prefix }) {
   // Oyuncuların görüntüsünden sonra çağrılır: izleyicilere ortak görüntü.
   function emitWatchers(room, snapshot) {
     if (!room.watchers?.size) return;
-    const view = snapshot(room, -1);
-    for (const id of room.watchers) io.to(id).emit(ev('state'), view);
+    const views = new Map();
+    for (const id of room.watchers) {
+      const seat = io.sockets?.sockets?.get(id)?.data?.[`${prefix}Follow`] ?? -1;
+      if (!views.has(seat)) views.set(seat, seat < 0 ? snapshot(room, -1) : { ...snapshot(room, seat), spectator: true, legal: [] });
+      io.to(id).emit(ev('state'), views.get(seat));
+    }
   }
+  const followSeat = v => (Number.isInteger(v) && v >= 0 && v < 4 ? v : -1);
   return { attach, voiceBroadcast, attachWatch, emitWatchers };
 }
 module.exports = { create, TREATS };

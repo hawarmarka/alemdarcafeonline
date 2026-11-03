@@ -16,7 +16,7 @@ namespace Alemdar.UI
         RectTransform tablePanel, seatsBox, orderMenu, gameBar, waitPanel, resultPanel, promptBox, menuPanel;
         Text tableTitle, tableInfo; int shownTable = -1; JObject roomsCache;
         Button bSeriesSort, bPairsSort, bOpen, bPairs, bProcess, bRetract, bReturn, bFinish, bAddBot, bBots;
-        Button createBtn, watchBtn; int modeIdx, roundIdx = 2;
+        Button createBtn, watchBtn, nextBtn; int modeIdx, roundIdx = 2;
         static readonly int[] Rounds = { 1, 2, 4 };
         int teamIdx; // 0 tekli, 1 eşli (koltuk 0-2 ve 1-3 takım)
         int gameIdx, batakTypeIdx, batakRoundIdx; // masada hangi oyun: 0 okey, 1 batak
@@ -41,7 +41,9 @@ namespace Alemdar.UI
             prompt = Ui.Label(promptBox, "", 22, Ui.Ink, TextAnchor.MiddleCenter); Ui.Stretch(prompt.rectTransform, 16, 4); promptBox.gameObject.SetActive(false);
             // izlerken: masadan kalkma düğmesi (oyun düğmeleri izleyicide gizli)
             watchBtn = Ui.Button(root, "İZLEMEYİ BIRAK  (Esc)", Ui.Kind.Danger, () => app.LeaveTable(), new Vector2(300, 54), "close");
-            Ui.Anchor((RectTransform)watchBtn.transform, new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(0, 40), new Vector2(300, 54)); watchBtn.gameObject.SetActive(false);
+            Ui.Anchor((RectTransform)watchBtn.transform, new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(-160, 40), new Vector2(300, 54)); watchBtn.gameObject.SetActive(false);
+            nextBtn = Ui.Button(root, "YANINA GEÇ  (Tab)", Ui.Kind.Plain, () => app.WatchNext(), new Vector2(300, 54), "eye");
+            Ui.Anchor((RectTransform)nextBtn.transform, new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(160, 40), new Vector2(300, 54)); nextBtn.gameObject.SetActive(false);
             BuildTablePanel(root); BuildOrder(root); BuildGameBar(root); BuildWait(root); BuildResult(root); BuildMenu(root);
             app.Okey.OnState = OnGameState;
             app.Io.On("lobbyUpdate", OnLobby);
@@ -96,7 +98,9 @@ namespace Alemdar.UI
             Ui.Size(create, -1, 312);
             createBtn = Ui.Button(col, "MASAYI KUR VE OTUR", Ui.Kind.Primary, CreateHere, new Vector2(430, 60), "plus");
             var foot = Ui.Row(col, 10); Ui.Size(foot, -1, 56);
-            Ui.Button(foot, "YANCI OL", Ui.Kind.Plain, () => { int t = shownTable; HideTable(); app.Me.WalkTo(app.Hall.Stool(t, 1) + (app.Hall.Stool(t, 1) - app.Hall.Tables[t]).normalized * .4f, () => app.Me.SitAt(app.Hall.Stool(t, 1), Quaternion.LookRotation(app.Hall.Tables[t] - app.Hall.Stool(t, 1)))); }, new Vector2(200, 52), "eye");
+            Ui.Button(foot, "YANCI OL", Ui.Kind.Plain, () => { int t = shownTable; var (k, r) = Slot(t);
+                if (k == "playing") { app.Watch(t, (string)r["code"], (string)r["_game"] == "batak"); return; } // oyun sürüyorsa yanındakinin elini görür
+                HideTable(); app.Me.WalkTo(app.Hall.Stool(t, 1) + (app.Hall.Stool(t, 1) - app.Hall.Tables[t]).normalized * .4f, () => app.Me.SitAt(app.Hall.Stool(t, 1), Quaternion.LookRotation(app.Hall.Tables[t] - app.Hall.Stool(t, 1)))); }, new Vector2(200, 52), "eye");
             Ui.Button(foot, "KAPAT", Ui.Kind.Ghost, HideTable, new Vector2(200, 52), "close");
             tablePanel.gameObject.SetActive(false);
         }
@@ -137,15 +141,16 @@ namespace Alemdar.UI
             for (int dir = 0; dir < 4; dir++)
             {
                 int seat = (4 - dir) % 4;
-                string name = null;
-                if (r != null) { var seats = (JArray)r["seats"]; var s = seat < seats.Count ? seats[seat] : null; name = s == null || s.Type == JTokenType.Null ? null : (string)s["name"]; }
+                string name = null; bool bot = false;
+                if (r != null) { var seats = (r["seats"] as JArray) ?? new JArray(); var s = seat < seats.Count ? seats[seat] as JObject : null; name = (string)s?["name"]; bot = (bool?)s?["isBot"] == true; }
                 var cell = Ui.Card(seatsBox, new Vector2(205, 92));
                 var l = Ui.Label(cell, $"<size=13><color=#B8AE9A>{labels[dir]}</color></size>\n{name ?? "Boş"}", 21, Ui.Ink, TextAnchor.UpperLeft); l.supportRichText = true; Ui.Stretch(l.rectTransform, 12, 8);
-                if (name == null && kind == "waiting")
+                // bekleyen masada boş koltuk; oyun süren masada botun koltuğu (kalkan oyuncunun yerine geçilir, oyun kaldığı yerden sürer)
+                if ((name == null && kind == "waiting") || (bot && kind == "playing" && !app.Watching))
                 {
                     int d = dir, tbl = shownTable; string code = (string)r["code"];
-                    var b = Ui.Button(cell, "OTUR", Ui.Kind.Primary, batak ? () => app.SitAndJoinBatak(tbl, d, new { mode = "code", code, seat = (4 - d) % 4 })
-                                                                               : () => app.SitAndJoin(tbl, d, new { mode = "code", roomCode = code, seat = (4 - d) % 4 }), new Vector2(100, 40));
+                    var b = Ui.Button(cell, name == null ? "OTUR" : "YERİNE OTUR", Ui.Kind.Primary, batak ? () => app.SitAndJoinBatak(tbl, d, new { mode = "code", code, seat = (4 - d) % 4 })
+                                                                               : () => app.SitAndJoin(tbl, d, new { mode = "code", roomCode = code, seat = (4 - d) % 4 }), new Vector2(name == null ? 100 : 150, 40));
                     var br = (RectTransform)b.transform; br.anchorMin = br.anchorMax = new Vector2(1, 0); br.pivot = new Vector2(1, 0); br.anchoredPosition = new Vector2(-10, 10);
                 }
             }
@@ -323,7 +328,7 @@ namespace Alemdar.UI
         void Update()
         {
             if (!app || !app.Me) return;
-            if (watchBtn.gameObject.activeSelf != app.Watching) watchBtn.gameObject.SetActive(app.Watching);
+            if (watchBtn.gameObject.activeSelf != app.Watching) { watchBtn.gameObject.SetActive(app.Watching); nextBtn.gameObject.SetActive(app.Watching); }
             if (app.Okey.State != null && gameBar.gameObject.activeSelf && Mathf.CeilToInt(app.Okey.TurnSecondsLeft) != lastSec) PaintTurn();
             if (app.OfflineMode) online.text = "<color=#E0574A>●</color>  Çevrimdışı: arkadaşlar bu salonu göremez";
             else if (app.Net) online.text = $"<color=#43C486>●</color>  Çevrimiçi · {Mathf.Max(1, app.Net.Online)} kişi salonda"; // liste beni de içerir

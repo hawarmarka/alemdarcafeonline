@@ -84,8 +84,10 @@ const stale = 'ZZZZZ9';
 fs.writeFileSync(path.join(process.env.DATA_DIR, 'rooms', `${stale}.json`), JSON.stringify({ savedAt: Date.now() - 31 * 60000, room: { code: stale, players: [] } }));
 assert.equal(RoomStore.load(stale), null, 'eski masa geri yüklenmemeli');
 
-// 4) Oyun sürerken son gerçek oyuncu ayrılınca masa kapanır ve kayıt dosyası silinir (botlar kendi kendine oynamaz).
+// 4) Oyun sürerken son gerçek oyuncu ayrılınca masa 90 sn bekler (geri dönebilsin), sonra kapanır ve kayıt dosyası silinir.
 back.receive('leaveGame');
+assert(rooms.has(code) && restored.emptyTimer, 'masa bir süre beklemeli');
+{ const t = restored.emptyTimer; const cb = t._onTimeout; clearTimeout(t); cb(); }
 assert(!rooms.has(code), 'yalnız bot kalan masa kapanmalı');
 assert(!fs.existsSync(path.join(process.env.DATA_DIR, 'rooms', `${code}.json`)), 'masa dosyası silinmeli');
 
