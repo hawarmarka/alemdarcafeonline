@@ -51,6 +51,12 @@ namespace Alemdar.EditorTools
                 ti.maxTextureSize = 1024; ti.anisoLevel = 8; ti.mipmapEnabled = true;
                 return;
             }
+            if (assetPath.Contains("Alemdar/Icons/"))
+            {
+                ti.alphaIsTransparency = true; ti.mipmapEnabled = true; ti.maxTextureSize = 128; ti.wrapMode = UnityEngine.TextureWrapMode.Clamp;
+                ti.textureCompression = TextureImporterCompression.Uncompressed; // ince çizgiler bozulmasın (128 px, küçük)
+                return;
+            }
             if (assetPath.Contains("Alemdar/Brand/"))
             {
                 // logo cama yapışan saydam çıkartma; kenarlar yumuşak kalsın

@@ -24,6 +24,7 @@ function install({ io, Accounts, Avatars, Logger }) {
     const type = L.TYPES[opts.type] ? opts.type : 'ihaleli';
     const room = { code: newCode(), type, roundLimit: L.ROUND_LIMITS.includes(Number(opts.rounds)) ? Number(opts.rounds) : 5,
       isPublic: !!opts.isPublic, autoBots: !!opts.autoBots, hostToken: null, players: [], phase: 'waiting', round: 0, dealer: 0,
+      hallTable: Number.isInteger(opts.hallTable) && opts.hallTable >= 0 && opts.hallTable < 32 ? opts.hallTable : null, // Unity kıraathanesinde masanın yeri
       totals: [0, 0, 0, 0], history: [], hands: null, bidding: null, contract: null, trump: null, trumpBroken: false,
       trick: [], lastTrick: null, tricks: [0, 0, 0, 0], played: new Set(), turn: -1, deadline: 0, revealed: null, notice: '' };
     rooms.set(room.code, room);
@@ -70,7 +71,7 @@ function install({ io, Accounts, Avatars, Logger }) {
   }
   function lobbyInfo(room) {
     const host = room.players.find(p => p.token === room.hostToken) || room.players.find(p => !p.isBot);
-    return { code: room.code, type: room.type, rounds: room.roundLimit, players: room.players.length, host: host?.name || '',
+    return { code: room.code, type: room.type, rounds: room.roundLimit, players: room.players.length, host: host?.name || '', hallTable: room.hallTable,
       seats: [0, 1, 2, 3].map(s => { const p = room.players.find(q => q.seat === s); return p ? { name: p.name, avatar: p.avatar, isBot: !!p.isBot, level: p.level || 1 } : null; }) };
   }
 
@@ -253,7 +254,7 @@ function install({ io, Accounts, Avatars, Logger }) {
         const type = L.TYPES[data.type] ? data.type : 'ihaleli';
         room = [...rooms.values()].find(r => r.isPublic && r.autoBots && r.phase === 'waiting' && r.type === type && r.players.length < 4)
           || makeRoom({ type, rounds: data.rounds, isPublic: true, autoBots: true });
-      } else if (data.mode === 'create') room = makeRoom({ type: data.type, rounds: data.rounds, isPublic: data.isPublic === true, autoBots: false }); // açık: masa listesinde görünür
+      } else if (data.mode === 'create') room = makeRoom({ type: data.type, rounds: data.rounds, isPublic: data.isPublic === true, autoBots: false, hallTable: data.hallTable }); // açık: masa listesinde görünür
       else if (data.mode === 'code') {
         room = rooms.get(String(data.code || '').trim().toUpperCase());
         if (!room) return fail('Bu kodda Batak masası bulunamadı.');
@@ -333,7 +334,9 @@ function install({ io, Accounts, Avatars, Logger }) {
     });
   }
   const stats = () => ({ tables: rooms.size, players: [...rooms.values()].reduce((n, r) => n + humans(r).length, 0),
-    waiting: [...rooms.values()].filter(r => r.isPublic && r.phase === 'waiting').map(lobbyInfo) });
+    waiting: [...rooms.values()].filter(r => r.isPublic && r.phase === 'waiting').map(lobbyInfo),
+    // Kıraathane salonunda oyunu süren Batak masaları (oturanlar görünür, İZLE ile seyredilir)
+    playing: [...rooms.values()].filter(r => r.isPublic && r.phase !== 'waiting').slice(0, 24).map(lobbyInfo) });
   return { onSocket, stats, rooms, _act: act, _autoMove: autoMove };
 }
 module.exports = { install };

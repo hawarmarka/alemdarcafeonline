@@ -1,4 +1,4 @@
-// Karakter: Quaternius temel gövdesi + saç/sakal + kemik ağırlığına göre boyanan kıyafet (gömlek, pantolon, ayakkabı).
+﻿// Karakter: Quaternius temel gövdesi + saç/sakal + kemik ağırlığına göre boyanan kıyafet (gömlek, pantolon, ayakkabı).
 // Görünüm adından türetilir (her istemcide aynı kişi aynı görünür). Animasyon: Speed, Sit, Talk, Serve.
 using System.Collections.Generic;
 using UnityEngine;
@@ -198,10 +198,30 @@ namespace Alemdar.Chars
             }
         }
 
+        // İki elle tutulan şey (iskambil yelpazesi): eller hedefin iki yanına gider. Yerel +z tutanın kendisine doğru.
+        public Transform Hold;
+        float holdW;
         // Baş ve gövde bakışı + el (Animator IK geçişi açık).
         void OnAnimatorIK(int layer)
         {
             float w = ReachWeight;
+            holdW = Mathf.MoveTowards(holdW, Hold ? 1 : 0, Time.deltaTime * 3);
+            if (holdW > 0 && Hold)
+            {
+                // sol el yelpazenin sol alt köşesinde (tutanın gözünden), sağ el sağında; sağ el kâğıt atarken uzanmaya geçer
+                Anim.SetIKPositionWeight(AvatarIKGoal.LeftHand, holdW * .9f); Anim.SetIKRotationWeight(AvatarIKGoal.LeftHand, holdW * .5f);
+                Anim.SetIKPosition(AvatarIKGoal.LeftHand, Hold.TransformPoint(new Vector3(.045f, -.005f, .012f)));
+                Anim.SetIKRotation(AvatarIKGoal.LeftHand, Hold.rotation * Quaternion.Euler(0, 180, -60));
+                if (w < .05f)
+                {
+                    Anim.SetIKPositionWeight(AvatarIKGoal.RightHand, holdW * .9f); Anim.SetIKRotationWeight(AvatarIKGoal.RightHand, holdW * .5f);
+                    Anim.SetIKPosition(AvatarIKGoal.RightHand, Hold.TransformPoint(new Vector3(-.04f, .02f, .014f)));
+                    Anim.SetIKRotation(AvatarIKGoal.RightHand, Hold.rotation * Quaternion.Euler(0, 180, 60));
+                    if (LookAt.HasValue) { Anim.SetLookAtWeight(1, .25f, .8f, 1, .6f); Anim.SetLookAtPosition(LookAt.Value); } else Anim.SetLookAtWeight(0);
+                    return;
+                }
+            }
+            else Anim.SetIKPositionWeight(AvatarIKGoal.LeftHand, 0);
             Vector3? look = w > .05f ? reach.Value.target : LookAt;
             if (look.HasValue) { Anim.SetLookAtWeight(1, .25f + w * .3f, .8f, 1, .6f); Anim.SetLookAtPosition(look.Value); }
             else Anim.SetLookAtWeight(0);

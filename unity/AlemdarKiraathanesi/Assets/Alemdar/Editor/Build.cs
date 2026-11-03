@@ -73,6 +73,7 @@ namespace Alemdar.EditorTools
             lib.noSmoking = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Alemdar/Brand/sigara.png");
             if (!lib.logo || !lib.noSmoking) throw new System.Exception("Brand/logo.png veya sigara.png eksik");
             lib.uiFont = AssetDatabase.LoadAssetAtPath<Font>("Assets/Alemdar/Fonts/FiraSans-SemiBold.ttf");
+            lib.icons = Directory.GetFiles("Assets/Alemdar/Icons", "*.png").Select(f => AssetDatabase.LoadAssetAtPath<Texture2D>(f.Replace('\\', '/'))).Where(t => t).ToArray();
             // normal haritalı ve duman şablonları (shader çeşitleri derlemeye girsin)
             var on = new Material(Shader.Find("Standard")) { enableInstancing = true }; on.SetTexture("_BumpMap", lib.plasterN); on.EnableKeyword("_NORMALMAP");
             AssetDatabase.DeleteAsset(Gen + "/OpakNormal.mat"); AssetDatabase.CreateAsset(on, Gen + "/OpakNormal.mat"); lib.opaqueNormal = on;

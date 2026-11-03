@@ -103,6 +103,29 @@ namespace Alemdar.UI
             return bevel = Sprite.Create(t, new Rect(0, 0, w, h), new Vector2(.5f, .5f), 100, 0, SpriteMeshType.FullRect, new Vector4(r, r, r, r));
         }
         static Color KindColor(Kind k) => k switch { Kind.Primary => new Color(.12f, .54f, .42f), Kind.Danger => new Color(.7f, .2f, .16f), Kind.Ghost => new Color(.24f, .22f, .2f, .62f), _ => new Color(.36f, .26f, .18f) }; // çuha yeşili, tuğla, ceviz
+        // İkon (Lib.icons): ad = dosya adı (ör. "cards", "power"); bulunamazsa null.
+        static readonly System.Collections.Generic.Dictionary<string, Sprite> icons = new();
+        public static Sprite Icon(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return null;
+            if (icons.TryGetValue(name, out var s)) return s;
+            var lib = Lib.I ? Lib.I : UnityEngine.Object.FindAnyObjectByType<Lib>();
+            var t = lib?.icons == null ? null : Array.Find(lib.icons, x => x && x.name == name);
+            return icons[name] = t ? Sprite.Create(t, new Rect(0, 0, t.width, t.height), new Vector2(.5f, .5f), 100) : null;
+        }
+        public static Button Button(Transform parent, string text, Kind kind, Action onClick, Vector2? size, string icon)
+        {
+            var b = Button(parent, text, kind, onClick, size);
+            var sp = Icon(icon); if (!sp) return b;
+            // ikon + yazı ortada yan yana
+            var label = b.GetComponentInChildren<Text>(); var r = (RectTransform)b.transform;
+            var row = Rect(r, "icerik"); Stretch(row, 10, 0);
+            var h = row.gameObject.AddComponent<HorizontalLayoutGroup>(); h.childAlignment = TextAnchor.MiddleCenter; h.spacing = 8; h.childControlWidth = h.childControlHeight = true; h.childForceExpandWidth = h.childForceExpandHeight = false;
+            var img = Rect(row, "ikon").gameObject.AddComponent<Image>(); img.sprite = sp; img.color = Ink; img.raycastTarget = false; img.preserveAspect = true;
+            float isz = Mathf.Clamp(r.sizeDelta.y * .42f, 16, 26); Size(img, isz, isz);
+            label.transform.SetParent(row, false); label.horizontalOverflow = HorizontalWrapMode.Overflow;
+            return b;
+        }
         public static Button Button(Transform parent, string text, Kind kind, Action onClick, Vector2? size = null)
         {
             var img = Box(parent, KindColor(kind), BevelSprite()); var r = img.rectTransform; r.sizeDelta = size ?? new Vector2(220, 56);
@@ -148,6 +171,15 @@ namespace Alemdar.UI
             var inner = Box(edge.transform, new Color(.07f, .06f, .055f, .9f)); Stretch(inner.rectTransform, 1.5f, 1.5f);
             var sh = edge.gameObject.AddComponent<Shadow>(); sh.effectColor = new Color(0, 0, 0, .5f); sh.effectDistance = new Vector2(0, -4);
             return edge.rectTransform;
+        }
+        // Panel açılışı: hafif büyüyerek belirir (PrimeTween).
+        public static void Pop(RectTransform r)
+        {
+            if (!r) return;
+            var cg = r.GetComponent<CanvasGroup>() ?? r.gameObject.AddComponent<CanvasGroup>();
+            PrimeTween.Tween.StopAll(r); PrimeTween.Tween.StopAll(cg);
+            PrimeTween.Tween.Alpha(cg, 0, 1, .16f, PrimeTween.Ease.OutQuad, useUnscaledTime: true);
+            PrimeTween.Tween.Scale(r, .94f, 1f, .22f, PrimeTween.Ease.OutBack, useUnscaledTime: true);
         }
         public static bool PointerOverUi => EventSystem.current && EventSystem.current.IsPointerOverGameObject();
         // bir yazı kutusuna yazılıyorsa kısayol tuşları çalışmasın

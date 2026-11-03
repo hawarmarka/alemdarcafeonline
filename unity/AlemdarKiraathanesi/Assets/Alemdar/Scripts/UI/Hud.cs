@@ -19,6 +19,9 @@ namespace Alemdar.UI
         Button createBtn; int modeIdx, roundIdx = 2;
         static readonly int[] Rounds = { 1, 2, 4 };
         int teamIdx; // 0 tekli, 1 eşli (koltuk 0-2 ve 1-3 takım)
+        int gameIdx, batakTypeIdx, batakRoundIdx; // masada hangi oyun: 0 okey, 1 batak
+        static readonly string[] BatakTypes = { "ihaleli", "kozmaca", "esli" }; static readonly int[] BatakRounds = { 5, 7, 9, 11 };
+        RectTransform okeyOpts, batakOpts; JObject batakCache;
 
         public void Build(App a)
         {
@@ -30,9 +33,9 @@ namespace Alemdar.UI
             Ui.Anchor(brand.rectTransform, new Vector2(0, .5f), new Vector2(0, .5f), new Vector2(200, 0), new Vector2(360, 60));
             online = Ui.Label(top, "", 20, Ui.Muted, TextAnchor.MiddleCenter); Ui.Anchor(online.rectTransform, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.zero, new Vector2(400, 40));
             var right = Ui.Row(top, 10, TextAnchor.MiddleRight); Ui.Anchor(right, new Vector2(1, .5f), new Vector2(1, .5f), new Vector2(-250, 0), new Vector2(480, 56));
-            Ui.Button(right, "TV", Ui.Kind.Plain, () => World.Tv.I?.ToggleRemote(), new Vector2(90, 50));
-            Ui.Button(right, "KAHVECİ", Ui.Kind.Plain, ToggleOrder, new Vector2(170, 50));
-            Ui.Button(right, "MENÜ", Ui.Kind.Ghost, () => menuPanel.gameObject.SetActive(!menuPanel.gameObject.activeSelf), new Vector2(130, 50));
+            Ui.Button(right, "TV", Ui.Kind.Plain, () => World.Tv.I?.ToggleRemote(), new Vector2(110, 50), "monitor");
+            Ui.Button(right, "KAHVECİ", Ui.Kind.Plain, ToggleOrder, new Vector2(180, 50), "bell");
+            Ui.Button(right, "MENÜ", Ui.Kind.Ghost, () => menuPanel.gameObject.SetActive(!menuPanel.gameObject.activeSelf), new Vector2(140, 50), "menu");
             // yakınlık ipucu
             promptBox = Ui.Card(root, new Vector2(520, 58)); Ui.Anchor(promptBox, new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(0, 110), new Vector2(520, 58));
             prompt = Ui.Label(promptBox, "", 22, Ui.Ink, TextAnchor.MiddleCenter); Ui.Stretch(prompt.rectTransform, 16, 4); promptBox.gameObject.SetActive(false);
@@ -61,7 +64,7 @@ namespace Alemdar.UI
                 if (n.Length < 2) { Ui.Toast("Ad en az 2 harf olmalı."); return; }
                 Destroy(card.gameObject); done(n);
             }
-            ok = Ui.Button(col, "İÇERİ GİR", Ui.Kind.Primary, Submit, new Vector2(300, 60));
+            ok = Ui.Button(col, "İÇERİ GİR", Ui.Kind.Primary, Submit, new Vector2(300, 60), "arrow_right");
             input.onSubmit.AddListener(_ => Submit());
             input.Select(); input.ActivateInputField();
         }
@@ -69,26 +72,34 @@ namespace Alemdar.UI
         // ---------- masa paneli ----------
         void BuildTablePanel(Transform root)
         {
-            tablePanel = Ui.Card(root, new Vector2(480, 770)); Ui.Anchor(tablePanel, new Vector2(1, .5f), new Vector2(1, .5f), new Vector2(-270, 0), new Vector2(480, 770));
+            tablePanel = Ui.Card(root, new Vector2(480, 850)); Ui.Anchor(tablePanel, new Vector2(1, .5f), new Vector2(1, .5f), new Vector2(-270, 0), new Vector2(480, 850));
             var col = Ui.Column(tablePanel, 14); Ui.Stretch(col);
             tableTitle = Ui.Label(col, "Masa", 32, Ui.Ink, TextAnchor.MiddleLeft, FontStyle.Bold); Ui.Size(tableTitle, -1, 44);
             tableInfo = Ui.Label(col, "", 19, Ui.Muted); Ui.Size(tableInfo, -1, 54);
             seatsBox = Ui.Rect(col, "koltuklar"); var grid = seatsBox.gameObject.AddComponent<GridLayoutGroup>(); grid.cellSize = new Vector2(205, 92); grid.spacing = new Vector2(12, 12); Ui.Size(seatsBox, -1, 200);
             // masa ayarları: yan yana seçenekler (çip/bahis yok)
             var create = Ui.Rect(col, "ayarlar"); var cv = create.gameObject.AddComponent<VerticalLayoutGroup>(); cv.spacing = 8; cv.childControlWidth = cv.childControlHeight = true; cv.childForceExpandHeight = false;
-            Ui.Segmented(create, "TÜR", new[] { "Klasik", "Yardımsız", "Katlamalı" }, () => modeIdx, i => modeIdx = i, 430);
-            Ui.Segmented(create, "EL SAYISI", new[] { "1 el", "2 el", "4 el" }, () => roundIdx, i => roundIdx = i, 430);
-            Ui.Segmented(create, "OYUN", new[] { "Tekli", "Eşli (karşındaki eşin)" }, () => teamIdx, i => teamIdx = i, 430);
-            Ui.Size(create, -1, 232);
-            createBtn = Ui.Button(col, "MASAYI KUR VE OTUR", Ui.Kind.Primary, CreateHere, new Vector2(430, 60));
+            Ui.Segmented(create, "OYUN", new[] { "101 Okey", "Batak" }, () => gameIdx, i => { gameIdx = i; PaintCreate(); }, 430);
+            RectTransform Group() { var g = Ui.Rect(create, "secenekler"); var v = g.gameObject.AddComponent<VerticalLayoutGroup>(); v.spacing = 8; v.childControlWidth = v.childControlHeight = true; v.childForceExpandHeight = false; return g; }
+            okeyOpts = Group();
+            Ui.Segmented(okeyOpts, "TÜR", new[] { "Klasik", "Yardımsız", "Katlamalı" }, () => modeIdx, i => modeIdx = i, 430);
+            Ui.Segmented(okeyOpts, "EL SAYISI", new[] { "1 el", "2 el", "4 el" }, () => roundIdx, i => roundIdx = i, 430);
+            Ui.Segmented(okeyOpts, "DÜZEN", new[] { "Tekli", "Eşli (karşındaki eşin)" }, () => teamIdx, i => teamIdx = i, 430);
+            Ui.Size(okeyOpts, -1, 232);
+            batakOpts = Group();
+            Ui.Segmented(batakOpts, "TÜR", new[] { "İhaleli", "Koz Maça", "Eşli" }, () => batakTypeIdx, i => batakTypeIdx = i, 430);
+            Ui.Segmented(batakOpts, "EL SAYISI", new[] { "5 el", "7 el", "9 el", "11 el" }, () => batakRoundIdx, i => batakRoundIdx = i, 430);
+            Ui.Size(batakOpts, -1, 232);
+            Ui.Size(create, -1, 312);
+            createBtn = Ui.Button(col, "MASAYI KUR VE OTUR", Ui.Kind.Primary, CreateHere, new Vector2(430, 60), "plus");
             var foot = Ui.Row(col, 10); Ui.Size(foot, -1, 56);
-            Ui.Button(foot, "YANCI OL", Ui.Kind.Plain, () => { int t = shownTable; HideTable(); app.Me.WalkTo(app.Hall.Stool(t, 1) + (app.Hall.Stool(t, 1) - app.Hall.Tables[t]).normalized * .4f, () => app.Me.SitAt(app.Hall.Stool(t, 1), Quaternion.LookRotation(app.Hall.Tables[t] - app.Hall.Stool(t, 1)))); }, new Vector2(200, 52));
-            Ui.Button(foot, "KAPAT", Ui.Kind.Ghost, HideTable, new Vector2(200, 52));
+            Ui.Button(foot, "YANCI OL", Ui.Kind.Plain, () => { int t = shownTable; HideTable(); app.Me.WalkTo(app.Hall.Stool(t, 1) + (app.Hall.Stool(t, 1) - app.Hall.Tables[t]).normalized * .4f, () => app.Me.SitAt(app.Hall.Stool(t, 1), Quaternion.LookRotation(app.Hall.Tables[t] - app.Hall.Stool(t, 1)))); }, new Vector2(200, 52), "eye");
+            Ui.Button(foot, "KAPAT", Ui.Kind.Ghost, HideTable, new Vector2(200, 52), "close");
             tablePanel.gameObject.SetActive(false);
         }
-        void PaintCreate() { }
+        void PaintCreate() { okeyOpts.gameObject.SetActive(gameIdx == 0); batakOpts.gameObject.SetActive(gameIdx == 1); }
         public void HideTable() { shownTable = -1; tablePanel.gameObject.SetActive(false); }
-        public void ShowTable(int t) { shownTable = t; tablePanel.gameObject.SetActive(true); PaintCreate(); RenderTable(); }
+        public void ShowTable(int t) { bool was = tablePanel.gameObject.activeSelf; shownTable = t; tablePanel.gameObject.SetActive(true); PaintCreate(); RenderTable(); if (!was) Ui.Pop(tablePanel); }
 
         // Masa salonda kurulduysa (hallTable) kendi masasında; diğerleri (webden açılanlar) boş masalara koda göre sırayla yerleşir.
         (string kind, JObject room)[] slotMap = new (string, JObject)[0];
@@ -97,7 +108,11 @@ namespace Alemdar.UI
             var map = new (string, JObject)[app.Hall.Tables.Count];
             if (roomsCache != null)
             {
-                var all = ((JArray)roomsCache["waiting"]).Select(r => ("waiting", (JObject)r)).Concat(((JArray)(roomsCache["playing"] ?? new JArray())).Select(r => ("playing", (JObject)r))).OrderBy(x => (string)x.Item2["code"]).ToList();
+                var all = ((JArray)roomsCache["waiting"]).Select(r => ("waiting", (JObject)r)).Concat(((JArray)(roomsCache["playing"] ?? new JArray())).Select(r => ("playing", (JObject)r))).ToList();
+                if (batakCache != null) // Batak masaları da salonda (koda göre B ile başlar)
+                    foreach (var (list, kind) in new[] { ("waiting", "waiting"), ("playing", "playing") })
+                        foreach (JObject r in (JArray)(batakCache[list] ?? new JArray())) { r["_game"] = "batak"; all.Add((kind, r)); }
+                all = all.OrderBy(x => (string)x.Item2["code"]).ToList();
                 var rest = new System.Collections.Generic.List<(string, JObject)>();
                 foreach (var x in all) { int h = (int?)x.Item2["hallTable"] ?? -1; if (h >= 0 && h < map.Length && map[h].Item2 == null) map[h] = x; else rest.Add(x); }
                 int k = 0; for (int i = 0; i < map.Length && k < rest.Count; i++) if (map[i].Item2 == null && i != app.SeatedTable) map[i] = rest[k++];
@@ -110,8 +125,10 @@ namespace Alemdar.UI
             if (shownTable < 0) return;
             var (kind, r) = Slot(shownTable);
             tableTitle.text = $"Masa {shownTable + 1}" + (shownTable >= 9 ? " · Teras" : "");
-            tableInfo.text = r == null ? "Boş masa. Türü seç, kur ve otur. Arkadaşların salonda bu masaya gelip boş koltuğa oturabilir; istersen boş koltukları botlarla doldurursun."
-                : $"{ModeTitle((string)r["modeKey"])}{((bool?)r["teamMode"] == true ? " · Eşli (karşılıklı oturanlar takım)" : "")} · " + (kind == "playing" ? "oyun sürüyor" : "oyuncu bekleniyor");
+            bool batak = (string)r?["_game"] == "batak";
+            tableInfo.text = r == null ? "Boş masa. Oyunu ve türü seç, kur ve otur. Arkadaşların salonda bu masaya gelip boş koltuğa oturabilir; istersen boş koltukları botlarla doldurursun."
+                : batak ? $"Batak · {BatakTitle((string)r["type"])} · {(int?)r["rounds"] ?? 5} el · " + (kind == "playing" ? "oyun sürüyor" : "oyuncu bekleniyor")
+                : $"101 Okey · {ModeTitle((string)r["modeKey"])}{((bool?)r["teamMode"] == true ? " · Eşli (karşılıklı oturanlar takım)" : "")} · " + (kind == "playing" ? "oyun sürüyor" : "oyuncu bekleniyor");
             foreach (Transform c in seatsBox) Destroy(c.gameObject);
             string[] labels = { "GÜNEY", "DOĞU", "KUZEY", "BATI" };
             for (int dir = 0; dir < 4; dir++)
@@ -124,7 +141,8 @@ namespace Alemdar.UI
                 if (name == null && kind == "waiting")
                 {
                     int d = dir, tbl = shownTable; string code = (string)r["code"];
-                    var b = Ui.Button(cell, "OTUR", Ui.Kind.Primary, () => app.SitAndJoin(tbl, d, new { mode = "code", roomCode = code, seat = (4 - d) % 4 }), new Vector2(100, 40));
+                    var b = Ui.Button(cell, "OTUR", Ui.Kind.Primary, batak ? () => app.SitAndJoinBatak(tbl, d, new { mode = "code", code, seat = (4 - d) % 4 })
+                                                                               : () => app.SitAndJoin(tbl, d, new { mode = "code", roomCode = code, seat = (4 - d) % 4 }), new Vector2(100, 40));
                     var br = (RectTransform)b.transform; br.anchorMin = br.anchorMax = new Vector2(1, 0); br.pivot = new Vector2(1, 0); br.anchoredPosition = new Vector2(-10, 10);
                 }
             }
@@ -132,12 +150,14 @@ namespace Alemdar.UI
             createBtn.gameObject.SetActive(r == null || kind == "playing");
             Ui.SetText(createBtn, r == null ? "MASAYI KUR VE OTUR" : "MASAYI İZLE");
         }
+        static string BatakTitle(string k) => k switch { "kozmaca" => "Koz Maça", "esli" => "Eşli", _ => "İhaleli" };
         static string ModeTitle(string k) => k switch { "katlamali" => "Katlamalı", "yardimsiz" => "Yardımsız", "yardimli" => "Yardımlı", _ => "Klasik" };
         void CreateHere()
         {
             int t = shownTable; if (t < 0) return;
             var (kind, r) = Slot(t);
-            if (kind == "playing") { app.Watch(t, (string)r["code"]); return; }
+            if (kind == "playing") { if ((string)r["_game"] == "batak") app.WatchBatak(t, (string)r["code"]); else app.Watch(t, (string)r["code"]); return; }
+            if (gameIdx == 1) { app.SitAndJoinBatak(t, 0, new { mode = "create", type = BatakTypes[batakTypeIdx], rounds = BatakRounds[batakRoundIdx], isPublic = true, seat = 0, hallTable = t }); return; }
             string mode = ModeNames[modeIdx * 2];
             app.SitAndJoin(t, 0, new { mode = "create", modeKey = mode, stackingMode = mode == "katlamali", assisted = mode != "yardimsiz", bet = 1000, roundLimit = Rounds[roundIdx], isPublic = true, custom = true, seat = 0, teamMode = teamIdx == 1, hallTable = t }); // custom: botlar kendiliğinden oturmaz, arkadaşlar gelebilsin; misafirden bahis alınmaz
         }
@@ -148,8 +168,14 @@ namespace Alemdar.UI
                 using (var req = UnityWebRequest.Get(app.Io.Url + "/api/rooms"))
                 {
                     yield return req.SendWebRequest();
-                    if (req.result == UnityWebRequest.Result.Success) { try { roomsCache = JObject.Parse(req.downloadHandler.text); MapSlots(); RenderTable(); } catch (Exception e) { Debug.LogWarning(e.Message); } }
+                    if (req.result == UnityWebRequest.Result.Success) { try { roomsCache = JObject.Parse(req.downloadHandler.text); } catch (Exception e) { Debug.LogWarning(e.Message); } }
                 }
+                using (var req = UnityWebRequest.Get(app.Io.Url + "/api/batak"))
+                {
+                    yield return req.SendWebRequest();
+                    if (req.result == UnityWebRequest.Result.Success) { try { batakCache = JObject.Parse(req.downloadHandler.text); } catch (Exception e) { Debug.LogWarning(e.Message); } }
+                }
+                try { MapSlots(); RenderTable(); } catch (Exception e) { Debug.LogWarning(e.Message); }
                 yield return new WaitForSeconds(3f);
             }
         }
@@ -169,10 +195,10 @@ namespace Alemdar.UI
         {
             menuPanel = Ui.Card(root, new Vector2(300, 330)); Ui.Anchor(menuPanel, new Vector2(1, 1), new Vector2(1, 1), new Vector2(-170, -255), new Vector2(300, 330));
             var col = Ui.Column(menuPanel, 10); Ui.Stretch(col);
-            Ui.Button(col, "Tam ekran", Ui.Kind.Plain, () => Screen.fullScreen = !Screen.fullScreen, new Vector2(250, 54));
-            Button gfx = null; gfx = Ui.Button(col, Quality.I ? Quality.I.Label : "Grafik", Ui.Kind.Plain, () => Ui.SetText(gfx, Quality.I.Cycle()), new Vector2(250, 54));
-            Ui.Button(col, "Adımı değiştir", Ui.Kind.Plain, () => { PlayerPrefs.DeleteKey("ad"); Ui.Toast("Oyunu yeniden açınca yeni adını sorarız."); }, new Vector2(250, 54));
-            Ui.Button(col, "Oyundan çık", Ui.Kind.Danger, Application.Quit, new Vector2(250, 54));
+            Ui.Button(col, "Tam ekran", Ui.Kind.Plain, () => Screen.fullScreen = !Screen.fullScreen, new Vector2(250, 54), "monitor");
+            Button gfx = null; gfx = Ui.Button(col, Quality.I ? Quality.I.Label : "Grafik", Ui.Kind.Plain, () => Ui.SetText(gfx, Quality.I.Cycle()), new Vector2(250, 54), "settings");
+            Ui.Button(col, "Adımı değiştir", Ui.Kind.Plain, () => { PlayerPrefs.DeleteKey("ad"); Ui.Toast("Oyunu yeniden açınca yeni adını sorarız."); }, new Vector2(250, 54), "edit");
+            Ui.Button(col, "Oyundan çık", Ui.Kind.Danger, Application.Quit, new Vector2(250, 54), "power");
             menuPanel.gameObject.SetActive(false);
         }
 
@@ -191,12 +217,12 @@ namespace Alemdar.UI
             bPairs = Ui.Button(row, "ÇİFT AÇ", Ui.Kind.Primary, () => o.Move("openWithPairs"), new Vector2(140, 58));
             Gap();
             bProcess = Ui.Button(row, "İŞLE", Ui.Kind.Plain, () => o.Move("processAll"), new Vector2(110, 58));
-            bRetract = Ui.Button(row, "GERİ TOPLA", Ui.Kind.Plain, () => o.Move("retractTurn"), new Vector2(160, 58));
+            bRetract = Ui.Button(row, "GERİ TOPLA", Ui.Kind.Plain, () => o.Move("retractTurn"), new Vector2(170, 58), "refresh");
             bReturn = Ui.Button(row, "GERİ BIRAK", Ui.Kind.Plain, () => o.Move("undoDiscardDraw"), new Vector2(160, 58));
             Gap();
-            bFinish = Ui.Button(row, "BİTİR", Ui.Kind.Primary, () => o.Move("finishGame"), new Vector2(120, 58));
+            bFinish = Ui.Button(row, "BİTİR", Ui.Kind.Primary, () => o.Move("finishGame"), new Vector2(140, 58), "flag_checkered");
             Gap();
-            Ui.Button(row, "MASADAN KALK", Ui.Kind.Danger, () => app.LeaveTable(), new Vector2(190, 58));
+            Ui.Button(row, "MASADAN KALK", Ui.Kind.Danger, () => app.LeaveTable(), new Vector2(200, 58), "power");
             var info = Ui.Card(root, new Vector2(760, 52)); Ui.Anchor(info, new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(0, 132), new Vector2(760, 52));
             turnInfo = Ui.Label(info, "", 22, Ui.Ink, TextAnchor.MiddleCenter); Ui.Stretch(turnInfo.rectTransform, 12, 4); turnInfo.supportRichText = true;
             turnInfo.transform.parent.SetParent(gameBar, true);
@@ -208,9 +234,9 @@ namespace Alemdar.UI
             var col = Ui.Column(waitPanel, 12); Ui.Stretch(col);
             waitInfo = Ui.Label(col, "", 22, Ui.Ink, TextAnchor.MiddleCenter); Ui.Size(waitInfo, -1, 70);
             var row = Ui.Row(col, 12); Ui.Size(row, -1, 60);
-            bAddBot = Ui.Button(row, "BOT EKLE", Ui.Kind.Plain, () => app.Io.Emit("addBot"), new Vector2(170, 56));
-            bBots = Ui.Button(row, "BOTLARLA BAŞLAT", Ui.Kind.Primary, () => app.Io.Emit("startWithBots"), new Vector2(240, 56));
-            Ui.Button(row, "KALK", Ui.Kind.Danger, () => app.LeaveTable(), new Vector2(130, 56));
+            bAddBot = Ui.Button(row, "BOT EKLE", Ui.Kind.Plain, () => app.Io.Emit("addBot"), new Vector2(180, 56), "robot");
+            bBots = Ui.Button(row, "BOTLARLA BAŞLAT", Ui.Kind.Primary, () => app.Io.Emit("startWithBots"), new Vector2(250, 56), "play");
+            Ui.Button(row, "KALK", Ui.Kind.Danger, () => app.LeaveTable(), new Vector2(140, 56), "power");
             waitPanel.gameObject.SetActive(false);
         }
         void BuildResult(Transform root)
@@ -220,7 +246,7 @@ namespace Alemdar.UI
             resultText = Ui.Label(col, "", 22, Ui.Ink, TextAnchor.UpperCenter); resultText.supportRichText = true; Ui.Size(resultText, -1, 80);
             resultRows = Ui.Column(col, 6, new RectOffset(40, 40, 0, 0)); Ui.Size(resultRows, -1, 190);
             resultFoot = Ui.Label(col, "", 22, Ui.Brass, TextAnchor.MiddleCenter, FontStyle.Bold); Ui.Size(resultFoot, -1, 34);
-            Ui.Button(col, "TAMAM", Ui.Kind.Primary, () => resultPanel.gameObject.SetActive(false), new Vector2(220, 56));
+            Ui.Button(col, "TAMAM", Ui.Kind.Primary, () => resultPanel.gameObject.SetActive(false), new Vector2(220, 56), "check");
             resultPanel.gameObject.SetActive(false);
         }
 

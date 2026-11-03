@@ -17,6 +17,8 @@ namespace Alemdar
         public World.WorldNet Net { get; private set; }
         public World.Waiter Waiter { get; private set; }
         public Okey.OkeyTable Okey { get; private set; }
+        public global::Alemdar.Batak.BatakTable Batak { get; private set; }
+        public BatakHud BatakUi { get; private set; }
         public Hud Hud { get; private set; }
         public string MyName { get; private set; }
         public int SeatedTable = -1, SeatedDir = -1;
@@ -33,6 +35,7 @@ namespace Alemdar
             if (DevShots.Arg("-cek") != null) gameObject.AddComponent<DevShots>();
             if (DevShots.Arg("-uzun") != null) gameObject.AddComponent<DevLong>();
             if (DevShots.Arg("-arkadas") != null) gameObject.AddComponent<DevFriends>();
+            if (DevShots.Arg("-batak") != null) gameObject.AddComponent<DevBatak>();
         }
 
         IEnumerator Start()
@@ -52,6 +55,9 @@ namespace Alemdar
             Io.On("joinedGame", OnJoined);
             Io.On("leftGame", _ => LeaveTable(false));
             Io.On("world:serve", OnServe);
+            Io.On("batak:joined", OnBatakJoined);
+            Io.On("batak:error", d => Ui.Toast((string)d["message"]));
+            Io.On("batak:left", _ => { if (Batak && Batak.Active) LeaveTable(false); });
 
             Hall = new GameObject("Kiraathane").AddComponent<World.Hall>(); Hall.Build();
             yield return null;
@@ -72,8 +78,10 @@ namespace Alemdar
             Net = gameObject.AddComponent<World.WorldNet>(); Net.Init(Io, Me, MyName);
             Waiter = new GameObject("Kahveci").AddComponent<World.Waiter>(); Waiter.Init(Hall);
             Okey = gameObject.AddComponent<Okey.OkeyTable>(); Okey.Init(Io, Hall, Me);
-            Net.Hidden = n => Okey.State != null && Okey.HasPlayer(n);
+            Batak = gameObject.AddComponent<global::Alemdar.Batak.BatakTable>(); Batak.Init(Io, Hall, Me);
+            Net.Hidden = n => (Okey.State != null && Okey.HasPlayer(n)) || (Batak.State != null && Batak.HasPlayer(n));
             Hud = gameObject.AddComponent<Hud>(); Hud.Build(this);
+            BatakUi = gameObject.AddComponent<BatakHud>(); BatakUi.Build(this);
         }
 
         // Kamerayı birkaç kare salonun, sokağın ve parkın üstünden geçirir (yükleme yazısı ekranı kaplarken): dokular GPU'ya önceden yüklenir.
@@ -145,7 +153,8 @@ namespace Alemdar
         }
 
         // ---------- masaya oturma / kalkma ----------
-        public void SitAndJoin(int table, int dir, object joinData)
+        public void SitAndJoinBatak(int table, int dir, object joinData) => SitAndJoin(table, dir, joinData, "batak:join");
+        public void SitAndJoin(int table, int dir, object joinData, string joinEvent = "joinGame")
         {
             Hud.HideTable();
             var seat = Hall.Seat(table, dir); var front = Hall.Seat(table, dir, .55f);
@@ -156,7 +165,7 @@ namespace Alemdar
                 if (joinData == null) return; // yancı/sohbet oturuşu
                 pendingToken = System.Guid.NewGuid().ToString("N") + System.Guid.NewGuid().ToString("N").Substring(0, 8);
                 var j = JObject.FromObject(joinData); j["playerName"] = MyName; j["token"] = pendingToken; j["penaltyMode"] = true;
-                Io.Emit("joinGame", j);
+                Io.Emit(joinEvent, j);
             });
         }
         void OnJoined(JToken d)
@@ -164,6 +173,22 @@ namespace Alemdar
             PlayerPrefs.SetString("oturum", (string)d["code"] + "|" + pendingToken);
             Okey.Spectating = false; Okey.Attach(SeatedTable, SeatedDir);
             Me.InputLocked = true; Hud.ShowGame(true);
+        }
+        void OnBatakJoined(JToken d)
+        {
+            Batak.Spectating = false; Batak.Attach(SeatedTable, SeatedDir);
+            Me.InputLocked = true; Hud.HideTable(); BatakUi.Show(true);
+        }
+        public void WatchBatak(int table, string code)
+        {
+            Hud.HideTable();
+            var stool = Hall.Stool(table, 0);
+            Me.WalkTo(stool + (stool - Hall.Tables[table]).normalized * .4f, () =>
+            {
+                Me.SitAt(stool, Quaternion.LookRotation(Hall.Tables[table] - stool)); SeatedTable = table; SeatedDir = -1;
+                Batak.Spectating = true; Batak.Attach(table, 0); Me.InputLocked = true; BatakUi.Show(true);
+                Io.Emit("batak:watch", new { code });
+            });
         }
         public void Watch(int table, string code)
         {
@@ -178,6 +203,11 @@ namespace Alemdar
         }
         public void LeaveTable(bool tellServer = true)
         {
+            if (Batak.Active)
+            {
+                if (tellServer) Io.Emit(Batak.Spectating ? "batak:unwatch" : "batak:leave");
+                Batak.Detach(); BatakUi.Show(false);
+            }
             if (tellServer && Okey.State != null) Io.Emit(Okey.Spectating ? "unwatchGame" : "leaveGame");
             Okey.Detach(); Hud.ShowGame(false);
             Me.InputLocked = false; Me.StandUp(); SeatedTable = -1; SeatedDir = -1;

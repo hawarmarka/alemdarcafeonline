@@ -28,6 +28,7 @@ namespace Alemdar
         [Header("Tablolar (CC0 fotoğraflar)")] public Texture2D[] photos;
         [Header("Kıraathane logosu (saydam) ve sigara içilmez afişi")] public Texture2D logo, noSmoking;
         [Header("Yazı tipi: Fira Sans (SIL OFL)")] public Font uiFont;
+        [Header("Arayüz ikonları (MIT, unity-ui-toolkit-design-system): beyaz, saydam zeminli")] public Texture2D[] icons;
         void Awake() { I = this; }
     }
 }
