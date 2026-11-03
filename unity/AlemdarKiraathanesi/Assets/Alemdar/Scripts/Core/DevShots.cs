@@ -56,6 +56,8 @@ namespace Alemdar
             yield return CamShot(dir, "m20_cimen", new Vector3(-3f, 1.4f, 22f), new Vector3(-8f, .2f, 30f));
             yield return CamShot(dir, "m21_oyun_parki", World.Playground.Center + new Vector3(-1f, 2.6f, -7f), World.Playground.Center + new Vector3(0, .5f, 1.5f));
             yield return CamShot(dir, "m16_cephe", new Vector3(2f, 1.7f, 16f), new Vector3(0, 1.8f, World.Hall.TerraceZ));
+            yield return CamShot(dir, "k12_sandalye_yakin", app.Hall.Tables[0] + new Vector3(.9f, 1.05f, 1.6f), app.Hall.Tables[0] + new Vector3(0, .55f, .5f));
+            yield return CamShot(dir, "k13_masa_ustu", app.Hall.Tables[0] + new Vector3(.25f, 1.45f, .9f), app.Hall.Tables[0] + new Vector3(0, .76f, 0));
             yield return CamShot(dir, "k11_sigara", new Vector3(4.6f, 1.6f, -5.2f), new Vector3(World.Hall.MaxX, 1.6f, -5.2f));
             yield return CamShot(dir, "m13_modern_apartman", new Vector3(18f, 1.8f, 16f), new Vector3(25f, 6f, 5f));
             yield return CamShot(dir, "k9_fiyat_jaluzi", new Vector3(-2.5f, 1.6f, -1.5f), new Vector3(-2.9f, 1.6f, -6.2f));

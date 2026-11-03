@@ -1,4 +1,4 @@
-// Okey masası (Unity): sunucunun 'gameState' görüntüsünü salondaki masaya çizer, ıstaka/sürükle-bırak/hamle isteklerini yollar.
+﻿// Okey masası (Unity): sunucunun 'gameState' görüntüsünü salondaki masaya çizer, ıstaka/sürükle-bırak/hamle isteklerini yollar.
 // Kurallar sunucuda; burada yalnızca gösterim ve istek. Koltuk eşlemesi: sunucu koltuğu s ↔ sandalye yönü (4 - s) % 4.
 using System.Collections.Generic;
 using System.Linq;
@@ -62,16 +62,7 @@ namespace Alemdar.Okey
         public static readonly float RackZ = World.Props.TableSize / 2 - .07f;
         public static readonly Vector3 PileLocal = new(-.39f, 0, .39f); // sahibinin sağ köşesi (ıstakaların dışında)
         public const float RackLen = Row * (TileView.W + .0015f) + .035f, LowY = .014f, LowZ = .032f, HighY = .05f, HighZ = -.034f, Lean = -20f; // taşlar oturan oyuncunun gözüne dönük
-        public static void BuildRack(Transform r)
-        {
-            var w = World.Props.WoodDark;
-            World.Props.Box(r, new Vector3(RackLen, .014f, .13f), w, new Vector3(0, .007f, 0));               // taban
-            World.Props.Box(r, new Vector3(RackLen, .01f, .008f), w, new Vector3(0, .019f, .062f));            // ön kenar (alt sıra dayanır)
-            World.Props.Box(r, new Vector3(RackLen, .036f, .05f), w, new Vector3(0, .032f, -.04f));            // arka basamak gövdesi
-            World.Props.Box(r, new Vector3(RackLen, .008f, .006f), w, new Vector3(0, .054f, -.013f));          // üst sıra kenarı
-            World.Props.Box(r, new Vector3(RackLen, .03f, .01f), w, new Vector3(0, .063f, -.062f)).transform.localRotation = Quaternion.Euler(Lean, 0, 0); // sırt: taş üstünü geçmez, masayı kapatmaz
-            foreach (float x in new[] { -RackLen / 2, RackLen / 2 }) World.Props.Box(r, new Vector3(.012f, .06f, .13f), w, new Vector3(x, .03f, 0)); // uçlar
-        }
+        public static void BuildRack(Transform r) => World.Furniture.Rack(r, RackLen, Lean);
         // row 0 üst (arka raf), row 1 alt (ön raf); col 0..15 soldan sağa (oyuncunun gözünden)
         public static Vector3 RackSpot(int row, float col, int count = Row)
         {

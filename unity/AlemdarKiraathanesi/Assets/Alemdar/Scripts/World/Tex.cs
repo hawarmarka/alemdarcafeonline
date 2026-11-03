@@ -192,6 +192,18 @@ namespace Alemdar.World
         });
 
         // Ferforje pencere: altıgen desen; alfa ile camdan görünür.
+        // Hasır oturak: sekizgen kamış örgüsü (Viyana hasırı), bal rengi şeritler, aralarda koyu boşluk.
+        public static Texture2D Cane() => Make(256, 256, (x, y) =>
+        {
+            float u = x / 256f * 8, v = y / 256f * 8;
+            float a = Mathf.Abs(Mathf.Repeat(u, 1) - .5f), b = Mathf.Abs(Mathf.Repeat(v, 1) - .5f);
+            float d1 = Mathf.Abs(Mathf.Repeat(u + v, 1) - .5f), d2 = Mathf.Abs(Mathf.Repeat(u - v, 1) - .5f);
+            float strand = Mathf.Max(Mathf.Max(a < .09f ? 1 : 0, b < .09f ? 1 : 0), Mathf.Max(d1 < .07f ? .9f : 0, d2 < .07f ? .9f : 0));
+            float n = Fbm(x * .05f, y * .05f, 3) * .2f;
+            var cane = new Color(.78f + n, .6f + n * .8f, .34f + n * .4f);
+            return strand > 0 ? cane * (.85f + strand * .15f) : new Color(.12f, .08f, .05f);
+        });
+
         // Çim tutamı (alfa kesik kart): alttan çıkan, hafif kıvrık 40 yaprak; dipte koyu, uçta sarımsı yeşil.
         public static Texture2D GrassTuft()
         {

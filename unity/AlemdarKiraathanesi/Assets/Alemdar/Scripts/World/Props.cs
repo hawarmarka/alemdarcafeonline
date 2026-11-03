@@ -1,4 +1,4 @@
-// Kıraathane eşyaları: basit geometriden, ortak malzemelerle (aynı malzeme → toplu çizim). Çarpışan eşyaya kutu çarpıştırıcı.
+﻿// Kıraathane eşyaları: basit geometriden, ortak malzemelerle (aynı malzeme → toplu çizim). Çarpışan eşyaya kutu çarpıştırıcı.
 using UnityEngine;
 
 namespace Alemdar.World
@@ -165,31 +165,8 @@ namespace Alemdar.World
             Box(p, new Vector3(.02f, .02f, .12f), Black, pos + new Vector3(.12f, .14f, 0), 90);
         }
 
-        // Masa: yeşil örtü yüzeyi + sarkan dört kenar; çarpıştırıcı masanın gövdesi.
-        public static Transform Table(Transform p, Vector3 pos)
-        {
-            var t = new GameObject("masa").transform; t.SetParent(p, false); t.localPosition = pos;
-            float S = TableSize, T = TableTop, drop = .22f;
-            Box(t, new Vector3(S + .04f, .02f, S + .04f), Cloth, new Vector3(0, T - .01f, 0));
-            for (int i = 0; i < 4; i++)
-            {
-                var side = Box(t, new Vector3(S + .07f, drop, .008f), Cloth, Vector3.zero, i * 90);
-                side.transform.localPosition = Quaternion.Euler(0, i * 90, 0) * new Vector3(0, T - drop / 2, S / 2 + .03f);
-                side.transform.localRotation = Quaternion.Euler(6, i * 90, 0);
-            }
-            for (int x = -1; x <= 1; x += 2) for (int z = -1; z <= 1; z += 2) Box(t, new Vector3(.03f, T - .02f, .03f), Black, new Vector3(x * (S / 2 - .06f), (T - .02f) / 2, z * (S / 2 - .06f)));
-            var col = t.gameObject.AddComponent<BoxCollider>(); col.center = new Vector3(0, T / 2, 0); col.size = new Vector3(S + .06f, T, S + .06f);
-            // köşelerde kare bardaklıklar (gerçek okey masalarındaki gibi): çay, kahve, küllük oraya konur
-            for (int i = 0; i < 4; i++)
-            {
-                var cp = Quaternion.Euler(0, i * 90, 0) * new Vector3(CornerOut, 0, CornerOut);
-                Box(t, new Vector3(.16f, .016f, .16f), WoodDark, cp + new Vector3(0, T - .006f, 0));
-                Box(t, new Vector3(.17f, .006f, .17f), Black, cp + new Vector3(0, T - .016f, 0));
-                var arm = Box(t, new Vector3(.04f, .012f, .12f), Black, Quaternion.Euler(0, i * 90, 0) * new Vector3(CornerOut - .05f, 0, CornerOut - .05f) + new Vector3(0, T - .02f, 0));
-                arm.transform.localRotation = Quaternion.Euler(0, i * 90 + 45, 0);
-            }
-            return t;
-        }
+        // Masa: çuha kaplı ceviz oyun masası (Furniture.Table).
+        public static Transform Table(Transform p, Vector3 pos) => Furniture.Table(p, pos);
         public static readonly float CornerOut = TableSize / 2 + .075f;
 
         // Küllük (koyu cam) ve isteğe bağlı tüten sigara.
@@ -254,20 +231,8 @@ namespace Alemdar.World
             return ps;
         }
 
-        // Siyah ziyafet sandalyesi: kavisli sırt, metal ayak. Yerel -z masaya bakar.
-        public static Transform Chair(Transform p, Vector3 pos, float ry)
-        {
-            var c = new GameObject("sandalye").transform; c.SetParent(p, false); c.localPosition = pos; c.localRotation = Quaternion.Euler(0, ry, 0);
-            Box(c, new Vector3(.44f, .07f, .43f), ChairSeat, new Vector3(0, .47f, 0));
-            var back = Box(c, new Vector3(.42f, .42f, .06f), ChairSeat, new Vector3(0, .84f, .21f)); back.transform.localRotation = Quaternion.Euler(-8, 0, 0);
-            foreach (float x in new[] { -.2f, .2f })
-            {
-                Box(c, new Vector3(.025f, .47f, .025f), Black, new Vector3(x, .235f, -.19f));
-                var r = Box(c, new Vector3(.025f, 1.02f, .025f), Black, new Vector3(x, .5f, .2f)); r.transform.localRotation = Quaternion.Euler(-6, 0, 0);
-            }
-            Box(c, new Vector3(.43f, .025f, .025f), Black, new Vector3(0, 1.04f, .25f));
-            return c;
-        }
+        // Sandalye: bükme ahşap, hasır oturaklı (Furniture.Chair). Yerel -z masaya bakar.
+        public static Transform Chair(Transform p, Vector3 pos, float ry) => Furniture.Chair(p, pos, ry);
 
         // Gerçek fotoğraf tablosu (Wikimedia Commons, lisanslar Photos/CREDITS.txt): yükseklik fotoğrafın oranından; koyu ahşap çerçeve + paspartu.
         public static void Photo(Transform p, Texture2D photo, float w, Vector3 pos, float ry)
@@ -355,7 +320,7 @@ namespace Alemdar.World
 
         static Font font;
         static Material textMat;
-        public static Font UiFont => font ??= Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        public static Font UiFont { get { if (font) return font; var lib = Lib.I ? Lib.I : Object.FindAnyObjectByType<Lib>(); return font = lib && lib.uiFont ? lib.uiFont : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"); } } // Fira Sans; yoksa yerleşik (Awake sırasından bağımsız)
         // Dünyada yazı (tabela, isim). mirror: arkadan bakılınca ters okunur.
         public static TextMesh Text3D(Transform p, string text, Vector3 pos, float ry, float height, Color color, bool mirror = false)
         {

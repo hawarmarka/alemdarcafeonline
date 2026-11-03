@@ -1,4 +1,4 @@
-// Okey taşı: krem gövde + renkli sayı + alt nokta. Okey (gösterge+1) arkası dönük düz taş görünür (web sürümüyle aynı).
+﻿// Okey taşı: krem gövde + renkli sayı + alt nokta. Okey (gösterge+1) arkası dönük düz taş görünür (web sürümüyle aynı).
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 
@@ -41,7 +41,7 @@ namespace Alemdar.Okey
         public static Mesh RoundedBox(Vector3 size, float r, int n)
         {
             var half = size / 2; var inner = half - Vector3.one * r;
-            var verts = new System.Collections.Generic.List<Vector3>(); var norms = new System.Collections.Generic.List<Vector3>(); var tris = new System.Collections.Generic.List<int>();
+            var verts = new System.Collections.Generic.List<Vector3>(); var norms = new System.Collections.Generic.List<Vector3>(); var tris = new System.Collections.Generic.List<int>(); var uvs = new System.Collections.Generic.List<Vector2>();
             Vector3[] dirs = { Vector3.right, Vector3.left, Vector3.up, Vector3.down, Vector3.forward, Vector3.back };
             foreach (var f in dirs)
             {
@@ -51,7 +51,7 @@ namespace Alemdar.Okey
                 {
                     var p = Vector3.Scale(f + u * (i / (float)n * 2 - 1) + v * (j / (float)n * 2 - 1), half);
                     var c = new Vector3(Mathf.Clamp(p.x, -inner.x, inner.x), Mathf.Clamp(p.y, -inner.y, inner.y), Mathf.Clamp(p.z, -inner.z, inner.z));
-                    var nrm = (p - c).normalized; verts.Add(c + nrm * r); norms.Add(nrm);
+                    var nrm = (p - c).normalized; verts.Add(c + nrm * r); norms.Add(nrm); uvs.Add(new Vector2(i / (float)n, j / (float)n)); // her yüze bütün doku (zar, ahşap)
                 }
                 for (int j = 0; j < n; j++) for (int i = 0; i < n; i++)
                 {
@@ -59,7 +59,7 @@ namespace Alemdar.Okey
                     tris.AddRange(new[] { a, a2, a1, a1, a2, a3 });
                 }
             }
-            var m = new Mesh { name = "yuvarlakKutu" }; m.SetVertices(verts); m.SetNormals(norms); m.SetTriangles(tris, 0); m.RecalculateBounds();
+            var m = new Mesh { name = "yuvarlakKutu" }; m.SetVertices(verts); m.SetNormals(norms); m.SetUVs(0, uvs); m.SetTriangles(tris, 0); m.RecalculateBounds();
             // yön tutarlılığı: üçgen yüzü normalle ters ise çevir
             var t = m.triangles; var vs = m.vertices; var ns = m.normals;
             for (int k = 0; k < t.Length; k += 3) { var fn = Vector3.Cross(vs[t[k + 1]] - vs[t[k]], vs[t[k + 2]] - vs[t[k]]); if (Vector3.Dot(fn, ns[t[k]]) < 0) (t[k + 1], t[k + 2]) = (t[k + 2], t[k + 1]); }

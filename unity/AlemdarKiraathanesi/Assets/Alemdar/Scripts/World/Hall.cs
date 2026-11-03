@@ -43,7 +43,7 @@ namespace Alemdar.World
                 var t = Tables[i];
                 Props.Table(Root, t);
                 for (int d = 0; d < 4; d++) Props.Chair(Root, Seat(i, d, .06f), d * 90);
-                for (int k = 0; k < 2; k++) { var s = Stool(i, k); Props.Cyl(Root, .16f, .03f, Props.ChairSeat, s + new Vector3(0, .5f, 0)); Props.Cyl(Root, .02f, .5f, stoolM, s + new Vector3(0, .25f, 0)); }
+                for (int k = 0; k < 2; k++) Furniture.Stool(Root, Stool(i, k)); // yancı tabureleri
                 // her masada ayrı oyun: okey, batak, pişti, domino, tavla (gerçek oyun o masaya gelince gizlenir: SetDecor)
                 var decor = new GameObject("oyunTakimi_" + i).transform; decor.SetParent(Root, false); Decor.Add(decor.gameObject);
                 if (i == Home) continue;

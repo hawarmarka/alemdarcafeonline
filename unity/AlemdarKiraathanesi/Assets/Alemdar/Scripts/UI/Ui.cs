@@ -1,4 +1,4 @@
-// Arayüz: kıraathane teması (koyu ceviz panel, pirinç kenar, krem yazı, örtü yeşili düğme). Kodla kurulur (uGUI).
+﻿// Arayüz: kıraathane teması (koyu ceviz panel, pirinç kenar, krem yazı, örtü yeşili düğme). Kodla kurulur (uGUI).
 using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -22,7 +22,7 @@ namespace Alemdar.UI
 
     public static class Ui
     {
-        public static readonly Color Panel = new(.09f, .075f, .06f, .93f), Line = new(.7f, .55f, .32f, .55f), Ink = new(.95f, .92f, .85f), Muted = new(.72f, .67f, .58f);
+        public static readonly Color Panel = new(.075f, .065f, .058f, .9f), Line = new(.82f, .66f, .4f, .38f), Ink = new(.97f, .95f, .9f), Muted = new(.74f, .7f, .63f);
         public static readonly Color Green = new(.09f, .42f, .37f), Wood = new(.2f, .15f, .11f), Maroon = new(.5f, .12f, .12f), Brass = new(.83f, .66f, .35f);
         public static Canvas Canvas { get; private set; }
         static Sprite round, roundSmall;
@@ -34,7 +34,7 @@ namespace Alemdar.UI
             Canvas = go.GetComponent<Canvas>(); Canvas.renderMode = RenderMode.ScreenSpaceOverlay; Canvas.sortingOrder = 10;
             var sc = go.GetComponent<CanvasScaler>(); sc.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize; sc.referenceResolution = new Vector2(1920, 1080); sc.matchWidthOrHeight = .5f;
             if (!UnityEngine.Object.FindAnyObjectByType<EventSystem>()) new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
-            round = RoundSprite(64, 18); roundSmall = RoundSprite(32, 8);
+            round = RoundSprite(72, 22); roundSmall = RoundSprite(32, 8);
             toast = Label(Canvas.transform, "", 26, Ink, TextAnchor.MiddleCenter);
             var tr = toast.rectTransform; Anchor(tr, new Vector2(.5f, 1), new Vector2(.5f, 1), new Vector2(0, -110), new Vector2(900, 60));
             var bg = Box(toast.transform, Panel, round); bg.transform.SetAsFirstSibling(); Stretch(bg.rectTransform, -24, -8);
@@ -71,6 +71,7 @@ namespace Alemdar.UI
         public static RectTransform Card(Transform parent, Vector2 size)
         {
             var edge = Box(parent, Line); edge.rectTransform.sizeDelta = size;
+            var sh = edge.gameObject.AddComponent<Shadow>(); sh.effectColor = new Color(0, 0, 0, .35f); sh.effectDistance = new Vector2(0, -5);
             var bg = Box(edge.transform, Panel); Stretch(bg.rectTransform, 1.5f, 1.5f);
             return edge.rectTransform;
         }
@@ -87,29 +88,29 @@ namespace Alemdar.UI
         static Sprite BevelSprite()
         {
             if (bevel) return bevel;
-            int w = 64, h = 64, r = 12; var t = new Texture2D(w, h, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp };
+            int w = 96, h = 96, r = 20; var t = new Texture2D(w, h, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear };
             for (int y = 0; y < h; y++) for (int x = 0; x < w; x++)
             {
                 float dx = Mathf.Max(0, Mathf.Max(r - x - .5f, x + .5f - (w - r))), dy = Mathf.Max(0, Mathf.Max(r - y - .5f, y + .5f - (h - r)));
-                float a = Mathf.Clamp01(r - Mathf.Sqrt(dx * dx + dy * dy) + .5f);
-                float v = Mathf.Lerp(.78f, 1.08f, y / (float)(h - 1));            // alttan üste aydınlanır
-                if (y >= h - 3 && x > 6 && x < w - 7) v = 1.25f;                  // üst parlaklık
-                if (y <= 2) v *= .8f;                                            // alt gölge kenarı
+                float dist = Mathf.Sqrt(dx * dx + dy * dy), a = Mathf.Clamp01(r - dist + .5f);
+                float k = y / (float)(h - 1), v = Mathf.Lerp(.86f, 1.06f, k * k * (3 - 2 * k));   // alttan üste yumuşak aydınlanma
+                float edge = r - dist;                                                                 // kenara uzaklık (köşelerde)
+                float inset = Mathf.Min(Mathf.Min(x, w - 1 - x), Mathf.Min(y, h - 1 - y));
+                if (Mathf.Min(inset, edge) < 1.6f) v *= y > h / 2 ? 1.18f : .78f;                    // üstte ince ışık, altta ince koyu çizgi
                 t.SetPixel(x, y, new Color(Mathf.Min(1, v), Mathf.Min(1, v), Mathf.Min(1, v), a));
             }
             t.Apply();
             return bevel = Sprite.Create(t, new Rect(0, 0, w, h), new Vector2(.5f, .5f), 100, 0, SpriteMeshType.FullRect, new Vector4(r, r, r, r));
         }
-        static Color KindColor(Kind k) => k switch { Kind.Primary => new Color(.11f, .5f, .43f), Kind.Danger => new Color(.6f, .15f, .14f), Kind.Ghost => new Color(.3f, .27f, .24f, .55f), _ => new Color(.29f, .22f, .16f) };
+        static Color KindColor(Kind k) => k switch { Kind.Primary => new Color(.12f, .54f, .42f), Kind.Danger => new Color(.7f, .2f, .16f), Kind.Ghost => new Color(.24f, .22f, .2f, .62f), _ => new Color(.36f, .26f, .18f) }; // çuha yeşili, tuğla, ceviz
         public static Button Button(Transform parent, string text, Kind kind, Action onClick, Vector2? size = null)
         {
             var img = Box(parent, KindColor(kind), BevelSprite()); var r = img.rectTransform; r.sizeDelta = size ?? new Vector2(220, 56);
             var b = img.gameObject.AddComponent<Button>();
             var cb = b.colors; cb.normalColor = Color.white; cb.highlightedColor = new Color(1.15f, 1.15f, 1.12f); cb.pressedColor = new Color(.82f, .82f, .82f); cb.selectedColor = Color.white; cb.disabledColor = new Color(.5f, .5f, .5f, .55f); cb.fadeDuration = .07f; b.colors = cb;
-            var sh = img.gameObject.AddComponent<Shadow>(); sh.effectColor = new Color(0, 0, 0, .45f); sh.effectDistance = new Vector2(0, -3);
-            var ol = img.gameObject.AddComponent<Outline>(); ol.effectColor = kind == Kind.Primary ? new Color(.45f, .9f, .78f, .3f) : new Color(.85f, .68f, .4f, .32f); ol.effectDistance = new Vector2(1, -1);
-            var l = Label(r, text, 21, Ink, TextAnchor.MiddleCenter, FontStyle.Bold); Stretch(l.rectTransform, 10, 4);
-            var ls = l.gameObject.AddComponent<Shadow>(); ls.effectColor = new Color(0, 0, 0, .5f); ls.effectDistance = new Vector2(0, -1);
+            var sh = img.gameObject.AddComponent<Shadow>(); sh.effectColor = new Color(0, 0, 0, .38f); sh.effectDistance = new Vector2(0, -3);
+            var l = Label(r, text, 20, Ink, TextAnchor.MiddleCenter, FontStyle.Normal); Stretch(l.rectTransform, 12, 4); // Fira Sans SemiBold: kalın görünür, sentetik kalınlık gerekmez
+            var ls = l.gameObject.AddComponent<Shadow>(); ls.effectColor = new Color(0, 0, 0, .35f); ls.effectDistance = new Vector2(0, -1);
             b.onClick.AddListener(() => onClick?.Invoke());
             img.gameObject.AddComponent<ButtonFx>();
             var le = img.gameObject.AddComponent<LayoutElement>(); le.preferredWidth = r.sizeDelta.x; le.preferredHeight = r.sizeDelta.y;
@@ -143,8 +144,8 @@ namespace Alemdar.UI
         // Tepsi: koyu ahşap çerçeveli, düğmelerin dizildiği bant.
         public static RectTransform Tray(Transform parent, Vector2 size)
         {
-            var edge = Box(parent, new Color(.42f, .29f, .17f, .95f)); edge.rectTransform.sizeDelta = size;
-            var inner = Box(edge.transform, new Color(.1f, .075f, .055f, .94f)); Stretch(inner.rectTransform, 3, 3);
+            var edge = Box(parent, new Color(.82f, .66f, .4f, .4f)); edge.rectTransform.sizeDelta = size;
+            var inner = Box(edge.transform, new Color(.07f, .06f, .055f, .9f)); Stretch(inner.rectTransform, 1.5f, 1.5f);
             var sh = edge.gameObject.AddComponent<Shadow>(); sh.effectColor = new Color(0, 0, 0, .5f); sh.effectDistance = new Vector2(0, -4);
             return edge.rectTransform;
         }

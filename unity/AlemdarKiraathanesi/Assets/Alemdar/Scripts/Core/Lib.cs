@@ -1,4 +1,4 @@
-// Sahnedeki varlık kütüphanesi: editör derleme betiği (Build.cs) doldurur. Kod içinden Lib.I ile erişilir.
+﻿// Sahnedeki varlık kütüphanesi: editör derleme betiği (Build.cs) doldurur. Kod içinden Lib.I ile erişilir.
 // Şablon malzemeler derlemede shader çeşitlerinin atılmamasını sağlar (saydam, kesik, ışıklı).
 using UnityEngine;
 
@@ -27,6 +27,7 @@ namespace Alemdar
         public Texture2D plasterD, plasterN, darkWoodD, darkWoodN, lightWoodD, lightWoodN, marbleD, marbleN, leatherD, leatherN, fabricN;
         [Header("Tablolar (CC0 fotoğraflar)")] public Texture2D[] photos;
         [Header("Kıraathane logosu (saydam) ve sigara içilmez afişi")] public Texture2D logo, noSmoking;
+        [Header("Yazı tipi: Fira Sans (SIL OFL)")] public Font uiFont;
         void Awake() { I = this; }
     }
 }

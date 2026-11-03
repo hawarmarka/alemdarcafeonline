@@ -1,4 +1,4 @@
-// Boş masalardaki oyun takımları: her masada ayrı oyun oynanıyormuş gibi (okey, batak/pişti kâğıtları, domino, tavla).
+﻿// Boş masalardaki oyun takımları: her masada ayrı oyun oynanıyormuş gibi (okey, batak/pişti kâğıtları, domino, tavla).
 // Hepsi durağandır; salon kurulurken bir kez çizilir ve diğer eşyalarla birleşir (StaticBatchingUtility).
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
@@ -70,14 +70,7 @@ namespace Alemdar.World
                 Card(p, pos, pisti ? rng.Next(0, 360) : i * 90 + rng.Next(-12, 12), suits[rng.Next(4)] + ranks[rng.Next(ranks.Length)]);
             }
         }
-        static void Card(Transform p, Vector3 pos, float ry, string face)
-        {
-            Props.Box(p, new Vector3(.058f, .0008f, .088f), face == null ? cardBack : cardFace, pos, ry, false, false);
-            if (face == null) return;
-            bool red = face[0] == '♥' || face[0] == '♦'; var ink = red ? new Color(.8f, .08f, .1f) : new Color(.08f, .08f, .1f);
-            var t = Props.Text3D(p, face.Substring(1) + face[0], pos + Vector3.up * .0006f, ry, .024f, ink);
-            t.transform.localRotation = Quaternion.Euler(90, ry, 0); // masaya yatık
-        }
+        static void Card(Transform p, Vector3 pos, float ry, string face) => Furniture.Card(p, pos, ry, face);
         // ---------- domino: ortada yılan gibi dizilmiş taşlar, oyuncuların önünde ayakta taşlar ----------
         static readonly Dictionary<int, Material> dominoFaces = new();
         public static void Domino(Transform p, Vector3 table, int seed)
@@ -99,27 +92,16 @@ namespace Alemdar.World
             for (int dir = 0; dir < 4; dir++)
                 for (int k = 0; k < 4; k++)
                 {
-                    var g = Props.Box(p, new Vector3(.03f, .06f, .012f), backM, table + R(dir) * new Vector3((k - 1.5f) * .034f, top + .03f, .36f), dir * 90, false, true);
-                    g.name = "domino_ayakta";
+                    Furniture.DominoStanding(p, table + R(dir) * new Vector3((k - 1.5f) * .034f, top, .36f), dir * 90);
                 }
         }
-        static void DominoTile(Transform p, Vector3 pos, float ry, int a, int b, bool flat)
-        {
-            int key = a * 7 + b;
-            if (!dominoFaces.TryGetValue(key, out var m)) dominoFaces[key] = m = Props.M(Color.white, .65f, 0, Tex.Domino(a, b));
-            var g = Props.Box(p, new Vector3(.03f, .012f, .06f), m, pos + Vector3.up * .006f, ry, false, true);
-            g.name = "domino";
-        }
+        static void DominoTile(Transform p, Vector3 pos, float ry, int a, int b, bool flat) => Furniture.DominoFlat(p, pos, ry, a, b);
 
         // ---------- tavla: üçgenli tahta, pullar, zarlar ----------
         public static void Backgammon(Transform p, Vector3 table, float ry, int seed)
         {
             var rng = new System.Random(seed); float top = Props.TableTop;
-            var g = new GameObject("tavla").transform; g.SetParent(p, false); g.localPosition = table + Vector3.up * top; g.localRotation = Quaternion.Euler(0, ry, 0);
-            Props.Box(g, new Vector3(.52f, .03f, .4f), Props.WoodDark, new Vector3(0, .015f, 0));
-            Props.Quad(g, new Vector2(.48f, .36f), Props.M(Color.white, .35f, 0, Tex.BackgammonBoard()), new Vector3(0, .031f, 0), Quaternion.Euler(90, 0, 0));
-            Props.Box(g, new Vector3(.02f, .036f, .4f), Props.WoodDark, new Vector3(0, .018f, 0)); // orta menteşe
-            var white = Props.M(new Color(.93f, .92f, .88f), .6f); var black = Props.M(new Color(.1f, .09f, .08f), .6f);
+            var g = Furniture.Backgammon(p, table + Vector3.up * top, ry);
             // başlangıç dizilişine yakın: 2-5-3-5 pul, iki tarafta
             int[] cols = { 0, 5, 7, 11 }; int[] counts = { 2, 5, 3, 5 };
             for (int side = 0; side < 2; side++)
@@ -128,13 +110,12 @@ namespace Alemdar.World
                     {
                         int col = cols[s] + (rng.NextDouble() < .2 ? 1 : 0);
                         float x = -.215f + col * .036f + (col >= 6 ? .02f : 0), z = (side == 0 ? -.16f : .16f) + (side == 0 ? 1 : -1) * k * .026f;
-                        Props.Cyl(g, .012f, .006f, (s + side) % 2 == 0 ? white : black, new Vector3(x, .035f, z));
+                        Furniture.Checker(g, new Vector3(x, .0205f, z), (s + side) % 2 == 0);
                     }
             // zarlar
             for (int d = 0; d < 2; d++)
             {
-                var die = Props.Box(g, new Vector3(.014f, .014f, .014f), Props.M(Color.white, .5f, 0, Tex.Die(1 + rng.Next(6))), new Vector3(.07f + d * .025f, .038f, rng.Next(-3, 3) * .01f), rng.Next(0, 90), false, false);
-                die.name = "zar";
+                Furniture.Die(g, new Vector3(.07f + d * .025f, .0275f, rng.Next(-3, 3) * .01f), rng.Next(0, 90), 1 + rng.Next(6));
             }
         }
     }
