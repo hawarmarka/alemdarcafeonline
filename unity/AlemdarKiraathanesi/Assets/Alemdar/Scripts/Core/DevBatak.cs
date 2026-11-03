@@ -50,7 +50,7 @@ namespace Alemdar
                     if (t.Phase == "bidding")
                     {
                         bool declare = (bool?)s["declare"] == true; int min = (int?)s["bidding"]?["minNext"] ?? 0;
-                        if (bids == 0) yield return Shot("b2b_soz_sirasi");
+                        if (bids == 0) { L("el: " + string.Join(" ", ((JArray)s["hand"]).Select(c => (string)c["id"]))); yield return Shot("b2b_soz_sirasi"); }
                         app.Io.Emit("batak:bid", new { value = declare ? (int?)3 : (bids == 0 ? (int?)min : null) }); bids++;
                     }
                     else if (t.Phase == "trump") { yield return Shot("b3a_koz_sec"); var hand = (JArray)s["hand"]; var best = hand.GroupBy(c => (string)c["suit"]).OrderByDescending(g => g.Count()).First().Key; app.Io.Emit("batak:trump", new { suit = best }); }

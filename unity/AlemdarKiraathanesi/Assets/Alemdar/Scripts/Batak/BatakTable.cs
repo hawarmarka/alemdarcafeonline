@@ -123,9 +123,11 @@ namespace Alemdar.Batak
         Vector3 SlotWorld(int k, int n, float spread, bool raised, out Quaternion rot)
         {
             float t = k - (n - 1) / 2f;
-            var local = new Vector3(-t * spread, Top + .145f + (raised ? .026f : 0) - t * t * .00045f, World.Props.TableSize / 2 + .12f + k * .0011f);
-            rot = root.rotation * R(myDir) * Quaternion.Euler(66, 0, -t * .9f) * Quaternion.Euler(0, 180, 0); // elde tutulur gibi: dik, bana dönük, çok hafif yelpaze
-            return root.TransformPoint(R(myDir) * local);
+            var local = new Vector3(-t * spread, Top + .145f, World.Props.TableSize / 2 + .12f);
+            rot = root.rotation * R(myDir) * Quaternion.Euler(66, 0, 0) * Quaternion.Euler(0, 180, 0) * Quaternion.Euler(0, t * .9f, 0); // dik, bana dönük; yelpaze açısı kâğıdın kendi düzleminde (yana yatırmak sırayı bozuyordu)
+            // Sıra kâğıdın kendi ekseninde: yüz normali (rot*up) boyunca sağdaki hep 1,5 mm önde. Kavis ve kalkma kâğıdın düzleminde (rot*forward =
+            // kâğıdın üstü); dünyada aşağı/yukarı taşımak eğik kâğıdı öne-arkaya da kaydırır ve sağ yarıda sırayı bozardı.
+            return root.TransformPoint(R(myDir) * local) + rot * Vector3.up * (k * .0015f) + rot * Vector3.forward * ((raised ? .026f : 0) - t * t * .00045f);
         }
 
         // ---------- rakiplerin kapalı kartları: kendi önlerinde ayakta yelpaze; eşlide açılan el yüzü yukarı ----------
@@ -236,7 +238,7 @@ namespace Alemdar.Batak
             float k = 1 - Mathf.Exp(-Time.deltaTime * 14);
             foreach (var v in hand.Values)
             {
-                var h = v == hover && MyTurn ? v.Home + Vector3.up * .012f : v.Home; // üstüne gelinen kâğıt biraz kalkar
+                var h = v == hover && MyTurn ? v.Home + v.HomeRot * Vector3.forward * .012f : v.Home; // üstüne gelinen kâğıt kendi düzleminde kalkar (öne çıkmaz)
                 v.transform.SetPositionAndRotation(Vector3.Lerp(v.transform.position, h, k), Quaternion.Slerp(v.transform.rotation, v.HomeRot, k));
             }
             // ortadaki kâğıtlar PrimeTween ile hareket eder (DrawTrick)
