@@ -29,7 +29,7 @@ namespace Alemdar.World
             Apartment.Build(Root, -19f, -7f, -6.4f, 5.2f, 3.4f, 4, blue, 2, true, new[] { "-", "TUHAFİYE" }, (f, c) => f == 0 && c == 4);
             Apartment.Build(Root, 7f, 19f, -6.4f, 5.2f, 3.4f, 3, pink, 3, true, new[] { "BAKKAL", "-" }, null);
             Apartment.Build(Root, -31f, -19.2f, -6.4f, 5.2f, 3.4f, 5, cream, 4, true, new[] { "-", "-" }, null);
-            Apartment.Build(Root, 19.2f, 31f, -6.4f, 5.2f, 3.4f, 4, beige, 5, true, new[] { "-", "-" }, null);
+            Apartment.BuildKit(Root, 19.2f, 31f, -6.4f, 5.2f, 3.4f, 3, cream, 5, new[] { "BERBER", "-" }); // modern apartman (Apartment Kit cephesi)
             // parkın arkasındaki sıra (yüzü parka bakar)
             var back = new GameObject("arkaSira").transform; back.SetParent(Root, false); back.localPosition = new Vector3(0, 0, MaxZ + 2f); back.localRotation = Quaternion.Euler(0, 180, 0);
             Apartment.Build(back, -28f, -10f, -8f, 0f, 3.2f, 4, pink, 6, true, new[] { "-", "-", "-" }, null);
@@ -277,9 +277,12 @@ namespace Alemdar.World
             next = Time.time + 4.5f + Random.value * 3;
             idx = (idx + 1) % lines.Length;
             bubble.text = near ? lines[idx] : "";
-            me.Reach(me.transform.position + me.Front * .55f + Vector3.up * 1.35f, 0, 1.1f); // el kol hareketi
-            if (other && other.TryGetComponent<GossipTalk>(out var o)) o.BubbleClear();
+            me.Gesture(Chars.Person.Talk, 4f); // anlatan elleriyle konuşur
+            if (other && other.TryGetComponent<GossipTalk>(out var o)) { o.BubbleClear(); o.Listen(); }
         }
         void BubbleClear() { if (bubble) bubble.text = ""; }
+        // dinleyen: biraz sonra başını sallar ya da güler
+        void Listen() => Invoke(nameof(React), 1.5f + Random.value);
+        void React() { if (me) me.Gesture(Random.value < .35f ? Chars.Person.Laugh : Chars.Person.Yes, 2.5f); }
     }
 }

@@ -160,6 +160,20 @@ namespace Alemdar.Chars
         public void SetTalk(float level) { talk = Mathf.Lerp(talk, level, .2f); Anim.SetBool(TalkId, talk > .15f); }
         public void Serve() => Anim.SetTrigger(ServeId);
 
+        // Üst gövde hareketi (Human Basic Motions): 1 çay iç, 2-4 konuş, 5 evet, 6 hayır, 7 gül, 8 el salla, 9 alkış, 10 soru.
+        // Katman ağırlığı yalnızca hareket süresince açılır; böylece oturma/yürüme hiç bozulmaz.
+        static readonly int GestureIdId = Animator.StringToHash("GestureId"), GestureId = Animator.StringToHash("Gesture");
+        public const int Drink = 1, Talk = 2, Yes = 5, No = 6, Laugh = 7, Wave = 8, Clap = 9, Ask = 10;
+        int gestureLayer = -2; float gestureUntil;
+        public bool Gesturing => Time.time < gestureUntil;
+        public void Gesture(int id, float seconds = 3f)
+        {
+            if (gestureLayer == -2) gestureLayer = Anim.GetLayerIndex("UstGovde");
+            if (gestureLayer < 0 || reach.HasValue) return; // katman yoksa ya da el taşa uzanıyorsa
+            if (id == Talk) id += Random.Range(0, 3);       // üç farklı konuşma
+            Anim.SetInteger(GestureIdId, id); Anim.SetTrigger(GestureId); gestureUntil = Time.time + seconds;
+        }
+
         void LateUpdate()
         {
             if (tag && Camera.main) tag.transform.parent.rotation = Quaternion.LookRotation(tag.transform.parent.position - Camera.main.transform.position);
@@ -175,6 +189,7 @@ namespace Alemdar.Chars
 
         void Update()
         {
+            if (gestureLayer >= 0) Anim.SetLayerWeight(gestureLayer, Mathf.MoveTowards(Anim.GetLayerWeight(gestureLayer), Gesturing && !reach.HasValue ? 1 : 0, Time.deltaTime * 3));
             if (reach.HasValue) { reachT += Time.deltaTime; if (reachT >= reach.Value.dur) reach = null; }
             else if (reaches.Count > 0)
             {
@@ -197,6 +212,22 @@ namespace Alemdar.Chars
                 Anim.SetIKPosition(AvatarIKGoal.RightHand, reach.Value.target + Vector3.up * .025f);
                 Anim.SetIKRotation(AvatarIKGoal.RightHand, Quaternion.LookRotation(reach.Value.target - transform.position, Vector3.up) * Quaternion.Euler(80, 0, 0)); // avuç aşağı
             }
+        }
+    }
+    // Masada oturan rakibin hal hareketleri: sırası değilken arada bir çay içer, konuşur, başını sallar, güler.
+    public class SeatedChatter : MonoBehaviour
+    {
+        public System.Func<bool> Busy; // sırası geldiyse (taş çekip atıyorsa) hareket yapılmaz
+        Person p; float next;
+        static readonly int[] Pool = { Person.Drink, Person.Drink, Person.Talk, Person.Talk, Person.Talk, Person.Yes, Person.No, Person.Laugh, Person.Ask };
+        void Start() { p = GetComponent<Person>(); next = Time.time + Random.Range(2f, 8f); }
+        void Update()
+        {
+            if (Time.time < next || !p) return;
+            next = Time.time + Random.Range(6f, 15f);
+            if (Busy != null && Busy()) return;
+            int id = Pool[Random.Range(0, Pool.Length)];
+            p.Gesture(id, id == Person.Drink ? 4.5f : 3.2f);
         }
     }
 }

@@ -48,6 +48,9 @@ namespace Alemdar
             yield return CamShot(dir, "m4_teyzeler", new Vector3(-6.6f, 3.2f, 11f), new Vector3(-6.8f, 4.6f, 5.4f));
             yield return CamShot(dir, "m5_park", new Vector3(-4f, 1.7f, 21.5f), new Vector3(2f, 1.5f, 34f));
             yield return CamShot(dir, "m6_cay_bahcesi", new Vector3(12f, 1.8f, 32f), new Vector3(18f, .7f, 37.5f));
+            yield return CamShot(dir, "m13_modern_apartman", new Vector3(18f, 1.8f, 16f), new Vector3(25f, 6f, 5f));
+            yield return CamShot(dir, "k9_fiyat_jaluzi", new Vector3(-2.5f, 1.6f, -1.5f), new Vector3(-2.9f, 1.6f, -6.2f));
+            yield return CamShot(dir, "k10_camekan", new Vector3(-3f, 1.6f, 1.5f), new Vector3(-3.5f, 1.8f, 5f));
             yield return CamShot(dir, "m12_cocuklar", World.Playground.Center + new Vector3(4.5f, 2.2f, -5f), World.Playground.Center + new Vector3(0, .6f, -.5f));
             if (World.Weather.I)
             {
@@ -82,6 +85,11 @@ namespace Alemdar
                 float until = Time.time + 20; while (app.Okey.State == null && Time.time < until) { if (app.SeatedTable >= 0) app.Io.Emit("startWithBots"); yield return new WaitForSeconds(1.5f); }
                 yield return new WaitForSeconds(3); Shot(dir, "5_masa");
                 report.Append("masadaki rakiplerin yönü: " + app.Okey.FacingReport() + "\n");
+                app.Okey.DebugGesture(Chars.Person.Drink); yield return new WaitForSeconds(1.6f); Shot(dir, "5b_cay_iciyor");
+                yield return new WaitForSeconds(3.6f);
+                app.Okey.DebugGesture(Chars.Person.Talk); yield return new WaitForSeconds(1.2f); Shot(dir, "5c_konusuyor");
+                yield return new WaitForSeconds(3f);
+                report.Append("hareketten sonra yön: " + app.Okey.FacingReport() + "\n");
                 // otomatik oyun: sıram geldikçe çek ve at; sunucu hatalarını say; el sonunu bekle
                 int errors = 0, draws = 0, discards = 0; bool finished = false; string lastError = "";
                 app.Io.On("gameError", d => { errors++; lastError = (string)d["message"]; });
@@ -173,9 +181,11 @@ namespace Alemdar
         {
             if (Time.time < 4) return;
             frames.Add(Time.unscaledDeltaTime * 1000);
+            if (Time.unscaledDeltaTime > .2f) report.Append($"UZUN KARE {Time.unscaledDeltaTime * 1000:0} ms, t={Time.time:0.0}, son çekim: {lastShot}\n");
             FrameTimingManager.CaptureFrameTimings();
             if (FrameTimingManager.GetLatestTimings(1, ft) > 0) { cpu.Add((float)ft[0].cpuMainThreadFrameTime); gpu.Add((float)ft[0].gpuFrameTime); }
         }
-        static void Shot(string dir, string name) => ScreenCapture.CaptureScreenshot(Path.Combine(dir, name + ".png"));
+        static string lastShot = "-";
+        static void Shot(string dir, string name) { lastShot = name; ScreenCapture.CaptureScreenshot(Path.Combine(dir, name + ".png")); }
     }
 }

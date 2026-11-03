@@ -57,6 +57,20 @@ namespace Alemdar.EditorTools
                 sb.AppendLine($"  {Path.GetFileNameWithoutExtension(f)}: merkez {b.center} boyut {b.size} parça {rs.Length} mesh {mf.Count(m => m.sharedMesh)} ölçek {inst.transform.localScale} mat {rs[0].sharedMaterial?.name} keyword {string.Join(",", rs[0].sharedMaterial ? rs[0].sharedMaterial.shaderKeywords : new string[0])}");
                 Object.DestroyImmediate(inst);
             }
+            sb.AppendLine("== Asset Store kalıpları (yol / merkez / boyut / ölçek / malzeme shader)");
+            foreach (var name in new[] { "Props_SM_NewsPaper_15", "Blinds_SM_VenetianBlind_Close_2", "Blinds_SM_VenetianBlind_Open_5", "WallProps_SM_Chalkboard_6", "SM_PlantPot_74",
+                                         "WallProps_SM_WallShelves3_2", "Props_SM_CoffeMug_7", "Cabinet_Base_SD_01", "Cabinet_Base_Sink_01", "Cabinet_Wall_DD_01", "Range_Hood", "Stove_01",
+                                         "Fridge_01", "urban_building_Prefab", "CeilingParts_SM_AC_3m_165", "SM_CeilingLamp_14", "Ext_Apt_01_Wall_Window_01", "Ext_apt_01_01" })
+            {
+                var guid = AssetDatabase.FindAssets(name + " t:Prefab").FirstOrDefault(); if (guid == null) { sb.AppendLine("  YOK " + name); continue; }
+                var path = AssetDatabase.GUIDToAssetPath(guid); var inst = (GameObject)Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(path));
+                var rs = inst.GetComponentsInChildren<Renderer>(true);
+                if (rs.Length == 0) { sb.AppendLine($"  {name}: renderer yok"); Object.DestroyImmediate(inst); continue; }
+                var b = rs[0].bounds; foreach (var r in rs) b.Encapsulate(r.bounds);
+                var sh = string.Join(",", rs.SelectMany(r => r.sharedMaterials).Where(m => m).Select(m => m.shader.name).Distinct());
+                sb.AppendLine($"  {name}: {path} | merkez {b.center} boyut {b.size} | ölçek {inst.transform.localScale} rot {inst.transform.eulerAngles} | {sh}");
+                Object.DestroyImmediate(inst);
+            }
             File.WriteAllText(Path.Combine(Application.dataPath, "../probe.txt"), sb.ToString());
         }
     }

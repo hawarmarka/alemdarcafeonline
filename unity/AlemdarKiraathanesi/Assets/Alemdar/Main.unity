@@ -119,7 +119,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &76736903
+--- !u!1 &295931104
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -127,8 +127,54 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 76736905}
-  - component: {fileID: 76736904}
+  - component: {fileID: 295931106}
+  - component: {fileID: 295931105}
+  m_Layer: 0
+  m_Name: Uygulama
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &295931105
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 295931104}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c81d788412335444bac65ec6c39b3d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Alemdar.App
+  SeatedTable: -1
+  SeatedDir: -1
+--- !u!4 &295931106
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 295931104}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &955420260
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 955420262}
+  - component: {fileID: 955420261}
   m_Layer: 0
   m_Name: Kutuphane
   m_TagString: Untagged
@@ -136,13 +182,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &76736904
+--- !u!114 &955420261
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 76736903}
+  m_GameObject: {fileID: 955420260}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d53ea8e2c0dc2f3439e7aec15bebb58e, type: 3}
@@ -216,6 +262,16 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 762394d39f8d9fb4ca6272ed31b1b0a7, type: 3}
   skybox: {fileID: 2100000, guid: e518b6b84746138408a081896337d573, type: 2}
   controller: {fileID: 9100000, guid: 12f98ab934719254b8bfb631353c5a9c, type: 2}
+  storeModels:
+  - {fileID: 1030974143, guid: abc00000000015719011778032900871, type: 3}
+  - {fileID: 1030971972, guid: abc00000000000909979521451180989, type: 3}
+  - {fileID: 1030973961, guid: abc00000000005205044257290924153, type: 3}
+  - {fileID: 1030975296, guid: abc00000000008965007600174189720, type: 3}
+  - {fileID: 1030973929, guid: abc00000000011195635789104536157, type: 3}
+  - {fileID: 3732465285068630151, guid: 4a111030cf811f542a01c361f491a2b1, type: 3}
+  - {fileID: 1129999413580238423, guid: edb02028d59ccac4ca6641a183fa7346, type: 3}
+  - {fileID: 8683862293970279672, guid: b9f258a086096d24aa7861fa20deed65, type: 3}
+  - {fileID: 8487948052559295814, guid: add8565ea42029f4abfaa37c7dbe2abf, type: 3}
   phTexKeys:
   - asphalt_02/diff
   - asphalt_02/nor
@@ -402,13 +458,13 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 9084387b676e2e24d8e7bfb31955b402, type: 3}
   - {fileID: 2800000, guid: f19a4651777b3694c82619d602bfccda, type: 3}
   - {fileID: 2800000, guid: 050cce5352f17f4428b49cd3250ff46d, type: 3}
---- !u!4 &76736905
+--- !u!4 &955420262
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 76736903}
+  m_GameObject: {fileID: 955420260}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -417,7 +473,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1339825498
+--- !u!1 &1063600053
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -425,9 +481,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1339825501}
-  - component: {fileID: 1339825500}
-  - component: {fileID: 1339825499}
+  - component: {fileID: 1063600056}
+  - component: {fileID: 1063600055}
+  - component: {fileID: 1063600054}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -435,21 +491,21 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!81 &1339825499
+--- !u!81 &1063600054
 AudioListener:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1339825498}
+  m_GameObject: {fileID: 1063600053}
   m_Enabled: 1
---- !u!20 &1339825500
+--- !u!20 &1063600055
 Camera:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1339825498}
+  m_GameObject: {fileID: 1063600053}
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
@@ -494,62 +550,16 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!4 &1339825501
+--- !u!4 &1063600056
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1339825498}
+  m_GameObject: {fileID: 1063600053}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1.8, z: 9.5}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1995472872
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1995472874}
-  - component: {fileID: 1995472873}
-  m_Layer: 0
-  m_Name: Uygulama
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1995472873
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1995472872}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5c81d788412335444bac65ec6c39b3d1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Alemdar.App
-  SeatedTable: -1
-  SeatedDir: -1
---- !u!4 &1995472874
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1995472872}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -559,6 +569,6 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 1339825501}
-  - {fileID: 76736905}
-  - {fileID: 1995472874}
+  - {fileID: 1063600056}
+  - {fileID: 955420262}
+  - {fileID: 295931106}

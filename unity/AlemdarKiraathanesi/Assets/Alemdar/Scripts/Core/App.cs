@@ -82,6 +82,9 @@ namespace Alemdar
             }
             // bütün gökyüzü dokularını bir kez göster: hava değişince ilk yükleme takılması olmasın
             if (World.Weather.I) yield return World.Weather.I.Prewarm();
+            // el kol hareketi kliplerini bir kez oynat (ilk kullanımda klip verisi açılırken takılmasın)
+            var someone = FindAnyObjectByType<Chars.Person>();
+            if (someone) for (int g = 1; g <= 10; g++) { someone.Gesture(g, .2f); yield return null; yield return null; }
             cam.SetPositionAndRotation(p0, r0);
         }
 

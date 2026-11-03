@@ -32,3 +32,13 @@ unity/runtime/
 unity/*.log
 unity/release/
 unity/AlemdarKiraathanesi/FFmpegRuntime/
+# Asset Store paketleri: Standard Unity Asset Store EULA kaynak dosyaların açık depoda dağıtılmasına izin vermez.
+# Yalnızca bu bilgisayarda (Package Manager > My Assets) durur; derlenmiş oyuna girer. Yeni bilgisayarda tekrar indirilip kurulmalı.
+unity/AlemdarKiraathanesi/Assets/LeartesStudios/
+unity/AlemdarKiraathanesi/Assets/LeartesStudios.meta
+unity/AlemdarKiraathanesi/Assets/Brick Project Studio/
+unity/AlemdarKiraathanesi/Assets/Brick Project Studio.meta
+unity/AlemdarKiraathanesi/Assets/Kevin Iglesias/
+unity/AlemdarKiraathanesi/Assets/Kevin Iglesias.meta
+unity/AlemdarKiraathanesi/Assets/UrbanBuilding/
+unity/AlemdarKiraathanesi/Assets/UrbanBuilding.meta

@@ -65,6 +65,7 @@ namespace Alemdar.World
             foreach (var s in new[] { new Vector3(-2.9f, 0, -3.6f), new Vector3(5.2f, 0, .6f), new Vector3(-5.6f, 0, 3.6f) }) { Props.SideTable(Root, s); Props.TeaGlass(Root, s + new Vector3(0, .635f, 0)); }
             // duvar eşyaları
             Paintings();
+            WallDecor();
             Props.AntenPoster(Root, new Vector3(MaxX - .03f, 1.75f, -3.4f), -90); // yeni uygulamamız Anten
             var clock = new GameObject("saat").AddComponent<WallClock>(); clock.transform.SetParent(Root, false); clock.transform.localPosition = new Vector3(MaxX - .03f, 2.25f, -1f); clock.transform.localRotation = Quaternion.Euler(0, -90, 0); clock.Build();
             Props.Fridge(Root, new Vector3(MaxX - .45f, 0, MinZ + .4f), 180);
@@ -76,6 +77,29 @@ namespace Alemdar.World
             // Salon ve mahalle hareket etmez: aynı malzemeli parçalar tek çizimde birleşir (binlerce küçük parça → birkaç yüz çizim).
             StaticBatchingUtility.Combine(Root.gameObject);
             StaticBatchingUtility.Combine(Neighborhood.Root.gameObject);
+        }
+
+        // Coffee Shop (Leartes) ve Apartment Kit (Brick Project) parçalarıyla iç süs: masalarda gazete, camekânda jaluzi,
+        // tezgah yanında fiyat tahtası, köşelerde büyük saksılar, duvar rafı, çay ocağında buzdolabı.
+        void WallDecor()
+        {
+            var rng = new System.Random(11);
+            for (int i = 0; i < Tables.Count; i++)
+                if (i != Home && i % 3 == 1) Apartment.Place(Root, "Props_SM_NewsPaper_15", Tables[i] + SeatRot(i % 4) * new Vector3(.3f, Props.TableTop + .002f, .3f), rng.Next(360), 1, false);
+            foreach (var s in new[] { new Vector3(-2.9f, .65f, -3.6f), new Vector3(5.2f, .65f, .6f) }) Apartment.Place(Root, "Props_SM_NewsPaper_15", s, 30, 1, false);
+            // camekân jaluzileri: iki yanın üst kısmında, yarı açık (dışarı görünür)
+            foreach (float x in new[] { -4.9f, -2.2f, 2.2f, 4.9f }) Apartment.Place(Root, "Blinds_SM_VenetianBlind_Open_5", new Vector3(x, 2.62f, MaxZ - .06f), 0, .9f, false);
+            // fiyat tahtası (kara tahta, tebeşir yazısı)
+            var board = new Vector3(-2.9f, 1.75f, MinZ + .03f); // dolap (-2.2..-1.3) ile tablo (-4.8..-3.6) arasında
+            if (Apartment.Place(Root, "WallProps_SM_Chalkboard_6", board, 0, .8f, false))
+            {
+                Props.Text3D(Root, "FİYAT LİSTESİ", board + new Vector3(0, .5f, .04f), 180, .07f, new Color(.95f, .93f, .85f));
+                string[] menu = { "Çay ............ 10 ₺", "Oralet ........ 10 ₺", "Türk Kahvesi .. 40 ₺", "Tost ........... 60 ₺", "Su ............. 10 ₺", "Ayran ......... 20 ₺" };
+                for (int k = 0; k < menu.Length; k++) Props.Text3D(Root, menu[k], board + new Vector3(0, .3f - k * .13f, .04f), 180, .045f, new Color(.92f, .9f, .82f));
+            }
+            Apartment.Place(Root, "SM_PlantPot_74", new Vector3(MinX + .75f, 0, MaxZ - .8f), 0, .7f);
+            Apartment.Place(Root, "SM_PlantPot_74", new Vector3(MaxX - .75f, 0, MaxZ - .9f), 120, .7f);
+            Apartment.Place(Root, "WallProps_SM_WallShelves3_2", new Vector3(3f, 1.55f, MinZ + .03f), 0, .8f, false); // tezgah ile Kapadokya tablosu arası
         }
 
         // Duvarlardaki tablolar: gerçek fotoğraflar (Galata, Kız Kulesi, Boğaz, Kapadokya, Uzungöl, Sümela, yayla, Ölüdeniz); yoksa kendi çizimimiz.

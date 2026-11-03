@@ -42,6 +42,11 @@ namespace Alemdar.EditorTools
             (lib.women, _) = Rocketbox("Assets/ThirdParty/RocketboxWomen", null);
             (lib.children, _) = Rocketbox("Assets/ThirdParty/RocketboxChildren", null);
             lib.phModels = PolyHavenModels();
+            // Asset Store paketlerinden yalnızca kullanılan kalıplar (derlemeye yalnız bunlar girer)
+            lib.storeModels = new[] { "Props_SM_NewsPaper_15", "Blinds_SM_VenetianBlind_Open_5", "WallProps_SM_Chalkboard_6", "SM_PlantPot_74", "WallProps_SM_WallShelves3_2",
+                                      "Ext_Apt_01_Wall_Window_01", "Ext_Apt_01_Wall_01", "Fridge_01", "Range_Hood" }
+                .Select(n => AssetDatabase.FindAssets(n + " t:Prefab").Select(AssetDatabase.GUIDToAssetPath).FirstOrDefault(p => Path.GetFileNameWithoutExtension(p) == n))
+                .Where(p => p != null).Select(p => AssetDatabase.LoadAssetAtPath<GameObject>(p)).ToArray();
             // mahalle dokuları: modeli olmayan Poly Haven klasörlerindeki diff/nor (anahtar "klasör/harita")
             var texKeys = new System.Collections.Generic.List<string>(); var texs = new System.Collections.Generic.List<Texture2D>();
             foreach (var dir in Directory.GetDirectories("Assets/ThirdParty/PolyHaven"))
@@ -196,7 +201,44 @@ namespace Alemdar.EditorTools
             T(sit, sitOut, .15f, false, ("Sit", false)); T(talk, sitOut, .15f, false, ("Sit", false)); T(sitOut, move, .2f, true);
             var ts = move.AddTransition(serve); ts.AddCondition(AnimatorConditionMode.If, 0, "Serve"); ts.duration = .15f; ts.hasExitTime = false;
             T(serve, move, .2f, true);
+            Gestures(ac);
             return ac;
+        }
+
+        // Üst gövde katmanı (Kevin Iglesias, Human Basic Motions): oturan ya da duran kişi çay içer, konuşur, başını sallar, güler.
+        // Maske yalnızca gövde, baş ve kollar: bacaklar ve kök alt katmandan (yürüme/oturma) gelir, yön sorunu olmaz.
+        // Person.Gesture(id): 1 çay iç, 2-4 konuş, 5 baş salla (evet), 6 baş salla (hayır), 7 gül, 8 el salla, 9 alkış, 10 soru sor
+        static readonly string[] GestureClips = { "Misc/Drink/HumanM@Drink01_R", "Social/Conversation/HumanM@Talk01", "Social/Conversation/HumanM@Talk02", "Social/Conversation/HumanM@Talk03",
+            "Social/Conversation/HumanM@HeadNod01", "Social/Conversation/HumanM@HeadShake01", "Social/Emotions/HumanM@Laugh01", "Social/Conversation/HumanM@HandWave01",
+            "Social/Conversation/HumanM@HandClap01", "Social/Conversation/HumanM@Question01" };
+        static void Gestures(AnimatorController ac)
+        {
+            const string HBM = "Assets/Kevin Iglesias/Human Animations/Animations/Male/";
+            AnimationClip Load(string rel) => AssetDatabase.LoadAllAssetsAtPath(HBM + rel + ".fbx").OfType<AnimationClip>().FirstOrDefault(c => !c.name.StartsWith("__preview"));
+            if (!Load(GestureClips[0])) { Debug.LogWarning("Human Basic Motions yok: el kol hareketleri kapalı."); return; }
+            var mask = new AvatarMask { name = "UstGovde" };
+            for (int i = 0; i < (int)AvatarMaskBodyPart.LastBodyPart; i++)
+            {
+                var part = (AvatarMaskBodyPart)i;
+                // omurga (Body) dahil değil: ayakta çekilmiş kliplerin duruşu oturan gövdeyi geriye yatırıyordu; yalnızca baş, kollar, parmaklar
+                mask.SetHumanoidBodyPartActive(part, part is AvatarMaskBodyPart.Head or AvatarMaskBodyPart.LeftArm or AvatarMaskBodyPart.RightArm
+                                                       or AvatarMaskBodyPart.LeftFingers or AvatarMaskBodyPart.RightFingers);
+            }
+            AssetDatabase.DeleteAsset(Gen + "/UstGovde.mask"); AssetDatabase.CreateAsset(mask, Gen + "/UstGovde.mask");
+            ac.AddParameter("GestureId", AnimatorControllerParameterType.Int);
+            ac.AddParameter("Gesture", AnimatorControllerParameterType.Trigger);
+            ac.AddLayer("UstGovde");
+            var layers = ac.layers; var L = layers[^1]; L.avatarMask = mask; L.defaultWeight = 0; /* Person.Gesture hareket süresince açar */ L.blendingMode = AnimatorLayerBlendingMode.Override; L.iKPass = true; ac.layers = layers;
+            var sm = ac.layers[^1].stateMachine;
+            var idle = sm.AddState("Bos"); sm.defaultState = idle; // boş durum: alt katman olduğu gibi görünür
+            for (int i = 0; i < GestureClips.Length; i++)
+            {
+                var clip = Load(GestureClips[i]); if (!clip) { Debug.LogWarning("Klip yok: " + GestureClips[i]); continue; }
+                var st = sm.AddState("Hareket" + (i + 1)); st.motion = clip;
+                var tin = sm.AddAnyStateTransition(st); tin.duration = .25f; tin.hasExitTime = false; tin.canTransitionToSelf = false;
+                tin.AddCondition(AnimatorConditionMode.If, 0, "Gesture"); tin.AddCondition(AnimatorConditionMode.Equals, i + 1, "GestureId");
+                var tout = st.AddTransition(idle); tout.hasExitTime = true; tout.exitTime = .9f; tout.duration = .35f;
+            }
         }
         static void T(AnimatorState a, AnimatorState b, float dur, bool exit, params (string p, bool v)[] conds)
         {

@@ -15,6 +15,8 @@ namespace Alemdar.Okey
         public int TableIndex { get; private set; }
         public bool Spectating;
         public int RackCount => slots.Count(s => s != null); // denetim: ıstakada duran taş sayısı
+        // denetim: bütün rakiplere aynı üst gövde hareketini yaptır
+        public void DebugGesture(int id) { foreach (var p in people.Values) if (p) p.Gesture(id, 5f); }
         // denetim: oturan her rakibin gövdesi (omuz kemikleri) ile masa ortası arasındaki açı; 0° masaya bakıyor, 180° sırtı dönük
         public string FacingReport() => string.Join(", ", people.Select(kv =>
         {
@@ -227,6 +229,8 @@ namespace Alemdar.Okey
                 var seat = hall.Seat(TableIndex, kv.Key);
                 holder.SetPositionAndRotation(seat, Quaternion.LookRotation(hall.Tables[TableIndex] - seat));
                 var p = Chars.Person.Create(kv.Value, holder); p.SetSit(true); people[kv.Key] = p;
+                int dir = kv.Key; // sırası gelen taşla uğraşır; diğerleri çay içer, sohbet eder
+                p.gameObject.AddComponent<Chars.SeatedChatter>().Busy = () => State == null || DirOf((int)State["currentPlayer"]) == dir;
             }
             int cur = (int)State["currentPlayer"];
             for (int i = 0; i < Players.Count; i++)

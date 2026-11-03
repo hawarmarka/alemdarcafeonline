@@ -161,6 +161,30 @@ namespace Alemdar.World
             }
         }
 
+        // Modern apartman: ön cephe Apartment Kit (Brick Project Studio) pencereli duvar parçalarından (2,5 m × 4 m),
+        // gövde, yanlar ve çatı bizim sıvamız; zemin katta dükkânlar. Kit parçası yoksa klasik apartmana döner.
+        public static void BuildKit(Transform p, float x0, float x1, float z0, float z1, float baseY, int floors, Material wall, int seed, string[] shopNames)
+        {
+            const float TW = 2.5f, TH = 4f;
+            if (!Lib.I.Model("Ext_Apt_01_Wall_Window_01")) { Build(p, x0, x1, z0, z1, baseY, floors, wall, seed, true, shopNames); return; }
+            Mats();
+            var rng = new System.Random(seed);
+            int cols = Mathf.FloorToInt((x1 - x0) / TW); float w = cols * TW; x1 = x0 + w; float cx = (x0 + x1) / 2, top = baseY + floors * TH;
+            Props.Box(p, new Vector3(w, top - baseY, z1 - z0 - .2f), wall, new Vector3(cx, (baseY + top) / 2, z0 + (z1 - z0 - .2f) / 2), 0, true); // ön yüzü camın arkasında
+            for (int f = 0; f < floors; f++)
+                for (int c = 0; c < cols; c++)
+                {
+                    // parçanın duvar düzlemi kendi ekseninde x=-1,3'te: 90° çevrilince pivotun 1,3 m önünde (+z) kalır
+                    const string piece = "Ext_Apt_01_Wall_Window_01"; // penceresiz kit duvarı tahta kaplama görünüyordu: her yer pencereli
+                    Place(p, piece, new Vector3(x0 + TW * (c + .5f), baseY + f * TH, z1 - 1.3f), 90, 1, false);
+                    // pencere boşluğunun arkasına cam: gövde duvarı görünmesin; bazı daireler gece ışıklı
+                    if (piece.EndsWith("Window_01")) Props.Box(p, new Vector3(TW - .1f, TH - .1f, .02f), rng.NextDouble() < .45 ? WinLit : winDark, new Vector3(x0 + TW * (c + .5f), baseY + f * TH + TH / 2, z1 - .08f), 0, false, false);
+                }
+            for (int f = 0; f <= floors; f++) Props.Box(p, new Vector3(w + .1f, .16f, .14f), slab, new Vector3(cx, baseY + f * TH, z1 + .05f));
+            Roof(p, x0, x1, z0, z1, top, rng);
+            Shops(p, x0, x1, z1, baseY, wall, shopNames, rng);
+        }
+
         // Poly Haven modeli yerleştir: yerel önü +z; isteğe bağlı kutu çarpıştırıcı (yürüme alanı ondan kaçar).
         public static GameObject Place(Transform p, string id, Vector3 pos, float ry, float scale = 1, bool collide = true)
         {
