@@ -20,6 +20,7 @@ namespace Alemdar
         public Hud Hud { get; private set; }
         public string MyName { get; private set; }
         public int SeatedTable = -1, SeatedDir = -1;
+        public bool OfflineMode { get; private set; } // çevrimiçi sunucuya ulaşılamadı: yalnız bu bilgisayarda
         string pendingToken;
 
         void Awake()
@@ -31,6 +32,7 @@ namespace Alemdar
             if (DevShots.Arg("-serbest") != null) QualitySettings.vSyncCount = 0; // ölçüm: kare hızı ekrana kilitlenmesin
             if (DevShots.Arg("-cek") != null) gameObject.AddComponent<DevShots>();
             if (DevShots.Arg("-uzun") != null) gameObject.AddComponent<DevLong>();
+            if (DevShots.Arg("-arkadas") != null) gameObject.AddComponent<DevFriends>();
         }
 
         IEnumerator Start()
@@ -57,7 +59,8 @@ namespace Alemdar
             // yükleme perdesi kapalıyken kamera sahneyi bir tur gezer: shader'lar ve dokular hazırlanır, mahalleyi ilk görünce takılmaz
             yield return WarmView();
             Destroy(curtain.gameObject);
-            if (server.Offline) Ui.Toast("Çevrimiçi sunucuya ulaşılamadı: botlarla bu bilgisayarda oynuyorsun.", 6);
+            OfflineMode = server.Offline;
+            if (server.Offline) Ui.Toast("Çevrimiçi sunucuya ulaşılamadı: botlarla bu bilgisayarda oynuyorsun. Arkadaşlarınla oynamak için internetini kontrol edip oyunu yeniden aç.", 9);
 
             MyName = DevShots.Arg("-ad") is { Length: > 1 } devName ? devName : PlayerPrefs.GetString("ad", "");
             if (MyName.Length < 2) { bool done = false; Hud.AskName(n => { MyName = n; PlayerPrefs.SetString("ad", n); done = true; }); while (!done) yield return null; }

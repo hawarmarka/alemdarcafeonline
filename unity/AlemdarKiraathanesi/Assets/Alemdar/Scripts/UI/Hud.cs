@@ -18,6 +18,7 @@ namespace Alemdar.UI
         Button bSeriesSort, bPairsSort, bOpen, bPairs, bProcess, bRetract, bReturn, bFinish, bAddBot, bBots;
         Button createBtn; int modeIdx, roundIdx = 2;
         static readonly int[] Rounds = { 1, 2, 4 };
+        int teamIdx; // 0 tekli, 1 eşli (koltuk 0-2 ve 1-3 takım)
 
         public void Build(App a)
         {
@@ -68,7 +69,7 @@ namespace Alemdar.UI
         // ---------- masa paneli ----------
         void BuildTablePanel(Transform root)
         {
-            tablePanel = Ui.Card(root, new Vector2(480, 690)); Ui.Anchor(tablePanel, new Vector2(1, .5f), new Vector2(1, .5f), new Vector2(-270, 0), new Vector2(480, 690));
+            tablePanel = Ui.Card(root, new Vector2(480, 770)); Ui.Anchor(tablePanel, new Vector2(1, .5f), new Vector2(1, .5f), new Vector2(-270, 0), new Vector2(480, 770));
             var col = Ui.Column(tablePanel, 14); Ui.Stretch(col);
             tableTitle = Ui.Label(col, "Masa", 32, Ui.Ink, TextAnchor.MiddleLeft, FontStyle.Bold); Ui.Size(tableTitle, -1, 44);
             tableInfo = Ui.Label(col, "", 19, Ui.Muted); Ui.Size(tableInfo, -1, 54);
@@ -77,7 +78,8 @@ namespace Alemdar.UI
             var create = Ui.Rect(col, "ayarlar"); var cv = create.gameObject.AddComponent<VerticalLayoutGroup>(); cv.spacing = 8; cv.childControlWidth = cv.childControlHeight = true; cv.childForceExpandHeight = false;
             Ui.Segmented(create, "TÜR", new[] { "Klasik", "Yardımsız", "Katlamalı" }, () => modeIdx, i => modeIdx = i, 430);
             Ui.Segmented(create, "EL SAYISI", new[] { "1 el", "2 el", "4 el" }, () => roundIdx, i => roundIdx = i, 430);
-            Ui.Size(create, -1, 152);
+            Ui.Segmented(create, "OYUN", new[] { "Tekli", "Eşli (karşındaki eşin)" }, () => teamIdx, i => teamIdx = i, 430);
+            Ui.Size(create, -1, 232);
             createBtn = Ui.Button(col, "MASAYI KUR VE OTUR", Ui.Kind.Primary, CreateHere, new Vector2(430, 60));
             var foot = Ui.Row(col, 10); Ui.Size(foot, -1, 56);
             Ui.Button(foot, "YANCI OL", Ui.Kind.Plain, () => { int t = shownTable; HideTable(); app.Me.WalkTo(app.Hall.Stool(t, 1) + (app.Hall.Stool(t, 1) - app.Hall.Tables[t]).normalized * .4f, () => app.Me.SitAt(app.Hall.Stool(t, 1), Quaternion.LookRotation(app.Hall.Tables[t] - app.Hall.Stool(t, 1)))); }, new Vector2(200, 52));
@@ -109,7 +111,7 @@ namespace Alemdar.UI
             var (kind, r) = Slot(shownTable);
             tableTitle.text = $"Masa {shownTable + 1}" + (shownTable >= 9 ? " · Teras" : "");
             tableInfo.text = r == null ? "Boş masa. Türü seç, kur ve otur. Arkadaşların salonda bu masaya gelip boş koltuğa oturabilir; istersen boş koltukları botlarla doldurursun."
-                : $"{ModeTitle((string)r["modeKey"])} · " + (kind == "playing" ? "oyun sürüyor" : "oyuncu bekleniyor");
+                : $"{ModeTitle((string)r["modeKey"])}{((bool?)r["teamMode"] == true ? " · Eşli (karşılıklı oturanlar takım)" : "")} · " + (kind == "playing" ? "oyun sürüyor" : "oyuncu bekleniyor");
             foreach (Transform c in seatsBox) Destroy(c.gameObject);
             string[] labels = { "GÜNEY", "DOĞU", "KUZEY", "BATI" };
             for (int dir = 0; dir < 4; dir++)
@@ -137,7 +139,7 @@ namespace Alemdar.UI
             var (kind, r) = Slot(t);
             if (kind == "playing") { app.Watch(t, (string)r["code"]); return; }
             string mode = ModeNames[modeIdx * 2];
-            app.SitAndJoin(t, 0, new { mode = "create", modeKey = mode, stackingMode = mode == "katlamali", assisted = mode != "yardimsiz", bet = 1000, roundLimit = Rounds[roundIdx], isPublic = true, custom = true, seat = 0, teamMode = false, hallTable = t }); // custom: botlar kendiliğinden oturmaz, arkadaşlar gelebilsin; misafirden bahis alınmaz
+            app.SitAndJoin(t, 0, new { mode = "create", modeKey = mode, stackingMode = mode == "katlamali", assisted = mode != "yardimsiz", bet = 1000, roundLimit = Rounds[roundIdx], isPublic = true, custom = true, seat = 0, teamMode = teamIdx == 1, hallTable = t }); // custom: botlar kendiliğinden oturmaz, arkadaşlar gelebilsin; misafirden bahis alınmaz
         }
         IEnumerator PollRooms()
         {
@@ -224,8 +226,14 @@ namespace Alemdar.UI
 
         public void ShowGame(bool on) { gameBar.gameObject.SetActive(on && !app.Okey.Spectating); waitPanel.gameObject.SetActive(on && app.Okey.State == null && !app.Okey.Spectating); if (!on) resultPanel.gameObject.SetActive(false); }
 
+        // denetim (DevFriends): arayüzün kendi yolları
+        public int LobbyCount { get; private set; }
+        public void DebugCreate() => CreateHere();
+        public string DebugTableText() => tableInfo.text + " | " + string.Join(" / ", seatsBox.GetComponentsInChildren<Text>().Select(t => t.text.Replace("\n", " ")));
+        public bool DebugPressSit() { var b = seatsBox.GetComponentsInChildren<Button>().FirstOrDefault(); if (!b) return false; b.onClick.Invoke(); return true; }
         void OnLobby(JToken d)
         {
+            LobbyCount = ((JArray)d["players"]).Count;
             if (app.SeatedTable < 0 || app.Okey.State != null) return;
             var ps = (JArray)d["players"]; int n = ps.Count, host = (int?)d["hostIndex"] ?? -1;
             bool iHost = host >= 0 && host < n && (string)ps[host]["name"] == app.MyName;
@@ -285,7 +293,8 @@ namespace Alemdar.UI
         {
             if (!app || !app.Me) return;
             if (app.Okey.State != null && gameBar.gameObject.activeSelf && Mathf.CeilToInt(app.Okey.TurnSecondsLeft) != lastSec) PaintTurn();
-            if (app.Net) online.text = $"<color=#43C486>●</color>  {Mathf.Max(1, app.Net.Online)} kişi salonda"; // liste beni de içerir
+            if (app.OfflineMode) online.text = "<color=#E0574A>●</color>  Çevrimdışı: arkadaşlar bu salonu göremez";
+            else if (app.Net) online.text = $"<color=#43C486>●</color>  Çevrimiçi · {Mathf.Max(1, app.Net.Online)} kişi salonda"; // liste beni de içerir
             online.supportRichText = true;
             int t = app.SeatedTable < 0 && !tablePanel.gameObject.activeSelf ? app.NearTable() : -1;
             int seat = t < 0 && app.SeatedTable < 0 ? (app.Me.Seated ? -2 : app.NearSeat()) : -1;

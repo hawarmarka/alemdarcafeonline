@@ -63,6 +63,8 @@ app.get('/api/avatar/:id', (req, res) => {
   if (!item) return res.status(404).end();
   res.set({ 'Content-Type': item.type, 'Cache-Control': 'public, max-age=31536000, immutable', 'X-Content-Type-Options': 'nosniff' }).send(item.data);
 });
+// Tanıtım sitesi ana sayfada; eski web oyunu sayfaları oraya yönlenir (statik dosyalardan önce).
+require('./site').attach(app);
 // Görseller/CSS/JS ?v= ile sürümlendiği için önbelleğe alınabilir; HTML her zaman taze gelsin.
 app.use(express.static(path.join(__dirname, '..', 'public'), {
     maxAge: process.env.NODE_ENV === 'production' ? '7d' : 0,
@@ -70,11 +72,6 @@ app.use(express.static(path.join(__dirname, '..', 'public'), {
 }));
 // 3D masa için three.js (sürüm package.json'da sabit, dosya değişmez).
 app.use('/vendor/three', express.static(path.join(__dirname, '..', 'node_modules', 'three', 'build'), { maxAge: '30d', immutable: true }));
-app.get('/kiraathane', (_req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'kiraathane.html')));
-app.get('/game', (_req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'game.html')));
-app.get('/batak', (_req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'batak.html')));
-app.get('/pisti', (_req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'pisti.html')));
-app.get('/isim-sehir', (_req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'isim-sehir.html')));
 // storage: 'persistent' olmalı. 'ephemeral' ise Coolify'da /app/data için kalıcı depolama yok, güncellemede hesaplar silinir.
 app.get('/health', (_req, res) => res.json({ status: 'ok', storage: Accounts.storageStatus(), rooms: rooms.size }));
 app.get('/api/leaderboard', (req, res) => res.json({ top: Accounts.leaderboard(25, req.query.by === 'chips' ? 'chips' : 'xp') }));

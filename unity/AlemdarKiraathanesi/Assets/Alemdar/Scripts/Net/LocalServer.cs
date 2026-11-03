@@ -1,4 +1,4 @@
-// Oyun sunucusu (Node) uygulamanın içinde, bu bilgisayarda çalışır: botlu oyun internetsiz ve gecikmesiz.
+﻿// Oyun sunucusu (Node) uygulamanın içinde, bu bilgisayarda çalışır: botlu oyun internetsiz ve gecikmesiz.
 // Derlemede: <oyun klasörü>/Server/{node.exe, server/, node_modules/}. Editörde depo kökündeki sunucu kullanılır.
 // Oyun klasöründe config.json { "serverUrl": "https://..." } varsa çevrimiçi sunucuya bağlanılır; ulaşılamazsa yerel sunucu açılır.
 using System;
@@ -32,10 +32,11 @@ namespace Alemdar.Net
                 try { var u = (string)JObject.Parse(File.ReadAllText(cfg))["serverUrl"]; if (!string.IsNullOrWhiteSpace(u)) { Url = u.TrimEnd('/'); Online = true; } }
                 catch (Exception e) { Debug.LogWarning("config.json okunamadı: " + e.Message); }
             }
+            if (DevShots.Arg("-sunucu") is { Length: > 7 } forced) { Url = forced.TrimEnd('/'); Online = true; } // denetim: iki oyunu aynı sunucuya bağla
             if (Online)
             {
                 bool ok = false;
-                yield return Wait(Url, 8f, r => ok = r);
+                yield return Wait(Url, 20f, r => ok = r); // yavaş bağlantıda hemen çevrimdışına düşmesin
                 if (ok) { ready(Url); yield break; }
                 Debug.LogWarning("Çevrimiçi sunucuya ulaşılamadı, bu bilgisayardaki sunucu açılıyor: " + Url);
                 Url = null; Online = false; Offline = true;
