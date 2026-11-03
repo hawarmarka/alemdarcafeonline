@@ -7,6 +7,15 @@ namespace Alemdar.EditorTools
     {
         void OnPreprocessModel()
         {
+            if (assetPath.Contains("ThirdParty/PolyHaven"))
+            {
+                // Poly Haven sokak eşyaları: iskeletsiz, malzemeler Build.Setup'ta kurulur
+                var ph = (ModelImporter)assetImporter;
+                ph.animationType = ModelImporterAnimationType.None; ph.importAnimation = false;
+                ph.materialImportMode = ModelImporterMaterialImportMode.None;
+                ph.importCameras = false; ph.importLights = false; ph.useFileScale = true; ph.bakeAxisConversion = true; // Blender ekseni gövdeye işlenir
+                return;
+            }
             if (assetPath.Contains("ThirdParty/Rocketbox"))
             {
                 // Microsoft Rocketbox (MIT): insan iskeleti, malzemeler Build.Setup'ta dokulardan kurulur
@@ -31,8 +40,10 @@ namespace Alemdar.EditorTools
         void OnPreprocessTexture()
         {
             var ti = (TextureImporter)assetImporter;
+            if (assetPath.Contains("ThirdParty/PolyHavenSky")) { ti.maxTextureSize = 2048; ti.mipmapEnabled = false; ti.textureCompression = TextureImporterCompression.CompressedHQ; return; }
             if (assetPath.Contains("ThirdParty/PolyHaven"))
             {
+                if (assetPath.EndsWith("/diff.png")) ti.alphaIsTransparency = true; // yaprak ve lamba camı: alfa kesik
                 // Poly Haven CC0: normal haritası, pürüzlülük doğrusal; mermer zemine işlenmek için okunabilir
                 if (assetPath.EndsWith("/nor.jpg")) ti.textureType = TextureImporterType.NormalMap;
                 if (assetPath.EndsWith("/rough.jpg")) ti.sRGBTexture = false;

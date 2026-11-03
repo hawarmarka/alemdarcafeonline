@@ -38,7 +38,20 @@ namespace Alemdar.EditorTools
             lib.femaleSkins = new[] { Load<Texture2D>("Characters/Textures/T_Superhero_Female_Light_BaseColor.png"), Load<Texture2D>("Characters/Textures/T_Superhero_Female_Dark_BaseColor.png") };
             lib.maleNormal = Load<Texture2D>("Characters/Textures/T_Superhero_Male_Normal.png"); lib.femaleNormal = Load<Texture2D>("Characters/Textures/T_Superhero_Female_Normal.png");
             lib.controller = controller;
-            (lib.men, lib.waiterBody) = Rocketbox();
+            (lib.men, lib.waiterBody) = Rocketbox("Assets/ThirdParty/Rocketbox", "Business_Male_06");
+            (lib.women, _) = Rocketbox("Assets/ThirdParty/RocketboxWomen", null);
+            (lib.children, _) = Rocketbox("Assets/ThirdParty/RocketboxChildren", null);
+            lib.phModels = PolyHavenModels();
+            // mahalle dokuları: modeli olmayan Poly Haven klasörlerindeki diff/nor (anahtar "klasör/harita")
+            var texKeys = new System.Collections.Generic.List<string>(); var texs = new System.Collections.Generic.List<Texture2D>();
+            foreach (var dir in Directory.GetDirectories("Assets/ThirdParty/PolyHaven"))
+                foreach (var f in Directory.GetFiles(dir).Where(f => f.EndsWith(".jpg") || f.EndsWith(".png")))
+                {
+                    var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(f.Replace('\\', '/')); if (!tex) continue;
+                    texKeys.Add(Path.GetFileName(dir) + "/" + Path.GetFileNameWithoutExtension(f)); texs.Add(tex);
+                }
+            lib.phTexKeys = texKeys.ToArray(); lib.phTex = texs.ToArray();
+            (lib.skies, lib.skybox) = Skies();
             (lib.opaque, lib.cutout, lib.transparent, lib.emissive, lib.character, lib.text) = mats;
             Texture2D PH(string id, string map) => AssetDatabase.LoadAssetAtPath<Texture2D>($"Assets/ThirdParty/PolyHaven/{id}/{map}.jpg");
             lib.plasterD = PH("painted_plaster_wall", "diff"); lib.plasterN = PH("painted_plaster_wall", "nor");
@@ -66,9 +79,9 @@ namespace Alemdar.EditorTools
 
         // Microsoft Rocketbox (MIT) erkek karakterleri: her model için gövde/baş/saydam malzemeleri dokulardan kurulur ve hazır kalıp kaydedilir.
         // Business_Male_06 (beyaz gömlek) kahveci; diğerleri müşteri.
-        static (GameObject[], GameObject) Rocketbox()
+        static (GameObject[], GameObject) Rocketbox(string RB, string waiterName)
         {
-            const string RB = "Assets/ThirdParty/Rocketbox", Out = Gen + "/Rocketbox";
+            string Out = Gen + "/" + Path.GetFileName(RB); if (!Directory.Exists(RB)) return (new GameObject[0], null);
             Directory.CreateDirectory(Out);
             var std = Shader.Find("Standard");
             GameObject waiter = null; var men = new System.Collections.Generic.List<GameObject>();
@@ -103,10 +116,46 @@ namespace Alemdar.EditorTools
                 }
                 var prefab = PrefabUtility.SaveAsPrefabAsset(inst, $"{Out}/{name}.prefab");
                 Object.DestroyImmediate(inst);
-                if (name == "Business_Male_06") waiter = prefab; else men.Add(prefab);
+                if (name == waiterName) waiter = prefab; else men.Add(prefab);
             }
             if (men.Count == 0) Debug.LogWarning("Rocketbox karakteri bulunamadı; Quaternius kullanılacak.");
             return (men.ToArray(), waiter);
+        }
+
+        // Poly Haven (CC0) sokak eşyaları: her modelin bütün parçalarına renk (+alfa varsa kesik) ve normal haritalı tek malzeme; hazır kalıp adı = klasör adı.
+        static GameObject[] PolyHavenModels()
+        {
+            const string PH = "Assets/ThirdParty/PolyHaven", Out = Gen + "/PolyHaven";
+            Directory.CreateDirectory(Out);
+            var std = Shader.Find("Standard"); var list = new System.Collections.Generic.List<GameObject>();
+            foreach (var dir in Directory.GetDirectories(PH).OrderBy(d => d))
+            {
+                string id = Path.GetFileName(dir), fbx = $"{PH}/{id}/model.fbx";
+                var model = AssetDatabase.LoadAssetAtPath<GameObject>(fbx); if (!model) continue;
+                var col = AssetDatabase.LoadAssetAtPath<Texture2D>($"{PH}/{id}/diff.png") ?? AssetDatabase.LoadAssetAtPath<Texture2D>($"{PH}/{id}/diff.jpg");
+                var nor = AssetDatabase.LoadAssetAtPath<Texture2D>($"{PH}/{id}/nor.jpg");
+                bool alpha = false; // lamba camının saydamlık haritası bütün lambayı kesiyordu: sokak eşyaları opak
+                var m = new Material(std) { name = id, enableInstancing = true };
+                m.SetTexture("_MainTex", col); m.SetFloat("_Glossiness", .3f);
+                if (nor) { m.SetTexture("_BumpMap", nor); m.EnableKeyword("_NORMALMAP"); }
+                if (alpha) { m.SetFloat("_Mode", 1); m.EnableKeyword("_ALPHATEST_ON"); m.SetFloat("_Cutoff", .5f); m.SetOverrideTag("RenderType", "TransparentCutout"); m.renderQueue = 2450; }
+                AssetDatabase.DeleteAsset($"{Out}/{id}.mat"); AssetDatabase.CreateAsset(m, $"{Out}/{id}.mat");
+                var inst = (GameObject)PrefabUtility.InstantiatePrefab(model); inst.name = id;
+                foreach (var r in inst.GetComponentsInChildren<Renderer>(true)) r.sharedMaterials = Enumerable.Repeat(m, r.sharedMaterials.Length).ToArray();
+                list.Add(PrefabUtility.SaveAsPrefabAsset(inst, $"{Out}/{id}.prefab"));
+                Object.DestroyImmediate(inst);
+            }
+            return list.ToArray();
+        }
+
+        // Gökyüzü (Poly Haven HDRI, CC0): açık, kapalı, gün batımı, gece; Panoramic gökyüzü malzemesi (Weather değiştirir).
+        static (Texture[], Material) Skies()
+        {
+            string[] ids = { "kloofendal_48d_partly_cloudy_puresky", "kloofendal_overcast_puresky", "qwantani_dusk_2_puresky", "rogland_clear_night" };
+            var skies = ids.Select(i => (Texture)AssetDatabase.LoadAssetAtPath<Texture2D>($"Assets/ThirdParty/PolyHavenSky/{i}/sky.hdr")).ToArray();
+            var m = new Material(Shader.Find("Skybox/Panoramic")); m.SetTexture("_MainTex", skies.FirstOrDefault(s => s));
+            AssetDatabase.DeleteAsset(Gen + "/Gokyuzu.mat"); AssetDatabase.CreateAsset(m, Gen + "/Gokyuzu.mat");
+            return (skies, m);
         }
 
         static T Load<T>(string rel) where T : Object
@@ -190,7 +239,7 @@ namespace Alemdar.EditorTools
             // kodla açılan shader'lar derlemeye girsin
             var gs = AssetDatabase.LoadAssetAtPath<Object>("ProjectSettings/GraphicsSettings.asset");
             var so = new SerializedObject(gs); var arr = so.FindProperty("m_AlwaysIncludedShaders");
-            foreach (var name in new[] { "Alemdar/Character", "Alemdar/Text3D", "Standard", "UI/Default", "Legacy Shaders/Diffuse", "Legacy Shaders/Particles/Alpha Blended" })
+            foreach (var name in new[] { "Alemdar/Character", "Alemdar/Text3D", "Standard", "UI/Default", "Legacy Shaders/Diffuse", "Legacy Shaders/Particles/Alpha Blended", "Skybox/Panoramic" })
             {
                 var sh = Shader.Find(name); if (!sh) continue;
                 bool has = false; for (int i = 0; i < arr.arraySize; i++) if (arr.GetArrayElementAtIndex(i).objectReferenceValue == sh) has = true;
@@ -208,6 +257,10 @@ namespace Alemdar.EditorTools
             var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions { scenes = new[] { ScenePath }, locationPathName = exe, target = BuildTarget.StandaloneWindows64, options = BuildOptions.None });
             if (report.summary.result != UnityEditor.Build.Reporting.BuildResult.Succeeded) throw new System.Exception("Derleme başarısız: " + report.summary.result);
             CopyServer(Path.Combine(outDir, "Server"));
+            // canlı TV: FFmpeg (LGPL, paylaşımlı kütüphaneler) varsa Tv/ altına; lisansı yanında
+            var ff = Path.Combine(Application.dataPath, "..", "FFmpegRuntime");
+            if (File.Exists(Path.Combine(ff, "ffmpeg.exe"))) CopyDir(ff, Path.Combine(outDir, "Tv"), _ => true);
+            else Debug.LogWarning("FFmpegRuntime/ffmpeg.exe yok: TV yalnızca MP4/WebM adreslerini oynatır.");
             // arkadaşlar aynı salonda buluşsun diye çevrimiçi sunucu; ulaşılamazsa oyun yerel sunucuyla açılır
             File.WriteAllText(Path.Combine(outDir, "config.json"), "{\n  \"serverUrl\": \"" + OnlineUrl + "\"\n}\n");
             Debug.Log("DERLEME TAMAM: " + exe);

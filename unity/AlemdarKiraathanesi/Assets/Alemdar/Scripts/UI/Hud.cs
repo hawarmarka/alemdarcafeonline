@@ -285,8 +285,11 @@ namespace Alemdar.UI
             if (app.Net) online.text = $"<color=#43C486>●</color>  {Mathf.Max(1, app.Net.Online)} kişi salonda"; // liste beni de içerir
             online.supportRichText = true;
             int t = app.SeatedTable < 0 && !tablePanel.gameObject.activeSelf ? app.NearTable() : -1;
-            promptBox.gameObject.SetActive(t >= 0);
-            if (t >= 0) prompt.text = $"<b>[E]</b>  Masa {t + 1}" + (Slot(t).room == null ? " · boş masa" : Slot(t).kind == "playing" ? " · oyun sürüyor" : " · boş koltuk var");
+            int seat = t < 0 && app.SeatedTable < 0 ? (app.Me.Seated ? -2 : app.NearSeat()) : -1;
+            promptBox.gameObject.SetActive(t >= 0 || seat != -1);
+            if (seat == -2) prompt.text = "<b>[E]</b>  Kalk";
+            else if (seat >= 0) prompt.text = "<b>[E]</b>  Otur";
+            if (t >= 0) prompt.text =$"<b>[E]</b>  Masa {t + 1}" + (Slot(t).room == null ? " · boş masa" : Slot(t).kind == "playing" ? " · oyun sürüyor" : " · boş koltuk var");
             prompt.supportRichText = true;
         }
     }

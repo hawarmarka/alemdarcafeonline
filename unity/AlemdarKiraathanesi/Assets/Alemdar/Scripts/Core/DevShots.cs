@@ -41,6 +41,36 @@ namespace Alemdar
             yield return CamShot(dir, "k6_masalar", new Vector3(-2.6f, 1.45f, -1.6f), new Vector3(-4.2f, .76f, -3f));
             yield return CamShot(dir, "k7_tv", new Vector3(3.6f, 1.7f, .2f), new Vector3(World.Hall.MaxX, 2.1f, 0));
             yield return CamShot(dir, "k8_domino_tavla", new Vector3(1.2f, 1.5f, -1.6f), new Vector3(0, .76f, -3f));
+            // mahalle: sokak, bina, bakkal, teyzeler, park, çay bahçesi; sonra gün batımı, gece ve yağmur
+            yield return CamShot(dir, "m1_sokak", new Vector3(-14f, 1.7f, 16.5f), new Vector3(2f, 4f, 5f));
+            yield return CamShot(dir, "m2_bina", new Vector3(4f, 1.6f, 24f), new Vector3(0, 7f, 5f));
+            yield return CamShot(dir, "m3_bakkal", new Vector3(10.5f, 1.6f, 12.5f), new Vector3(9.5f, 1f, 5.5f));
+            yield return CamShot(dir, "m4_teyzeler", new Vector3(-6.6f, 3.2f, 11f), new Vector3(-6.8f, 4.6f, 5.4f));
+            yield return CamShot(dir, "m5_park", new Vector3(-4f, 1.7f, 21.5f), new Vector3(2f, 1.5f, 34f));
+            yield return CamShot(dir, "m6_cay_bahcesi", new Vector3(12f, 1.8f, 32f), new Vector3(18f, .7f, 37.5f));
+            yield return CamShot(dir, "m12_cocuklar", World.Playground.Center + new Vector3(4.5f, 2.2f, -5f), World.Playground.Center + new Vector3(0, .6f, -.5f));
+            if (World.Weather.I)
+            {
+                World.Weather.I.Show(2); yield return new WaitForSeconds(1.5f); yield return CamShot(dir, "m7_gun_batimi", new Vector3(-14f, 1.7f, 16.5f), new Vector3(2f, 4f, 5f));
+                World.Weather.I.Show(3); yield return new WaitForSeconds(1.5f); yield return CamShot(dir, "m8_gece", new Vector3(-14f, 1.7f, 16.5f), new Vector3(2f, 4f, 5f));
+                World.Weather.I.Show(1); World.Weather.I.ForceRain = true; yield return new WaitForSeconds(3f); yield return CamShot(dir, "m9_yagmur", new Vector3(-4f, 1.7f, 21.5f), new Vector3(2f, 1.5f, 34f));
+                World.Weather.I.ForceRain = false; World.Weather.I.Show(0);
+            }
+            // parkta banka otur: oturunca gövde bankın önüne mi bakıyor?
+            if (World.Neighborhood.Seats.Count > 0)
+            {
+                var (sp, sr) = World.Neighborhood.Seats[0];
+                app.Me.InputLocked = false; app.Me.transform.position = sp + sr * Vector3.forward * 1.2f + Vector3.up * .05f;
+                bool sat = false; app.Me.WalkTo(sp + sr * Vector3.forward * .5f, () => { app.Me.SitAt(sp, sr); sat = true; });
+                float until2 = Time.time + 12; while (!sat && Time.time < until2) yield return null;
+                yield return new WaitForSeconds(2.5f);
+                float ang = Vector3.Angle(Vector3.ProjectOnPlane(app.Me.Body.BoneFront, Vector3.up), sr * Vector3.forward);
+                report.Append($"bank: oturdu {app.Me.Seated}, gövde-bank önü açısı {ang:0}°\n");
+                yield return CamShot(dir, "m10_bank", sp + sr * new Vector3(.8f, 1.3f, 2.2f), sp + Vector3.up * .7f);
+                app.Me.StandUp(); yield return new WaitForSeconds(1);
+                var (cp, cr) = World.Neighborhood.Seats[World.Neighborhood.Seats.Count - 1];
+                yield return CamShot(dir, "m11_sandalye", cp + cr * new Vector3(.6f, 1.4f, 1.8f), cp + Vector3.up * .5f);
+            }
             app.Me.InputLocked = false;
             app.Hud.ShowTable(7); yield return new WaitForSeconds(.6f); Shot(dir, "u1_masa_paneli"); yield return new WaitForSeconds(.2f); app.Hud.HideTable(); // görüntü kare sonunda alınır
             Phase("salon");

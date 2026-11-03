@@ -75,7 +75,10 @@ namespace Alemdar.Chars
         static Person CreateRocketbox(string name, Transform parent, bool nameTag, string role)
         {
             var lib = Lib.I; uint h = Hash(name);
-            var prefab = role == "waiter" && lib.waiterBody ? lib.waiterBody : lib.men[h % (uint)lib.men.Length];
+            var prefab = role == "waiter" && lib.waiterBody ? lib.waiterBody
+                       : role == "teyze" && lib.women is { Length: > 0 } ? lib.women[h % (uint)lib.women.Length] // mahalledeki teyzeler (kıraathanede yalnız erkek)
+                       : role == "cocuk" && lib.children is { Length: > 0 } ? lib.children[h % (uint)lib.children.Length] // parkta oynayan çocuklar
+                       : lib.men[h % (uint)lib.men.Length];
             var go = Instantiate(prefab, parent); go.name = "Kisi_" + name;
             // Modelin kendisi +z'ye baksa da humanoid klipler (Quaternius, keepOriginalOrientation) gövdeyi -z'ye çevirir; düzeltme aynı 180°.
             go.transform.localRotation = ModelFix;

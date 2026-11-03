@@ -1,7 +1,7 @@
 // Duvardaki plazma televizyon ve kumandası. Kanallar oyun klasöründeki tv.json dosyasından okunur:
 //   { "channels": [ { "name": "Kanal adı", "url": "https://.../yayin.m3u8" } ] }
 // Oyunla birlikte yayın adresi dağıtılmaz (yayın hakkı): oyuncu izinli olduğu adresleri kendisi ekler.
-// Oynatıcı: Unity VideoPlayer (MP4/WebM ve düz adresler). Canlı yayın (HLS) için AVPro Video eklentisi gelince ona geçilir.
+// Oynatıcı: oyun klasöründe Tv/ffmpeg.exe varsa FFmpeg (canlı yayın/HLS dahil, ücretsiz); yoksa Unity VideoPlayer (MP4/WebM).
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json.Linq;
@@ -18,6 +18,7 @@ namespace Alemdar.World
         readonly List<(string name, string url)> channels = new();
         VideoPlayer player; AudioSource sound; Renderer screen; Material screenOn, screenOff;
         RenderTexture rt; TextMesh osd; float osdUntil;
+        TvStream stream; Texture2D streamTex; float vol = .6f; // FFmpeg yolu
         RectTransform remote; Text remoteInfo;
         int current = -1; bool on; float volume = .6f;
 
@@ -49,7 +50,13 @@ namespace Alemdar.World
             player.renderMode = VideoRenderMode.RenderTexture; player.targetTexture = rt;
             player.audioOutputMode = VideoAudioOutputMode.AudioSource; player.SetTargetAudioSource(0, sound);
             player.errorReceived += (_, msg) => { Debug.LogWarning("TV yayını açılmadı: " + msg); Osd("Yayın açılamadı"); };
-            screenOn.mainTexture = rt; screenOn.SetTexture("_EmissionMap", rt);
+            if (TvStream.Available)
+            {
+                stream = new TvStream(); streamTex = new Texture2D(TvStream.W, TvStream.H, TextureFormat.RGB24, false) { name = "tvYayin" };
+                screenOn.mainTexture = streamTex; screenOn.SetTexture("_EmissionMap", streamTex);
+                sound.spatialBlend = 0; sound.Play(); // ses OnAudioFilterRead ile akar
+            }
+            else { screenOn.mainTexture = rt; screenOn.SetTexture("_EmissionMap", rt); }
             LoadChannels();
             BuildRemote();
         }
@@ -99,15 +106,16 @@ namespace Alemdar.World
         {
             if (channels.Count == 0) { Paint(); Ui.Toast("Önce tv.json dosyasına kanal ekle."); return; }
             on = !on;
-            if (on) Tune(current < 0 ? 0 : current); else { player.Stop(); screen.sharedMaterial = screenOff; osd.text = ""; }
+            if (on) Tune(current < 0 ? 0 : current); else { player.Stop(); stream?.Stop(); screen.sharedMaterial = screenOff; osd.text = ""; }
             Paint();
         }
         void Step(int d) { if (!on || channels.Count == 0) return; Tune((current + d + channels.Count) % channels.Count); Paint(); }
-        void Volume(float d) { volume = Mathf.Clamp01(volume + d); sound.volume = volume; Osd("Ses %" + Mathf.RoundToInt(volume * 100)); Paint(); }
+        void Volume(float d) { volume = Mathf.Clamp01(volume + d); sound.volume = volume; vol = volume; Osd("Ses %" + Mathf.RoundToInt(volume * 100)); Paint(); }
         void Tune(int i)
         {
-            current = i; player.Stop(); player.url = channels[i].url; player.Prepare();
-            player.prepareCompleted -= Started; player.prepareCompleted += Started;
+            current = i;
+            if (stream != null) stream.Start(channels[i].url);
+            else { player.Stop(); player.url = channels[i].url; player.Prepare(); player.prepareCompleted -= Started; player.prepareCompleted += Started; }
             screen.sharedMaterial = screenOn; Osd($"{i + 1}  {channels[i].name}");
         }
         void Started(VideoPlayer v) { if (on) v.Play(); }
@@ -116,8 +124,11 @@ namespace Alemdar.World
         void Update()
         {
             if (osd.text.Length > 0 && Time.time > osdUntil) osd.text = "";
+            if (on && stream != null) { stream.Upload(streamTex); if (stream.Error != null && osd.text.Length == 0) Osd("Yayın açılamadı"); }
             if (Input.GetKeyDown(KeyCode.T) && !Ui.TypingText) ToggleRemote();
         }
-        void OnDestroy() { if (rt) rt.Release(); }
+        void OnAudioFilterRead(float[] data, int channels) { if (stream != null && on) stream.Fill(data, vol); }
+        void OnDestroy() { if (rt) rt.Release(); stream?.Dispose(); }
+        void OnApplicationQuit() => stream?.Dispose();
     }
 }

@@ -71,8 +71,11 @@ namespace Alemdar.World
             Tv.Build(transform, new Vector3(MaxX - .08f, 2.1f, 0f), -90); // sağ duvarda, salonun her yerinden görünür (StaticBatching dışında: ekranı değişir)
             Props.CoatRack(Root, new Vector3(MinX + .4f, 0, .4f));
             Lights();
-            // Salon hareket etmez: aynı malzemeli parçalar tek çizimde birleşir (binlerce küçük parça → birkaç yüz çizim).
+            Neighborhood.Build(transform); // üstte apartman, sokak, park, çay bahçesi, teyzeler
+            Weather.Install(gameObject);   // gün döngüsü, gökyüzü, yağmur, gece ışıkları
+            // Salon ve mahalle hareket etmez: aynı malzemeli parçalar tek çizimde birleşir (binlerce küçük parça → birkaç yüz çizim).
             StaticBatchingUtility.Combine(Root.gameObject);
+            StaticBatchingUtility.Combine(Neighborhood.Root.gameObject);
         }
 
         // Duvarlardaki tablolar: gerçek fotoğraflar (Galata, Kız Kulesi, Boğaz, Kapadokya, Uzungöl, Sümela, yayla, Ölüdeniz); yoksa kendi çizimimiz.
@@ -264,7 +267,8 @@ namespace Alemdar.World
         void Terrace()
         {
             var steel = Props.Black; float mz = (MaxZ + TerraceZ) / 2, dz = TerraceZ - MaxZ;
-            Props.Box(Root, new Vector3(MaxX - MinX, .9f, .22f), Props.Plaster, new Vector3(0, .45f, TerraceZ), 0, true);
+            // ön duvar: ortada sokağa açılan geçit (dükkân kapısının hizasında)
+            foreach (var (a, b) in new[] { (MinX, -1.1f), (1.1f, MaxX) }) Props.Box(Root, new Vector3(b - a, .9f, .22f), Props.Plaster, new Vector3((a + b) / 2, .45f, TerraceZ), 0, true);
             Props.Box(Root, new Vector3(.22f, .9f, dz), Props.Plaster, new Vector3(MinX, .45f, mz), 0, true);
             Props.Box(Root, new Vector3(.22f, .9f, dz), Props.Plaster, new Vector3(MaxX, .45f, mz), 0, true);
             foreach (float x in new[] { MinX + .2f, -2.2f, 2.2f, MaxX - .2f }) Props.Box(Root, new Vector3(.1f, 2.8f, .1f), steel, new Vector3(x, 1.4f, TerraceZ - .1f));
@@ -272,8 +276,6 @@ namespace Alemdar.World
             var roof = Props.Box(Root, new Vector3(MaxX - MinX, .03f, dz + .4f), new Material(Props.Black) { color = new Color(.25f, .26f, .27f) }, new Vector3(0, 2.95f, mz));
             roof.transform.localRotation = Quaternion.Euler(-3, 0, 0);
             for (float x = MinX; x < MaxX; x += .3f) Props.Box(Root, new Vector3(.04f, .04f, dz + .4f), steel, new Vector3(x, 2.93f, mz), 0, false, false);
-            Props.Box(Root, new Vector3(60, .1f, 30), new Material(Props.Plaster) { color = new Color(.55f, .55f, .54f) }, new Vector3(0, -.06f, TerraceZ + 15));
-            Props.Box(Root, new Vector3(60, 14, 1), new Material(Props.Plaster) { color = new Color(.85f, .82f, .76f) }, new Vector3(0, 7, TerraceZ + 14), 0, false, false);
         }
 
         void Lights()

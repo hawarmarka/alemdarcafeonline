@@ -1,7 +1,8 @@
 'use strict';
 // Kıraathane salonu: yürüyen oyuncuların konumları. İstemci 'world:enter' ile girer, 'world:move' ile konum yollar
 // (en fazla saniyede 10). Sunucu salondakilere saniyede 8 kez toplu 'world:state' yollar; konum doğrulanır, sınır dışı kırpılır.
-const BOUNDS = { minX: -6.4, maxX: 6.4, minZ: -6.0, maxZ: 8.0 };
+// salon + teras + sokak + park (Unity Neighborhood: x ±26, z ..42)
+const BOUNDS = { minX: -25.8, maxX: 25.8, minZ: -6.0, maxZ: 41.8 };
 const MAX_PEOPLE = 80;
 const TICK_MS = 125;
 const POSES = new Set(['stand', 'walk', 'sit']);

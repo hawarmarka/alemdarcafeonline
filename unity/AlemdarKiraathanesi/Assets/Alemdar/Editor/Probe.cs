@@ -46,6 +46,17 @@ namespace Alemdar.EditorTools
                 sb.AppendLine("  bounds=" + inst.GetComponentsInChildren<Renderer>().Select(r => r.bounds).FirstOrDefault().size + " ölçek=" + inst.transform.localScale);
                 Object.DestroyImmediate(inst);
             }
+            sb.AppendLine("== Poly Haven kalıpları (sınır merkezi / boyut / malzeme)");
+            foreach (var f in Directory.GetFiles("Assets/Alemdar/Generated/PolyHaven", "*.prefab"))
+            {
+                var inst = (GameObject)Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(f.Replace('\\', '/')));
+                var rs = inst.GetComponentsInChildren<Renderer>(true);
+                if (rs.Length == 0) { sb.AppendLine($"  {inst.name}: RENDERER YOK"); Object.DestroyImmediate(inst); continue; }
+                var b = rs[0].bounds; foreach (var r in rs) b.Encapsulate(r.bounds);
+                var mf = inst.GetComponentsInChildren<MeshFilter>(true);
+                sb.AppendLine($"  {Path.GetFileNameWithoutExtension(f)}: merkez {b.center} boyut {b.size} parça {rs.Length} mesh {mf.Count(m => m.sharedMesh)} ölçek {inst.transform.localScale} mat {rs[0].sharedMaterial?.name} keyword {string.Join(",", rs[0].sharedMaterial ? rs[0].sharedMaterial.shaderKeywords : new string[0])}");
+                Object.DestroyImmediate(inst);
+            }
             File.WriteAllText(Path.Combine(Application.dataPath, "../probe.txt"), sb.ToString());
         }
     }

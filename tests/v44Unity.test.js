@@ -84,7 +84,7 @@ w1.receive('world:move', { x: 99, z: 1.5, ry: 1, pose: 'walk', speed: 1.4 });
 await new Promise(r => setTimeout(r, 200));
 const state = w2.last('world:state');
 const row = state.list.find(r => r[1] === 'Cemalb');
-assert.equal(row[2], 6.4, 'x sınıra kırpılır'); assert.equal(row[5], 'walk');
+assert.equal(row[2], require('../server/world').BOUNDS.maxX, 'x mahalle sınırına kırpılır'); assert.equal(row[5], 'walk');
 assert(!JSON.stringify(state).includes(w1.id), 'socket id istemciye gitmez');
 w1.receive('world:order', { item: 'cay', table: 3, seat: 1 });
 assert.deepEqual(w2.last('world:serve'), { id: row[0], name: 'Cemalb', item: 'cay', table: 3, seat: 1 });

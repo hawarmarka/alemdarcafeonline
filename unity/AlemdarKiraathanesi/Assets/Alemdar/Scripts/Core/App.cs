@@ -33,7 +33,8 @@ namespace Alemdar
 
         IEnumerator Start()
         {
-            var loading = Ui.Label(Ui.Canvas.transform, "Kıraathane hazırlanıyor…", 30, Ui.Muted, TextAnchor.MiddleCenter);
+            var curtain = Ui.Box(Ui.Canvas.transform, new Color(.05f, .04f, .03f, 1)); Ui.Stretch(curtain.rectTransform); // yükleme perdesi (ısınma turunu gizler)
+            var loading = Ui.Label(curtain.transform, "Kıraathane hazırlanıyor…", 30, Ui.Muted, TextAnchor.MiddleCenter);
             Ui.Stretch(loading.rectTransform);
             var server = gameObject.AddComponent<Net.LocalServer>();
             string url = null;
@@ -51,7 +52,9 @@ namespace Alemdar
             Hall = new GameObject("Kiraathane").AddComponent<World.Hall>(); Hall.Build();
             yield return null;
             BakeNavMesh();
-            Destroy(loading.gameObject);
+            // yükleme perdesi kapalıyken kamera sahneyi bir tur gezer: shader'lar ve dokular hazırlanır, mahalleyi ilk görünce takılmaz
+            yield return WarmView();
+            Destroy(curtain.gameObject);
             if (server.Offline) Ui.Toast("Çevrimiçi sunucuya ulaşılamadı: botlarla bu bilgisayarda oynuyorsun.", 6);
 
             MyName = DevShots.Arg("-ad") is { Length: > 1 } devName ? devName : PlayerPrefs.GetString("ad", "");
@@ -68,17 +71,47 @@ namespace Alemdar
             Hud = gameObject.AddComponent<Hud>(); Hud.Build(this);
         }
 
+        // Kamerayı birkaç kare salonun, sokağın ve parkın üstünden geçirir (yükleme yazısı ekranı kaplarken): dokular GPU'ya önceden yüklenir.
+        IEnumerator WarmView()
+        {
+            var cam = Camera.main.transform; var (p0, r0) = (cam.position, cam.rotation);
+            foreach (var (pos, look) in new[] { (new Vector3(0, 2, 4), new Vector3(0, 1, -5)), (new Vector3(-14, 1.7f, 16.5f), new Vector3(2, 4, 5)),
+                                                 (new Vector3(0, 6, 15), new Vector3(0, 4, 5)), (new Vector3(-4, 1.7f, 21.5f), new Vector3(2, 1.5f, 34)), (new Vector3(12, 1.8f, 32), new Vector3(18, .7f, 37.5f)) })
+            {
+                cam.SetPositionAndRotation(pos, Quaternion.LookRotation(look - pos)); yield return null; yield return null;
+            }
+            // bütün gökyüzü dokularını bir kez göster: hava değişince ilk yükleme takılması olmasın
+            if (World.Weather.I) yield return World.Weather.I.Prewarm();
+            cam.SetPositionAndRotation(p0, r0);
+        }
+
         void BakeNavMesh()
         {
-            var bounds = new Bounds(new Vector3(0, 1, 1), new Vector3(16, 4, 18));
+            // salon + sokak + park (Neighborhood sınırları)
+            var bounds = new Bounds(new Vector3(0, 1, 17.5f), new Vector3(World.Neighborhood.MaxX * 2 + 1, 5, 49));
             var sources = new List<NavMeshBuildSource>();
             NavMeshBuilder.CollectSources(bounds, ~(1 << 2), NavMeshCollectGeometry.PhysicsColliders, 0, new List<NavMeshBuildMarkup>(), sources);
-            var s = NavMesh.GetSettingsByID(0); s.agentRadius = .22f; s.agentHeight = 1.75f; s.agentClimb = .2f; s.voxelSize = .05f; s.overrideVoxelSize = true;
+            var s = NavMesh.GetSettingsByID(0); s.agentRadius = .22f; s.agentHeight = 1.75f; s.agentClimb = .2f; s.voxelSize = .07f; s.overrideVoxelSize = true;
             var data = NavMeshBuilder.BuildNavMeshData(s, sources, bounds, Vector3.zero, Quaternion.identity);
             NavMesh.AddNavMeshData(data);
         }
 
-        void Update() { Ui.Tick(); if (Input.GetKeyDown(KeyCode.E) && Me && SeatedTable < 0) { int t = NearTable(); if (t >= 0) Hud.ShowTable(t); } }
+        void Update()
+        {
+            Ui.Tick();
+            if (!Input.GetKeyDown(KeyCode.E) || !Me || SeatedTable >= 0 || Ui.TypingText) return;
+            if (Me.Seated) { Me.StandUp(); return; }                       // bankta/çay bahçesinde oturuyorsa kalk
+            int t = NearTable(); if (t >= 0) { Hud.ShowTable(t); return; }
+            int s = NearSeat(); if (s < 0) return;                          // mahalledeki bank ya da sandalye
+            var (pos, rot) = World.Neighborhood.Seats[s];
+            Me.WalkTo(pos + rot * Vector3.forward * .5f, () => Me.SitAt(pos, rot));
+        }
+        public int NearSeat(float max = 1.6f)
+        {
+            int best = -1; float bd = max; var seats = World.Neighborhood.Seats;
+            for (int i = 0; i < seats.Count; i++) { var d = Vector3.Distance(Flat(Me.transform.position), Flat(seats[i].pos)); if (d < bd) { bd = d; best = i; } }
+            return best;
+        }
 
         public int NearTable(float max = 1.8f)
         {
