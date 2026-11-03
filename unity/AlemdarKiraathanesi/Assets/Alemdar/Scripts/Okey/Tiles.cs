@@ -24,15 +24,18 @@ namespace Alemdar.Okey
             var mf = g.GetComponent<MeshFilter>(); mf.sharedMesh = SharedMesh();
             g.GetComponent<Renderer>().sharedMaterial = body;
             Object.Destroy(g.GetComponent<BoxCollider>()); var col = g.AddComponent<BoxCollider>(); col.size = new Vector3(W, H, D);
-            var t = g.AddComponent<TileView>();
+            return g.AddComponent<TileView>(); // yazı ve nokta yalnızca yüzü açık taşta, ilk gerektiğinde kurulur (sırtı dönük taşlar hafif)
+        }
+        void EnsureFace()
+        {
+            if (num) return;
             // Bütün sayılar aynı boyda ve aynı alt çizgide (simetri); iki haneliler yalnızca yatayda daralır.
-            t.num = World.Props.Text3D(g.transform, "", new Vector3(0, NumBottom, D / 2 + .0006f), 180, NumHeight, Color.black);
-            t.num.anchor = TextAnchor.LowerCenter; t.num.fontStyle = FontStyle.Bold;
-            t.num.fontSize = 192; t.num.characterSize = NumHeight / 19.2f; // yüksek çözünürlüklü yazı tipi: rakamlar keskin
+            num = World.Props.Text3D(transform, "", new Vector3(0, NumBottom, D / 2 + .0006f), 180, NumHeight, Color.black);
+            num.anchor = TextAnchor.LowerCenter; num.fontStyle = FontStyle.Bold;
+            num.fontSize = 192; num.characterSize = NumHeight / 19.2f; // yüksek çözünürlüklü yazı tipi: rakamlar keskin
             var d = GameObject.CreatePrimitive(PrimitiveType.Cylinder); Object.Destroy(d.GetComponent<Collider>());
-            d.transform.SetParent(g.transform, false); d.transform.localPosition = new Vector3(0, DotY, D / 2 + .0003f); d.transform.localRotation = Quaternion.Euler(90, 0, 0); d.transform.localScale = new Vector3(.0058f, .0003f, .0058f);
-            t.dot = d.transform;
-            return t;
+            d.transform.SetParent(transform, false); d.transform.localPosition = new Vector3(0, DotY, D / 2 + .0003f); d.transform.localRotation = Quaternion.Euler(90, 0, 0); d.transform.localScale = new Vector3(.0058f, .0003f, .0058f);
+            dot = d.transform;
         }
         static Mesh mesh;
         static Mesh SharedMesh() => mesh ? mesh : mesh = RoundedBox(new Vector3(W, H, D), .0028f, 5);
@@ -73,8 +76,8 @@ namespace Alemdar.Okey
             Data = tile; Id = (string)tile?["id"];
             bool face = tile != null && !isOkey;
             GetComponent<Renderer>().sharedMaterial = face ? body : bodyBack;
-            num.gameObject.SetActive(face); dot.gameObject.SetActive(face);
-            if (!face) return;
+            if (!face) { if (num) { num.gameObject.SetActive(false); dot.gameObject.SetActive(false); } return; }
+            EnsureFace(); num.gameObject.SetActive(true); dot.gameObject.SetActive(true);
             bool fake = (bool?)tile["isFakeJoker"] == true;
             var c = Ink((string)tile["color"]);
             num.text = fake ? "♣" : ((int)tile["number"]).ToString(); num.color = c;

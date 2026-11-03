@@ -205,6 +205,7 @@ namespace Alemdar.World
             var prefab = Lib.I.Model(id); if (!prefab) return null;
             // FBX kökünde birim çevirisi (ör. 100 kat ölçek) ve eksen dönüşü olabilir: korunur, üstüne eklenir
             var g = Object.Instantiate(prefab, p); g.transform.localPosition = pos;
+            foreach (var mc in g.GetComponentsInChildren<MeshCollider>()) Object.Destroy(mc); // hazır modellerin ağ çarpıştırıcıları okunamaz (yürüme haritası atlar); gerekirse aşağıda kutu eklenir
             g.transform.localRotation = Quaternion.Euler(0, ry, 0) * prefab.transform.localRotation; g.transform.localScale = prefab.transform.localScale * scale;
             if (collide)
             {

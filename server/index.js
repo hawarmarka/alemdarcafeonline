@@ -94,7 +94,8 @@ app.get('/api/rooms', (_req, res) => {
     // Masa listesinde koltuklar: dolu koltukta oyuncu, boşta OTUR düğmesi
     seats: [0, 1, 2, 3].map(s => { const p = r.players.find(q => seatOf(r, q) === s); return p ? { name: p.name, avatar: p.avatar, isBot: !!p.isBot, level: p.level || 1 } : null; }) })),
     // Kıraathane salonunda oyunu süren masalar (oturanlar görünür, İZLE ile seyredilir)
-    playing: list.filter(r => r.started && r.game).slice(0, 24).map(r => ({ code: r.code, modeKey: r.modeKey, bet: r.bet, teamMode: r.teamMode, hallTable: r.hallTable ?? null,
+    // el arasında (started false) da masa dolu görünsün
+    playing: list.filter(r => r.game && !r.matchEnded).slice(0, 24).map(r => ({ code: r.code, modeKey: r.modeKey, bet: r.bet, teamMode: r.teamMode, hallTable: r.hallTable ?? null,
       seats: r.players.map(p => ({ name: p.name, isBot: !!p.isBot })) })) });
 });
 const httpServer = http.createServer(app);

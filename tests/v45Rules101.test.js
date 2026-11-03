@@ -37,6 +37,7 @@ const token = s => s.repeat(30).slice(0, 30);
 // 1) Eşli oyunda biten oyuncunun eşi ceza almaz (açmamış olsa bile); tekli oyunda alır.
 {
   const g = new GameLogic(); g.startGame(['A', 'B', 'C', 'D'].map(name => ({ name })), 0);
+  const h0 = g.playerTiles[0]; h0.push(h0.splice(h0.findIndex(t => !g.isOkey(t)), 1)[0]); // bitiş taşı okey olmasın (okeyle bitiş ayrı kural: -202)
   g.discardPiles[0].push(g.playerTiles[0].pop());
   const team = g.calculatePoints(0, { type: 'normal' }, true), solo = g.calculatePoints(0, { type: 'normal' }, false);
   assert.equal(team[0], -101); assert.equal(team[2], 0, 'eşin cezası silinir');
@@ -54,12 +55,15 @@ assert(Number.isInteger(d0));
 assert.equal(room.game.currentPlayer, (d0 + 1) % 4, 'dağıtanın sağındaki başlar');
 assert.equal(room.game.playerTiles[(d0 + 1) % 4].length, 22); assert.equal(room.game.hasDrawn, true);
 const me = room.players.findIndex(p => p.name === 'Ayse');
+// Okey rastgele seçilir; senaryo taşlarından biri (Yeşil 7, Kırmızı 13…) okey olursa debugSetup onu normal taş olarak veremez.
+// Senaryolar kullanılmayan bir taşla (Siyah 1) okeyli oynansın.
+room.game.okey = { color: 'Siyah', number: 1 };
 
 // 3) Yandan alıp geri bırakmak 101 ceza (kural 7).
 const penaltyOf = () => room.roundExtras[me];
 a.receive('debugSetup', { reset: true, myTurn: true, drawn: false, hand: [['Kirmizi', 3], ['Mavi', 9], ['Siyah', 5]], leftDiscard: ['Yesil', 7] });
 a.receive('drawTile', { fromDiscard: true });
-assert(room.game.playerStates[me].drawnFromDiscardTile, 'yandan aldı');
+assert(room.game.playerStates[me].drawnFromDiscardTile, 'yandan aldı: ' + JSON.stringify(a.last('gameError')) + ' sıra ' + room.game.currentPlayer + '/' + me);
 const before = penaltyOf();
 a.receive('undoDiscardDraw');
 assert.equal(penaltyOf() - before, 101, 'geri bırakana 101 ceza');
@@ -69,7 +73,7 @@ a.receive('debugSetup', { reset: true, myTurn: true, drawn: false, leftDiscard: 
   hand: [['Kirmizi', 13], ['Mavi', 13], ['Siyah', 13], ['Kirmizi', 10], ['Kirmizi', 11], ['Kirmizi', 12], ['Mavi', 10], ['Mavi', 11], ['Mavi', 12], ['Siyah', 10], ['Siyah', 11], ['Siyah', 12], ['Yesil', 2]] });
 a.receive('drawTile', { fromDiscard: true });
 const st = room.game.playerStates[me], picked = st.drawnFromDiscardTile;
-assert(picked, 'yandan K13 alındı');
+assert(picked, 'yandan K13 alındı: ' + JSON.stringify(a.last('gameError')) + ' okey ' + JSON.stringify(room.game.okeyTile || room.game.okey));
 const hand = room.game.playerTiles[me];
 const find = (c, n, notId) => hand.find(t => t.color === c && t.number === n && t.id !== notId && !room.game.isOkey(t));
 const twin = find('Kirmizi', 13, picked.id);

@@ -39,6 +39,7 @@ namespace Alemdar.Okey
         {
             io = socket; hall = h; me = motor;
             io.On("gameState", d => Apply((JObject)d));
+            io.On("gameFinished", _ => RoundOver = true);
         }
 
         public void Attach(int table, int myChairDir)
@@ -82,12 +83,15 @@ namespace Alemdar.Okey
             if (root) { Destroy(root.gameObject); hall.SetDecor(TableIndex, true); }
             foreach (var p in people.Values) if (p) Destroy(p.transform.parent.gameObject);
             people.Clear(); State = null; rack.Clear();
+            CancelInvoke(); pileCounts.Clear(); rackWorld.Clear(); sig.Clear(); RoundOver = false; // başka masaya oturunca eski masanın izleri kalmasın
+            for (int i = 0; i < topTiles.Length; i++) topTiles[i] = null;
         }
 
         // ---------- durum ----------
         int MyIndex => (int?)State?["playerIndex"] ?? 0;
         JToken Okey => State?["okey"];
-        public bool MyTurn => State != null && !Spectating && (int)State["currentPlayer"] == MyIndex;
+        public bool MyTurn => State != null && !Spectating && !RoundOver && (int)State["currentPlayer"] == MyIndex;
+        public bool RoundOver { get; private set; } // el bitti, yenisi dağıtılana kadar hamle yok
         public JArray Players => State?["players"] as JArray;
         public int DirOf(int playerIndex)
         {
@@ -102,14 +106,14 @@ namespace Alemdar.Okey
             bool newRound = (string)s["roundId"] != roundId;
             var before = State;
             State = s;
-            if (newRound) { roundId = (string)s["roundId"]; for (int i = 0; i < Slots; i++) slots[i] = null; LoadRack(); }
+            if (newRound) { roundId = (string)s["roundId"]; RoundOver = false; for (int i = 0; i < Slots; i++) slots[i] = null; LoadRack(); }
             if (newRound) { sig.Clear(); dealt = false; }
             var prevPiles = pileCounts.ToArray();
             SyncRack(); dealt = true;
             DrawPeople();
             // her bölüm yalnızca girdisi değişince yeniden kurulur (her hamlede yüzlerce nesne yaratılmasın)
-            if (Changed("deste", $"{s["pileCount"]}|{s["indicator"]?["id"]}")) DrawDeck();
-            if (Changed("atik", string.Join(";", ((JArray)s["discards"] ?? new JArray()).Select(p => p.Count() + ":" + (string)p.LastOrDefault()?["id"])))) { DrawPiles(); AnimateDiscards(prevPiles); }
+            if (Changed("deste", $"{s["pileCount"]}|{(s["indicator"] as JObject)?["id"]}")) DrawDeck();
+            if (Changed("atik", string.Join(";", ((s["discards"] as JArray) ?? new JArray()).Select(p => p.Count() + ":" + (string)p.LastOrDefault()?["id"])))) { DrawPiles(); AnimateDiscards(prevPiles); }
             if (Changed("grup", s["openedGroups"]?.ToString(Newtonsoft.Json.Formatting.None) + s["extraPairs"]?.ToString(Newtonsoft.Json.Formatting.None))) DrawGroups();
             if (Changed("rakip", string.Join(",", Players.Select(p => (string)p["tileCount"])))) DrawOpponentRacks();
             if (!newRound) Hands(before, s);
@@ -167,11 +171,18 @@ namespace Alemdar.Okey
                 else v.transform.SetLocalPositionAndRotation(v.Home, v.HomeRot);
             }
         }
-        string RackKey => "istaka_" + (string)State?["roomCode"] + "_" + roundId;
-        void SaveRack() { PlayerPrefs.SetString(RackKey, string.Join(",", slots.Select(s => s ?? ""))); }
+        // Istaka dizilimi tek anahtarda (masa|el|yuvalar): yalnızca değişince yazılır, her el yeni anahtar açılmaz (kayıt defteri şişmesin).
+        string RackTag => (string)State?["roomCode"] + "|" + roundId + "|";
+        string lastSaved;
+        void SaveRack()
+        {
+            var v = RackTag + string.Join(",", slots.Select(s => s ?? ""));
+            if (v == lastSaved) return; lastSaved = v; PlayerPrefs.SetString("istaka", v);
+        }
         void LoadRack()
         {
-            var raw = PlayerPrefs.GetString(RackKey, ""); if (raw.Length == 0) return;
+            var all = PlayerPrefs.GetString("istaka", ""); if (!all.StartsWith(RackTag)) return;
+            var raw = all.Substring(RackTag.Length); if (raw.Length == 0) return;
             var parts = raw.Split(','); for (int i = 0; i < Slots && i < parts.Length; i++) slots[i] = parts[i].Length > 0 ? parts[i] : null;
         }
 

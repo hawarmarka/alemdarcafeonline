@@ -1,4 +1,4 @@
-// Duvardaki plazma televizyon ve kumandası. Kanallar oyun klasöründeki tv.json dosyasından okunur:
+﻿// Duvardaki plazma televizyon ve kumandası. Kanallar oyun klasöründeki tv.json dosyasından okunur:
 //   { "channels": [ { "name": "Kanal adı", "url": "https://.../yayin.m3u8" } ] }
 // Oyunla birlikte yayın adresi dağıtılmaz (yayın hakkı): oyuncu izinli olduğu adresleri kendisi ekler.
 // Oynatıcı: oyun klasöründe Tv/ffmpeg.exe varsa FFmpeg (canlı yayın/HLS dahil, ücretsiz); yoksa Unity VideoPlayer (MP4/WebM).
@@ -67,7 +67,7 @@ namespace Alemdar.World
             try
             {
                 if (!File.Exists(ListPath)) File.WriteAllText(ListPath, "{\n  \"channels\": []\n}\n");
-                foreach (var c in (JArray)JObject.Parse(File.ReadAllText(ListPath))["channels"] ?? new JArray())
+                foreach (var c in (JObject.Parse(File.ReadAllText(ListPath))["channels"] as JArray) ?? new JArray())
                 {
                     string name = (string)c["name"], url = (string)c["url"];
                     if (!string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(url) && (url.StartsWith("http://") || url.StartsWith("https://") || File.Exists(url))) channels.Add((name.Trim(), url.Trim()));

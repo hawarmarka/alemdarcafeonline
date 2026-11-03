@@ -1,4 +1,4 @@
-// Küçük Socket.IO v4 istemcisi (Engine.IO v4, yalnız WebSocket). Sunucu: Node + socket.io 4.
+﻿// Küçük Socket.IO v4 istemcisi (Engine.IO v4, yalnız WebSocket). Sunucu: Node + socket.io 4.
 // Olaylar ana iş parçacığında (Update) dağıtılır; Unity nesnelerine güvenle dokunulabilir.
 using System;
 using System.Collections.Concurrent;
@@ -26,6 +26,7 @@ namespace Alemdar.Net
         CancellationTokenSource cts;
         int ackId;
         bool wantOpen;
+        readonly SemaphoreSlim sendLock = new(1, 1); // ClientWebSocket aynı anda tek gönderim kabul eder (pong ile oyun mesajı çakışmasın)
 
         public void Connect(string httpUrl)
         {
@@ -62,12 +63,13 @@ namespace Alemdar.Net
                     backoff = 500;
                     var send = SendLoop(cts.Token);
                     await Receive(cts.Token);
+                    try { await send; } catch { } // gönderim döngüsü de kapansın; hatası yutulmasın diye beklenir
                 }
                 catch (Exception) { /* yeniden bağlanılır */ }
                 finally
                 {
                     cts.Cancel();
-                    if (Connected) { Connected = false; main.Enqueue(() => OnDisconnect?.Invoke()); }
+                    if (Connected) { Connected = false; main.Enqueue(() => { acks.Clear(); OnDisconnect?.Invoke(); }); } // cevabı gelmeyecek istekler unutulur
                     try { ws.Dispose(); } catch { }
                 }
                 if (!wantOpen) break;
@@ -84,24 +86,28 @@ namespace Alemdar.Net
             }
         }
 
-        Task Raw(string msg, CancellationToken ct) =>
-            ws.State == WebSocketState.Open ? ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(msg)), WebSocketMessageType.Text, true, ct) : Task.CompletedTask;
+        async Task Raw(string msg, CancellationToken ct)
+        {
+            await sendLock.WaitAsync(ct);
+            try { if (ws.State == WebSocketState.Open) await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(msg)), WebSocketMessageType.Text, true, ct); }
+            finally { sendLock.Release(); }
+        }
 
         async Task Receive(CancellationToken ct)
         {
             var buf = new byte[64 * 1024];
-            var sb = new StringBuilder();
+            var all = new System.IO.MemoryStream(); // parçalar bayt olarak birleşir: Türkçe harf parça sınırında bölünmez
             while (ws.State == WebSocketState.Open && !ct.IsCancellationRequested)
             {
-                sb.Clear();
+                all.SetLength(0);
                 WebSocketReceiveResult r;
                 do
                 {
                     r = await ws.ReceiveAsync(new ArraySegment<byte>(buf), ct);
                     if (r.MessageType == WebSocketMessageType.Close) return;
-                    sb.Append(Encoding.UTF8.GetString(buf, 0, r.Count));
+                    all.Write(buf, 0, r.Count);
                 } while (!r.EndOfMessage);
-                await Handle(sb.ToString(), ct);
+                await Handle(Encoding.UTF8.GetString(all.GetBuffer(), 0, (int)all.Length), ct);
             }
         }
 

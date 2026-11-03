@@ -1,4 +1,4 @@
-// Kahveci: siparişleri sırayla ocaktan alıp masaya götürür, siparişi verenin önüne bırakır, ocağa döner.
+﻿// Kahveci: siparişleri sırayla ocaktan alıp masaya götürür, siparişi verenin önüne bırakır, ocağa döner.
 // Herkes aynı servisi görür (sunucu 'world:serve' yayınlar). Bırakılan ikram 3 dakika masada kalır.
 using System.Collections;
 using System.Collections.Generic;
@@ -47,7 +47,7 @@ namespace Alemdar.World
                 item.SetParent(hall.Root, true); item.position = o.spot; item.rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
                 Destroy(item.gameObject, 180);
                 yield return new WaitForSeconds(.6f);
-                if (queue.Count == 0) Destroy(tray.gameObject); else tray.gameObject.SetActive(false);
+                Destroy(tray.gameObject); // her siparişte yeni tepsi kurulur; gizli tepsi birikmesin
             }
             yield return Go(hall.WaiterSpot);
             yield return Face(hall.WaiterSpot + Vector3.forward);
@@ -74,8 +74,10 @@ namespace Alemdar.World
         }
         static void Tint(Transform t, Color c)
         {
-            foreach (var r in t.GetComponentsInChildren<Renderer>()) if (r.sharedMaterial == Props.Tea) { var m = new Material(Props.Tea) { color = c }; m.SetColor("_EmissionColor", c * .12f); r.sharedMaterial = m; }
+            if (!tints.TryGetValue(c, out var m)) { tints[c] = m = new Material(Props.Tea) { color = c }; m.SetColor("_EmissionColor", c * .12f); } // renk başına bir malzeme
+            foreach (var r in t.GetComponentsInChildren<Renderer>()) if (r.sharedMaterial == Props.Tea) r.sharedMaterial = m;
         }
+        static readonly System.Collections.Generic.Dictionary<Color, Material> tints = new();
         static Transform Simit(Transform p)
         {
             var root = new GameObject("simit").transform; root.SetParent(p, false);

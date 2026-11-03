@@ -32,7 +32,7 @@ namespace Alemdar.Chars
             transform.position = pos; transform.rotation = Quaternion.Euler(0, facing, 0); yaw = facing;
             body.transform.SetParent(transform, false); body.transform.localPosition = Vector3.zero; body.transform.localRotation = body.Fix; // modelin yön düzeltmesi (Quaternius -z, Rocketbox +z)
             gameObject.layer = 2; // Ignore Raycast: kamera ve tıklama kendi gövdesine çarpmasın
-            cc = gameObject.AddComponent<CharacterController>(); cc.radius = .26f; cc.height = 1.75f; cc.center = new Vector3(0, .88f, 0); cc.stepOffset = .32f; cc.slopeLimit = 50; // bordür (17 cm) çaprazdan da aşılsın cc.minMoveDistance = 0;
+            cc = gameObject.AddComponent<CharacterController>(); cc.radius = .26f; cc.height = 1.75f; cc.center = new Vector3(0, .88f, 0); cc.stepOffset = .32f; cc.slopeLimit = 50; cc.minMoveDistance = 0; // bordür (17 cm) çaprazdan da aşılsın
         }
 
         public void WalkTo(Vector3 target, Action onArrive = null)

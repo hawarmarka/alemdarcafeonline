@@ -22,7 +22,6 @@ namespace Alemdar.Batak
         int myDir;
         readonly Dictionary<int, Chars.Person> people = new();
         readonly Dictionary<string, CardView> hand = new();
-        readonly List<(CardView c, Vector3 to, Quaternion rot)> sweeping = new();
         string trickSig = "", handSig = "", oppSig = "";
         float lastPlay;
 
@@ -42,9 +41,10 @@ namespace Alemdar.Batak
         }
         public void Detach()
         {
-            if (root) { Destroy(root.gameObject); hall.SetDecor(TableIndex, true); }
+            if (root) { foreach (var tw in root.GetComponentsInChildren<Transform>()) Tween.StopAll(tw); Destroy(root.gameObject); hall.SetDecor(TableIndex, true); }
+            root = null; fans.Clear(); // Destroy kare sonunda olur: bu karede LateUpdate eski masaya dokunmasın
             foreach (var p in people.Values) if (p) Destroy(p.transform.parent.gameObject);
-            people.Clear(); hand.Clear(); sweeping.Clear(); State = null; trickSig = handSig = oppSig = ""; TableIndex = -1;
+            people.Clear(); hand.Clear(); State = null; trickSig = handSig = oppSig = ""; TableIndex = -1;
         }
         Transform Child(string n) { var t = new GameObject(n).transform; t.SetParent(root, false); return t; }
 
@@ -67,9 +67,9 @@ namespace Alemdar.Batak
             State = s;
             turnDeadline = Time.time + ((float?)s["remainingMs"] ?? 0) / 1000f;
             DrawPeople();
-            DrawHand();
             DrawOpponents();
-            DrawTrick();
+            DrawTrick(); // önce ortadaki el: oynadığım kâğıt elimdeki yerinden uçsun (DrawHand onu siler)
+            DrawHand();
             OnState?.Invoke();
         }
 
@@ -94,7 +94,8 @@ namespace Alemdar.Batak
                     var pl = Players[i]; bool on = i == Turn;
                     var bid = pl["bid"]; string b = bid == null || bid.Type == JTokenType.Null ? ((bool?)pl["passed"] == true ? " · pas" : "") : $" · söz {(int)bid}";
                     pp.SetTag($"{(string)pl["name"]}{b} · aldı {(int?)pl["tricks"] ?? 0}", on ? new Color(1f, .8f, .35f) : Color.white);
-                    pp.LookAt = on ? hall.Tables[TableIndex] + Vector3.up * .8f : (Turn >= 0 && people.TryGetValue(DirOf(Turn), out var a) ? a.Head.position : me.Cam.transform.position);
+                    // sırası gelen elindeki kâğıtlara bakar; diğerleri sırası gelene (ya da bana)
+                    pp.LookAt = on ? (fans.TryGetValue(DirOf(i), out var myFan) && myFan ? myFan.position : hall.Tables[TableIndex] + Vector3.up * .8f) : (Turn >= 0 && people.TryGetValue(DirOf(Turn), out var a) ? a.Head.position : me.Cam.transform.position);
                 }
         }
 
@@ -102,8 +103,8 @@ namespace Alemdar.Batak
         static readonly Dictionary<string, int> SuitOrder = new() { ["S"] = 0, ["H"] = 1, ["C"] = 2, ["D"] = 3 }; // renkler sırayla karışık: siyah, kırmızı, siyah, kırmızı
         void DrawHand()
         {
-            var cards = ((JArray)State["hand"] ?? new JArray()).OrderBy(c => SuitOrder.TryGetValue((string)c["suit"], out var o) ? o : 9).ThenByDescending(c => (int)c["rank"]).ToList();
-            var legal = new HashSet<string>(((JArray)State["legal"] ?? new JArray()).Select(x => (string)x));
+            var cards = ((State["hand"] as JArray) ?? new JArray()).OrderBy(c => SuitOrder.TryGetValue((string)c["suit"], out var o) ? o : 9).ThenByDescending(c => (int)c["rank"]).ToList();
+            var legal = new HashSet<string>(((State["legal"] as JArray) ?? new JArray()).Select(x => (string)x));
             string sig = string.Join(",", cards.Select(c => (string)c["id"])) + "|" + string.Join(",", legal) + "|" + MyTurn;
             if (sig == handSig) return; handSig = sig;
             var keep = new HashSet<string>(cards.Select(c => (string)c["id"]));
@@ -181,7 +182,7 @@ namespace Alemdar.Batak
         // ---------- ortadaki el: her kart oynayanın önünde; el bitince alana doğru süpürülür ----------
         void DrawTrick()
         {
-            var trick = (JArray)State["trick"] ?? new JArray();
+            var trick = (State["trick"] as JArray) ?? new JArray();
             string sig = Phase + "|" + string.Join(",", trick.Select(t => (string)t["card"]["id"]));
             if (sig == trickSig) return;
             bool wasFull = trickSig.Split('|').Length > 1 && trickSig.Split('|')[1].Split(',').Length == 4 && trickSig.StartsWith("trickEnd");
@@ -191,6 +192,7 @@ namespace Alemdar.Batak
                 // el bitti: kartlar alanın kenarına kayar ve kaybolur
                 int win = (int?)(State["lastTrick"] as JObject)?["winner"] ?? -1;
                 var target = win >= 0 ? root.TransformPoint(R(DirOf(win)) * new Vector3(.25f, Top + .002f, .3f)) : root.position;
+                if (win >= 0 && people.TryGetValue(DirOf(win), out var taker) && taker) taker.Reach(root.position + Vector3.up * (Top + .02f), 0, .55f); // eli alan ortadan toplar
                 // el bitti: kartlar kazananın önüne kayıp küçülerek kaybolur (PrimeTween)
                 foreach (var cv in trickRoot.GetComponentsInChildren<CardView>())
                 {
@@ -243,7 +245,7 @@ namespace Alemdar.Batak
             if (Physics.Raycast(me.Cam.ScreenPointToRay(Input.mousePosition), out var hit, 4f) && hit.collider.TryGetComponent<CardView>(out var cv) && hand.ContainsKey(cv.Id ?? "")) hover = cv;
             if (Input.GetMouseButtonDown(0) && hover && MyTurn && Phase == "playing" && Time.time - lastPlay > .4f)
             {
-                var legal = ((JArray)State["legal"] ?? new JArray()).Select(x => (string)x);
+                var legal = ((State["legal"] as JArray) ?? new JArray()).Select(x => (string)x);
                 if (!legal.Contains(hover.Id)) { UI.Ui.Toast("Bu kâğıt şu an oynanamaz: rengi takip et, geçebiliyorsan büyüt."); return; }
                 lastPlay = Time.time; io.Emit("batak:play", new { cardId = hover.Id });
             }
@@ -253,7 +255,7 @@ namespace Alemdar.Batak
         bool hiddenSelf;
         void LateUpdate()
         {
-            if (root) PlaceFans();
+            if (root && TableIndex >= 0) PlaceFans();
             bool on = root && me && me.InputLocked;
             if (hiddenSelf != on) { hiddenSelf = on; foreach (var r in me.Body.GetComponentsInChildren<Renderer>()) r.enabled = !on || Spectating; if (!on) me.Cam.fieldOfView = 55; }
             if (!on) return;

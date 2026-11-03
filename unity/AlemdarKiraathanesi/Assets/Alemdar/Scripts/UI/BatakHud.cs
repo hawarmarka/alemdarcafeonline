@@ -73,6 +73,7 @@ namespace Alemdar.UI
         public void Show(bool on)
         {
             root.gameObject.SetActive(on);
+            lastPhase = lastBidSig = ""; foreach (Transform c in bidRow) Destroy(c.gameObject); // yeni masada eski imzalar kalmasın
             if (on) { wait.gameObject.SetActive(true); top.gameObject.SetActive(false); board.gameObject.SetActive(false); bar.gameObject.SetActive(false); result.gameObject.SetActive(false); waitInfo.text = "Batak masası hazırlanıyor…"; }
         }
 

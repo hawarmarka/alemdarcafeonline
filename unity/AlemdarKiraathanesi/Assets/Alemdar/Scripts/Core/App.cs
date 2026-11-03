@@ -24,6 +24,9 @@ namespace Alemdar
         public int SeatedTable = -1, SeatedDir = -1;
         public bool OfflineMode { get; private set; } // çevrimiçi sunucuya ulaşılamadı: yalnız bu bilgisayarda
         string pendingToken;
+        // Hangi masadayım: kod ve oyuncu jetonu (kalkarken sunucuya haber, kopunca geri dönmek için). İzlerken jeton boş.
+        string okeyCode, okeyToken, batakCode, batakToken; bool joining;
+        public bool Watching => SeatedTable >= 0 && ((okeyCode != null && okeyToken == null) || (batakCode != null && batakToken == null));
 
         void Awake()
         {
@@ -48,15 +51,17 @@ namespace Alemdar
             yield return server.Run(u => url = u);
             if (url == null) { loading.text = server.Error + "\nOyunu yeniden başlat."; yield break; }
             Io = gameObject.AddComponent<Net.SocketIO>(); Io.Connect(url);
-            Io.On("gameError", d => Ui.Toast((string)d["message"]));
+            Io.OnDisconnect += () => { if (Hud) Ui.Toast("Bağlantı koptu, yeniden bağlanılıyor…", 4); };
+            Io.OnConnect += Rejoin;
+            Io.On("gameError", d => { Ui.Toast((string)d["message"]); if (joining) JoinFailed(); });
             Io.On("actionSuccess", d => Ui.Toast((string)d["message"]));
             Io.On("penalty", d => Ui.Toast(((string)d["name"] == MyName ? "Ceza aldın" : (string)d["name"]) + $": {(string)d["reason"] ?? "ceza"} (+{(int?)d["amount"] ?? 101})"));
             Io.On("autoDiscard", d => Ui.Toast((string)d["message"]));
             Io.On("joinedGame", OnJoined);
-            Io.On("leftGame", _ => LeaveTable(false));
+            Io.On("leftGame", _ => { if (okeyCode != null) LeaveTable(false); }); // kendim kalktıysam kod zaten silindi: ikinci kez kaldırma
             Io.On("world:serve", OnServe);
             Io.On("batak:joined", OnBatakJoined);
-            Io.On("batak:error", d => Ui.Toast((string)d["message"]));
+            Io.On("batak:error", d => { Ui.Toast((string)d["message"]); if (joining) JoinFailed(); });
             Io.On("batak:left", _ => { if (Batak && Batak.Active) LeaveTable(false); });
 
             Hall = new GameObject("Kiraathane").AddComponent<World.Hall>(); Hall.Build();
@@ -117,6 +122,7 @@ namespace Alemdar
         void Update()
         {
             Ui.Tick();
+            if (Input.GetKeyDown(KeyCode.Escape) && Watching) { LeaveTable(); return; } // izleyici Esc ile kalkar
             if (!Input.GetKeyDown(KeyCode.E) || !Me || SeatedTable >= 0 || Ui.TypingText) return;
             if (Me.Seated) { Me.StandUp(); return; }                       // bankta/çay bahçesinde oturuyorsa kalk
             int t = NearTable(); if (t >= 0) { Hud.ShowTable(t); return; }
@@ -165,17 +171,18 @@ namespace Alemdar
                 if (joinData == null) return; // yancı/sohbet oturuşu
                 pendingToken = System.Guid.NewGuid().ToString("N") + System.Guid.NewGuid().ToString("N").Substring(0, 8);
                 var j = JObject.FromObject(joinData); j["playerName"] = MyName; j["token"] = pendingToken; j["penaltyMode"] = true;
-                Io.Emit(joinEvent, j);
+                joining = true; Io.Emit(joinEvent, j);
             });
         }
         void OnJoined(JToken d)
         {
-            PlayerPrefs.SetString("oturum", (string)d["code"] + "|" + pendingToken);
+            joining = false; okeyCode = (string)d["code"]; okeyToken = pendingToken;
             Okey.Spectating = false; Okey.Attach(SeatedTable, SeatedDir);
             Me.InputLocked = true; Hud.ShowGame(true);
         }
         void OnBatakJoined(JToken d)
         {
+            joining = false; batakCode = (string)d["code"]; batakToken = pendingToken;
             Batak.Spectating = false; Batak.Attach(SeatedTable, SeatedDir);
             Me.InputLocked = true; Hud.HideTable(); BatakUi.Show(true);
         }
@@ -187,7 +194,7 @@ namespace Alemdar
             {
                 Me.SitAt(stool, Quaternion.LookRotation(Hall.Tables[table] - stool)); SeatedTable = table; SeatedDir = -1;
                 Batak.Spectating = true; Batak.Attach(table, 0); Me.InputLocked = true; BatakUi.Show(true);
-                Io.Emit("batak:watch", new { code });
+                batakCode = code; batakToken = null; Io.Emit("batak:watch", new { code });
             });
         }
         public void Watch(int table, string code)
@@ -197,7 +204,8 @@ namespace Alemdar
             Me.WalkTo(stool + (stool - Hall.Tables[table]).normalized * .4f, () =>
             {
                 Me.SitAt(stool, Quaternion.LookRotation(Hall.Tables[table] - stool)); SeatedTable = table; SeatedDir = -1;
-                Okey.Spectating = true; Okey.Attach(table, 0); Io.Emit("watchGame", new { code });
+                Okey.Spectating = true; Okey.Attach(table, 0); okeyCode = code; okeyToken = null; Me.InputLocked = true;
+                Io.Emit("watchGame", new { roomCode = code }); // sunucu roomCode bekler
                 Hud.ShowGame(true);
             });
         }
@@ -208,9 +216,24 @@ namespace Alemdar
                 if (tellServer) Io.Emit(Batak.Spectating ? "batak:unwatch" : "batak:leave");
                 Batak.Detach(); BatakUi.Show(false);
             }
-            if (tellServer && Okey.State != null) Io.Emit(Okey.Spectating ? "unwatchGame" : "leaveGame");
+            if (tellServer && okeyCode != null) Io.Emit(okeyToken == null ? "unwatchGame" : "leaveGame"); // oyun başlamadan kalkınca da haber verilir
+            okeyCode = okeyToken = batakCode = batakToken = null; joining = false;
             Okey.Detach(); Hud.ShowGame(false);
             Me.InputLocked = false; Me.StandUp(); SeatedTable = -1; SeatedDir = -1;
+        }
+        // Katılma reddedildi (koltuk doldu, masa başladı…): karakter kalkar, masa ipucu yeniden çalışır.
+        void JoinFailed()
+        {
+            joining = false; okeyCode = okeyToken = batakCode = batakToken = null;
+            Me.InputLocked = false; Me.StandUp(); SeatedTable = -1; SeatedDir = -1;
+        }
+        // Bağlantı geri gelince masaya dön (sunucu koltuğu 60 sn / Batakta 8 sn tutar).
+        void Rejoin()
+        {
+            if (!Hud) return; // ilk bağlantı
+            if (okeyCode != null) { if (okeyToken != null) Io.Emit("rejoinRoom", new { roomCode = okeyCode, token = okeyToken }); else Io.Emit("watchGame", new { roomCode = okeyCode }); }
+            if (batakCode != null) { if (batakToken != null) Io.Emit("batak:rejoin", new { code = batakCode, token = batakToken }); else Io.Emit("batak:watch", new { code = batakCode }); }
+            if (okeyCode != null || batakCode != null) Ui.Toast("Bağlantı geri geldi, masaya dönüldü.", 3);
         }
 
         // ---------- kahveci ----------

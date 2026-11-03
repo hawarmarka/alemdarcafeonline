@@ -39,6 +39,26 @@ namespace Alemdar
                     if (app.Okey.State == null && app.SeatedTable >= 0 && LastLobbyCount(app) >= 2) { yield return new WaitForSeconds(2); L("ikinci oyuncu geldi, botlarla başlatılıyor"); app.Io.Emit("startWithBots"); yield return new WaitForSeconds(3); }
                 }
             }
+            else if (role == "izle")
+            {
+                // oyun süren masayı izle, izleyici görüntüsü gelsin, sonra izlemeyi bırakıp kalk
+                float until = Time.time + 90; string code = null;
+                while (Time.time < until && code == null)
+                {
+                    yield return new WaitForSeconds(2);
+                    using var req = UnityWebRequest.Get(app.Io.Url + "/api/rooms"); yield return req.SendWebRequest();
+                    var playing = (JObject.Parse(req.downloadHandler.text)["playing"] as JArray) ?? new JArray();
+                    code = (string)playing.FirstOrDefault(r => (int?)r["hallTable"] == table)?["code"];
+                }
+                L(code == null ? "izlenecek masa bulunamadı" : "izleniyor: " + code);
+                if (code != null)
+                {
+                    app.Watch(table, code); yield return new WaitForSeconds(9);
+                    L($"izleyici görüntüsü: {(app.Okey.State != null)}, izliyor {app.Watching}");
+                    app.LeaveTable(); yield return new WaitForSeconds(2);
+                    L($"kalktı: masa {app.SeatedTable}, izliyor {app.Watching}");
+                }
+            }
             else
             {
                 // salondaki masa listesinde arkadaşın masası görünene kadar bekle, sonra masaya yaklaşıp panelden boş koltuğa otur
