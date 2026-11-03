@@ -684,7 +684,7 @@ function summary(room) {
 function lobby(room) {
     RoomStore.markDirty(room);
     // Masayı açan ayrıldıysa yönetim masadaki ilk gerçek oyuncuya geçer
-    if (!room.isPublic && !room.players.some(p => p.token === room.hostToken)) room.hostToken = room.players.find(p => !p.isBot)?.token || null;
+    if (!room.autoBots && !room.players.some(p => p.token === room.hostToken)) room.hostToken = room.players.find(p => !p.isBot)?.token || null;
     io.to(room.code).emit('lobbyUpdate', { code: room.code, isPublic: room.isPublic,
         players: summary(room), teamMode: room.teamMode, started: room.started,
         // Bekleme paneli: masa ayarları ve botların masayı ne zaman dolduracağı

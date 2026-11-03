@@ -1,4 +1,4 @@
-// Oyun arayüzü (kıraathane teması): üst çubuk, masa paneli, kahveci menüsü, okey alt çubuğu, bekleme ve el sonu.
+﻿// Oyun arayüzü (kıraathane teması): üst çubuk, masa paneli, kahveci menüsü, okey alt çubuğu, bekleme ve el sonu.
 using System;
 using System.Collections;
 using System.Linq;
@@ -15,7 +15,7 @@ namespace Alemdar.UI
         App app; Text online, prompt, turnInfo, waitInfo, resultText, resultFoot; RectTransform resultRows;
         RectTransform tablePanel, seatsBox, orderMenu, gameBar, waitPanel, resultPanel, promptBox, menuPanel;
         Text tableTitle, tableInfo; int shownTable = -1; JObject roomsCache;
-        Button bSeriesSort, bPairsSort, bOpen, bPairs, bProcess, bRetract, bReturn, bFinish;
+        Button bSeriesSort, bPairsSort, bOpen, bPairs, bProcess, bRetract, bReturn, bFinish, bAddBot, bBots;
         Button createBtn; int modeIdx, roundIdx = 2;
         static readonly int[] Rounds = { 1, 2, 4 };
 
@@ -25,7 +25,7 @@ namespace Alemdar.UI
             // üst çubuk
             var top = Ui.Rect(root, "ust"); Ui.Anchor(top, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0, -38), new Vector2(0, 76));
             var shade = Ui.Box(top, new Color(0, 0, 0, .42f)); Ui.Stretch(shade.rectTransform); shade.raycastTarget = false;
-            var brand = Ui.Label(top, "EVDO  <size=16><color=#D4A85A>KIRAATHANESİ</color></size>", 30, Ui.Ink, TextAnchor.MiddleLeft, FontStyle.Bold); brand.supportRichText = true;
+            var brand = Ui.Label(top, "ALEMDAR  <size=16><color=#D4A85A>KIRAATHANESİ</color></size>", 30, Ui.Ink, TextAnchor.MiddleLeft, FontStyle.Bold); brand.supportRichText = true;
             Ui.Anchor(brand.rectTransform, new Vector2(0, .5f), new Vector2(0, .5f), new Vector2(200, 0), new Vector2(360, 60));
             online = Ui.Label(top, "", 20, Ui.Muted, TextAnchor.MiddleCenter); Ui.Anchor(online.rectTransform, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.zero, new Vector2(400, 40));
             var right = Ui.Row(top, 10, TextAnchor.MiddleRight); Ui.Anchor(right, new Vector2(1, .5f), new Vector2(1, .5f), new Vector2(-250, 0), new Vector2(480, 56));
@@ -108,7 +108,7 @@ namespace Alemdar.UI
             if (shownTable < 0) return;
             var (kind, r) = Slot(shownTable);
             tableTitle.text = $"Masa {shownTable + 1}" + (shownTable >= 9 ? " · Teras" : "");
-            tableInfo.text = r == null ? "Boş masa. Türü seç, kur ve otur; boş koltuklara birkaç saniyede bilgisayar oyuncuları oturur."
+            tableInfo.text = r == null ? "Boş masa. Türü seç, kur ve otur. Arkadaşların salonda bu masaya gelip boş koltuğa oturabilir; istersen boş koltukları botlarla doldurursun."
                 : $"{ModeTitle((string)r["modeKey"])} · " + (kind == "playing" ? "oyun sürüyor" : "oyuncu bekleniyor");
             foreach (Transform c in seatsBox) Destroy(c.gameObject);
             string[] labels = { "GÜNEY", "DOĞU", "KUZEY", "BATI" };
@@ -137,7 +137,7 @@ namespace Alemdar.UI
             var (kind, r) = Slot(t);
             if (kind == "playing") { app.Watch(t, (string)r["code"]); return; }
             string mode = ModeNames[modeIdx * 2];
-            app.SitAndJoin(t, 0, new { mode = "create", modeKey = mode, stackingMode = mode == "katlamali", assisted = mode != "yardimsiz", bet = 1000, roundLimit = Rounds[roundIdx], isPublic = true, seat = 0, teamMode = false, hallTable = t }); // misafirden bahis alınmaz; çip arayüzde yok
+            app.SitAndJoin(t, 0, new { mode = "create", modeKey = mode, stackingMode = mode == "katlamali", assisted = mode != "yardimsiz", bet = 1000, roundLimit = Rounds[roundIdx], isPublic = true, custom = true, seat = 0, teamMode = false, hallTable = t }); // custom: botlar kendiliğinden oturmaz, arkadaşlar gelebilsin; misafirden bahis alınmaz
         }
         IEnumerator PollRooms()
         {
@@ -165,9 +165,10 @@ namespace Alemdar.UI
 
         void BuildMenu(Transform root)
         {
-            menuPanel = Ui.Card(root, new Vector2(300, 260)); Ui.Anchor(menuPanel, new Vector2(1, 1), new Vector2(1, 1), new Vector2(-170, -220), new Vector2(300, 260));
+            menuPanel = Ui.Card(root, new Vector2(300, 330)); Ui.Anchor(menuPanel, new Vector2(1, 1), new Vector2(1, 1), new Vector2(-170, -255), new Vector2(300, 330));
             var col = Ui.Column(menuPanel, 10); Ui.Stretch(col);
             Ui.Button(col, "Tam ekran", Ui.Kind.Plain, () => Screen.fullScreen = !Screen.fullScreen, new Vector2(250, 54));
+            Button gfx = null; gfx = Ui.Button(col, Quality.I ? Quality.I.Label : "Grafik", Ui.Kind.Plain, () => Ui.SetText(gfx, Quality.I.Cycle()), new Vector2(250, 54));
             Ui.Button(col, "Adımı değiştir", Ui.Kind.Plain, () => { PlayerPrefs.DeleteKey("ad"); Ui.Toast("Oyunu yeniden açınca yeni adını sorarız."); }, new Vector2(250, 54));
             Ui.Button(col, "Oyundan çık", Ui.Kind.Danger, Application.Quit, new Vector2(250, 54));
             menuPanel.gameObject.SetActive(false);
@@ -205,8 +206,8 @@ namespace Alemdar.UI
             var col = Ui.Column(waitPanel, 12); Ui.Stretch(col);
             waitInfo = Ui.Label(col, "", 22, Ui.Ink, TextAnchor.MiddleCenter); Ui.Size(waitInfo, -1, 70);
             var row = Ui.Row(col, 12); Ui.Size(row, -1, 60);
-            Ui.Button(row, "BOT EKLE", Ui.Kind.Plain, () => app.Io.Emit("addBot"), new Vector2(170, 56));
-            Ui.Button(row, "BOTLARLA BAŞLAT", Ui.Kind.Primary, () => app.Io.Emit("startWithBots"), new Vector2(240, 56));
+            bAddBot = Ui.Button(row, "BOT EKLE", Ui.Kind.Plain, () => app.Io.Emit("addBot"), new Vector2(170, 56));
+            bBots = Ui.Button(row, "BOTLARLA BAŞLAT", Ui.Kind.Primary, () => app.Io.Emit("startWithBots"), new Vector2(240, 56));
             Ui.Button(row, "KALK", Ui.Kind.Danger, () => app.LeaveTable(), new Vector2(130, 56));
             waitPanel.gameObject.SetActive(false);
         }
@@ -226,8 +227,10 @@ namespace Alemdar.UI
         void OnLobby(JToken d)
         {
             if (app.SeatedTable < 0 || app.Okey.State != null) return;
-            int n = ((JArray)d["players"]).Count;
-            waitInfo.text = $"Masa {(string)d["code"]} · {n}/4 oyuncu\nArkadaşlarını bekle ya da bilgisayar oyuncularıyla başla.";
+            var ps = (JArray)d["players"]; int n = ps.Count, host = (int?)d["hostIndex"] ?? -1;
+            bool iHost = host >= 0 && host < n && (string)ps[host]["name"] == app.MyName;
+            bAddBot.gameObject.SetActive(iHost); bBots.gameObject.SetActive(iHost);
+            waitInfo.text = $"Masa {(string)d["code"]} · {n}/4 oyuncu\n" + (iHost ? "Arkadaşların bu masaya oturabilir. 4 kişi olunca oyun başlar ya da botlarla başlat." : "Masayı kuran oyuncu başlatacak. 4 kişi olunca oyun kendiliğinden başlar.");
             waitPanel.gameObject.SetActive(true);
         }
         void OnGameState()

@@ -192,6 +192,30 @@ namespace Alemdar.World
         });
 
         // Ferforje pencere: altıgen desen; alfa ile camdan görünür.
+        // Çim tutamı (alfa kesik kart): alttan çıkan, hafif kıvrık 40 yaprak; dipte koyu, uçta sarımsı yeşil.
+        public static Texture2D GrassTuft()
+        {
+            const int W = 256, H = 128; var c = new Color[W * H];
+            for (int i = 0; i < c.Length; i++) c[i] = new Color(.2f, .3f, .1f, 0);
+            for (int b = 0; b < 40; b++)
+            {
+                float x0 = 12 + Hash(b, 1) * (W - 24), len = H * (.45f + Hash(b, 2) * .52f), bend = (Hash(b, 3) - .5f) * 60, wid = 2.2f + Hash(b, 4) * 2.4f;
+                float tint = Hash(b, 5);
+                for (int y = 0; y < (int)len; y++)
+                {
+                    float t = y / len, cx = x0 + bend * t * t, hw = wid * (1 - t * .9f);
+                    for (int x = Mathf.Max(0, (int)(cx - hw - 1)); x <= Mathf.Min(W - 1, (int)(cx + hw + 1)); x++)
+                    {
+                        float a = Mathf.Clamp01(hw + .5f - Mathf.Abs(x - cx)); if (a <= 0) continue;
+                        var col = Color.Lerp(new Color(.13f, .24f, .07f), Color.Lerp(new Color(.42f, .58f, .2f), new Color(.6f, .65f, .28f), tint), t);
+                        ref var dst = ref c[y * W + x]; if (a > dst.a) dst = new Color(col.r, col.g, col.b, a);
+                    }
+                }
+            }
+            var tex = new Texture2D(W, H, TextureFormat.RGBA32, true) { wrapMode = TextureWrapMode.Clamp, anisoLevel = 4, filterMode = FilterMode.Trilinear };
+            tex.SetPixels(c); tex.Apply(true, false); return tex;
+        }
+
         public static Texture2D Grille() => Make(256, 256, (x, y) =>
         {
             float u = (x % 64) / 64f, v = (y % 64) / 64f;

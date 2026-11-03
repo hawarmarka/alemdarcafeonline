@@ -1,4 +1,4 @@
-// Oyuncunun karakteri: WASD/oklar, Shift koşu, fareyle bakış, tekerlekle yakınlaştırma, tıklanan yere yürüme (NavMesh yolu).
+﻿// Oyuncunun karakteri: WASD/oklar, Shift koşu, fareyle bakış, tekerlekle yakınlaştırma, tıklanan yere yürüme (NavMesh yolu).
 // Oturma: sandalyenin önüne yürür, döner, oturur. Kamera duvara girmez (küre izdüşümü).
 using System;
 using System.Collections.Generic;
@@ -32,7 +32,7 @@ namespace Alemdar.Chars
             transform.position = pos; transform.rotation = Quaternion.Euler(0, facing, 0); yaw = facing;
             body.transform.SetParent(transform, false); body.transform.localPosition = Vector3.zero; body.transform.localRotation = body.Fix; // modelin yön düzeltmesi (Quaternius -z, Rocketbox +z)
             gameObject.layer = 2; // Ignore Raycast: kamera ve tıklama kendi gövdesine çarpmasın
-            cc = gameObject.AddComponent<CharacterController>(); cc.radius = .26f; cc.height = 1.75f; cc.center = new Vector3(0, .88f, 0); cc.stepOffset = .25f; cc.minMoveDistance = 0;
+            cc = gameObject.AddComponent<CharacterController>(); cc.radius = .26f; cc.height = 1.75f; cc.center = new Vector3(0, .88f, 0); cc.stepOffset = .32f; cc.slopeLimit = 50; // bordür (17 cm) çaprazdan da aşılsın cc.minMoveDistance = 0;
         }
 
         public void WalkTo(Vector3 target, Action onArrive = null)
@@ -46,6 +46,21 @@ namespace Alemdar.Chars
             if (path.Count > 0 && (path[0] - transform.position).sqrMagnitude < .01f) path.RemoveAt(0);
         }
 
+        // yalnızca denetim: tuşa basılı tutulmuş gibi bir yöne yürür
+        Vector3 pushDir; float pushUntil;
+        public void DebugPush(Vector3 dir, float secs) { path.Clear(); pushDir = dir; pushUntil = Time.time + secs; }
+
+        // Koltuğun yanında boş bir ayakta durma yeri: önce önü, sonra yanları, en son arkası (çay bahçesinde önü masadır).
+        public static Vector3 FreeSpot(Vector3 seat, Quaternion rot)
+        {
+            foreach (var off in new[] { new Vector3(0, 0, .55f), new Vector3(.6f, 0, .1f), new Vector3(-.6f, 0, .1f), new Vector3(0, 0, -.65f), new Vector3(.7f, 0, -.5f), new Vector3(-.7f, 0, -.5f) })
+            {
+                var p = seat + rot * off; p.y = seat.y + .05f;
+                if (!Physics.CheckCapsule(p + Vector3.up * .33f, p + Vector3.up * 1.5f, .25f, ~(1 << 2), QueryTriggerInteraction.Ignore)) return p;
+            }
+            return seat + rot * new Vector3(0, 0, .55f);
+        }
+
         public void SitAt(Vector3 seat, Quaternion rot)
         {
             path.Clear(); arrive = null;
@@ -55,7 +70,7 @@ namespace Alemdar.Chars
         {
             if (!Seated) return;
             Seated = false; sitting = false; Body.SetSit(false);
-            transform.position = seatPos + seatRot * Vector3.forward * .55f;
+            transform.position = FreeSpot(seatPos, seatRot); Physics.SyncTransforms(); // önü masaysa yana ya da arkaya kalkar
             cc.enabled = true;
         }
 
@@ -76,6 +91,7 @@ namespace Alemdar.Chars
                 if (ix != 0 || iz != 0) { path.Clear(); arrive = null; move = Quaternion.Euler(0, yaw, 0) * new Vector3(ix, 0, iz).normalized; }
             }
             else if (Seated && !InputLocked && (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.S))) StandUp();
+            if (move == Vector3.zero && Time.time < pushUntil && !Seated) move = pushDir;
             if (move == Vector3.zero && path.Count > 0 && !Seated)
             {
                 var to = path[0] - transform.position; to.y = 0;

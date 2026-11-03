@@ -1,4 +1,4 @@
-// Uygulamanın akışı: sunucu (gömülü ya da çevrimiçi) → bağlantı → salon → karakter → salon ağı, kahveci, okey masası, arayüz.
+﻿// Uygulamanın akışı: sunucu (gömülü ya da çevrimiçi) → bağlantı → salon → karakter → salon ağı, kahveci, okey masası, arayüz.
 using System.Collections;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
@@ -27,6 +27,8 @@ namespace Alemdar
             I = this;
             Application.targetFrameRate = -1; QualitySettings.vSyncCount = 1; // ekran tazelemesiyle eşit, takılmasız
             Ui.Init();
+            gameObject.AddComponent<Quality>();
+            if (DevShots.Arg("-serbest") != null) QualitySettings.vSyncCount = 0; // ölçüm: kare hızı ekrana kilitlenmesin
             if (DevShots.Arg("-cek") != null) gameObject.AddComponent<DevShots>();
             if (DevShots.Arg("-uzun") != null) gameObject.AddComponent<DevLong>();
         }
@@ -76,7 +78,9 @@ namespace Alemdar
         {
             var cam = Camera.main.transform; var (p0, r0) = (cam.position, cam.rotation);
             foreach (var (pos, look) in new[] { (new Vector3(0, 2, 4), new Vector3(0, 1, -5)), (new Vector3(-14, 1.7f, 16.5f), new Vector3(2, 4, 5)),
-                                                 (new Vector3(0, 6, 15), new Vector3(0, 4, 5)), (new Vector3(-4, 1.7f, 21.5f), new Vector3(2, 1.5f, 34)), (new Vector3(12, 1.8f, 32), new Vector3(18, .7f, 37.5f)) })
+                                                 (new Vector3(0, 6, 15), new Vector3(0, 4, 5)), (new Vector3(-4, 1.7f, 21.5f), new Vector3(2, 1.5f, 34)), (new Vector3(12, 1.8f, 32), new Vector3(18, .7f, 37.5f)),
+                                                 (new Vector3(-12, 1.7f, 14.5f), new Vector3(-40, 4, 14.5f)), (new Vector3(12, 1.7f, 14.5f), new Vector3(40, 4, 14.5f)), (new Vector3(-3, 1.4f, 22), new Vector3(-8, .2f, 30)),
+                                                 (new Vector3(-9, 2.6f, 31), new Vector3(-9.5f, .5f, 39.7f)), (new Vector3(-1.2f, 1.6f, 7.6f), new Vector3(-2.5f, 1.7f, 5)) })
             {
                 cam.SetPositionAndRotation(pos, Quaternion.LookRotation(look - pos)); yield return null; yield return null;
             }
@@ -107,7 +111,7 @@ namespace Alemdar
             int t = NearTable(); if (t >= 0) { Hud.ShowTable(t); return; }
             int s = NearSeat(); if (s < 0) return;                          // mahalledeki bank ya da sandalye
             var (pos, rot) = World.Neighborhood.Seats[s];
-            Me.WalkTo(pos + rot * Vector3.forward * .5f, () => Me.SitAt(pos, rot));
+            Me.WalkTo(Chars.PlayerMotor.FreeSpot(pos, rot), () => Me.SitAt(pos, rot)); // önü masaysa yandan yaklaşır
         }
         public int NearSeat(float max = 1.6f)
         {

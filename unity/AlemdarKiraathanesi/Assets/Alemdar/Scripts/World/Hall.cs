@@ -1,4 +1,4 @@
-// EVDO Kıraathanesi salonu: 3×3 masa + teras, kolonlar, ocak tezgahı, dolap, tablolar, saat, camekân, ışıklar.
+﻿// Alemdar Kıraathanesi salonu: 3×3 masa + teras, kolonlar, ocak tezgahı, dolap, tablolar, saat, camekân, ışıklar.
 // Koordinatlar: +z camekâna/terasa, -z ocağa doğru. Masa koltukları: 0 güney (+z), 1 doğu, 2 kuzey, 3 batı.
 using System.Collections.Generic;
 using UnityEngine;
@@ -100,6 +100,7 @@ namespace Alemdar.World
             Apartment.Place(Root, "SM_PlantPot_74", new Vector3(MinX + .75f, 0, MaxZ - .8f), 0, .7f);
             Apartment.Place(Root, "SM_PlantPot_74", new Vector3(MaxX - .75f, 0, MaxZ - .9f), 120, .7f);
             Apartment.Place(Root, "WallProps_SM_WallShelves3_2", new Vector3(3f, 1.55f, MinZ + .03f), 0, .8f, false); // tezgah ile Kapadokya tablosu arası
+            Sticker(new Vector2(.42f, .63f), Decal(Lib.I.noSmoking), new Vector3(MaxX - .012f, 1.6f, -5.2f), 90); // sağ duvarda sigara içilmez afişi
         }
 
         // Duvarlardaki tablolar: gerçek fotoğraflar (Galata, Kız Kulesi, Boğaz, Kapadokya, Uzungöl, Sümela, yayla, Ölüdeniz); yoksa kendi çizimimiz.
@@ -155,12 +156,18 @@ namespace Alemdar.World
             }
             Props.Box(Root, new Vector3(MaxX - MinX, Height - 2.65f, .2f), Props.Plaster, new Vector3(0, (Height + 2.65f) / 2, z), 0, true);
             foreach (float x in new[] { doorL, doorR }) Props.Box(Root, new Vector3(.09f, 2.65f, .12f), frame, new Vector3(x, 1.325f, z));
-            // camekân yazısı (EVDO logosu): dışarıdan okunur, içeriden ters görünür
-            var signM = Props.Cutout(Tex.Badge(false));
-            var outside = Props.Quad(Root, new Vector2(1.7f, 1.06f), signM, new Vector3(3.2f, 1.85f, z + .015f), Quaternion.Euler(0, 180, 0));
-            var inside = Props.Quad(Root, new Vector2(-1.7f, 1.06f), signM, new Vector3(3.2f, 1.85f, z - .015f), Quaternion.identity); // ayna
-            foreach (var s in new[] { outside, inside }) s.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            foreach (var (zz, ry, mirror) in new[] { (z + .02f, 180f, false), (z - .02f, 0f, true) }) Logo(new Vector3(3.2f, 1.85f, zz), ry, 1f, mirror);
+            // camekân çıkartması: kapının iki yanındaki camda logo; dışarıdan düz, içeriden ters okunur
+            var logoM = Decal(Lib.I.logo);
+            float lh = 1.0f, lw = lh * Lib.I.logo.width / Lib.I.logo.height;
+            foreach (float x in new[] { -3.04f, 3.04f }) // kapının yanındaki camın ortası (kayıtların arası)
+            {
+                Sticker(new Vector2(lw, lh), logoM, new Vector3(x, 1.78f, z + .015f), 180);
+                Sticker(new Vector2(-lw, lh), logoM, new Vector3(x, 1.78f, z - .015f), 0); // ayna
+            }
+            // sigara içilmez afişi: kapının sağındaki camda (içe ve dışa bakar) ve sol duvarda
+            var noSmoke = Decal(Lib.I.noSmoking); var ns = new Vector2(.3f, .45f);
+            Sticker(ns, noSmoke, new Vector3(1.61f, 1.55f, z + .015f), 180);
+            Sticker(ns, noSmoke, new Vector3(1.61f, 1.55f, z - .015f), 0);
             // kepenk kutuları: her camın üstünde, dışarıda; kepenk gündüz yukarıda, alt çıtası görünür
             var shutter = Props.Tiled(Props.M(new Color(.62f, .63f, .64f), .45f, .6f, Tex.Shutter()), new Vector2(4, 1));
             foreach (var (a, b) in new[] { (MinX, doorL), (doorR, MaxX) })
@@ -174,22 +181,29 @@ namespace Alemdar.World
             Sign(new Vector3(0, 2.45f, TerraceZ + .05f));
         }
 
-        // EVDO yazısı: büyük EVDO, altında KIRAATHANESİ · 1987 (ölçek 1 = camekân boyu)
-        void Logo(Vector3 pos, float ry, float s, bool mirror)
+        // saydam çıkartma malzemesi (camın önünde çizilsin diye cam sırasından sonra)
+        static Material Decal(Texture2D t)
         {
-            var gold = Tex.EvdoGold;
-            Props.Text3D(Root, "EVDO", pos + Vector3.down * .02f * s, ry, .3f * s, gold, mirror);
-            Props.Text3D(Root, "KIRAATHANESİ · 1987", pos + Vector3.down * .3f * s, ry, .07f * s, new Color(.95f, .92f, .84f), mirror);
+            var m = Props.Transparent(Color.white, .6f); m.color = Color.white; m.mainTexture = t; m.renderQueue = 3010; return m;
         }
+        void Sticker(Vector2 size, Material m, Vector3 pos, float ry)
+            => Props.Quad(Root, size, m, pos, Quaternion.Euler(0, ry, 0)).GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        // dükkân tabelası: beyaz ışıklı kutu, ince kırmızı çerçeve, ortada logo
         void Sign(Vector3 pos)
         {
-            var board = Props.Box(Root, new Vector3(3.2f, .9f, .14f), Props.M(Tex.EvdoGreen, .35f), pos);
+            var red = Props.M(new Color(.72f, .03f, .03f), .55f);
+            var board = Props.Box(Root, new Vector3(3.4f, .95f, .16f), Props.Emissive(new Color(.97f, .96f, .94f), .35f), pos);
             board.name = "tabela";
-            Props.Box(Root, new Vector3(3.28f, .98f, .1f), Props.M(Tex.EvdoGold, .6f, .7f), pos + new Vector3(0, 0, -.03f));
-            var badge = Props.Emissive(Color.white, .25f); badge.mainTexture = Tex.Badge(true); badge.SetTexture("_EmissionMap", badge.mainTexture);
-            Props.Quad(Root, new Vector2(1.3f, .81f), badge, pos + new Vector3(-.9f, 0, .075f), Quaternion.Euler(0, 180, 0));
-            Props.Text3D(Root, "EVDO", pos + new Vector3(.55f, .14f, .08f), 180, .36f, Tex.EvdoGold);
-            Props.Text3D(Root, "KIRAATHANESİ", pos + new Vector3(.55f, -.2f, .08f), 180, .12f, new Color(.95f, .92f, .84f));
+            Props.Box(Root, new Vector3(3.5f, 1.05f, .12f), red, pos + new Vector3(0, 0, -.03f));
+            var logoM = Decal(Lib.I.logo); logoM.EnableKeyword("_EMISSION"); logoM.SetColor("_EmissionColor", Color.white * .3f); logoM.SetTexture("_EmissionMap", Lib.I.logo);
+            float h = .88f; Sticker(new Vector2(h * Lib.I.logo.width / Lib.I.logo.height, h), logoM, pos + new Vector3(0, 0, .082f), 180);
+            // iki yanda kırmızı çizgi ve küçük yazı
+            foreach (float sx in new[] { -1f, 1f })
+            {
+                Props.Box(Root, new Vector3(.9f, .025f, .01f), red, pos + new Vector3(sx * 1.17f, .12f, .085f));
+                Props.Text3D(Root, sx < 0 ? "ÇAY · KAHVE" : "OKEY · TAVLA", pos + new Vector3(sx * 1.17f, -.05f, .086f), 180, .085f, new Color(.6f, .03f, .03f));
+                Props.Box(Root, new Vector3(.9f, .025f, .01f), red, pos + new Vector3(sx * 1.17f, -.2f, .085f));
+            }
             var l = new GameObject("tabelaIsigi").AddComponent<Light>(); l.transform.SetParent(Root, false); l.transform.localPosition = pos + new Vector3(0, -.2f, .9f);
             l.type = LightType.Point; l.range = 3f; l.intensity = .6f; l.color = new Color(1f, .93f, .78f); l.renderMode = LightRenderMode.ForceVertex;
         }
@@ -295,6 +309,18 @@ namespace Alemdar.World
             foreach (var (a, b) in new[] { (MinX, -1.1f), (1.1f, MaxX) }) Props.Box(Root, new Vector3(b - a, .9f, .22f), Props.Plaster, new Vector3((a + b) / 2, .45f, TerraceZ), 0, true);
             Props.Box(Root, new Vector3(.22f, .9f, dz), Props.Plaster, new Vector3(MinX, .45f, mz), 0, true);
             Props.Box(Root, new Vector3(.22f, .9f, dz), Props.Plaster, new Vector3(MaxX, .45f, mz), 0, true);
+            // duvarlara taş kapak ve koyu süpürgelik: kaldırımdan ayrı, sağlam bir duvar gibi dursun
+            var cap = Props.M(new Color(.62f, .6f, .57f), .35f); var plinth = Props.M(new Color(.3f, .29f, .28f), .2f);
+            foreach (var (a, b) in new[] { (MinX, -1.1f), (1.1f, MaxX) })
+            {
+                Props.Box(Root, new Vector3(b - a + .06f, .06f, .32f), cap, new Vector3((a + b) / 2, .93f, TerraceZ));
+                Props.Box(Root, new Vector3(b - a + .02f, .12f, .25f), plinth, new Vector3((a + b) / 2, .06f, TerraceZ));
+            }
+            foreach (float x in new[] { MinX, MaxX })
+            {
+                Props.Box(Root, new Vector3(.32f, .06f, dz + .1f), cap, new Vector3(x, .93f, mz));
+                Props.Box(Root, new Vector3(.25f, .12f, dz), plinth, new Vector3(x, .06f, mz));
+            }
             foreach (float x in new[] { MinX + .2f, -2.2f, 2.2f, MaxX - .2f }) Props.Box(Root, new Vector3(.1f, 2.8f, .1f), steel, new Vector3(x, 1.4f, TerraceZ - .1f));
             Props.Box(Root, new Vector3(MaxX - MinX, .12f, .12f), steel, new Vector3(0, 2.8f, TerraceZ - .1f));
             var roof = Props.Box(Root, new Vector3(MaxX - MinX, .03f, dz + .4f), new Material(Props.Black) { color = new Color(.25f, .26f, .27f) }, new Vector3(0, 2.95f, mz));

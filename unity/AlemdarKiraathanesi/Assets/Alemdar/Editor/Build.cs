@@ -1,4 +1,4 @@
-// Komut satırı: Unity -batchmode -quit -projectPath ... -executeMethod Alemdar.EditorTools.Build.Windows
+﻿// Komut satırı: Unity -batchmode -quit -projectPath ... -executeMethod Alemdar.EditorTools.Build.Windows
 // Sahne, animasyon denetleyicisi, şablon malzemeler ve oyuncu ayarları kodla kurulur; çıktı: unity/Build/AlemdarKiraathanesi.exe
 // Derleme sonrası oyun sunucusu (Node + server/ + node_modules/) Build/Server altına kopyalanır.
 using System.IO;
@@ -44,7 +44,8 @@ namespace Alemdar.EditorTools
             lib.phModels = PolyHavenModels();
             // Asset Store paketlerinden yalnızca kullanılan kalıplar (derlemeye yalnız bunlar girer)
             lib.storeModels = new[] { "Props_SM_NewsPaper_15", "Blinds_SM_VenetianBlind_Open_5", "WallProps_SM_Chalkboard_6", "SM_PlantPot_74", "WallProps_SM_WallShelves3_2",
-                                      "Ext_Apt_01_Wall_Window_01", "Ext_Apt_01_Wall_01", "Fridge_01", "Range_Hood" }
+                                      "Ext_Apt_01_Wall_Window_01", "Ext_Apt_01_Wall_01", "Fridge_01", "Range_Hood",
+                                      "HATCHBACK_1988", "SEDAN", "Traffic B - OldSedan", "Traffic B - OldWagon 2", "Traffic B - MidSedan 1", "Traffic B - Small_Car", "Traffic B - Taxi", "Traffic B - Van" }
                 .Select(n => AssetDatabase.FindAssets(n + " t:Prefab").Select(AssetDatabase.GUIDToAssetPath).FirstOrDefault(p => Path.GetFileNameWithoutExtension(p) == n))
                 .Where(p => p != null).Select(p => AssetDatabase.LoadAssetAtPath<GameObject>(p)).ToArray();
             // mahalle dokuları: modeli olmayan Poly Haven klasörlerindeki diff/nor (anahtar "klasör/harita")
@@ -68,6 +69,9 @@ namespace Alemdar.EditorTools
             lib.photos = Directory.Exists("Assets/ThirdParty/Photos")
                 ? Directory.GetFiles("Assets/ThirdParty/Photos", "*.jpg").Select(f => AssetDatabase.LoadAssetAtPath<Texture2D>(f.Replace('\\', '/'))).Where(t => t).ToArray()
                 : new Texture2D[0];
+            lib.logo = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Alemdar/Brand/logo.png");
+            lib.noSmoking = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Alemdar/Brand/sigara.png");
+            if (!lib.logo || !lib.noSmoking) throw new System.Exception("Brand/logo.png veya sigara.png eksik");
             // normal haritalı ve duman şablonları (shader çeşitleri derlemeye girsin)
             var on = new Material(Shader.Find("Standard")) { enableInstancing = true }; on.SetTexture("_BumpMap", lib.plasterN); on.EnableKeyword("_NORMALMAP");
             AssetDatabase.DeleteAsset(Gen + "/OpakNormal.mat"); AssetDatabase.CreateAsset(on, Gen + "/OpakNormal.mat"); lib.opaqueNormal = on;
@@ -139,7 +143,8 @@ namespace Alemdar.EditorTools
                 var model = AssetDatabase.LoadAssetAtPath<GameObject>(fbx); if (!model) continue;
                 var col = AssetDatabase.LoadAssetAtPath<Texture2D>($"{PH}/{id}/diff.png") ?? AssetDatabase.LoadAssetAtPath<Texture2D>($"{PH}/{id}/diff.jpg");
                 var nor = AssetDatabase.LoadAssetAtPath<Texture2D>($"{PH}/{id}/nor.jpg");
-                bool alpha = false; // lamba camının saydamlık haritası bütün lambayı kesiyordu: sokak eşyaları opak
+                // lamba camının saydamlık haritası bütün lambayı kesiyordu: sokak eşyaları opak; yalnız bitkiler (çim, çalı, çiçek) alfa kesik
+                bool alpha = id.StartsWith("grass_") || id.StartsWith("shrub_") || id.StartsWith("flower_");
                 var m = new Material(std) { name = id, enableInstancing = true };
                 m.SetTexture("_MainTex", col); m.SetFloat("_Glossiness", .3f);
                 if (nor) { m.SetTexture("_BumpMap", nor); m.EnableKeyword("_NORMALMAP"); }

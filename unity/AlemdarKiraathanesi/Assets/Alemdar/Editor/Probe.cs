@@ -1,4 +1,4 @@
-// Komut satırından: -executeMethod Alemdar.EditorTools.Probe.Run → içe aktarılan modellerin klip, kemik ve mesh adlarını yazar.
+﻿// Komut satırından: -executeMethod Alemdar.EditorTools.Probe.Run → içe aktarılan modellerin klip, kemik ve mesh adlarını yazar.
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -60,9 +60,10 @@ namespace Alemdar.EditorTools
             sb.AppendLine("== Asset Store kalıpları (yol / merkez / boyut / ölçek / malzeme shader)");
             foreach (var name in new[] { "Props_SM_NewsPaper_15", "Blinds_SM_VenetianBlind_Close_2", "Blinds_SM_VenetianBlind_Open_5", "WallProps_SM_Chalkboard_6", "SM_PlantPot_74",
                                          "WallProps_SM_WallShelves3_2", "Props_SM_CoffeMug_7", "Cabinet_Base_SD_01", "Cabinet_Base_Sink_01", "Cabinet_Wall_DD_01", "Range_Hood", "Stove_01",
-                                         "Fridge_01", "urban_building_Prefab", "CeilingParts_SM_AC_3m_165", "SM_CeilingLamp_14", "Ext_Apt_01_Wall_Window_01", "Ext_apt_01_01" })
+                                         "Fridge_01", "urban_building_Prefab", "CeilingParts_SM_AC_3m_165", "SM_CeilingLamp_14", "Ext_Apt_01_Wall_Window_01", "Ext_apt_01_01",
+                                         "HATCHBACK_1988", "SEDAN", "Traffic B - OldSedan", "Traffic B - OldWagon 2", "Traffic B - MidSedan 1", "Traffic B - Small_Car", "Traffic B - Taxi", "Traffic B - Van", "Car1", "Taxi" })
             {
-                var guid = AssetDatabase.FindAssets(name + " t:Prefab").FirstOrDefault(); if (guid == null) { sb.AppendLine("  YOK " + name); continue; }
+                var guid = AssetDatabase.FindAssets(name + " t:Prefab").FirstOrDefault(g => Path.GetFileNameWithoutExtension(AssetDatabase.GUIDToAssetPath(g)) == name); if (guid == null) { sb.AppendLine("  YOK " + name); continue; }
                 var path = AssetDatabase.GUIDToAssetPath(guid); var inst = (GameObject)Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(path));
                 var rs = inst.GetComponentsInChildren<Renderer>(true);
                 if (rs.Length == 0) { sb.AppendLine($"  {name}: renderer yok"); Object.DestroyImmediate(inst); continue; }

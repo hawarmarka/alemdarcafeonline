@@ -1,4 +1,4 @@
-// Quaternius karakter, saç ve animasyon FBX'leri: insan (Humanoid) iskeleti, okunabilir mesh (kıyafet maskesi için).
+﻿// Quaternius karakter, saç ve animasyon FBX'leri: insan (Humanoid) iskeleti, okunabilir mesh (kıyafet maskesi için).
 using UnityEditor;
 
 namespace Alemdar.EditorTools
@@ -49,6 +49,13 @@ namespace Alemdar.EditorTools
                 if (assetPath.EndsWith("/rough.jpg")) ti.sRGBTexture = false;
                 ti.isReadable = assetPath.Contains("marble_01/diff");
                 ti.maxTextureSize = 1024; ti.anisoLevel = 8; ti.mipmapEnabled = true;
+                return;
+            }
+            if (assetPath.Contains("Alemdar/Brand/"))
+            {
+                // logo cama yapışan saydam çıkartma; kenarlar yumuşak kalsın
+                ti.alphaIsTransparency = true; ti.maxTextureSize = 2048; ti.anisoLevel = 8; ti.mipmapEnabled = true; ti.npotScale = TextureImporterNPOTScale.None;
+                ti.textureCompression = TextureImporterCompression.CompressedHQ; ti.wrapMode = UnityEngine.TextureWrapMode.Clamp;
                 return;
             }
             if (assetPath.Contains("ThirdParty/Photos"))

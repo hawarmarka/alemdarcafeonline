@@ -1,4 +1,4 @@
-// 80'ler Türk apartmanı: sıvalı cephe (Poly Haven dokuları), alüminyum pencereler, demir korkuluklu balkonlar, çamaşır ipi,
+﻿// 80'ler Türk apartmanı: sıvalı cephe (Poly Haven dokuları), alüminyum pencereler, demir korkuluklu balkonlar, çamaşır ipi,
 // çatıda su deposu ve televizyon anteni, zemin katta dükkânlar ve kepenkler. Önü +z (sokak) tarafı.
 using System.Collections.Generic;
 using UnityEngine;
@@ -47,7 +47,7 @@ namespace Alemdar.World
                     if (balcony) Balcony(p, x, y, z1, step * .9f, rng);
                     else if (open != null && open(f, c)) OpenAt(p, x, y + 1.55f, z1, wall);
                     else Window(p, x, y + 1.55f, z1, 1.3f, 1.35f, rng);
-                    if (!balcony && rng.NextDouble() < .25 && Lib.I.Model("exterior_aircon_unit")) Place(p, "exterior_aircon_unit", new Vector3(x + .9f, y + .55f, z1 + .25f), 180, .9f, false);
+                    if (!balcony && !(open != null && open(f, c)) && rng.NextDouble() < .25 && Lib.I.Model("exterior_aircon_unit")) Place(p, "exterior_aircon_unit", new Vector3(x, y + .32f, z1 + .25f), 180, .8f, false); // pencerenin altında, yandaki balkona taşmaz
                 }
             }
             Roof(p, x0, x1, z0, z1, top, rng);
@@ -63,7 +63,12 @@ namespace Alemdar.World
             Props.Box(p, new Vector3(.32f, 1.3f, .03f), curtain, new Vector3(x - .5f, y, z + .03f), 0, false, false);
             Props.Box(p, new Vector3(1.5f, 1.0f, .8f), wall, new Vector3(x, y - 1.18f, z + .4f), 0, true);           // pervaz altı (teyzenin belini ve bacaklarını örter)
             Props.Box(p, new Vector3(1.6f, .07f, .88f), slab, new Vector3(x, y - .66f, z + .42f));                     // mermer pervaz: dirsek dayanır
-            foreach (float s in new[] { -1f, 1f }) Props.Box(p, new Vector3(.12f, 1.4f, .8f), wall, new Vector3(x + s * .74f, y, z + .4f)); // yan söveler
+            foreach (float s in new[] { -1f, 1f })
+            {
+                Props.Box(p, new Vector3(.12f, 1.4f, .8f), wall, new Vector3(x + s * .74f, y, z + .4f)); // yan söveler
+                Props.Box(p, new Vector3(.02f, .9f, .5f), winDark, new Vector3(x + s * .805f, y + .05f, z + .42f), 0, false, false); // yan cam (cumba)
+                WindowFrameSide(p, x + s * .81f, y + .05f, z + .42f, .5f, .9f);
+            }
             Props.Box(p, new Vector3(1.6f, .12f, .8f), wall, new Vector3(x, y + .72f, z + .4f));                       // üst söve
             OpenWindows.Add((new Vector3(x, y, z), Vector3.forward));
         }
@@ -75,6 +80,13 @@ namespace Alemdar.World
             if (lit) Props.Box(p, new Vector3((ww - .1f) * .35f, wh - .12f, .01f), curtain, new Vector3(x - ww * .28f, y, z + .025f), 0, false, false); // tül perde
             WindowFrame(p, x, y, z, ww, wh);
             Props.Box(p, new Vector3(ww + .12f, .05f, .2f), slab, new Vector3(x, y - wh / 2 - .03f, z + .1f));
+        }
+        static void WindowFrameSide(Transform p, float x, float y, float z, float wd, float wh)
+        {
+            Props.Box(p, new Vector3(.04f, .04f, wd), frame, new Vector3(x, y + wh / 2, z), 0, false, false);
+            Props.Box(p, new Vector3(.04f, .04f, wd), frame, new Vector3(x, y - wh / 2, z), 0, false, false);
+            Props.Box(p, new Vector3(.04f, wh, .04f), frame, new Vector3(x, y, z - wd / 2), 0, false, false);
+            Props.Box(p, new Vector3(.04f, wh, .04f), frame, new Vector3(x, y, z + wd / 2), 0, false, false);
         }
         static void WindowFrame(Transform p, float x, float y, float z, float ww, float wh)
         {
@@ -90,9 +102,11 @@ namespace Alemdar.World
         {
             const float depth = 1.05f;
             Props.Box(p, new Vector3(bw, .14f, depth), slab, new Vector3(x, y + .07f, z + depth / 2), 0, true);
-            Props.Box(p, new Vector3(1f, 2.1f, .02f), winDark, new Vector3(x - bw * .2f, y + 1.2f, z + .01f), 0, false, false);
-            WindowFrame(p, x - bw * .2f, y + 1.2f, z, 1f, 2.1f);
-            Window(p, x + bw * .25f, y + 1.55f, z, .9f, 1.3f, rng);
+            float dw = Mathf.Min(.9f, bw * .42f), ww = Mathf.Min(.85f, bw * .4f); // kapı ve pencere balkon genişliğine sığar, üst üste binmez
+            float dx = x - bw / 2 + .12f + dw / 2, wx = x + bw / 2 - .12f - ww / 2;
+            Props.Box(p, new Vector3(dw, 2.1f, .02f), winDark, new Vector3(dx, y + 1.2f, z + .01f), 0, false, false);
+            WindowFrame(p, dx, y + 1.2f, z, dw, 2.1f);
+            Window(p, wx, y + 1.55f, z, ww, 1.3f, rng);
             float rz = z + depth - .04f, rh = .95f;
             Props.Box(p, new Vector3(bw, .05f, .05f), iron, new Vector3(x, y + .14f + rh, rz), 0, false, false);
             Props.Box(p, new Vector3(bw, .03f, .03f), iron, new Vector3(x, y + .24f, rz), 0, false, false);
@@ -112,7 +126,7 @@ namespace Alemdar.World
                     Props.Box(p, new Vector3(cw, .45f + (float)rng.NextDouble() * .3f, .01f), Props.M(cloth[rng.Next(cloth.Length)], .05f), new Vector3(x - bw / 2 + .35f + i * (bw - .6f) / 3.5f, y + 1.6f, z + depth - .3f), 0, false, true);
                 }
             }
-            if (rng.NextDouble() < .6 && Lib.I.Model("potted_plant_02")) Place(p, "potted_plant_02", new Vector3(x + bw / 2 - .3f, y + .14f, z + depth - .3f), rng.Next(360), .6f, false);
+            if (rng.NextDouble() < .6 && Lib.I.Model("potted_plant_02")) Place(p, "potted_plant_02", new Vector3(x + bw / 2 - .25f, y + .14f, z + depth - .22f), rng.Next(360), .55f, false);
         }
 
         static void Roof(Transform p, float x0, float x1, float z0, float z1, float top, System.Random rng)

@@ -1,4 +1,4 @@
-// Mahalle: kıraathanenin üstünde 4 katlı apartman, iki yanda komşu apartmanlar (bakkal), kilit taşı kaldırım, asfalt yol,
+﻿// Mahalle: kıraathanenin üstünde 4 katlı apartman, iki yanda komşu apartmanlar (bakkal), kilit taşı kaldırım, asfalt yol,
 // karşıda park (ağaçlar, banklar, lambalar) ve çay bahçesi; pencerede dedikodu yapan teyzeler.
 // Koordinat: +z sokağa doğru. Teras önü Hall.TerraceZ; yol 11..18; park 20.5..42.
 using System.Collections.Generic;
@@ -12,6 +12,7 @@ namespace Alemdar.World
         public static readonly List<(Vector3 pos, Quaternion rot)> Seats = new(); // oturulabilir yerler (bank, çay bahçesi sandalyesi)
         public static readonly List<Light> Lamps = new();                          // gece yanan sokak lambaları
         public static Transform Root { get; private set; }
+        public static MeshRenderer LawnRenderer;                                           // çim kartları (düşük grafikte kapanır)
         static Material leaves, bark;
 
         public static void Build(Transform parent)
@@ -35,7 +36,8 @@ namespace Alemdar.World
             Apartment.Build(back, -28f, -10f, -8f, 0f, 3.2f, 4, pink, 6, true, new[] { "-", "-", "-" }, null);
             Apartment.Build(back, -9.6f, 9.6f, -8f, 0f, 3.2f, 5, cream, 7, true, new[] { "-", "-", "-" }, null);
             Apartment.Build(back, 10f, 28f, -8f, 0f, 3.2f, 4, blue, 8, true, new[] { "-", "-", "-" }, null);
-            Street(); Bakkal(); Park(); TeaGarden();
+            EndBlocks(pink, blue, cream, beige);
+            Street(); Bakkal(); Park(); Lawn(); TeaGarden();
             Gossip(people);
             Playground.Build(Root, people); // salıncak, kaydırak, kum havuzu ve oynayan çocuklar
             Walls();
@@ -48,7 +50,7 @@ namespace Alemdar.World
         static void Ground()
         {
             var walk = Tex("brick_pavement_02", Vector2.one); var road = Tex("asphalt_02", Vector2.one, .25f);
-            var curb = Tex("concrete_pavement", Vector2.one); var soil = Tex("forrest_ground_01", Vector2.one, .05f);
+            var curb = Tex("concrete_pavement", Vector2.one); var soil = Props.MN(new Color(.62f, .86f, .45f), .05f, Lib.I.T("leafy_grass", "diff"), Lib.I.T("leafy_grass", "nor"), Vector2.one, .8f); // park çimeni: yeşile çekilmiş
             Slab(walk, MinX, -6.7f, 5.2f, RoadZ0, 0); Slab(walk, 6.7f, MaxX, 5.2f, RoadZ0, 0); Slab(walk, -6.7f, 6.7f, Hall.TerraceZ, RoadZ0, 0);
             Slab(curb, MinX - 6, MaxX + 6, RoadZ0 - .2f, RoadZ0, .02f); Slab(curb, MinX - 6, MaxX + 6, RoadZ1, RoadZ1 + .2f, .02f);
             Slab(road, MinX - 30, MaxX + 30, RoadZ0, RoadZ1, -.15f);
@@ -57,9 +59,79 @@ namespace Alemdar.World
             Slab(walk, -1.4f, 1.4f, ParkZ0, MaxZ, .03f); Slab(walk, MinX, MaxX, 29.2f, 31.6f, .03f); // park yolları
             // yolun yan uçları: sisle kaybolan sokak devamı
             Slab(walk, MinX - 30, MinX, 5.2f, RoadZ0, 0); Slab(walk, MaxX, MaxX + 30, 5.2f, RoadZ0, 0);
+            // parkın yanları ve arkası: yan sokakların kaldırımı (uçlardaki binalara kadar)
+            Slab(walk, MinX - 30, MinX - 6, RoadZ1 + .2f, ParkZ0, 0); Slab(walk, MaxX + 6, MaxX + 30, RoadZ1 + .2f, ParkZ0, 0);
+            Slab(walk, MinX - 30, MinX, ParkZ0, MaxZ, 0); Slab(walk, MaxX, MaxX + 30, ParkZ0, MaxZ, 0);
+            Slab(walk, MinX - 30, MaxX + 30, MaxZ, MaxZ + 2.5f, 0);
+            Slab(Tex("grass_path_2", Vector2.one, .1f), 13.4f, MaxX - .2f, 33.2f, MaxZ - .1f, .02f); // çay bahçesi: çakıllı toprak
             // yol çizgisi (kesik)
             var line = Props.M(new Color(.92f, .9f, .82f), .2f);
             for (float x = MinX - 28; x < MaxX + 28; x += 4) Props.Box(Root, new Vector3(2f, .005f, .12f), line, new Vector3(x, -.148f, (RoadZ0 + RoadZ1) / 2), 0, false, false);
+        }
+
+        // ---------- dört yanı kapalı mahalle: sokağın iki ucunda yola dik apartmanlar (ortada yolun geçtiği boşluk),
+        // boşluğun gerisinde, sisin içinde karşı sıra. Sokak boş ufka açılmaz.
+        static void EndBlocks(params Material[] walls)
+        {
+            Transform Side(float x, float ry) { var t = new GameObject("ucSira").transform; t.SetParent(Root, false); t.localPosition = new Vector3(x, 0, 0); t.localRotation = Quaternion.Euler(0, ry, 0); return t; }
+            // solda yerel x = -dünya z, sağda yerel x = dünya z; yerel ön (+z) sokağın içine bakar
+            var left = Side(MinX - 8, 90); var right = Side(MaxX + 8, -90);
+            (float a, float b, int floors, string shop)[] segs = { (-6.4f, 10.2f, 4, "EKMEK FIRINI"), (18.8f, 31.2f, 5, "-"), (31.6f, 44.5f, 4, "-") };
+            int s = 20;
+            foreach (var (a, b, floors, shop) in segs)
+            {
+                Apartment.Build(left, -b, -a, -10f, 0f, 3.4f, floors, walls[s % walls.Length], s, true, new[] { shop == "-" ? "-" : "KUAFÖR", "-" }, null); s++;
+                Apartment.Build(right, a, b, -10f, 0f, 3.4f, floors + (s % 2), walls[s % walls.Length], s, true, new[] { "-", shop }, null); s++;
+            }
+            // yolun geçtiği boşluğun gerisi (araba buradan gelip gider)
+            Apartment.Build(Side(MinX - 36, 90), -24f, -6f, -10f, 0f, 3.4f, 4, walls[1], 40, true, new[] { "-", "-" }, null);
+            Apartment.Build(Side(MaxX + 36, -90), 6f, 24f, -10f, 0f, 3.4f, 4, walls[2], 41, true, new[] { "-", "-" }, null);
+        }
+
+        // ---------- park çimeni: çim tutamları (alfa kesik çapraz kartlar), çit dibinde çalılar, saksılarda çiçek ----------
+        static void Lawn()
+        {
+            var tuft = Props.Cutout(World.Tex.GrassTuft()); tuft.SetFloat("_Cutoff", .4f); tuft.enableInstancing = true; tuft.SetFloat("_Glossiness", .05f);
+            var rng = new System.Random(7);
+            bool Free(float x, float z) => Mathf.Abs(x) > 1.8f && (z < 28.9f || z > 31.9f)                       // park yolları
+                && !(x > 12.8f && z > 32.6f)                                                                       // çay bahçesi
+                && (new Vector2(x, z) - new Vector2(Playground.Center.x, Playground.Center.z)).sqrMagnitude > 25; // oyun alanı
+            // bütün tutamlar tek bir ağda (tek çizim çağrısı); her tutam iki çapraz kart, iki yüzlü
+            var verts = new List<Vector3>(); var uvs = new List<Vector2>(); var norms = new List<Vector3>(); var tris = new List<int>();
+            int n = 0;
+            for (int i = 0; i < 9000 && n < 2600; i++)
+            {
+                float x = MinX + .6f + (float)rng.NextDouble() * (MaxX - MinX - 1.2f), z = ParkZ0 + .5f + (float)rng.NextDouble() * (MaxZ - ParkZ0 - 1f);
+                if (!Free(x, z)) continue;
+                float s = .22f + (float)rng.NextDouble() * .2f, a = (float)rng.NextDouble() * 180f, hw = s * .9f, h = s * .75f; // kısa, sık çim
+                foreach (float cross in new[] { 0f, 90f })
+                    foreach (float side in new[] { 1f, -1f })
+                    {
+                        var rot = Quaternion.Euler(0, a + cross, 0); var r = rot * Vector3.right * hw; var nrm = rot * Vector3.back * side;
+                        var p0 = new Vector3(x, .01f, z); int b0 = verts.Count;
+                        verts.AddRange(new[] { p0 - r, p0 + r, p0 + r + Vector3.up * h, p0 - r + Vector3.up * h });
+                        uvs.AddRange(new[] { new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1) });
+                        var up = Vector3.Lerp(nrm, Vector3.up, .6f).normalized; norms.AddRange(new[] { up, up, up, up }); // yukarı eğik normal: çim yumuşak ışık alır
+                        if (side > 0) tris.AddRange(new[] { b0, b0 + 2, b0 + 1, b0, b0 + 3, b0 + 2 }); else tris.AddRange(new[] { b0, b0 + 1, b0 + 2, b0, b0 + 2, b0 + 3 });
+                    }
+                n++;
+            }
+            var mesh = new Mesh { name = "cimen", indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
+            mesh.SetVertices(verts); mesh.SetUVs(0, uvs); mesh.SetNormals(norms); mesh.SetTriangles(tris, 0); mesh.RecalculateBounds();
+            var lawn = new GameObject("cimen", typeof(MeshFilter), typeof(MeshRenderer)); lawn.transform.SetParent(Root, false);
+            lawn.GetComponent<MeshFilter>().sharedMesh = mesh; var lr = lawn.GetComponent<MeshRenderer>(); lr.sharedMaterial = tuft;
+            lr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            LawnRenderer = lr; lr.enabled = !Quality.I || Quality.I.Level <= 1;            // çalılar: çitin dibinde, aralıklı
+            var shrubRng = new System.Random(9);
+            foreach (float x in new[] { -24f, -18f, -14.5f, -4.5f, 4.5f, 9f, 16f, 23f })
+                Apartment.Place(Root, shrubRng.Next(2) == 0 ? "shrub_01" : "shrub_02", new Vector3(x, .01f, ParkZ0 + .9f), shrubRng.Next(360), .8f, false);
+            foreach (float z in new[] { 24.5f, 34.5f, 39.5f })
+            {
+                Apartment.Place(Root, "shrub_02", new Vector3(MinX + .9f, .01f, z), shrubRng.Next(360), .8f, false);
+                Apartment.Place(Root, "shrub_01", new Vector3(MaxX - .9f, .01f, z - 1), shrubRng.Next(360), .8f, false);
+            }
+            // saksılarda çiçek
+            foreach (float x in new[] { -4f, 4f }) for (int k = -1; k <= 1; k++) Apartment.Place(Root, "flower_gazania", new Vector3(x + k * .35f, .45f, 30.4f), shrubRng.Next(360), 1.2f, false);
         }
 
         // ---------- sokak: lambalar, direkler, teller, rögar, çöp kutusu, elektrik kutusu ----------
@@ -85,10 +157,18 @@ namespace Alemdar.World
             Apartment.Place(Root, "metal_trash_can", new Vector3(3.2f, 0, 10.2f), 0);
             Apartment.Place(Root, "metal_trash_can", new Vector3(-2.5f, .03f, 22f), 0);
             Apartment.Place(Root, "utility_box_01", new Vector3(-7.4f, 0, 5.6f), 0);
+            Cars();
         }
-        static void Lamp(string id, Vector3 pos, float ry)
+        // arada bir yoldan geçen araba (park etmiş araba yok): şerit z, yön ve model her seferinde rastgele
+        static void Cars()
         {
-            Apartment.Place(Root, id, pos, ry);
+            var t = new GameObject("trafik").AddComponent<Traffic>(); t.transform.SetParent(Root.parent, false);
+        }        static void Lamp(string id, Vector3 pos, float ry)
+        {
+            Apartment.Place(Root, id, pos, ry, 1, false);
+            // yalnızca direk çarpışır: modelin tüm kutusu sokağa uzanan kolu da kapsıyor, bordürün üstünü kapatıyordu
+            var pole = new GameObject("lambaDiregi").AddComponent<CapsuleCollider>(); pole.transform.SetParent(Root, false);
+            pole.transform.localPosition = pos + Vector3.up * 1.5f; pole.radius = .14f; pole.height = 3f;
             var l = new GameObject("lamba").AddComponent<Light>(); l.transform.SetParent(Root, false);
             l.transform.localPosition = pos + new Vector3(0, 3.5f, 0); // lamba başı (model 3,9 m)
             l.type = LightType.Point; l.range = 11; l.intensity = 0; l.color = new Color(1f, .82f, .55f); l.shadows = LightShadows.None; l.renderMode = LightRenderMode.ForceVertex;
@@ -210,7 +290,7 @@ namespace Alemdar.World
                 for (int k = 0; k < 4; k++)
                 {
                     var rot = Quaternion.Euler(0, k * 90 + 180, 0); var sp = c + Quaternion.Euler(0, k * 90, 0) * new Vector3(0, 0, .62f);
-                    if (Apartment.Place(Root, "plastic_monobloc_chair_01", sp, k * 90 + 180) == null) Props.Chair(Root, sp, k * 90);
+                    if (Apartment.Place(Root, "plastic_monobloc_chair_01", sp, k * 90) == null) Props.Chair(Root, sp, k * 90);
                     Seats.Add((sp, rot));
                     if (k % 2 == 0) Props.TeaGlass(Root, c + Quaternion.Euler(0, k * 90, 0) * new Vector3(0, .735f, .22f));
                 }
@@ -284,5 +364,36 @@ namespace Alemdar.World
         // dinleyen: biraz sonra başını sallar ya da güler
         void Listen() => Invoke(nameof(React), 1.5f + Random.value);
         void React() { if (me) me.Gesture(Random.value < .35f ? Chars.Person.Laugh : Chars.Person.Yes, 2.5f); }
+    }
+
+    // Sokaktan arada bir geçen araba: uçtaki boşluktan gelir, sokağı geçer, öbür uçta kaybolur. Önünde biri varsa yavaşlar, durur.
+    public class Traffic : MonoBehaviour
+    {
+        static readonly string[] Models = { "HATCHBACK_1988", "SEDAN", "Traffic B - OldSedan", "Traffic B - Taxi", "Traffic B - OldWagon 2", "Traffic B - MidSedan 1" };
+        const float Edge = Neighborhood.MaxX + 40, Cruise = 7.5f;
+        GameObject car; float dir, lane, speed, next;
+
+        void Start() { next = Time.time + 8; }
+        void Update()
+        {
+            if (!car)
+            {
+                if (Time.time < next) return;
+                var id = Models[Random.Range(0, Models.Length)]; dir = Random.value < .5f ? 1 : -1;
+                lane = dir > 0 ? Neighborhood.RoadZ0 + 1.9f : Neighborhood.RoadZ1 - 1.9f; // sağdan gider
+                bool alongZ = id.StartsWith("Traffic");
+                car = Apartment.Place(transform, id, new Vector3(-Edge * dir, -.15f, lane), alongZ ? (dir > 0 ? 90 : -90) : (dir > 0 ? 0 : 180), alongZ ? .8f : 1f, false);
+                if (!car) { next = Time.time + 30; return; }
+                foreach (var r in car.GetComponentsInChildren<Renderer>()) r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+                speed = Cruise;
+            }
+            // önünde (aynı şeritte, 7 m içinde) oyuncu ya da biri varsa yavaşla
+            float want = Cruise; var me = App.I && App.I.Me ? App.I.Me.transform.position : new Vector3(0, -100, 0);
+            float ahead = (me.x - car.transform.position.x) * dir;
+            if (ahead > 0 && ahead < 8 && Mathf.Abs(me.z - lane) < 1.6f && me.y < 1) want = ahead < 4.5f ? 0 : Cruise * (ahead - 4.5f) / 3.5f;
+            speed = Mathf.MoveTowards(speed, want, Time.deltaTime * (want < speed ? 9 : 3));
+            car.transform.position += Vector3.right * dir * speed * Time.deltaTime;
+            if (car.transform.position.x * dir > Edge) { Destroy(car); next = Time.time + Random.Range(12f, 30f); }
+        }
     }
 }

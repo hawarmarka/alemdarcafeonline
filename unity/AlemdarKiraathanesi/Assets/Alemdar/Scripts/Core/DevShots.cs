@@ -1,4 +1,4 @@
-// Geliştirici denetimi (yalnızca komut satırıyla): -ad X  -cek klasor  -oyna  -kapat
+﻿// Geliştirici denetimi (yalnızca komut satırıyla): -ad X  -cek klasor  -oyna  -kapat
 // -cek: sırayla ekran görüntüleri alır (salon, yürüyüş, masa, oyun). -oyna: bir masa kurar ve botlarla başlatır. -kapat: bitince çıkar.
 using System;
 using System.Collections;
@@ -48,6 +48,15 @@ namespace Alemdar
             yield return CamShot(dir, "m4_teyzeler", new Vector3(-6.6f, 3.2f, 11f), new Vector3(-6.8f, 4.6f, 5.4f));
             yield return CamShot(dir, "m5_park", new Vector3(-4f, 1.7f, 21.5f), new Vector3(2f, 1.5f, 34f));
             yield return CamShot(dir, "m6_cay_bahcesi", new Vector3(12f, 1.8f, 32f), new Vector3(18f, .7f, 37.5f));
+            yield return CamShot(dir, "m14_cam_logo", new Vector3(-1.2f, 1.6f, World.Hall.TerraceZ - .6f), new Vector3(-2.5f, 1.7f, World.Hall.MaxZ));
+            yield return CamShot(dir, "m15_sokak_ucu_bati", new Vector3(-12f, 1.7f, 14.5f), new Vector3(-40f, 4f, 14.5f));
+            yield return CamShot(dir, "m17_sokak_ucu_dogu", new Vector3(12f, 1.7f, 14.5f), new Vector3(40f, 4f, 14.5f));
+            yield return CamShot(dir, "m18_park_yan", new Vector3(-20f, 1.8f, 23f), new Vector3(-34f, 4f, 34f));
+            yield return CamShot(dir, "m19_balkonlar", new Vector3(-12f, 5.5f, 9.5f), new Vector3(-13f, 6.5f, 5f));
+            yield return CamShot(dir, "m20_cimen", new Vector3(-3f, 1.4f, 22f), new Vector3(-8f, .2f, 30f));
+            yield return CamShot(dir, "m21_oyun_parki", World.Playground.Center + new Vector3(-1f, 2.6f, -7f), World.Playground.Center + new Vector3(0, .5f, 1.5f));
+            yield return CamShot(dir, "m16_cephe", new Vector3(2f, 1.7f, 16f), new Vector3(0, 1.8f, World.Hall.TerraceZ));
+            yield return CamShot(dir, "k11_sigara", new Vector3(4.6f, 1.6f, -5.2f), new Vector3(World.Hall.MaxX, 1.6f, -5.2f));
             yield return CamShot(dir, "m13_modern_apartman", new Vector3(18f, 1.8f, 16f), new Vector3(25f, 6f, 5f));
             yield return CamShot(dir, "k9_fiyat_jaluzi", new Vector3(-2.5f, 1.6f, -1.5f), new Vector3(-2.9f, 1.6f, -6.2f));
             yield return CamShot(dir, "k10_camekan", new Vector3(-3f, 1.6f, 1.5f), new Vector3(-3.5f, 1.8f, 5f));
@@ -63,7 +72,7 @@ namespace Alemdar
             if (World.Neighborhood.Seats.Count > 0)
             {
                 var (sp, sr) = World.Neighborhood.Seats[0];
-                app.Me.InputLocked = false; app.Me.transform.position = sp + sr * Vector3.forward * 1.2f + Vector3.up * .05f;
+                app.Me.InputLocked = false; app.Me.transform.position = sp + sr * Vector3.forward * 1.2f + Vector3.up * .05f; Physics.SyncTransforms();
                 bool sat = false; app.Me.WalkTo(sp + sr * Vector3.forward * .5f, () => { app.Me.SitAt(sp, sr); sat = true; });
                 float until2 = Time.time + 12; while (!sat && Time.time < until2) yield return null;
                 yield return new WaitForSeconds(2.5f);
@@ -72,9 +81,40 @@ namespace Alemdar
                 yield return CamShot(dir, "m10_bank", sp + sr * new Vector3(.8f, 1.3f, 2.2f), sp + Vector3.up * .7f);
                 app.Me.StandUp(); yield return new WaitForSeconds(1);
                 var (cp, cr) = World.Neighborhood.Seats[World.Neighborhood.Seats.Count - 1];
-                yield return CamShot(dir, "m11_sandalye", cp + cr * new Vector3(.6f, 1.4f, 1.8f), cp + Vector3.up * .5f);
+                // çay bahçesi sandalyesine otur (önü masa): yandan yaklaşmalı, oturunca masaya bakmalı, kalkınca masanın içinde kalmamalı
+                app.Me.transform.position = cp + cr * new Vector3(0, 0, -2.2f) + Vector3.up * .05f; Physics.SyncTransforms(); yield return null;
+                bool sat2 = false; app.Me.WalkTo(Chars.PlayerMotor.FreeSpot(cp, cr), () => { app.Me.SitAt(cp, cr); sat2 = true; });
+                float until3 = Time.time + 12; while (!sat2 && Time.time < until3) yield return null;
+                yield return new WaitForSeconds(2.5f);
+                float ang2 = Vector3.Angle(Vector3.ProjectOnPlane(app.Me.Body.BoneFront, Vector3.up), cr * Vector3.forward);
+                yield return CamShot(dir, "m11_sandalye", cp + cr * new Vector3(1.4f, 1.5f, -1.6f), cp + Vector3.up * .6f + cr * Vector3.forward * .4f);
+                app.Me.StandUp(); yield return new WaitForSeconds(1);
+                var stood = app.Me.transform.position;
+                bool stuck = Physics.CheckCapsule(stood + Vector3.up * .35f, stood + Vector3.up * 1.5f, .2f, ~(1 << 2), QueryTriggerInteraction.Ignore);
+                report.Append($"çay sandalyesi: oturdu {sat2}, gövde-masa açısı {ang2:0}°, kalkınca konum {stood.x:0.0},{stood.z:0.0} sıkıştı mı {stuck}\n");
             }
+            Phase("cekimler");
+            app.Me.InputLocked = false; app.Me.transform.position = new Vector3(-20f, -.1f, 14.5f); Physics.SyncTransforms(); yield return null;
+            app.Me.DebugPush(Vector3.right, 10f); yield return new WaitForSeconds(10f);
+            Phase("mahalle_yuruyus");
+            app.Me.transform.position = new Vector3(-3f, .05f, 24f); Physics.SyncTransforms(); yield return null;
+            app.Me.DebugPush(new Vector3(-1, 0, 1).normalized, 6f); yield return new WaitForSeconds(6f);
+            Phase("park_yuruyus");
+            // kaldırım: yoldan kaldırıma düz yürüyüş (bordürde takılmamalı) ve tıklayarak yürüyüş
             app.Me.InputLocked = false;
+            foreach (var (from, to) in new[] { (new Vector3(5f, -.1f, 13.5f), new Vector3(5f, 0, 9f)), (new Vector3(-.5f, -.1f, 13.5f), new Vector3(-.5f, 0, 23f)), (new Vector3(7f, -.1f, 13.5f), new Vector3(7f, 0, 23f)), (new Vector3(-3f, -.1f, 14f), new Vector3(-3f, 0, 9.5f)) })
+            {
+                app.Me.transform.position = from; Physics.SyncTransforms(); yield return null;
+                app.Me.DebugPush((to - from).normalized, 6.5f); yield return new WaitForSeconds(6.7f);
+                var pa = app.Me.transform.position;
+                var ahead = pa + (to - from).normalized * .35f;
+                var hits = Physics.OverlapCapsule(ahead + Vector3.up * .3f, ahead + Vector3.up * 1.5f, .26f, ~(1 << 2)).Select(h => h.name + "@" + h.transform.position.ToString("0.0")).Distinct();
+                report.Append($"  önündeki çarpışanlar: {string.Join(", ", hits)}\n");
+                app.Me.transform.position = from; Physics.SyncTransforms(); yield return null;
+                app.Me.WalkTo(to); yield return new WaitForSeconds(4f);
+                var pb = app.Me.transform.position;
+                report.Append($"kaldırım {from}→{to}: düz {pa.x:0.0},{pa.y:0.00},{pa.z:0.0}  tıklama {pb.x:0.0},{pb.y:0.00},{pb.z:0.0}\n");
+            }
             app.Hud.ShowTable(7); yield return new WaitForSeconds(.6f); Shot(dir, "u1_masa_paneli"); yield return new WaitForSeconds(.2f); app.Hud.HideTable(); // görüntü kare sonunda alınır
             Phase("salon");
             if (Arg("-oyna") != null)
@@ -133,7 +173,7 @@ namespace Alemdar
                 yield return new WaitForSeconds(1.5f); Shot(dir, "9_elsonu");
                 report.Append($"oyun: çekme {draws}, atma {discards}, sunucu hatası {errors}{(errors > 0 ? " (son: " + lastError + ")" : "")}, el bitti {finished}\n");
             }
-            File.WriteAllText(Path.Combine(dir, "fps.txt"), report.ToString() + Stats("masa") + $"ekran={Screen.currentResolution.refreshRateRatio.value:0}Hz vsync={QualitySettings.vSyncCount}\n");
+            File.WriteAllText(Path.Combine(dir, "fps.txt"), report.ToString() + Stats("masa") + $"ekran={Screen.currentResolution.refreshRateRatio.value:0}Hz vsync={QualitySettings.vSyncCount} {(Quality.I ? Quality.I.Label : "")}\n");
             if (Arg("-kapat") != null) Application.Quit();
         }
 

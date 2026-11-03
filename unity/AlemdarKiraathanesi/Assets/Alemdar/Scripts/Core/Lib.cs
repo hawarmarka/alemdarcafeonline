@@ -26,6 +26,7 @@ namespace Alemdar
         [Header("Poly Haven CC0 dokular (renk, normal)")]
         public Texture2D plasterD, plasterN, darkWoodD, darkWoodN, lightWoodD, lightWoodN, marbleD, marbleN, leatherD, leatherN, fabricN;
         [Header("Tablolar (CC0 fotoğraflar)")] public Texture2D[] photos;
+        [Header("Kıraathane logosu (saydam) ve sigara içilmez afişi")] public Texture2D logo, noSmoking;
         void Awake() { I = this; }
     }
 }

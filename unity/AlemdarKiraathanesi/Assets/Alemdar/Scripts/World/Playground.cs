@@ -1,4 +1,4 @@
-// Parktaki çocuk oyun alanı: salıncak, kaydırak, kum havuzu (kendi çizimimiz, metal boru + ahşap oturak)
+﻿// Parktaki çocuk oyun alanı: salıncak, kaydırak, kum havuzu (kendi çizimimiz, metal boru + ahşap oturak)
 // ve orada oynayan çocuklar (Rocketbox çocuk karakterleri, MIT): ikisi kovalamaca, biri salıncakta, biri kaydırakta.
 using System.Collections;
 using UnityEngine;
@@ -32,7 +32,8 @@ namespace Alemdar.World
             Swing = new Transform[2];
             for (int i = 0; i < 2; i++)
             {
-                var pivot = new GameObject("salincak").transform; pivot.SetParent(people, false); // birleştirilen (durağan) kısmın dışında: sallanabilsin pivot.localPosition = sw + new Vector3(i == 0 ? -.7f : .7f, 2.46f, 0);
+                var pivot = new GameObject("salincak").transform; pivot.SetParent(people, false); // birleştirilen (durağan) kısmın dışında: sallanabilsin
+                pivot.localPosition = sw + new Vector3(i == 0 ? -.7f : .7f, 2.46f, 0);
                 foreach (float x in new[] { -.22f, .22f }) Props.Box(pivot, new Vector3(.015f, 1.95f, .015f), steel, new Vector3(x, -.98f, 0), 0, false, false);
                 Props.Box(pivot, new Vector3(.5f, .04f, .22f), yellow, new Vector3(0, -1.96f, 0), 0, false);
                 Swing[i] = pivot;
@@ -46,18 +47,43 @@ namespace Alemdar.World
             var chute = Props.Box(root, new Vector3(.7f, .05f, 3f), red, sl + new Vector3(0, .85f, 1.75f)); chute.transform.localRotation = Quaternion.Euler(30, 0, 0);
             foreach (float x in new[] { -.36f, .36f }) { var e = Props.Box(root, new Vector3(.04f, .15f, 3f), red, sl + new Vector3(x, .92f, 1.75f)); e.transform.localRotation = Quaternion.Euler(30, 0, 0); }
             SlideTop = sl + new Vector3(0, 1.63f, .2f); SlideBottom = sl + new Vector3(0, .1f, 3.1f); SlideLadder = sl + new Vector3(0, 0, -1.1f);
+            // tahterevalli: ortada ayak, üstte sallanan kalas, iki uçta tutamaklı oturak
+            var ss = Center + new Vector3(-1.5f, 0, 2.8f);
+            Props.Box(root, new Vector3(.3f, .45f, .3f), red, ss + new Vector3(0, .22f, 0), 0, true);
+            Seesaw = new GameObject("tahterevalli").transform; Seesaw.SetParent(people, false); Seesaw.localPosition = ss + new Vector3(0, .5f, 0);
+            Props.Box(Seesaw, new Vector3(3.2f, .06f, .28f), yellow, Vector3.zero, 0, false);
+            foreach (float x in new[] { -1.35f, 1.35f })
+            {
+                Props.Box(Seesaw, new Vector3(.34f, .05f, .32f), red, new Vector3(x, .05f, 0), 0, false);
+                Props.Box(Seesaw, new Vector3(.03f, .3f, .03f), steel, new Vector3(x - Mathf.Sign(x) * .25f, .18f, 0), 0, false, false);
+                Props.Box(Seesaw, new Vector3(.03f, .03f, .3f), steel, new Vector3(x - Mathf.Sign(x) * .25f, .33f, 0), 0, false, false);
+            }
+            SeesawEnds = new[] { new Vector3(-1.35f, -.38f, 0), new Vector3(1.35f, -.38f, 0) }; // oturma pozunda kalça kökün ~0,46 m üstünde
+            // dönme dolap (çevirmeli): yere yakın yuvarlak platform, tutamak çubukları
+            var mg = Center + new Vector3(4.6f, 0, 1.8f); // kaydırağın ağzından ve çitten uzak
+            Props.Cyl(root, .12f, .2f, steel, mg + new Vector3(0, .1f, 0), true);
+            Carousel = new GameObject("donmeDolap").transform; Carousel.SetParent(people, false); Carousel.localPosition = mg + new Vector3(0, .22f, 0);
+            Props.Cyl(Carousel, 1.1f, .06f, red, Vector3.zero);
+            for (int k = 0; k < 4; k++)
+            {
+                var q = Quaternion.Euler(0, k * 45, 0);
+                var bar = Props.Box(Carousel, new Vector3(1.9f, .04f, .04f), steel, new Vector3(0, .55f, 0), k * 45, false, false);
+                foreach (float e in new[] { -.95f, .95f }) Props.Box(Carousel, new Vector3(.04f, .55f, .04f), steel, q * new Vector3(e, .28f, 0), 0, false, false);
+            }
+            var cc = Carousel.gameObject.AddComponent<CapsuleCollider>(); cc.radius = 1.1f; cc.height = .5f; cc.center = new Vector3(0, .25f, 0);
             // çocuklar
             var host = new GameObject("cocuklar").AddComponent<KidsPlay>(); host.transform.SetParent(people, false);
             host.Begin();
         }
         public static Transform[] Swing;
         public static Vector3 SlideTop, SlideBottom, SlideLadder;
+        public static Transform Seesaw, Carousel; public static Vector3[] SeesawEnds;
     }
 
     // Çocukların oyunu: basit, kesintisiz döngüler (yol bulma gerekmez: oyun alanı açık ve engelsiz).
     public class KidsPlay : MonoBehaviour
     {
-        static readonly string[] Names = { "Ali", "Ayşe", "Mehmet", "Zeynep" };
+        static readonly string[] Names = { "Ali", "Ayşe", "Mehmet", "Zeynep", "Emre", "Elif" };
         Chars.Person[] kids;
 
         public void Begin()
@@ -68,8 +94,9 @@ namespace Alemdar.World
                 var holder = new GameObject("cocuk_" + Names[i]).transform; holder.SetParent(transform, false); holder.localPosition = Playground.Center;
                 kids[i] = Chars.Person.Create(Names[i], holder, false, "cocuk");
             }
-            StartCoroutine(Chase(kids[0], 0)); StartCoroutine(Chase(kids[1], Mathf.PI * .7f));
-            StartCoroutine(OnSwing(kids[2])); StartCoroutine(OnSlide(kids[3]));
+            StartCoroutine(OnSeesaw(kids[0], kids[1])); StartCoroutine(OnSwing(kids[2])); StartCoroutine(OnSlide(kids[3]));
+            StartCoroutine(Chase(kids[4], 0)); StartCoroutine(OnCarousel(kids[5]));
+            StartCoroutine(Swing2());
         }
 
         // kovalamaca: kum havuzunun çevresinde sekiz çizerek koşarlar, arada durup soluklanırlar
@@ -91,6 +118,37 @@ namespace Alemdar.World
                 }
                 k.SetSpeed(0); yield return new WaitForSeconds(1.5f + Random.value * 2);
             }
+        }
+
+        // tahterevalli: iki çocuk iki uçta oturur, kalas aşağı yukarı iner çıkar
+        IEnumerator OnSeesaw(Chars.Person a, Chars.Person b)
+        {
+            var s = Playground.Seesaw;
+            for (int i = 0; i < 2; i++)
+            {
+                var k = i == 0 ? a : b; var t = k.transform.parent;
+                t.SetParent(s, false); t.localPosition = Playground.SeesawEnds[i]; t.localRotation = Quaternion.Euler(0, i == 0 ? 90 : -90, 0); // yüzleri birbirine
+                k.SetSit(true);
+            }
+            while (true) { s.localRotation = Quaternion.Euler(0, 0, Mathf.Sin(Time.time * 1.6f) * 14f); yield return null; }
+        }
+        // dönme dolap: çocuk platformun kenarında oturur, dolap yavaşça döner
+        IEnumerator OnCarousel(Chars.Person k)
+        {
+            var c = Playground.Carousel; var t = k.transform.parent;
+            t.SetParent(c, false); t.localPosition = new Vector3(.7f, .03f, 0); t.localRotation = Quaternion.Euler(0, 180, 0);
+            k.SetSit(false); float speed = 0; // ayakta, tutamağa tutunur
+            while (true)
+            {
+                speed = Mathf.MoveTowards(speed, 45 + Mathf.Sin(Time.time * .3f) * 25, Time.deltaTime * 20);
+                c.localRotation *= Quaternion.Euler(0, speed * Time.deltaTime, 0); yield return null;
+            }
+        }
+        // boş salıncak rüzgârda hafifçe sallanır
+        IEnumerator Swing2()
+        {
+            var p = Playground.Swing[1];
+            while (true) { p.localRotation = Quaternion.Euler(Mathf.Sin(Time.time * 1.3f + 1) * 4f, 0, 0); yield return null; }
         }
 
         // salıncak: oturur, salıncak ileri geri sallanır (sarkaç)
