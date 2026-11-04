@@ -33,6 +33,27 @@ namespace Alemdar
             app.Order("cay"); yield return new WaitForSeconds(6); Shot(dir, "4_kahveci");
             // sabit kamera görüntüleri: ocak, Anten afişi, nargile ve duman
             app.Me.InputLocked = true;
+            if (Arg("-yeni") != null) // yalnızca yeni yapılanlar: ocak, tuvalet, dayılar, teyzeler, ara sokak, piknik, balkonlar
+            {
+                yield return new WaitForSeconds(8); // dayılar konuşmaya başlasın
+                yield return CamShot(dir, "y1_ocak", new Vector3(.9f, 1.65f, -2.6f), new Vector3(.4f, 1.0f, -6f));
+                yield return CamShot(dir, "y2_ocak_ici", new Vector3(2.2f, 1.6f, -5.0f), new Vector3(-.6f, 1.0f, -5.9f));
+                yield return CamShot(dir, "y3_wc_kapi", new Vector3(-4.2f, 1.6f, -2.6f), new Vector3(-6.0f, 1.2f, -4.8f));
+                yield return CamShot(dir, "y4_wc_ici", new Vector3(-5.5f, 1.6f, -4.75f), new Vector3(-6.2f, .6f, -5.9f));
+                yield return CamShot(dir, "y5_dayilar_okey", app.Hall.Tables[0] + new Vector3(1.7f, 1.7f, 1.8f), app.Hall.Tables[0] + new Vector3(0, .9f, 0));
+                yield return CamShot(dir, "y6_dayilar_batak", app.Hall.Tables[6] + new Vector3(1.8f, 1.7f, -1.6f), app.Hall.Tables[6] + new Vector3(0, .9f, 0));
+                yield return CamShot(dir, "y7_teyzeler", new Vector3(-2.7f, 3.6f, 9.5f), new Vector3(-2.7f, 4.4f, 5.6f));
+                yield return CamShot(dir, "y8_sokak_kavga", new Vector3(-7.7f, 1.6f, 16.5f), new Vector3(-7.7f, 1.4f, 19.5f));
+                yield return CamShot(dir, "y9_ara_sokak", new Vector3(-21f, 1.7f, 9f), new Vector3(-21f, 2.5f, -10f));
+                yield return CamShot(dir, "y10_ara_sokak_ici", new Vector3(21f, 1.7f, -2f), new Vector3(21f, 3f, -16f));
+                yield return CamShot(dir, "y11_piknik", new Vector3(-12.5f, 1.8f, 23f), new Vector3(-15.5f, .5f, 25.5f));
+                yield return CamShot(dir, "y12_balkon_cocuk", new Vector3(13f, 2.5f, 12f), new Vector3(13f, 6.5f, 5.5f));
+                yield return CamShot(dir, "y13_balkon_amca", new Vector3(-12f, 2.5f, 12f), new Vector3(-12f, 4.2f, 5.5f));
+                yield return CamShot(dir, "y14_park_anne", World.Playground.Center + new Vector3(-1f, 2f, -8f), World.Playground.Center + new Vector3(-4.6f, 1f, -3.2f));
+                yield return CamShot(dir, "y15_balkonlar", new Vector3(-12f, 5.5f, 9.5f), new Vector3(-13f, 6.5f, 5f));
+                if (Arg("-kapat") != null) Application.Quit();
+                yield break;
+            }
             yield return CamShot(dir, "k1_ocak", new Vector3(.8f, 1.6f, -3.2f), new Vector3(.5f, 1.0f, -6f));
             yield return CamShot(dir, "k2_afis", new Vector3(4.4f, 1.7f, -3.4f), new Vector3(6.6f, 1.75f, -3.4f));
             yield return CamShot(dir, "k3_nargile", new Vector3(-3.2f, 1.3f, -2.0f), new Vector3(-3.25f, .7f, -3.35f));

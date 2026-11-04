@@ -1,5 +1,6 @@
-﻿// Kahveci: siparişleri sırayla ocaktan alıp masaya götürür, siparişi verenin önüne bırakır, ocağa döner.
-// Herkes aynı servisi görür (sunucu 'world:serve' yayınlar). Bırakılan ikram 3 dakika masada kalır.
+﻿// Kahveci: siparişleri sırayla ocaktan alıp masaya götürür, siparişi verenin köşe bardaklığına bırakır, ocağa döner.
+// Orada eski bir bardak varsa tepsiye alır; biten bardakları da gelip toplar (TableService söyler).
+// Herkes aynı servisi görür (sunucu 'world:serve' yayınlar).
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,8 +10,8 @@ namespace Alemdar.World
 {
     public class Waiter : MonoBehaviour
     {
-        public static readonly (string id, string name)[] Menu = { ("cay", "Çay"), ("kahve", "Türk kahvesi"), ("oralet", "Oralet"), ("tost", "Kaşarlı tost"), ("simit", "Simit"), ("ayran", "Ayran"), ("su", "Su") };
-        struct Order { public string item; public int table; public Vector3 spot; }
+        public static readonly (string id, string name)[] Menu = { ("cay", "Çay"), ("kahve", "Türk kahvesi"), ("oralet", "Oralet"), ("tost", "Kaşarlı tost"), ("simit", "Simit"), ("ayran", "Ayran"), ("su", "Su"), ("nargile", "Nargile") };
+        struct Order { public string item; public int table, dir; public bool collect; }
         readonly Queue<Order> queue = new();
         Hall hall; NavMeshAgent agent; Chars.Person body; bool busy;
 
@@ -24,30 +25,46 @@ namespace Alemdar.World
             agent.obstacleAvoidanceType = ObstacleAvoidanceType.LowQualityObstacleAvoidance;
         }
 
-        // spot: masada ikramın bırakılacağı yer (siparişi verenin önü)
-        public void Serve(string item, int table, Vector3 spot) { queue.Enqueue(new Order { item = item, table = table, spot = spot }); if (!busy) StartCoroutine(Work()); }
+        // dir: siparişi verenin sandalye yönü; ikram onun köşe bardaklığına (nargile sandalyesinin yanına) konur
+        public void Serve(string item, int table, int dir) { queue.Enqueue(new Order { item = item, table = table, dir = dir }); if (!busy) StartCoroutine(Work()); }
+        public void Collect(int table, int dir) { pickups.Enqueue(new Order { table = table, dir = dir, collect = true }); if (!busy) StartCoroutine(Work()); }
+        readonly Queue<Order> pickups = new(); // boş toplama: siparişler her zaman önce
 
         IEnumerator Work()
         {
             busy = true;
-            while (queue.Count > 0)
+            while (queue.Count > 0 || pickups.Count > 0)
             {
-                var o = queue.Dequeue();
-                yield return Go(hall.WaiterSpot + new Vector3(-.6f, 0, -.35f)); // tezgahtan al
-                yield return Face(hall.WaiterSpot + new Vector3(-.6f, 1, -1));
-                body.Serve(); yield return new WaitForSeconds(1.1f);
-                var (tray, item) = Tray(o.item);
-                var t = hall.Tables[o.table];
-                var dir = (o.spot - t); dir.y = 0;
+                var o = queue.Count > 0 ? queue.Dequeue() : pickups.Dequeue();
+                if (o.table < 0 || o.table >= hall.Tables.Count) continue;
+                Transform tray = null, item = null;
+                if (!o.collect)
+                {
+                    yield return Go(hall.WaiterSpot + new Vector3(-.6f, 0, -.35f)); // tezgahtan al
+                    yield return Face(hall.WaiterSpot + new Vector3(-.6f, 1, -1));
+                    body.Serve(); yield return new WaitForSeconds(1.1f);
+                    (tray, item) = Tray(o.item);
+                }
+                // masanın o köşesinin dışında, oturanın arkasına girmeden durur
+                var t = hall.Tables[o.table]; var corner = hall.Corner(o.table, o.dir);
+                var dir = corner - t; dir.y = 0;
                 var stand = t + dir.normalized * (Hall.SeatDist + .35f) + Quaternion.Euler(0, 90, 0) * dir.normalized * .45f;
                 yield return Go(stand);
-                yield return Face(o.spot);
+                yield return Face(o.item == "nargile" ? hall.Seat(o.table, o.dir) : corner);
                 body.Serve(); yield return new WaitForSeconds(.6f);
-                // yalnızca ikram masaya iner; tepsi kahvecide kalır
-                item.SetParent(hall.Root, true); item.position = o.spot; item.rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
-                Destroy(item.gameObject, 180);
+                Transform old;
+                if (o.collect) old = TableService.I.TakeEmpty(o.table, o.dir);
+                else old = TableService.I.Place(item, o.item, o.table, o.dir); // yalnızca ikram masaya iner; tepsi kahvecide kalır
+                if (old)
+                {
+                    if (!tray) tray = Props.Tray(transform);
+                    tray.localPosition = new Vector3(.12f, 1.05f, .32f);
+                    old.SetParent(tray, true); old.localPosition = new Vector3(-.06f, .007f, .03f); old.localRotation = Quaternion.identity;
+                    if (old.name == "nargile") old.localPosition = new Vector3(0, -.62f, .12f); // nargile elde, tepsinin altında
+                }
                 yield return new WaitForSeconds(.6f);
-                Destroy(tray.gameObject); // her siparişte yeni tepsi kurulur; gizli tepsi birikmesin
+                if (old) { yield return Go(hall.WaiterSpot + new Vector3(-.6f, 0, -.35f)); yield return Face(hall.WaiterSpot + new Vector3(-.6f, 1, -1)); body.Serve(); yield return new WaitForSeconds(.8f); }
+                if (tray) Destroy(tray.gameObject); // her siparişte yeni tepsi kurulur; gizli tepsi birikmesin (boşlar tezgaha bırakıldı)
             }
             yield return Go(hall.WaiterSpot);
             yield return Face(hall.WaiterSpot + Vector3.forward);
@@ -64,8 +81,10 @@ namespace Alemdar.World
                 "tost" => Props.Toast(tray, Vector3.zero),
                 "simit" => Simit(tray),
                 "cay" => Props.ServedTea(tray, Vector3.zero),
+                "nargile" => Props.Nargile(tray, Vector3.zero, 0),
                 _ => Props.TeaGlass(tray, Vector3.zero, true),
             };
+            if (item == "nargile") { t.localPosition = new Vector3(.1f, -.62f, .12f); t.localRotation = Quaternion.identity; return (tray, t); } // elde taşınır, yerden biraz yüksekte
             if (item == "oralet") Tint(t, new Color(.85f, .42f, .05f));
             if (item == "ayran") Tint(t, new Color(.95f, .95f, .92f));
             if (item == "su") Tint(t, new Color(.8f, .9f, 1f, .4f));

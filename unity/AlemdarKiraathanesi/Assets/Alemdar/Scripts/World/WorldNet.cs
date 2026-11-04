@@ -13,6 +13,7 @@ namespace Alemdar.World
         public string MyId { get; private set; }
         public int Online { get; private set; }
         public System.Func<string, bool> Hidden = _ => false; // masada oyun nesnesi olarak çizilenler (çift görünmesin)
+        public Chars.Person PersonNamed(string name) { foreach (var r in remotes.Values) if (r.p && r.p.Display == name && r.p.gameObject.activeSelf) return r.p; return null; }
         Net.SocketIO io; Chars.PlayerMotor me; float lastSend; string lastSig;
 
         public void Init(Net.SocketIO socket, Chars.PlayerMotor motor, string name)

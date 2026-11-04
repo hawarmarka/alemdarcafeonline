@@ -10,7 +10,6 @@ namespace Alemdar.World
         public const float FloorH = 3f;
         static Material winDark, frame, iron, slab, curtain;
         public static Material WinLit;             // gece yanan pencereler (Weather ışığı açar)
-        public static readonly List<(Vector3 pos, Vector3 facing)> OpenWindows = new(); // teyze pencereleri
 
         static void Mats()
         {
@@ -37,15 +36,15 @@ namespace Alemdar.World
             // kat silmeleri
             for (int f = 0; f <= floors; f++) Props.Box(p, new Vector3(w + .06f, .14f, .1f), slab, new Vector3(cx, baseY + f * FloorH, z1 + .02f));
             int cols = Mathf.Max(2, Mathf.FloorToInt(w / 2.3f)); float step = w / cols;
+            curSeed = seed;
             for (int f = 0; f < floors; f++)
             {
-                float y = baseY + f * FloorH;
+                float y = baseY + f * FloorH; curFloor = f;
                 for (int c = 0; c < cols; c++)
                 {
                     float x = x0 + step * (c + .5f);
                     bool balcony = c % 2 == 1 && w > 6;
                     if (balcony) Balcony(p, x, y, z1, step * .9f, rng);
-                    else if (open != null && open(f, c)) OpenAt(p, x, y + 1.55f, z1, wall);
                     else Window(p, x, y + 1.55f, z1, 1.3f, 1.35f, rng);
                     if (!balcony && !(open != null && open(f, c)) && rng.NextDouble() < .25 && Lib.I.Model("exterior_aircon_unit")) Place(p, "exterior_aircon_unit", new Vector3(x, y + .32f, z1 + .25f), 180, .8f, false); // pencerenin altında, yandaki balkona taşmaz
                 }
@@ -54,24 +53,6 @@ namespace Alemdar.World
             if (groundShops) Shops(p, x0, x1, z1, baseY, wall, shopNames, rng);
         }
 
-        // Açık pencere: içi koyu, perde kenara çekili. Teyze cephenin hemen önünde durur; beline kadar cepheyle aynı sıva
-        // bir pervaz onu örter, böylece pencereden sarkıyor görünür (cephe tek parça olduğu için içeride dursa görünmezdi).
-        public static void OpenAt(Transform p, float x, float y, float z, Material wall)
-        {
-            Mats();
-            Props.Box(p, new Vector3(1.3f, 1.35f, .02f), Props.M(new Color(.06f, .05f, .05f), .1f), new Vector3(x, y, z + .01f), 0, false, false);
-            Props.Box(p, new Vector3(.32f, 1.3f, .03f), curtain, new Vector3(x - .5f, y, z + .03f), 0, false, false);
-            Props.Box(p, new Vector3(1.5f, 1.0f, .8f), wall, new Vector3(x, y - 1.18f, z + .4f), 0, true);           // pervaz altı (teyzenin belini ve bacaklarını örter)
-            Props.Box(p, new Vector3(1.6f, .07f, .88f), slab, new Vector3(x, y - .66f, z + .42f));                     // mermer pervaz: dirsek dayanır
-            foreach (float s in new[] { -1f, 1f })
-            {
-                Props.Box(p, new Vector3(.12f, 1.4f, .8f), wall, new Vector3(x + s * .74f, y, z + .4f)); // yan söveler
-                Props.Box(p, new Vector3(.02f, .9f, .5f), winDark, new Vector3(x + s * .805f, y + .05f, z + .42f), 0, false, false); // yan cam (cumba)
-                WindowFrameSide(p, x + s * .81f, y + .05f, z + .42f, .5f, .9f);
-            }
-            Props.Box(p, new Vector3(1.6f, .12f, .8f), wall, new Vector3(x, y + .72f, z + .4f));                       // üst söve
-            OpenWindows.Add((new Vector3(x, y, z), Vector3.forward));
-        }
         static void Window(Transform p, float x, float y, float z, float ww, float wh, System.Random rng)
         {
             bool lit = rng.NextDouble() < .45;
@@ -97,9 +78,12 @@ namespace Alemdar.World
             Props.Box(p, new Vector3(.04f, wh, .05f), frame, new Vector3(x, y, z + .035f), 0, false, false); // orta kayıt
         }
 
-        // Balkon: beton döşeme, demir korkuluk, kapı-pencere, bazen çamaşır ipi ve saksı.
+        // Balkon: beton döşeme, demir korkuluk, kapı-pencere ve bazen saksı. Yerleri Balconies listesinde (balkondaki insanlar için).
+        public static readonly List<(int seed, int floor, Vector3 floor0, float width, Vector3 facing)> Balconies = new();
+        static int curSeed, curFloor;
         static void Balcony(Transform p, float x, float y, float z, float bw, System.Random rng)
         {
+            Balconies.Add((curSeed, curFloor, p.TransformPoint(new Vector3(x, y + .14f, z)), bw, p.TransformDirection(Vector3.forward)));
             const float depth = 1.05f;
             Props.Box(p, new Vector3(bw, .14f, depth), slab, new Vector3(x, y + .07f, z + depth / 2), 0, true);
             float dw = Mathf.Min(.9f, bw * .42f), ww = Mathf.Min(.85f, bw * .4f); // kapı ve pencere balkon genişliğine sığar, üst üste binmez
@@ -116,16 +100,7 @@ namespace Alemdar.World
                 Props.Box(p, new Vector3(.05f, .05f, depth), iron, new Vector3(x + sx * bw / 2, y + .14f + rh, z + depth / 2), 0, false, false);
                 for (float bz = .1f; bz < depth; bz += .13f) Props.Box(p, new Vector3(.018f, rh, .018f), iron, new Vector3(x + sx * bw / 2, y + .14f + rh / 2, z + bz), 0, false, false);
             }
-            if (rng.NextDouble() < .55) // çamaşır ipi: renkli çamaşırlar
-            {
-                Props.Box(p, new Vector3(bw - .1f, .008f, .008f), iron, new Vector3(x, y + 1.85f, z + depth - .3f), 0, false, false);
-                Color[] cloth = { new(.9f, .9f, .88f), new(.25f, .4f, .7f), new(.75f, .2f, .2f), new(.95f, .8f, .3f), new(.4f, .6f, .4f) };
-                for (int i = 0; i < 4; i++)
-                {
-                    float cw = .3f + (float)rng.NextDouble() * .3f;
-                    Props.Box(p, new Vector3(cw, .45f + (float)rng.NextDouble() * .3f, .01f), Props.M(cloth[rng.Next(cloth.Length)], .05f), new Vector3(x - bw / 2 + .35f + i * (bw - .6f) / 3.5f, y + 1.6f, z + depth - .3f), 0, false, true);
-                }
-            }
+            rng.NextDouble(); // eski çamaşır ipi kaldırıldı (kullanıcı isteği); rastgele sıra aynı kalsın, saksılar yerinde dursun
             if (rng.NextDouble() < .6 && Lib.I.Model("potted_plant_02")) Place(p, "potted_plant_02", new Vector3(x + bw / 2 - .25f, y + .14f, z + depth - .22f), rng.Next(360), .55f, false);
         }
 

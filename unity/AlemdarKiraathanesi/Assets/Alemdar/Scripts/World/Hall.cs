@@ -12,6 +12,7 @@ namespace Alemdar.World
         public static readonly float SeatDist = Props.TableSize / 2 + .3f;
         public readonly List<Vector3> Tables = new();
         public readonly List<GameObject> Decor = new(); // masa başına dekor oyun takımı
+        public readonly List<(int table, int dir, Transform item, string kind)> CornerItems = new();
         public void SetDecor(int table, bool on) { if (table >= 0 && table < Decor.Count && Decor[table]) Decor[table].SetActive(on); }
         public Vector3 WaiterSpot { get; private set; }
         public Transform Root { get; private set; }
@@ -29,7 +30,7 @@ namespace Alemdar.World
             Root = new GameObject("Salon").transform; Root.SetParent(transform, false);
             foreach (float z in new[] { -3f, 0f, 3f }) foreach (float x in new[] { -4.2f, 0f, 4.2f }) Tables.Add(new Vector3(x, 0, z));
             Tables.Add(new Vector3(-4.2f, 0, 6.6f)); Tables.Add(new Vector3(4.2f, 0, 6.6f));
-            Shell(); Storefront(); Windows(); Counter(); Terrace();
+            Shell(); Storefront(); Windows(); Counter(); Toilet(); Terrace();
             // kolonlar
             foreach (var c in new[] { new Vector3(-2.1f, 0, -1.5f), new Vector3(2.1f, 0, -1.5f), new Vector3(-2.1f, 0, 1.5f), new Vector3(2.1f, 0, 1.5f) })
             {
@@ -55,9 +56,10 @@ namespace Alemdar.World
                     case 3: TableSets.Domino(decor, t, i); break;
                     case 4: TableSets.Cards(decor, t, i, true); break;    // pişti
                 }
-                // köşe bardaklıklarında çay ve küllük (bazılarında sigara tüter)
-                Props.TeaGlass(Root, Corner(i, 0)); Props.TeaGlass(Root, Corner(i, 2));
-                Props.Ashtray(Root, Corner(i, 1), i % 3 == 0);
+                // köşe bardaklıklarında yarım çay ve küllük (bazılarında sigara tüter). TableService bunları masadaki ikram sayar:
+                // o köşeye sipariş gelince kahveci eskisini tepsiye alır (üst üste binmez), bekleyen çaylar zamanla toplanır.
+                CornerItems.Add((i, 0, Props.TeaGlass(Root, Corner(i, 0)), "cay")); CornerItems.Add((i, 2, Props.TeaGlass(Root, Corner(i, 2)), "cay"));
+                CornerItems.Add((i, 1, Props.Ashtray(Root, Corner(i, 1), i % 3 == 0), "kul"));
             }
             // nargileler: iki masanın yanında, közü tüter
             Props.Nargile(Root, Tables[0] + new Vector3(.95f, 0, -.35f), 20);
@@ -77,6 +79,7 @@ namespace Alemdar.World
             // Salon ve mahalle hareket etmez: aynı malzemeli parçalar tek çizimde birleşir (binlerce küçük parça → birkaç yüz çizim).
             StaticBatchingUtility.Combine(Root.gameObject);
             StaticBatchingUtility.Combine(Neighborhood.Root.gameObject);
+            Locals.Build(this); // masalardaki dayılar, sokaktakiler (birleştirmeden sonra: konuşma yazıları değişebilsin)
         }
 
         // Coffee Shop (Leartes) ve Apartment Kit (Brick Project) parçalarıyla iç süs: masalarda gazete, camekânda jaluzi,
@@ -220,47 +223,79 @@ namespace Alemdar.World
             }
         }
 
+        // Çay ocağı: arka duvarda tezgah (dolaplı), ocak ve semaver; önünde kahvecinin dolaştığı geçit ve servis tezgahı.
+        // Servis tezgahının sağ ucu açık: kahveci oradan salona çıkar. Önceki buzlu cam bölme salonu kapatıyordu, kaldırıldı.
         void Counter()
         {
-            float z0 = MinZ + .45f, x0 = .6f;
-            Props.Box(Root, new Vector3(3.4f, 1.05f, .5f), Props.Plaster, new Vector3(x0, .525f, z0 + .6f), 0, true);
-            Props.Box(Root, new Vector3(3.5f, .05f, .6f), Props.Marble, new Vector3(x0, 1.07f, z0 + .6f));
-            var frost = Props.Transparent(new Color(.86f, .9f, .92f, .5f), .6f);
+            float x0 = .6f, back = MinZ + .3f, frontZ = MinZ + 1.45f;
+            // arka tezgah: ceviz kapaklı alt dolap + mermer üst
+            Props.Box(Root, new Vector3(3.4f, .9f, .58f), Props.WoodLight, new Vector3(x0, .45f, back), 0, true);
+            Props.Box(Root, new Vector3(3.46f, .04f, .62f), Props.Marble, new Vector3(x0, .92f, back + .01f));
             for (int i = 0; i < 6; i++)
             {
-                Props.Quad(Root, new Vector2(.5f, .5f), frost, new Vector3(x0 - 1.4f + i * .56f, 1.35f, z0 + .62f), Quaternion.Euler(0, 180, 0)); // yüzü müşteriye (+z)
-                Props.Box(Root, new Vector3(.04f, .55f, .05f), Props.White, new Vector3(x0 - 1.68f + i * .56f, 1.35f, z0 + .62f));
+                float cx = x0 - 1.42f + i * .568f;
+                Props.Box(Root, new Vector3(.54f, .78f, .015f), Props.Brown, new Vector3(cx, .45f, back + .292f));                        // dolap kapağı
+                Props.Box(Root, new Vector3(.12f, .015f, .02f), Props.Steel, new Vector3(cx + (i % 2 == 0 ? .2f : -.2f), .72f, back + .305f)); // kulp
             }
-            Props.Box(Root, new Vector3(3.4f, .9f, .55f), Props.WoodLight, new Vector3(x0, .45f, MinZ + .3f), 0, true);
-            Props.Box(Root, new Vector3(3.4f, .04f, .6f), Props.Marble, new Vector3(x0, .92f, MinZ + .3f));
-            for (int i = 0; i < 3; i++) Props.Teapot(Root, new Vector3(x0 - 1.2f + i * .32f, .94f, MinZ + .32f));
+            Props.Box(Root, new Vector3(3.4f, .08f, .02f), Props.Black, new Vector3(x0, .04f, back + .29f)); // süpürgelik
+            // ocağın arkasında beyaz fayans
+            Props.Box(Root, new Vector3(3.4f, .6f, .02f), Props.Tiled(Props.M(Color.white, .7f, 0, Tex.Tile()), new Vector2(17, 3)), new Vector3(x0, 1.24f, MinZ + .012f));
+            // raflarda ince belli bardaklar
             foreach (float sx in new[] { -.9f, .9f })
             {
                 Props.Box(Root, new Vector3(1.2f, .04f, .25f), Props.WoodLight, new Vector3(x0 + sx, 1.7f, MinZ + .14f)); Props.Box(Root, new Vector3(1.2f, .04f, .25f), Props.WoodLight, new Vector3(x0 + sx, 2.05f, MinZ + .14f));
                 for (int k = 0; k < 7; k++) Props.TeaGlass(Root, new Vector3(x0 + sx - .5f + k * .16f, 1.72f, MinZ + .15f), false);
             }
-            Kitchen(x0, z0);
+            Kitchen(x0, back);
+            // servis tezgahı: müşteriye bakan ahşap ön, mermer üst; üstünde kek fanusu ve simit sepeti
+            Props.Box(Root, new Vector3(2.8f, 1.02f, .5f), Props.WoodLight, new Vector3(x0 - .3f, .51f, frontZ), 0, true);
+            Props.Box(Root, new Vector3(2.9f, .05f, .62f), Props.Marble, new Vector3(x0 - .3f, 1.045f, frontZ));
+            for (int i = 0; i < 5; i++) Props.Box(Root, new Vector3(.03f, .9f, .02f), Props.Brown, new Vector3(x0 - 1.6f + i * .65f, .5f, frontZ + .26f)); // ön yüzde ahşap çıtalar
+            Showcase(x0, frontZ);
             Props.Box(Root, new Vector3(.9f, 2f, .45f), new Material(Props.WoodLight) { color = new Color(.95f, .93f, .9f) }, new Vector3(x0 - 2.35f, 1f, MinZ + .3f), 0, true);
-            WaiterSpot = new Vector3(x0 + 2.2f, 0, z0 + 1.0f);
+            WaiterSpot = new Vector3(x0 + .4f, 0, MinZ + .95f); // geçidin ortası: arkası ocağa, yüzü salona
         }
 
-        // Ocak: davlumbaz, kavanozlar (Çay/Kahve/Şeker), cezve ve fincanlar, tost makinesi, eviye; ön tezgahta kek ve simit.
-        // Marka yok: her ürünün yalnızca adı yazar.
-        void Kitchen(float x0, float z0)
+        // Arka tezgahın üstü: davlumbazın altında iki gözlü ocak (mavi alev), üstünde çaydanlıklar; yanında semaver,
+        // eviye ve musluk, kavanozlar, cezve ve fincanlar, tost makinesi. Marka yok, yalnızca adlar.
+        void Kitchen(float x0, float back)
         {
-            float back = MinZ + .3f, top = .94f, front = z0 + .6f, ftop = 1.095f;
-            // davlumbaz: aşağı doğru genişleyen paslanmaz çelik + baca
-            var hoodMesh = Props.Lathe(new[] { new Vector2(.62f, 0), new Vector2(.62f, .06f), new Vector2(.2f, .36f), new Vector2(.2f, .38f) }, 4);
+            float top = .94f;
+            var stove = new Vector3(x0 - 1.05f, top, back);
+            Props.Box(Root, new Vector3(.74f, .06f, .46f), Props.Steel, stove + new Vector3(0, .03f, 0));
+            var flame = Props.Emissive(new Color(.25f, .45f, 1f), 2.4f);
+            foreach (float dx in new[] { -.18f, .18f })
+            {
+                Props.Cyl(Root, .075f, .012f, Props.Black, stove + new Vector3(dx, .066f, 0));
+                Props.Cyl(Root, .06f, .006f, flame, stove + new Vector3(dx, .074f, 0));
+                for (int k = 0; k < 4; k++) Props.Box(Root, new Vector3(.2f, .012f, .012f), Props.Black, stove + new Vector3(dx, .082f, 0), k * 45, false, false);
+                Props.Teapot(Root, stove + new Vector3(dx, .088f, 0));
+            }
+            for (int k = 0; k < 2; k++) Props.Cyl(Root, .015f, .03f, Props.Black, stove + new Vector3(-.18f + k * .36f, .03f, .235f)); // düğmeler
+            // davlumbaz: tam ocağın üstünde, duvara yaslı
+            var hoodMesh = Props.Lathe(new[] { new Vector2(.56f, 0), new Vector2(.56f, .06f), new Vector2(.18f, .34f), new Vector2(.18f, .36f) }, 4);
             var hood = new GameObject("davlumbaz", typeof(MeshFilter), typeof(MeshRenderer)); hood.transform.SetParent(Root, false);
-            hood.transform.localPosition = new Vector3(x0 - 1.05f, 1.95f, back + .1f); hood.transform.localRotation = Quaternion.Euler(0, 45, 0);
+            hood.transform.localPosition = new Vector3(stove.x, 1.75f, MinZ + .38f); hood.transform.localRotation = Quaternion.Euler(0, 45, 0);
             hood.GetComponent<MeshFilter>().sharedMesh = hoodMesh; hood.GetComponent<MeshRenderer>().sharedMaterial = Props.Steel;
-            Props.Box(Root, new Vector3(.26f, .7f, .26f), Props.Steel, new Vector3(x0 - 1.05f, 2.65f, back + .1f));
+            Props.Box(Root, new Vector3(.24f, Height - 2.1f, .24f), Props.Steel, new Vector3(stove.x, (Height + 2.1f) / 2, MinZ + .38f));
+            // semaver: ocağın solunda, musluklu
+            var sem = new Vector3(x0 - 1.62f, top, back);
+            var semGo = new GameObject("semaver", typeof(MeshFilter), typeof(MeshRenderer)); semGo.transform.SetParent(Root, false); semGo.transform.localPosition = sem;
+            semGo.GetComponent<MeshFilter>().sharedMesh = Props.Lathe(new[] { new Vector2(.1f, 0), new Vector2(.13f, .04f), new Vector2(.14f, .3f), new Vector2(.1f, .38f), new Vector2(.05f, .42f), new Vector2(.02f, .5f) }, 24);
+            semGo.GetComponent<MeshRenderer>().sharedMaterial = Props.Steel;
+            Props.Box(Root, new Vector3(.02f, .02f, .08f), Props.Black, sem + new Vector3(0, .12f, .16f));
+            // eviye ve musluk
+            var sink = new Vector3(x0 - .35f, top, back);
+            Props.Box(Root, new Vector3(.5f, .02f, .4f), Props.Steel, sink + new Vector3(0, .005f, 0));
+            Props.Box(Root, new Vector3(.4f, .015f, .3f), Props.Black, sink + new Vector3(0, .012f, 0));
+            Props.Box(Root, new Vector3(.025f, .28f, .025f), Props.Steel, sink + new Vector3(0, .14f, -.17f));
+            Props.Box(Root, new Vector3(.02f, .02f, .15f), Props.Steel, sink + new Vector3(0, .27f, -.1f));
             // kavanozlar
             var jar = Props.Transparent(new Color(.9f, .95f, .97f, .35f)); jar.color = new Color(.9f, .95f, .97f, .35f);
             (string name, Color fill)[] jars = { ("Çay", new Color(.18f, .1f, .05f)), ("Kahve", new Color(.3f, .18f, .1f)), ("Şeker", new Color(.97f, .97f, .95f)) };
             for (int i = 0; i < jars.Length; i++)
             {
-                var p = new Vector3(x0 + .15f + i * .2f, top, back + .05f);
+                var p = new Vector3(x0 + .15f + i * .2f, top, back - .12f);
                 Props.Cyl(Root, .055f, .14f, Props.M(jars[i].fill, .2f), p + new Vector3(0, .07f, 0));
                 Props.Cyl(Root, .062f, .18f, jar, p + new Vector3(0, .09f, 0));
                 Props.Cyl(Root, .064f, .02f, Props.Steel, p + new Vector3(0, .19f, 0));
@@ -268,21 +303,21 @@ namespace Alemdar.World
             }
             // cezve ve fincanlar
             var copper = Props.M(new Color(.72f, .4f, .22f), .7f, .9f);
-            var cez = new GameObject("cezve", typeof(MeshFilter), typeof(MeshRenderer)); cez.transform.SetParent(Root, false); cez.transform.localPosition = new Vector3(x0 + .8f, top, back + .08f);
+            var cez = new GameObject("cezve", typeof(MeshFilter), typeof(MeshRenderer)); cez.transform.SetParent(Root, false); cez.transform.localPosition = new Vector3(x0 + .82f, top, back);
             cez.GetComponent<MeshFilter>().sharedMesh = Props.Lathe(new[] { new Vector2(0, 0), new Vector2(.045f, 0), new Vector2(.04f, .08f), new Vector2(.05f, .1f) }, 18); cez.GetComponent<MeshRenderer>().sharedMaterial = copper;
-            Props.Box(Root, new Vector3(.012f, .01f, .14f), Props.Black, new Vector3(x0 + .8f, top + .08f, back + .18f));
-            for (int k = 0; k < 4; k++) Props.Coffee(Root, new Vector3(x0 + 1.0f, top + k * .062f, back + .08f));
+            Props.Box(Root, new Vector3(.012f, .01f, .14f), Props.Black, new Vector3(x0 + .82f, top + .08f, back + .1f));
+            for (int k = 0; k < 4; k++) Props.Coffee(Root, new Vector3(x0 + 1.02f, top + k * .062f, back - .05f));
             // tost makinesi
-            Props.Box(Root, new Vector3(.34f, .1f, .28f), Props.Steel, new Vector3(x0 + 1.35f, top + .05f, back + .06f));
-            Props.Box(Root, new Vector3(.32f, .03f, .26f), Props.Black, new Vector3(x0 + 1.35f, top + .115f, back + .06f));
-            Props.Box(Root, new Vector3(.3f, .02f, .02f), Props.Black, new Vector3(x0 + 1.35f, top + .13f, back + .2f));
-            Props.Label(Root, "Tost", new Vector3(x0 + 1.35f, top + .05f, back + .205f));
-            // eviye ve musluk
-            Props.Box(Root, new Vector3(.45f, .02f, .36f), Props.Steel, new Vector3(x0 - .45f, top + .005f, back));
-            Props.Box(Root, new Vector3(.02f, .25f, .02f), Props.Steel, new Vector3(x0 - .45f, top + .12f, back - .16f));
-            Props.Box(Root, new Vector3(.02f, .02f, .14f), Props.Steel, new Vector3(x0 - .45f, top + .24f, back - .1f));
-            // ön tezgah: fanus altında kek (dilimli), sepette simit
-            var kek = new Vector3(x0 - .9f, ftop, front);
+            Props.Box(Root, new Vector3(.34f, .1f, .28f), Props.Steel, new Vector3(x0 + 1.38f, top + .05f, back));
+            Props.Box(Root, new Vector3(.32f, .03f, .26f), Props.Black, new Vector3(x0 + 1.38f, top + .115f, back));
+            Props.Box(Root, new Vector3(.3f, .02f, .02f), Props.Black, new Vector3(x0 + 1.38f, top + .13f, back + .14f));
+            Props.Label(Root, "Tost", new Vector3(x0 + 1.38f, top + .05f, back + .145f));
+        }
+        // Servis tezgahının üstü: fanus altında dilimli kek, sepette simit, servis tepsileri ve bekleyen bir çay.
+        void Showcase(float x0, float frontZ)
+        {
+            float ftop = 1.07f;
+            var kek = new Vector3(x0 - 1.1f, ftop, frontZ);
             Props.Cyl(Root, .14f, .015f, Props.White, kek + new Vector3(0, .07f, 0)); Props.Cyl(Root, .025f, .07f, Props.White, kek + new Vector3(0, .035f, 0));
             Props.Cyl(Root, .11f, .08f, Props.M(new Color(.55f, .32f, .14f), .3f), kek + new Vector3(0, .12f, 0));
             Props.Cyl(Root, .112f, .012f, Props.M(new Color(.95f, .9f, .8f), .5f), kek + new Vector3(0, .165f, 0));
@@ -290,11 +325,56 @@ namespace Alemdar.World
             var dm = new GameObject("fanus", typeof(MeshFilter), typeof(MeshRenderer)); dm.transform.SetParent(Root, false); dm.transform.localPosition = kek + new Vector3(0, .077f, 0);
             var prof = new Vector2[10]; for (int i = 0; i < 10; i++) { float a = i / 9f * Mathf.PI / 2; prof[i] = new Vector2(Mathf.Cos(a) * .14f, Mathf.Sin(a) * .16f); }
             dm.GetComponent<MeshFilter>().sharedMesh = Props.Lathe(prof, 28); dm.GetComponent<MeshRenderer>().sharedMaterial = dome;
-            Props.Label(Root, "Kek", kek + new Vector3(0, .02f, .15f));
-            var basket = new Vector3(x0 + .3f, ftop, front);
+            Props.Label(Root, "Kek", kek + new Vector3(0, .02f, .16f));
+            var basket = new Vector3(x0 - .45f, ftop, frontZ);
             Props.Box(Root, new Vector3(.34f, .06f, .24f), Props.WoodLight, basket + new Vector3(0, .03f, 0));
             for (int i = 0; i < 4; i++) Simit(basket + new Vector3(-.09f + (i % 2) * .17f, .07f + (i / 2) * .02f, -.04f + (i / 2) * .07f));
-            Props.Label(Root, "Simit", basket + new Vector3(0, .03f, .125f));
+            Props.Label(Root, "Simit", basket + new Vector3(0, .03f, .13f));
+            for (int i = 0; i < 3; i++) Props.Tray(Root).localPosition = new Vector3(x0 + .45f, ftop + .003f + i * .008f, frontZ); // üst üste servis tepsileri
+            Props.TeaGlass(Root, new Vector3(x0 + .05f, ftop, frontZ - .1f)); // tezgahta bekleyen çay
+        }
+        // Tuvalet: salonun sol arka köşesinde fayanslı bölme, yarı açık kapı ve "WC" levhası; içeride klozet, lavabo, ayna, havlu, lamba.
+        void Toilet()
+        {
+            float x0 = MinX, x1 = MinX + 1.6f, z0 = MinZ, z1 = MinZ + 1.6f, doorL = MinX + .7f, doorR = MinX + 1.5f, h = 2.3f;
+            var wallM = Props.Tiled(Props.Wall, new Vector2(.7f, 1)); var tile = Props.Tiled(Props.M(Color.white, .7f, 0, Tex.Tile()), new Vector2(6, 4));
+            // bölme duvarları (dışı salon sıvası, içi fayans); kapının üstünde lento
+            Props.Box(Root, new Vector3(doorL - x0, h, .1f), wallM, new Vector3((x0 + doorL) / 2, h / 2, z1), 0, true);
+            Props.Box(Root, new Vector3(x1 - doorR, h, .1f), wallM, new Vector3((doorR + x1) / 2, h / 2, z1), 0, true);
+            Props.Box(Root, new Vector3(doorR - doorL, h - 2.05f, .1f), wallM, new Vector3((doorL + doorR) / 2, 2.05f + (h - 2.05f) / 2, z1));
+            Props.Box(Root, new Vector3(.1f, h, z1 - z0), wallM, new Vector3(x1, h / 2, (z0 + z1) / 2), 0, true);
+            Props.Box(Root, new Vector3(x1 - x0 - .12f, 1.4f, .01f), tile, new Vector3((x0 + x1) / 2, .7f, z0 + .012f));   // iç fayans: arka
+            Props.Box(Root, new Vector3(.01f, 1.4f, z1 - z0 - .1f), tile, new Vector3(x0 + .012f, .7f, (z0 + z1) / 2));     // sol
+            Props.Box(Root, new Vector3(.01f, 1.4f, z1 - z0 - .1f), tile, new Vector3(x1 - .056f, .7f, (z0 + z1) / 2));     // sağ (içten)
+            Props.Box(Root, new Vector3(x1 - x0 - .1f, .02f, z1 - z0 - .1f), Props.Plaster, new Vector3((x0 + x1) / 2, h, (z0 + z1) / 2)); // tavan
+            // kapı: menteşe sağda, içe doğru yarı açık; kolu ve kilit
+            var hinge = new GameObject("wcKapi").transform; hinge.SetParent(Root, false); hinge.localPosition = new Vector3(doorR, 0, z1); hinge.localRotation = Quaternion.Euler(0, -70, 0);
+            Props.Box(hinge, new Vector3(doorR - doorL - .02f, 2.02f, .04f), Props.Brown, new Vector3(-(doorR - doorL) / 2, 1.01f, 0), 0, true);
+            Props.Box(hinge, new Vector3(.1f, .02f, .03f), Props.Steel, new Vector3(-(doorR - doorL) + .1f, 1f, .03f));
+            Props.Box(hinge, new Vector3(.1f, .02f, .03f), Props.Steel, new Vector3(-(doorR - doorL) + .1f, 1f, -.03f));
+            // WC levhası (kapının üstünde, salona bakar)
+            Props.Box(Root, new Vector3(.36f, .18f, .02f), Props.Brown, new Vector3((doorL + doorR) / 2, 2.17f, z1 + .06f));
+            Props.Text3D(Root, "WC", new Vector3((doorL + doorR) / 2, 2.17f, z1 + .072f), 180, .12f, new Color(.98f, .95f, .85f));
+            // klozet: tabanı, hazne ve kapak; arka duvara yaslı
+            var white = Props.M(new Color(.97f, .97f, .96f), .85f);
+            var bowl = new GameObject("klozet", typeof(MeshFilter), typeof(MeshRenderer)); bowl.transform.SetParent(Root, false); bowl.transform.localPosition = new Vector3(x0 + .45f, 0, z0 + .45f);
+            bowl.GetComponent<MeshFilter>().sharedMesh = Props.Lathe(new[] { new Vector2(.1f, 0), new Vector2(.13f, .15f), new Vector2(.2f, .38f), new Vector2(.2f, .4f), new Vector2(.15f, .41f) }, 24);
+            bowl.GetComponent<MeshRenderer>().sharedMaterial = white;
+            Props.Box(Root, new Vector3(.42f, .02f, .44f), white, new Vector3(x0 + .45f, .42f, z0 + .45f));                     // kapak
+            Props.Box(Root, new Vector3(.4f, .4f, .16f), white, new Vector3(x0 + .45f, .62f, z0 + .12f), 0, true);              // hazne
+            Props.Box(Root, new Vector3(.06f, .02f, .03f), Props.Steel, new Vector3(x0 + .45f, .83f, z0 + .12f));                // basma düğmesi
+            // lavabo, ayna, sabun, havlu
+            var sinkP = new Vector3(x1 - .38f, 0, z0 + .2f);
+            Props.Box(Root, new Vector3(.42f, .12f, .32f), white, sinkP + new Vector3(0, .82f, 0), 0, true);
+            Props.Box(Root, new Vector3(.08f, .7f, .08f), white, sinkP + new Vector3(0, .4f, -.05f));
+            Props.Box(Root, new Vector3(.02f, .12f, .02f), Props.Steel, sinkP + new Vector3(0, .94f, -.1f)); Props.Box(Root, new Vector3(.02f, .02f, .08f), Props.Steel, sinkP + new Vector3(0, 1f, -.06f));
+            Props.Box(Root, new Vector3(.4f, .5f, .01f), Props.Glass, sinkP + new Vector3(0, 1.45f, -.15f), 0, false, false);
+            Props.Box(Root, new Vector3(.44f, .54f, .008f), Props.Steel, sinkP + new Vector3(0, 1.45f, -.157f), 0, false, false);
+            Props.Box(Root, new Vector3(.07f, .03f, .05f), Props.M(new Color(.9f, .75f, .4f), .4f), sinkP + new Vector3(.14f, .895f, .02f));
+            Props.Box(Root, new Vector3(.3f, .02f, .02f), Props.Steel, new Vector3(x1 - .056f, 1.15f, z0 + .9f)); // havluluk
+            Props.Box(Root, new Vector3(.01f, .45f, .28f), Props.M(new Color(.85f, .3f, .25f), .1f), new Vector3(x1 - .07f, .93f, z0 + .9f));
+            var l = new GameObject("wcIsigi").AddComponent<Light>(); l.transform.SetParent(Root, false); l.transform.localPosition = new Vector3((x0 + x1) / 2, h - .2f, (z0 + z1) / 2);
+            l.type = LightType.Point; l.range = 2.4f; l.intensity = .7f; l.color = new Color(1f, .95f, .85f); l.renderMode = LightRenderMode.ForceVertex;
         }
         void Simit(Vector3 p)
         {

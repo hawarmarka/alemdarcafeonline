@@ -30,6 +30,7 @@ namespace Alemdar.Okey
         readonly string[] slots = new string[Slots];
         readonly Dictionary<string, TileView> rack = new();
         readonly Dictionary<int, Chars.Person> people = new(); // sandalye yönü → oturan (ben hariç)
+        public Chars.Person PersonNamed(string name) { foreach (var p in people.Values) if (p && p.Display == name) return p; return null; }
         TileView indicator; string roundId; int myDir;
         TileView dragging; Vector3 dragOffset; float lastClick; string lastClickId;
         readonly Plane rackPlane = new();
@@ -317,6 +318,7 @@ namespace Alemdar.Okey
             Chars.Person P(int i) => (!Spectating && i == MyIndex) ? null : people.TryGetValue(DirOf(i), out var p) ? p : null;
             // çekme: deste azaldı ya da soldaki yığın azaldı
             int left = (actor + 3) % 4;
+            if ((int?)b["pileCount"] < (int?)a["pileCount"] || ((JArray)db[left]).Count < ((JArray)da[left]).Count) World.Sfx.Play("tas", root.position + Vector3.up * World.Props.TableTop, .5f, 1.15f);
             if (P(actor) is { } drawer)
             {
                 if (((JArray)db[left]).Count < ((JArray)da[left]).Count) drawer.Reach(PileWorld(left));
@@ -346,6 +348,7 @@ namespace Alemdar.Okey
                 Vector3 from = !Spectating && i == MyIndex && id != null && rackWorld.TryGetValue(id, out var w) ? w
                     : root.TransformPoint(World.Hall.SeatRot(DirOf(i)) * new Vector3(0, World.Props.TableTop + .06f, RackZ));
                 StartCoroutine(Fly(top, from, .3f));
+                World.Sfx.Play("tas", top.position, .8f);
             }
         }
         System.Collections.IEnumerator Fly(Transform t, Vector3 fromWorld, float dur)

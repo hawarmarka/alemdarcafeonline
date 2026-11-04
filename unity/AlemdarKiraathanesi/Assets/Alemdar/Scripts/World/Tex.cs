@@ -191,6 +191,14 @@ namespace Alemdar.World
             return new Color(rib - n, rib - n, rib - n);
         });
 
+        // Seramik fayans: kare karolar, ince gri derz (çay ocağının arkası, tuvalet duvarı).
+        public static Texture2D Tile() => Make(128, 128, (x, y) =>
+        {
+            bool grout = x % 64 < 3 || y % 64 < 3;
+            float n = Fbm(x / 30f, y / 30f, 7) * .04f;
+            return grout ? new Color(.62f, .62f, .6f) : new Color(.96f - n, .96f - n, .94f - n);
+        });
+
         // Ferforje pencere: altıgen desen; alfa ile camdan görünür.
         // Hasır oturak: sekizgen kamış örgüsü (Viyana hasırı), bal rengi şeritler, aralarda koyu boşluk.
         public static Texture2D Cane() => Make(256, 256, (x, y) =>

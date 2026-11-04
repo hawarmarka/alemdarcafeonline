@@ -22,6 +22,7 @@ namespace Alemdar.Batak
         Transform root, handRoot, trickRoot, oppRoot, lastRoot;
         int myDir;
         readonly Dictionary<int, Chars.Person> people = new();
+        public Chars.Person PersonNamed(string name) { foreach (var p in people.Values) if (p && p.Display == name) return p; return null; }
         readonly Dictionary<string, CardView> hand = new();
         string trickSig = "", handSig = "", oppSig = "";
         float lastPlay;
@@ -196,6 +197,7 @@ namespace Alemdar.Batak
                 int win = (int?)(State["lastTrick"] as JObject)?["winner"] ?? -1;
                 var target = win >= 0 ? root.TransformPoint(R(DirOf(win)) * new Vector3(.25f, Top + .002f, .3f)) : root.position;
                 if (win >= 0 && people.TryGetValue(DirOf(win), out var taker) && taker) taker.Reach(root.position + Vector3.up * (Top + .02f), 0, .55f); // eli alan ortadan toplar
+                World.Sfx.Play("kagit", root.position + Vector3.up * Top, .7f, .8f);
                 // el bitti: kartlar kazananın önüne kayıp küçülerek kaybolur (PrimeTween)
                 foreach (var cv in trickRoot.GetComponentsInChildren<CardView>())
                 {

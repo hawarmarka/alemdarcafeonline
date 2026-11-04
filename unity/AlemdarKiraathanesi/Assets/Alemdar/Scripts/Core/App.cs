@@ -17,6 +17,7 @@ namespace Alemdar
         public Chars.PlayerMotor Me { get; private set; }
         public World.WorldNet Net { get; private set; }
         public World.Waiter Waiter { get; private set; }
+        public World.TableService Service { get; private set; }
         public Okey.OkeyTable Okey { get; private set; }
         public global::Alemdar.Batak.BatakTable Batak { get; private set; }
         public BatakHud BatakUi { get; private set; }
@@ -40,6 +41,7 @@ namespace Alemdar
             if (DevShots.Arg("-uzun") != null) gameObject.AddComponent<DevLong>();
             if (DevShots.Arg("-arkadas") != null) gameObject.AddComponent<DevFriends>();
             if (DevShots.Arg("-batak") != null) gameObject.AddComponent<DevBatak>();
+            if (DevShots.Arg("-ikram") != null) gameObject.AddComponent<DevService>();
         }
 
         IEnumerator Start()
@@ -65,6 +67,7 @@ namespace Alemdar
             Io.On("batak:error", d => { Ui.Toast((string)d["message"]); if (joining) JoinFailed(); });
             Io.On("batak:left", _ => { if (Batak && Batak.Active) LeaveTable(false); });
 
+            World.Sfx.Init();
             Hall = new GameObject("Kiraathane").AddComponent<World.Hall>(); Hall.Build();
             yield return null;
             BakeNavMesh();
@@ -83,6 +86,11 @@ namespace Alemdar
             Me.OnClickWorld += OnClickWorld;
             Net = gameObject.AddComponent<World.WorldNet>(); Net.Init(Io, Me, MyName);
             Waiter = new GameObject("Kahveci").AddComponent<World.Waiter>(); Waiter.Init(Hall);
+            Service = gameObject.AddComponent<World.TableService>(); Service.Init(Hall, Waiter);
+            Service.Self = () => { var (t, d) = MySpot(); return (t, d, Me.Body, SeatedTable >= 0 && SeatedDir >= 0 && Me.InputLocked); };
+            Service.PersonNamed = n => n == MyName ? Me.Body : Okey.PersonNamed(n) ?? Batak.PersonNamed(n) ?? Net.PersonNamed(n);
+            Service.Send = (act, t, d) => Io.Emit("world:act", new { act, table = t, seat = d });
+            Io.On("world:act", d => Service.Remote((string)d["name"], (string)d["act"], (int?)d["table"] ?? -1, (int?)d["seat"] ?? -1));
             Okey = gameObject.AddComponent<Okey.OkeyTable>(); Okey.Init(Io, Hall, Me);
             Batak = gameObject.AddComponent<global::Alemdar.Batak.BatakTable>(); Batak.Init(Io, Hall, Me);
             Net.Hidden = n => (Okey.State != null && Okey.HasPlayer(n)) || (Batak.State != null && Batak.HasPlayer(n));
@@ -112,7 +120,7 @@ namespace Alemdar
         void BakeNavMesh()
         {
             // salon + sokak + park (Neighborhood sınırları)
-            var bounds = new Bounds(new Vector3(0, 1, 17.5f), new Vector3(World.Neighborhood.MaxX * 2 + 1, 5, 49));
+            var bounds = new Bounds(new Vector3(0, 1, 13f), new Vector3(World.Neighborhood.MaxX * 2 + 1, 5, 58)); // z -16 (ara sokak dibi) .. 42
             var sources = new List<NavMeshBuildSource>();
             NavMeshBuilder.CollectSources(bounds, ~(1 << 2), NavMeshCollectGeometry.PhysicsColliders, 0, new List<NavMeshBuildMarkup>(), sources);
             var s = NavMesh.GetSettingsByID(0); s.agentRadius = .22f; s.agentHeight = 1.75f; s.agentClimb = .2f; s.voxelSize = .07f; s.overrideVoxelSize = true;
@@ -125,6 +133,13 @@ namespace Alemdar
             Ui.Tick();
             if (Input.GetKeyDown(KeyCode.Escape) && Watching) { LeaveTable(); return; } // izleyici Esc ile kalkar
             if (Input.GetKeyDown(KeyCode.Tab) && Watching) WatchNext(); // yancı sıradaki oyuncunun yanına geçer
+            if (Me && Service && !Ui.TypingText && !Watching)
+            {
+                // Q çay/kahve iç (yiyecekse bir ısırık), G sigara, H nargile
+                if (Input.GetKeyDown(KeyCode.Q) && !Service.SipMine()) Ui.Toast("Önünde içecek yok. KAHVECİ düğmesinden çay söyle.");
+                if (Input.GetKeyDown(KeyCode.G)) Service.SmokeMine();
+                if (Input.GetKeyDown(KeyCode.H) && !Service.NargileMine()) Ui.Toast("Yanında nargile yok. KAHVECİ'den nargile iste.");
+            }
             if (!Input.GetKeyDown(KeyCode.E) || !Me || SeatedTable >= 0 || Ui.TypingText) return;
             if (Me.Seated) { Me.StandUp(); return; }                       // bankta/çay bahçesinde oturuyorsa kalk
             int t = NearTable(); if (t >= 0) { Hud.ShowTable(t); return; }
@@ -240,7 +255,7 @@ namespace Alemdar
                 Batak.Detach(); BatakUi.Show(false);
             }
             if (tellServer && okeyCode != null) Io.Emit(okeyToken == null ? "unwatchGame" : "leaveGame"); // oyun başlamadan kalkınca da haber verilir
-            okeyCode = okeyToken = batakCode = batakToken = null; joining = false; WatchDir = -1;
+            okeyCode = okeyToken = batakCode = batakToken = null; joining = false; WatchDir = -1; Service.PutOutMine();
             Okey.Detach(); Hud.ShowGame(false);
             Me.InputLocked = false; Me.StandUp(); SeatedTable = -1; SeatedDir = -1;
         }
@@ -254,27 +269,34 @@ namespace Alemdar
         void Rejoin()
         {
             if (!Hud) return; // ilk bağlantı
-            if (okeyCode != null) { if (okeyToken != null) Io.Emit("rejoinRoom", new { roomCode = okeyCode, token = okeyToken }); else Io.Emit("watchGame", new { roomCode = okeyCode }); }
-            if (batakCode != null) { if (batakToken != null) Io.Emit("batak:rejoin", new { code = batakCode, token = batakToken }); else Io.Emit("batak:watch", new { code = batakCode }); }
+            int seat = WatchDir >= 0 ? (4 - WatchDir) % 4 : -1; // yancı aynı oyuncunun yanında kalır
+            if (okeyCode != null) { if (okeyToken != null) Io.Emit("rejoinRoom", new { roomCode = okeyCode, token = okeyToken }); else Io.Emit("watchGame", new { roomCode = okeyCode, seat }); }
+            if (batakCode != null) { if (batakToken != null) Io.Emit("batak:rejoin", new { code = batakCode, token = batakToken }); else Io.Emit("batak:watch", new { code = batakCode, seat }); }
             if (okeyCode != null || batakCode != null) Ui.Toast("Bağlantı geri geldi, masaya dönüldü.", 3);
         }
 
         // ---------- kahveci ----------
+        // Benim masam ve sandalye yönüm: masada oturuyorsam o sandalye; ayaktaysam (ya da taburede) en yakın masanın bana en yakın sandalyesi.
+        (int table, int dir) MySpot()
+        {
+            int t = SeatedTable >= 0 ? SeatedTable : NearTable(2.5f); if (t < 0) return (-1, -1);
+            if (SeatedTable == t && SeatedDir >= 0) return (t, SeatedDir);
+            var me = Me.transform.position;
+            return (t, Enumerable.Range(0, 4).OrderBy(d => (Hall.Seat(t, d) - me).sqrMagnitude).First());
+        }
         public void Order(string item)
         {
-            int t = SeatedTable >= 0 ? SeatedTable : NearTable(2.5f);
+            var (t, dir) = MySpot();
             if (t < 0) { Ui.Toast("Bir masaya otur ya da yaklaş, kahveci oraya getirsin."); return; }
-            Io.Emit("world:order", new { item, table = t, seat = SeatedDir });
+            Io.Emit("world:order", new { item, table = t, seat = dir });
         }
         void OnServe(JToken d)
         {
             int table = (int)d["table"]; if (table < 0 || table >= Hall.Tables.Count) return;
-            // ikram siparişi verenin önüne: koltuğu biliniyorsa oraya, yoksa masanın kahveciye yakın kenarına
+            // ikram, siparişi verenin kendi köşe bardaklığına (sol köşesi) konur; eskisi varsa kahveci onu alır
             int seat = (int?)d["seat"] ?? -1;
-            // ikram, siparişi verenin kendi köşe bardaklığına (sol köşesi) konur; koltuk bilinmiyorsa güney köşesi
-            Vector3 spot = Hall.Corner(table, seat >= 0 ? seat : 0);
-            Waiter.Serve((string)d["item"], table, spot);
-            if ((string)d["name"] == MyName) Ui.Toast("Kahveci siparişini getiriyor.");
+            Waiter.Serve((string)d["item"], table, seat >= 0 ? seat : 0);
+            if ((string)d["name"] == MyName) Ui.Toast((string)d["item"] == "nargile" ? "Kahveci nargileni hazırlıyor. Gelince H ile çek." : "Kahveci siparişini getiriyor. Gelince Q ile iç.");
         }
     }
 }

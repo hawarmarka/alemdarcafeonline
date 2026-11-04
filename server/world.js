@@ -2,11 +2,12 @@
 // Kıraathane salonu: yürüyen oyuncuların konumları. İstemci 'world:enter' ile girer, 'world:move' ile konum yollar
 // (en fazla saniyede 10). Sunucu salondakilere saniyede 8 kez toplu 'world:state' yollar; konum doğrulanır, sınır dışı kırpılır.
 // salon + teras + sokak + park (Unity Neighborhood: x ±26, z ..42)
-const BOUNDS = { minX: -25.8, maxX: 25.8, minZ: -6.0, maxZ: 41.8 };
+const BOUNDS = { minX: -25.8, maxX: 25.8, minZ: -15.6, maxZ: 41.8 }; // minZ: ara sokakların dibi
 const MAX_PEOPLE = 80;
 const TICK_MS = 125;
 const POSES = new Set(['stand', 'walk', 'sit']);
-const ORDER_ITEMS = new Set(['cay', 'kahve', 'oralet', 'tost', 'su', 'ayran', 'simit']); // Unity istemcisindeki menüyle aynı
+const ORDER_ITEMS = new Set(['cay', 'kahve', 'oralet', 'tost', 'su', 'ayran', 'simit', 'nargile']); // Unity istemcisindeki menüyle aynı
+const ACTS = new Set(['sip', 'smoke', 'nargile']); // masadaki hal hareketi: içmek, sigara, nargile (herkes görür)
 
 function install({ io, fromToken }) {
   const people = new Map(); // socket.id → { id, name, x, z, ry, pose, speed, at }
@@ -50,7 +51,15 @@ function install({ io, fromToken }) {
       if (!ORDER_ITEMS.has(item) || !Number.isInteger(table) || table < 0 || table > 20) return;
       const now = Date.now(); if (now - (p.orderAt || 0) < 4000) return socket.emit('world:notice', { message: 'Kahveci geliyor, biraz bekle.' });
       p.orderAt = now;
-      io.to('world').emit('world:serve', { id: p.id, name: p.name, item, table, seat: Number.isInteger(data?.seat) ? data.seat : -1 });
+      io.to('world').emit('world:serve', { id: p.id, name: p.name, item, table, seat: Number.isInteger(data?.seat) && data.seat >= 0 && data.seat < 4 ? data.seat : -1 });
+    });
+    // Çay içmek, sigara ve nargile çekmek: salondaki herkes aynı hareketi görür. Saniyede en fazla bir kez.
+    socket.on('world:act', data => {
+      const p = people.get(socket.id); if (!p) return;
+      const act = String(data?.act || ''), table = Number(data?.table), seat = Number(data?.seat);
+      if (!ACTS.has(act) || !Number.isInteger(table) || table < -1 || table > 20 || !Number.isInteger(seat) || seat < -1 || seat > 3) return;
+      const now = Date.now(); if (now - (p.actAt || 0) < 900) return; p.actAt = now;
+      socket.to('world').emit('world:act', { name: p.name, act, table, seat });
     });
     const leave = () => { if (people.delete(socket.id)) socket.leave('world'); }; // sonraki 'world:state' listesinde yok
     socket.on('world:leave', leave);

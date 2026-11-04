@@ -64,6 +64,7 @@ namespace Alemdar.World
             // yağmur: bulutlu evrede (o evreye girerken bir kez kura), yalnızca açık havada
             if (local < .01f) raining = Random.value < Mathf.Max(a.rain, .01f);
             bool wantRain = (ForceRain || raining && a.rain > 0) && Outdoors();
+            Sfx.Raining(wantRain);
             var em = rain.emission; em.rateOverTime = Mathf.MoveTowards(em.rateOverTime.constant, wantRain ? 900 : 0, Time.deltaTime * 600);
             if (Camera.main) rain.transform.position = Camera.main.transform.position + Vector3.up * 8;
         }

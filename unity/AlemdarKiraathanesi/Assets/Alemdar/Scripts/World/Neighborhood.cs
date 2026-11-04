@@ -26,17 +26,18 @@ namespace Alemdar.World
             var blue = Apartment.Plaster("blue_plaster_weathered", Color.white, 12, 15);
             var pink = Apartment.Plaster("beige_wall_002", new Color(1f, .88f, .84f), 12, 12);
             var cream = Apartment.Plaster("clay_plaster", new Color(1f, .96f, .86f), 12, 15);
-            Apartment.Build(Root, -6.8f, 6.8f, -6.4f, 5.2f, Hall.Height + .2f, 4, beige, 1, false, null, (f, c) => f == 0 && c == 0);
-            Apartment.Build(Root, -19f, -7f, -6.4f, 5.2f, 3.4f, 4, blue, 2, true, new[] { "-", "TUHAFİYE" }, (f, c) => f == 0 && c == 4);
+            Apartment.Build(Root, -6.8f, 6.8f, -6.4f, 5.2f, Hall.Height + .2f, 4, beige, 1, false, null);
+            Apartment.Build(Root, -19f, -7f, -6.4f, 5.2f, 3.4f, 4, blue, 2, true, new[] { "-", "TUHAFİYE" }, null);
             Apartment.Build(Root, 7f, 19f, -6.4f, 5.2f, 3.4f, 3, pink, 3, true, new[] { "BAKKAL", "-" }, null);
-            Apartment.Build(Root, -31f, -19.2f, -6.4f, 5.2f, 3.4f, 5, cream, 4, true, new[] { "-", "-" }, null);
-            Apartment.BuildKit(Root, 19.2f, 31f, -6.4f, 5.2f, 3.4f, 3, cream, 5, new[] { "BERBER", "-" }); // modern apartman (Apartment Kit cephesi)
+            Apartment.Build(Root, -31f, -23.2f, -6.4f, 5.2f, 3.4f, 5, cream, 4, true, new[] { "-", "-" }, null);
+            Apartment.BuildKit(Root, 23.2f, 31f, -6.4f, 5.2f, 3.4f, 3, cream, 5, new[] { "BERBER", "-" }); // modern apartman (Apartment Kit cephesi)
             // parkın arkasındaki sıra (yüzü parka bakar)
             var back = new GameObject("arkaSira").transform; back.SetParent(Root, false); back.localPosition = new Vector3(0, 0, MaxZ + 2f); back.localRotation = Quaternion.Euler(0, 180, 0);
             Apartment.Build(back, -28f, -10f, -8f, 0f, 3.2f, 4, pink, 6, true, new[] { "-", "-", "-" }, null);
             Apartment.Build(back, -9.6f, 9.6f, -8f, 0f, 3.2f, 5, cream, 7, true, new[] { "-", "-", "-" }, null);
             Apartment.Build(back, 10f, 28f, -8f, 0f, 3.2f, 4, blue, 8, true, new[] { "-", "-", "-" }, null);
             EndBlocks(pink, blue, cream, beige);
+            Alleys(pink, blue, cream, beige);
             Street(); Bakkal(); Park(); Lawn(); TeaGarden();
             Gossip(people);
             Playground.Build(Root, people); // salıncak, kaydırak, kum havuzu ve oynayan çocuklar
@@ -86,6 +87,39 @@ namespace Alemdar.World
             // yolun geçtiği boşluğun gerisi (araba buradan gelip gider)
             Apartment.Build(Side(MinX - 36, 90), -24f, -6f, -10f, 0f, 3.4f, 4, walls[1], 40, true, new[] { "-", "-" }, null);
             Apartment.Build(Side(MaxX + 36, -90), 6f, 24f, -10f, 0f, 3.4f, 4, walls[2], 41, true, new[] { "-", "-" }, null);
+        }
+
+        // ---------- ara sokaklar: ana caddeden kıraathane sırasının arkasına giden iki dar sokak ----------
+        // İki yanı sokağa bakan apartmanlar, dipte sokağı kapatan bir bina; kaldırım taşı, lamba, çöp kutusu ve sokak tabelası.
+        public const float AlleyZ = -16f;
+        public static readonly (float x0, float x1, string name)[] AlleyList = { (-23f, -19f, "ÇINAR SOKAK"), (19f, 23f, "MENEKŞE SOKAK") };
+        static void Alleys(params Material[] walls)
+        {
+            var walk = Tex("brick_pavement_02", Vector2.one);
+            int s = 60;
+            foreach (var (x0, x1, name) in AlleyList)
+            {
+                Slab(walk, x0, x1, AlleyZ, 5.2f, 0);                                   // sokağın zemini (ana kaldırıma bağlanır)
+                Slab(walk, x0 - 4, x1 + 4, AlleyZ - 1, AlleyZ, 0);
+                // batı yakası: yüzü doğuya (sokağa); doğu yakası: yüzü batıya
+                var west = new GameObject("araSokakBati").transform; west.SetParent(Root, false); west.localPosition = new Vector3(x0, 0, 0); west.localRotation = Quaternion.Euler(0, 90, 0);
+                var east = new GameObject("araSokakDogu").transform; east.SetParent(Root, false); east.localPosition = new Vector3(x1, 0, 0); east.localRotation = Quaternion.Euler(0, -90, 0);
+                Apartment.Build(west, 6.6f, AlleyZ * -1, -10f, 0f, 3.2f, 3 + s % 2, walls[s % walls.Length], s, true, new[] { "TERZİ", "-" }, null); s++;
+                Apartment.Build(east, AlleyZ, -6.6f, -10f, 0f, 3.2f, 4 - s % 2, walls[s % walls.Length], s, true, new[] { "-", "KÖFTECİ" }, null); s++;
+                // binaların zemin katı içi dolu: cephe (dükkânlar) dışında arkası boştu, sokaktan bakınca altlarından gökyüzü görünüyordu
+                Props.Box(Root, new Vector3(9.7f, 3.3f, 9.4f), walls[(s + 1) % walls.Length], new Vector3(x0 - 5.15f, 1.65f, (AlleyZ - 6.6f) / 2), 0, true);
+                Props.Box(Root, new Vector3(9.7f, 3.3f, 9.4f), walls[s % walls.Length], new Vector3(x1 + 5.15f, 1.65f, (AlleyZ - 6.6f) / 2), 0, true);
+                Props.Box(Root, new Vector3(x1 - x0 + 8, 3.3f, 10.6f), walls[s % walls.Length], new Vector3((x0 + x1) / 2, 1.65f, AlleyZ - 5.6f), 0, true);
+                // dipte sokağı kapatan apartman (yüzü caddeye)
+                Apartment.Build(Root, x0 - 4, x1 + 4, AlleyZ - 11, AlleyZ, 3.2f, 4, walls[s % walls.Length], s, true, new[] { "-", "-" }, null); s++;
+                float cx = (x0 + x1) / 2;
+                Lamp("street_lamp_01", new Vector3(x0 + .45f, 0, -5.5f), 90);
+                TrashCan(new Vector3(x1 - .5f, 0, -11.5f));
+                // sokak tabelası: köşe binasının yan duvarında, caddeden okunur
+                var sign = Props.Box(Root, new Vector3(.9f, .26f, .03f), Props.M(new Color(.1f, .25f, .55f), .3f), new Vector3(x0 + .02f, 2.6f, 4.4f), 90);
+                Props.Text3D(Root, name, new Vector3(x0 + .04f, 2.6f, 4.4f), -90, .07f, Color.white);
+                Props.Text3D(Root, name, new Vector3(x0 - .0f + .005f, 2.6f, 4.4f), 90, .07f, Color.white);
+            }
         }
 
         // ---------- park çimeni: çim tutamları (alfa kesik çapraz kartlar), çit dibinde çalılar, saksılarda çiçek ----------
@@ -154,8 +188,7 @@ namespace Alemdar.World
                 }
             Apartment.Place(Root, "water_manhole_cover", new Vector3(-8, -.148f, 14.5f), 0, 1, false);
             Apartment.Place(Root, "water_manhole_cover", new Vector3(9, -.148f, 15.2f), 30, 1, false);
-            Apartment.Place(Root, "metal_trash_can", new Vector3(3.2f, 0, 10.2f), 0);
-            Apartment.Place(Root, "metal_trash_can", new Vector3(-2.5f, .03f, 22f), 0);
+            TrashCan(new Vector3(3.2f, 0, 10.2f)); TrashCan(new Vector3(-2.5f, .03f, 22f));
             Apartment.Place(Root, "utility_box_01", new Vector3(-7.4f, 0, 5.6f), 0);
             Cars();
         }
@@ -298,7 +331,16 @@ namespace Alemdar.World
             }
         }
 
-        // ---------- teyzeler: açık pencerelerde, birbirine dönük dedikodu ----------
+        // Poly Haven modelinde yan yana iki kutu var (temiz ve paslı): yalnız temiz olan kalır, her yerde tek çöp kutusu.
+        static void TrashCan(Vector3 pos)
+        {
+            var g = Apartment.Place(Root, "metal_trash_can", pos, 0, 1, false); if (!g) return;
+            foreach (var t in g.GetComponentsInChildren<Transform>(true)) if (t != g.transform && t.name.Contains("_rust")) Object.Destroy(t.gameObject);
+            var b = g.AddComponent<BoxCollider>(); b.center = new Vector3(0, .45f, 0); b.size = new Vector3(.55f, .9f, .55f); // tek kutunun çarpışması
+            var s = g.transform.lossyScale; b.center = new Vector3(b.center.x / s.x, b.center.y / s.y, b.center.z / s.z); b.size = new Vector3(b.size.x / s.x, b.size.y / s.y, b.size.z / s.z);
+        }
+
+        // ---------- teyzeler: kahvenin üstündeki balkonda, karşılıklı dedikodu ----------
         static readonly string[] Lines =
         {
             "Duydun mu kız, karşının oğlan evleniyormuş!", "Bakkal yine veresiye defteri açmış...", "Bizimki kahveden çıkmıyor ki!",
@@ -307,22 +349,22 @@ namespace Alemdar.World
         };
         static void Gossip(Transform people)
         {
-            var spots = Apartment.OpenWindows;
-            string[] names = { "Fatma Teyze", "Hatice Teyze", "Emine Teyze" };
+            // kahvenin üstündeki apartmanın (seed 1) birinci kat balkonu: arada duvar yok, ikisi aynı balkonda yan yana
+            var bal = Apartment.Balconies.Find(b => b.seed == 1 && b.floor == 0);
+            if (bal.width <= 0) return;
+            string[] names = { "Fatma Teyze", "Hatice Teyze" };
             var made = new List<Chars.Person>();
-            for (int i = 0; i < spots.Count && i < names.Length; i++)
+            for (int i = 0; i < names.Length; i++)
             {
-                var (pos, _) = spots[i];
                 var holder = new GameObject("teyze").transform; holder.SetParent(people, false);
-                holder.localPosition = new Vector3(pos.x, pos.y - 1.55f, pos.z + .35f); // pervazın içinde, belinden yukarısı dışarıda
-                var p = Chars.Person.Create(names[i], holder, false, "teyze");
-                made.Add(p);
+                holder.position = bal.floor0 + new Vector3((i == 0 ? -1 : 1) * Mathf.Min(.55f, bal.width * .24f), 0, .5f);
+                made.Add(Chars.Person.Create(names[i], holder, false, "teyze"));
             }
             for (int i = 0; i < made.Count; i++)
             {
                 var me = made[i]; var other = made[(i + 1) % made.Count];
                 var dir = other.transform.position - me.transform.position; dir.y = 0;
-                me.transform.parent.localRotation = Quaternion.LookRotation(Vector3.forward + dir.normalized * .6f); // sokağa sarkar, komşusuna döner
+                me.transform.parent.rotation = Quaternion.LookRotation(dir.normalized + Vector3.forward * .55f); // komşusuna döner, biraz da sokağa
                 var g = me.gameObject.AddComponent<GossipTalk>(); g.Init(me, other, Lines, i * 2.1f);
             }
         }
@@ -356,8 +398,9 @@ namespace Alemdar.World
             if (Time.time < next) return;
             next = Time.time + 4.5f + Random.value * 3;
             idx = (idx + 1) % lines.Length;
-            bubble.text = near ? lines[idx] : "";
+            bubble.text = ""; // yazı yok, yalnızca ses
             me.Gesture(Chars.Person.Talk, 4f); // anlatan elleriyle konuşur
+            Sfx.Voice(me.Head ? me.Head.position : transform.position + Vector3.up * 1.6f, lines[idx], Chars.Person.Hash(me.Display), false, true); // sesli dedikodu
             if (other && other.TryGetComponent<GossipTalk>(out var o)) { o.BubbleClear(); o.Listen(); }
         }
         void BubbleClear() { if (bubble) bubble.text = ""; }
@@ -385,6 +428,7 @@ namespace Alemdar.World
                 car = Apartment.Place(transform, id, new Vector3(-Edge * dir, -.15f, lane), alongZ ? (dir > 0 ? 90 : -90) : (dir > 0 ? 0 : 180), alongZ ? .8f : 1f, false);
                 if (!car) { next = Time.time + 30; return; }
                 foreach (var r in car.GetComponentsInChildren<Renderer>()) r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+                Sfx.Engine(car.transform);
                 speed = Cruise;
             }
             // önünde (aynı şeritte, 7 m içinde) oyuncu ya da biri varsa yavaşla

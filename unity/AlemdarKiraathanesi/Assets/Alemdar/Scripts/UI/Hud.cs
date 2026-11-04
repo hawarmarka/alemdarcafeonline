@@ -16,7 +16,7 @@ namespace Alemdar.UI
         RectTransform tablePanel, seatsBox, orderMenu, gameBar, waitPanel, resultPanel, promptBox, menuPanel;
         Text tableTitle, tableInfo; int shownTable = -1; JObject roomsCache;
         Button bSeriesSort, bPairsSort, bOpen, bPairs, bProcess, bRetract, bReturn, bFinish, bAddBot, bBots;
-        Button createBtn, watchBtn, nextBtn; int modeIdx, roundIdx = 2;
+        Button createBtn, watchBtn, nextBtn; Text keys; int modeIdx, roundIdx = 2;
         static readonly int[] Rounds = { 1, 2, 4 };
         int teamIdx; // 0 tekli, 1 eşli (koltuk 0-2 ve 1-3 takım)
         int gameIdx, batakTypeIdx, batakRoundIdx; // masada hangi oyun: 0 okey, 1 batak
@@ -44,6 +44,9 @@ namespace Alemdar.UI
             Ui.Anchor((RectTransform)watchBtn.transform, new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(-160, 40), new Vector2(300, 54)); watchBtn.gameObject.SetActive(false);
             nextBtn = Ui.Button(root, "YANINA GEÇ  (Tab)", Ui.Kind.Plain, () => app.WatchNext(), new Vector2(300, 54), "eye");
             Ui.Anchor((RectTransform)nextBtn.transform, new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(160, 40), new Vector2(300, 54)); nextBtn.gameObject.SetActive(false);
+            // masadayken tuş ipucu (sağ altta, sade)
+            keys = Ui.Label(root, "Q  çay iç     G  sigara     H  nargile", 17, Ui.Muted, TextAnchor.MiddleRight); keys.raycastTarget = false;
+            Ui.Anchor(keys.rectTransform, new Vector2(1, 0), new Vector2(1, 0), new Vector2(-190, 14), new Vector2(360, 26)); keys.gameObject.SetActive(false);
             BuildTablePanel(root); BuildOrder(root); BuildGameBar(root); BuildWait(root); BuildResult(root); BuildMenu(root);
             app.Okey.OnState = OnGameState;
             app.Io.On("lobbyUpdate", OnLobby);
@@ -191,7 +194,7 @@ namespace Alemdar.UI
         // ---------- kahveci ----------
         void BuildOrder(Transform root)
         {
-            orderMenu = Ui.Card(root, new Vector2(320, 520)); Ui.Anchor(orderMenu, new Vector2(1, 1), new Vector2(1, 1), new Vector2(-180, -350), new Vector2(320, 520));
+            orderMenu = Ui.Card(root, new Vector2(320, 600)); Ui.Anchor(orderMenu, new Vector2(1, 1), new Vector2(1, 1), new Vector2(-180, -390), new Vector2(320, 600));
             var col = Ui.Column(orderMenu, 8); Ui.Stretch(col);
             Ui.Size(Ui.Label(col, "Kahveciye söyle", 24, Ui.Ink, TextAnchor.MiddleLeft, FontStyle.Bold), -1, 40);
             foreach (var (id, name) in World.Waiter.Menu) { var i = id; Ui.Button(col, name, Ui.Kind.Plain, () => { app.Order(i); orderMenu.gameObject.SetActive(false); }, new Vector2(270, 54)); }
@@ -199,12 +202,14 @@ namespace Alemdar.UI
         }
         void ToggleOrder() => orderMenu.gameObject.SetActive(!orderMenu.gameObject.activeSelf);
 
+        static string SoundLabel() => World.Sfx.Volume > .75f ? "Ses: açık" : World.Sfx.Volume > .25f ? "Ses: kısık" : "Ses: kapalı";
         void BuildMenu(Transform root)
         {
-            menuPanel = Ui.Card(root, new Vector2(300, 330)); Ui.Anchor(menuPanel, new Vector2(1, 1), new Vector2(1, 1), new Vector2(-170, -255), new Vector2(300, 330));
+            menuPanel = Ui.Card(root, new Vector2(300, 394)); Ui.Anchor(menuPanel, new Vector2(1, 1), new Vector2(1, 1), new Vector2(-170, -287), new Vector2(300, 394));
             var col = Ui.Column(menuPanel, 10); Ui.Stretch(col);
             Ui.Button(col, "Tam ekran", Ui.Kind.Plain, () => Screen.fullScreen = !Screen.fullScreen, new Vector2(250, 54), "monitor");
             Button gfx = null; gfx = Ui.Button(col, Quality.I ? Quality.I.Label : "Grafik", Ui.Kind.Plain, () => Ui.SetText(gfx, Quality.I.Cycle()), new Vector2(250, 54), "settings");
+            Button snd = null; snd = Ui.Button(col, SoundLabel(), Ui.Kind.Plain, () => { World.Sfx.SetVolume(World.Sfx.Volume > .75f ? .5f : World.Sfx.Volume > .25f ? 0 : 1); Ui.SetText(snd, SoundLabel()); }, new Vector2(250, 54), "sound");
             Ui.Button(col, "Adımı değiştir", Ui.Kind.Plain, () => { PlayerPrefs.DeleteKey("ad"); Ui.Toast("Oyunu yeniden açınca yeni adını sorarız."); }, new Vector2(250, 54), "edit");
             Ui.Button(col, "Oyundan çık", Ui.Kind.Danger, Application.Quit, new Vector2(250, 54), "power");
             menuPanel.gameObject.SetActive(false);
@@ -329,6 +334,8 @@ namespace Alemdar.UI
         {
             if (!app || !app.Me) return;
             if (watchBtn.gameObject.activeSelf != app.Watching) { watchBtn.gameObject.SetActive(app.Watching); nextBtn.gameObject.SetActive(app.Watching); }
+            bool showKeys = app.SeatedTable >= 0 && app.SeatedDir >= 0;
+            if (keys.gameObject.activeSelf != showKeys) keys.gameObject.SetActive(showKeys);
             if (app.Okey.State != null && gameBar.gameObject.activeSelf && Mathf.CeilToInt(app.Okey.TurnSecondsLeft) != lastSec) PaintTurn();
             if (app.OfflineMode) online.text = "<color=#E0574A>●</color>  Çevrimdışı: arkadaşlar bu salonu göremez";
             else if (app.Net) online.text = $"<color=#43C486>●</color>  Çevrimiçi · {Mathf.Max(1, app.Net.Online)} kişi salonda"; // liste beni de içerir

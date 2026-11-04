@@ -115,7 +115,7 @@ namespace Alemdar.World
             saucerMesh ??= Lathe(new[] { new Vector2(0, 0), new Vector2(.04f, 0), new Vector2(.052f, .012f), new Vector2(.054f, .014f) }, 20);
             var root = new GameObject("cay").transform; root.SetParent(p, false); root.localPosition = pos;
             MeshGo(root, saucerMesh, Saucer, Vector3.zero);
-            if (full) MeshGo(root, teaMesh, Tea, new Vector3(0, .008f, 0), false);
+            if (full) MeshGo(root, teaMesh, Tea, new Vector3(0, .008f, 0), false).name = "sivi"; // içtikçe seviyesi iner (TableService)
             MeshGo(root, glassMesh, Glass, new Vector3(0, .008f, 0), false);
             var spoon = Box(root, new Vector3(.003f, .11f, .003f), Steel, new Vector3(.011f, .065f, 0), 0, false, false); spoon.transform.localRotation = Quaternion.Euler(0, 0, -18);
             return root;
@@ -144,7 +144,7 @@ namespace Alemdar.World
             var root = new GameObject("kahve").transform; root.SetParent(p, false); root.localPosition = pos;
             MeshGo(root, saucerMesh ?? Lathe(new[] { new Vector2(0, 0), new Vector2(.04f, 0), new Vector2(.052f, .012f) }), White, Vector3.zero);
             MeshGo(root, Lathe(new[] { new Vector2(.017f, 0), new Vector2(.024f, .01f), new Vector2(.027f, .05f), new Vector2(.028f, .055f) }), White, new Vector3(0, .01f, 0));
-            Cyl(root, .025f, .002f, M(new Color(.2f, .11f, .06f), .4f), new Vector3(0, .058f, 0));
+            Cyl(root, .025f, .002f, M(new Color(.2f, .11f, .06f), .4f), new Vector3(0, .058f, 0)).name = "sivi";
             return root;
         }
         public static Transform Toast(Transform p, Vector3 pos) // tabakta kaşarlı tost
@@ -170,20 +170,22 @@ namespace Alemdar.World
         public static readonly float CornerOut = TableSize / 2 + .075f;
 
         // Küllük (koyu cam) ve isteğe bağlı tüten sigara.
-        public static void Ashtray(Transform p, Vector3 pos, bool smoking)
+        public static Transform Ashtray(Transform parent, Vector3 at, bool smoking)
         {
+            var p = new GameObject("kulluk").transform; p.SetParent(parent, false); p.localPosition = at; var pos = Vector3.zero; // tek parça: kahveci alıp götürebilsin
             var glass = Transparent(new Color(.25f, .22f, .2f, .75f), .9f); glass.color = new Color(.25f, .22f, .2f, .75f);
             MeshGo(p, Lathe(new[] { new Vector2(0, 0), new Vector2(.05f, 0), new Vector2(.055f, .02f), new Vector2(.045f, .022f), new Vector2(.035f, .01f), new Vector2(0, .01f) }, 20), glass, pos);
-            if (!smoking) return;
+            if (!smoking) return p;
             var cig = Box(p, new Vector3(.007f, .007f, .06f), White, pos + new Vector3(.02f, .025f, 0), 30, false, false); cig.transform.localRotation = Quaternion.Euler(-8, 30, 0);
             Box(cig.transform, new Vector3(1, 1, .3f), M(new Color(.75f, .5f, .2f), .3f), new Vector3(0, 0, -.35f), 0, false, false);
             var ember = cig.transform.TransformPoint(new Vector3(0, 0, .5f));
             Box(p, new Vector3(.008f, .008f, .006f), Emissive(new Color(1f, .35f, .05f), 3f), p.InverseTransformPoint(ember), 30, false, false);
             Smoke(p, p.InverseTransformPoint(ember), .45f);
+            return p;
         }
 
         // Nargile: cam gövde, metal boru, lüle ve köz, hortum; közden duman yükselir.
-        public static void Nargile(Transform p, Vector3 pos, float ry)
+        public static Transform Nargile(Transform p, Vector3 pos, float ry) // hortumun ağızlığı yerel (+.4, .65, 0)
         {
             var g = new GameObject("nargile").transform; g.SetParent(p, false); g.localPosition = pos; g.localRotation = Quaternion.Euler(0, ry, 0);
             var vase = Transparent(new Color(.2f, .45f, .5f, .55f), .95f); vase.color = new Color(.2f, .45f, .5f, .55f);
@@ -201,6 +203,7 @@ namespace Alemdar.World
                 var s = GameObject.CreatePrimitive(PrimitiveType.Sphere); Object.Destroy(s.GetComponent<Collider>()); s.transform.SetParent(g, false); s.transform.localPosition = a; s.transform.localScale = Vector3.one * .022f; s.GetComponent<Renderer>().sharedMaterial = hose;
             }
             Smoke(g, new Vector3(0, .74f, 0), 1f);
+            return g;
         }
 
         static Texture2D puff;
@@ -229,6 +232,29 @@ namespace Alemdar.World
             var r = go.GetComponent<ParticleSystemRenderer>(); r.sharedMaterial = new Material(Lib.I.smoke) { mainTexture = puff }; r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             ps.Play();
             return ps;
+        }
+        // Ağızdan üflenen duman: öne doğru çıkan, yayılıp yükselen tek seferlik bulut; kendi kendini siler.
+        public static void Exhale(Vector3 mouth, Vector3 forward, float strength)
+        {
+            var ps = Smoke(null, mouth, strength); var go = ps.gameObject; go.transform.rotation = Quaternion.LookRotation(forward);
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            var main = ps.main; main.loop = false; main.duration = .6f; main.startLifetime = new ParticleSystem.MinMaxCurve(2.2f, 3.6f);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(.28f, .5f * strength + .2f); main.startSize = new ParticleSystem.MinMaxCurve(.04f, .08f); main.gravityModifier = -.02f;
+            main.startColor = new Color(.9f, .9f, .9f, .32f + .2f * strength); main.stopAction = ParticleSystemStopAction.Destroy;
+            var em = ps.emission; em.rateOverTime = 0; em.SetBursts(new[] { new ParticleSystem.Burst(0, (short)(14 * strength + 6)), new ParticleSystem.Burst(.25f, (short)(8 * strength + 3)) });
+            var sh = ps.shape; sh.shapeType = ParticleSystemShapeType.Cone; sh.angle = 14; sh.radius = .008f;
+            var lv = ps.limitVelocityOverLifetime; lv.enabled = true; lv.limit = .05f; lv.dampen = .08f; // önce hızlı çıkar, sonra havada asılı kalıp dağılır
+            ps.Play();
+        }
+        // Elde tutulan sigara: filtre ucu, yanan köz ve közden ince duman. Yerel +z yanan uç.
+        public static Transform HandCigarette()
+        {
+            var t = new GameObject("sigara").transform;
+            Box(t, new Vector3(.006f, .006f, .07f), White, Vector3.zero, 0, false, false);
+            Box(t, new Vector3(.0062f, .0062f, .02f), M(new Color(.78f, .52f, .22f), .3f), new Vector3(0, 0, -.025f), 0, false, false);
+            Box(t, new Vector3(.0064f, .0064f, .006f), Emissive(new Color(1f, .35f, .05f), 3f), new Vector3(0, 0, .036f), 0, false, false);
+            Smoke(t, new Vector3(0, 0, .04f), .3f);
+            return t;
         }
 
         // Sandalye: bükme ahşap, hasır oturaklı (Furniture.Chair). Yerel -z masaya bakar.
