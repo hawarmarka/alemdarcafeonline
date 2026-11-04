@@ -1,0 +1,151 @@
+@sohbet H=Halil Amca M=Mümtaz Bey
+
+H: Dün akşam maçı izledin mi Mümtaz?
+M: İzledim, ikinci yarı rezaletti.
+H: Hakem penaltıyı vermedi, gördün mü?
+M: Gördüm, apaçık penaltıydı.
+H: Bu hakemlerle şampiyon olmak zor.
+
+M: Ekmeğe yine zam gelmiş.
+H: Duydum, fırıncı söyledi.
+M: Emekli maaşı neye yetecek bilmiyorum.
+H: Bir çaya, bir simite.
+M: Onlara da zam gelir yakında.
+
+H: Benim oğlan askerden geliyor.
+M: Hayırlısı, ne zaman?
+H: Gelecek hafta, annesi çok heyecanlı.
+M: Dönünce iş bulsun inşallah.
+H: İnşallah, bizim bakkal yanına alacakmış.
+
+M: Bu yaz memlekete gidiyoruz.
+H: Neresiydi senin memleket?
+M: Rize, çayın memleketi.
+H: O zaman bize çay getir.
+M: Getiririm, ama Evdo kıskanır.
+
+H: Bizim sokağı yine kazmışlar.
+M: Ne için kazıyorlar?
+H: Su borusu diyorlar, üç ay oldu.
+M: Bitmez o iş, ben bilirim.
+H: Kapının önü çamur oldu.
+
+M: Torun okula başladı maşallah.
+H: Hangi okula?
+M: Mahallenin ilkokuluna.
+H: Ben de orada okudum, eski bina hâlâ duruyor mu?
+M: Yenilediler, çok güzel olmuş.
+
+H: Rahmetli babam derdi ki, kahve sohbetsiz olmaz.
+M: Doğru söylemiş.
+H: Sohbet olmazsa çay da içilmez.
+M: Çay bahane, sohbet şahane.
+H: Aynen öyle.
+
+M: Doktor şekeri yasakladı.
+H: Çayı şekersiz mi içiyorsun?
+M: Şekersiz içiyorum ama tadı yok.
+H: Bir tane at, bir şey olmaz.
+M: Hanım görürse olur.
+
+H: Bakkal Hasan dükkânı devretmiş, duydun mu?
+M: Duymadım, kime devretmiş?
+H: Yeğenine, genç bir çocuk.
+M: Hasan olmadan bakkalın tadı olmaz.
+H: Veresiye defteri de gitti herhalde.
+
+M: Bu sene kış erken geldi.
+H: Sabah çok soğuktu, eldiven taktım.
+M: Kömür aldın mı?
+H: Doğalgaz geldi artık, kömür yok.
+M: Ben sobayı özledim.
+
+H!: Kahveciii, iki çay!
+M: Halil, demli söyle.
+H: Evdo bilir, bizimkiler hep demli.
+M: Evdo her şeyi bilir.
+H: Kahvenin hafızası o.
+
+M: Gazete okudun mu bugün?
+H: Okudum, yine bir şey yok.
+M: Hep aynı haberler.
+H: Ben spor sayfasına bakıyorum, gerisi boş.
+M: Spor sayfası da üzüyor ama.
+
+H: Eskiden bu kahve çok kalabalıktı.
+M: Şimdi de kalabalık, bak masalara.
+H: O zaman herkes tanıdıktı.
+M: Şimdi de tanıdık, sadece yaşlandık.
+H: Haklısın, yaşlandık.
+
+M: Akşam ne yiyorsunuz?
+H: Hanım kuru fasulye yaptı.
+M: Bizimki de dolma yapıyor.
+H: Dolma iyidir, kış yemeği.
+M: Gel sen de, beraber yeriz.
+
+H: Şu gençler hep telefona bakıyor.
+M: Bizim zamanımızda telefon yoktu.
+H: Vardı ama evde, duvarda.
+M: Doğru, bir telefon için sıra beklerdik.
+H: Şimdi herkesin cebinde.
+
+M: Elektrik faturası geldi, görsen şaşarsın.
+H: Ne kadar geldi?
+M: Söylemeyeyim, moralin bozulur.
+H: Benim de geldi, hiç açmadım.
+M: Açma, en iyisi.
+
+H: Bu kahve kaç yıllık biliyor musun?
+M: Kırk yıl var mı?
+H: Elli yıl, babam da burada çay içerdi.
+M: O zaman Evdo'nun babası mı işletiyordu?
+H: Evet, Evdo devraldı.
+
+M: Bugün hava güzel, terasta oturmak iyi oldu.
+H: İçerisi çok bağırıyor zaten.
+M: Okeyciler kavga ediyor.
+H: Okeyciler hep kavga eder, sonra sarılır.
+M: Kahvenin adeti bu.
+
+H: Sen bu seçimde kime oy vereceksin?
+M: Onu konuşmayalım, kavga çıkar.
+H: Haklısın, siyaset konuşmayalım.
+M: Hava durumu konuşalım.
+H: Yağmur yağacak diyorlar.
+
+M: Hanım beni pazara yolladı.
+H: Gitmedin mi?
+M: Kahveye uğradım, pazar kaçmaz.
+H: Hanım kızacak ama.
+M: Bir çay içer giderim.
+
+H: Gençliğimde çok balık tutardım.
+M: Nerede tutardın?
+H: Boğazda, sabah namazından sonra.
+M: Şimdi gidiyor musun?
+H: Dizler izin vermiyor.
+
+M: Kızım evleniyor, haberin var mı?
+H: Hayırlı olsun! Ne zaman?
+M: Baharda, düğüne bekliyorum.
+H: Gelirim tabii, kaçırır mıyım.
+M: Kahvedekileri de çağıracağım.
+
+H: Bu çay biraz açık olmuş.
+M: Evdo'ya söyle, değiştirsin.
+H: Söylemeyeyim, kırılır.
+M: Kırılmaz, Evdo alışık.
+H: Peki, bir dahaki çay demli olsun.
+
+M: Şu karşıdaki teyzeler ne konuşuyor acaba?
+H: Bizi konuşuyorlardır.
+M: Neden bizi konuşsunlar?
+H: Hep kahvedeyiz diye.
+M: Haklılar galiba.
+
+H: Ben gidiyorum, akşam namazına yetişeyim.
+M: Hadi güle güle, yarın görüşürüz.
+H: Yarın erken gel, tavla oynayalım.
+M: Gelirim, sen pulları hazırla.
+H: Hazır, hep hazır.

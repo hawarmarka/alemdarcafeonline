@@ -1,0 +1,90 @@
+# Tek kişinin arada bir söylediği sözler: her satır ayrı bir söz (diyalog değil).
+@anne A=Ayşe Hanım
+A!: Ahmet! Eve gel, yemek hazır!
+A!: Zeynep! Salıncaktan in, düşeceksin!
+A: Akşam oldu çocuklar, hadi eve!
+A: Ahmet, kardeşine iyi bak!
+A: Üstünü kirletme Zeynep!
+A: Beş dakika daha, sonra eve!
+A!: Emre! Montunu giy, hava soğuk!
+A!: Ahmeeet! Duymuyor musun beni?
+A: Kaydıraktan baş aşağı kayma!
+A!: Zeynep, kuma oturma!
+A: Hadi bakalım, el yüz yıkanacak.
+A!: Babanız gelmeden eve gelin!
+A: Ahmet, topunu al da gel.
+A: Kim düştü orada? Zeynep sen misin?
+A!: Kavga etmeyin, ayıp!
+A: Su içmek isteyen var mı?
+A!: Mehmet, kardeşini itme!
+A: Aferin size, ne güzel oynuyorsunuz.
+A: Bir tur daha, sonra gidiyoruz.
+A!: Ahmet! Üçe kadar sayıyorum!
+A: Bir... iki...
+A: Hadi gel kuzum, annen yoruldu.
+A!: Elif'in topunu geri verin!
+A: Ellerinizi yıkayın, simit aldım.
+A!: Eve gelmeyen akşam televizyon izlemez!
+
+@ihtiyar I=İhsan Amca
+I: Kahvede bugün kalabalık maşallah.
+I: Şu okey masası yine bağırıyor.
+I: Benim zamanımda burası tarlaydı.
+I: Kahveci Evdo'nun çayı bir başka.
+I: Akşama ben de inerim kahveye.
+I!: Gençler, yavaş oynayın!
+I: Rıza yine kazanıyor, belli.
+I: Ah dizlerim, olmasa inerdim aşağı.
+I: Bu sokak eskiden ne sessizdi.
+I: Şu arabalar da hiç bitmiyor.
+I!: Bayram! Erol! Kavga etmeyin!
+I: Çay soğudu, yenisini koyayım.
+I: Hanım, bir çay daha getir bana!
+I: Kuşlar ne güzel ötüyor bugün.
+I: Yağmur yağacak, belli oluyor.
+
+@cocuk A=Ali
+A!: Anneee! Bak araba geçiyor!
+A!: Kediii! Kedi var!
+A: Ben de parka gidicem!
+A: Babam kahvede, gördüm onu!
+A!: Dedeee! Bana dondurma al!
+A: Şu kuş ne kadar büyük!
+A!: Anne, ben de aşağı inebilir miyim?
+A: Ahmet parkta oynuyor, ben de gideyim.
+A: Bak bak, yağmur başladı!
+A!: Babaaa! Yukarı gel!
+
+@kahveci E=Kahveci Evdo
+E: Geliyor abi, hemen!
+E: Çaylar tazeleniyor, birazdan.
+E: Buyur abi, afiyet olsun.
+E: Demli mi olsun açık mı?
+E: Geldi geldi, sıcak sıcak.
+E: Kahve orta şekerli, bildiğin gibi.
+E: Tost hazırlanıyor, beş dakika.
+E: Buyurun, simitler taze, fırından yeni geldi.
+E: Boşları alayım abi.
+E: Bir çay daha getireyim mi?
+E: Afiyet olsun, eksik olmasın.
+E: Nargilen hazır, közünü de tazeledim.
+E: Hemen geliyorum, bir dakika.
+E: Ayranlar soğuk, yeni açtım.
+E: Su istersen söyle abi.
+E: Bugün çay bizden, bayram var.
+E: Hesap sonra, siz oynayın.
+E: Tepsiye dikkat, sıcak.
+E: Masayı silelim, ıslak olmuş.
+E: Kimin çayıydı bu? Buyurun.
+
+@yuruyen M=Mehmet Efendi G=Gülsüm Hanım
+M: Kolay gelsin.
+M: Selamün aleyküm.
+M: Hayırlı akşamlar.
+M: Hava da soğudu.
+M: Ekmek almaya gidiyorum.
+G: İyi günler.
+G: Kolay gelsin evladım.
+G: Pazara yetişeyim.
+G: Akşam yemeği hazırlayacağım.
+G: Hayırlı günler.

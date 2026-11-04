@@ -96,74 +96,132 @@ namespace Alemdar.World
         }
     }
 
-    // ---------- konuşan grup: sırayla biri konuşur, diğerleri dinler, arada biri bağırır ----------
+    // ---------- konuşan grup: seslendirilmiş diyaloglar sırayla oynar (Dialogues); her sözü kendi kişisi söyler ----------
+    // Ses dosyası yoksa eski kodla üretilen mırıltıya düşer. Yazı yok: kullanıcı isteğiyle konuşmalar yalnızca sesli.
     public class Talker : MonoBehaviour
     {
-        List<Chars.Person> people; string topic; Vector3 focus; float hear, next, baseSize; int speaker = -1;
-        readonly Dictionary<Chars.Person, TextMesh> bubbles = new();
-        readonly Queue<string> recent = new();
+        List<Chars.Person> people; string topic; Vector3 focus; float hear, next; int speaker = -1; bool talking;
         System.Random rng;
         public void Init(List<Chars.Person> p, string t, Vector3 f, float hearDistance)
         {
             people = p; topic = t; focus = f; hear = hearDistance; rng = new System.Random((int)Chars.Person.Hash(t + p.Count + f));
-            next = Time.time + 1.5f + (float)rng.NextDouble() * 5;
-            foreach (var x in p)
-            {
-                var b = new GameObject("lafi"); b.transform.SetParent(x.transform.parent, false); b.transform.localPosition = new Vector3(0, x.Anim.GetBool("Sit") ? 1.55f : 2.0f, 0);
-                bubbles[x] = Props.Text3D(b.transform, "", Vector3.zero, 0, .075f, new Color(1f, .97f, .85f)); baseSize = bubbles[x].characterSize;
-            }
+            next = Time.time + 1.5f + (float)rng.NextDouble() * 6;
         }
         float gameMove;
         void Update()
         {
             if (people == null || !Camera.main) return;
             var cam = Camera.main.transform.position;
-            foreach (var kv in bubbles) if (kv.Value && kv.Value.text.Length > 0) kv.Value.transform.parent.rotation = Quaternion.LookRotation(kv.Value.transform.parent.position - cam);
-            // masadakiler oyun oynar: sırası gelen taşa/kâğıda uzanır, diğerleri ona bakar
+            // masadakiler oyun oynar: sırası gelen taşa/kâğıda uzanır, diğerleri ona (ya da konuşana) bakar
             if (Game && Time.time > gameMove)
             {
                 gameMove = Time.time + 2.2f + (float)rng.NextDouble() * 2.5f;
                 int turn = (int)(Time.time / 5f) % people.Count; var p = people[turn];
                 if (p) { p.Reach(focus + (p.transform.position - focus).normalized * .25f + Vector3.up * .02f, 0, .8f); Sfx.Play(topic == "tavla" ? "zar" : topic == "okey" ? "tas" : "kagit", focus, .6f); }
-                foreach (var o in people) if (o && o != p) o.LookAt = p ? p.Head.position : (Vector3?)null;
+                if (!talking) foreach (var o in people) if (o && o != p) o.LookAt = p ? p.Head.position : (Vector3?)null;
             }
-            if (Time.time < next) return;
+            if (talking || Time.time < next) return;
             bool near = (cam - focus).sqrMagnitude < hear * hear;
-            next = Time.time + (near ? 3.2f : 6f) + (float)rng.NextDouble() * 4f;
-            if (!near) { foreach (var b in bubbles.Values) if (b) b.text = ""; return; } // uzaktayken konuşma üretilmez (FPS)
+            if (!near) { next = Time.time + 2f; return; } // uzaktaki grup konuşmaz (duyulmaz, işlemci de harcanmaz)
+            var dialog = Dialogues.Next(topic, rng);
+            if (dialog != null) StartCoroutine(Play(dialog));
+            else { next = Time.time + 4f + (float)rng.NextDouble() * 4f; Babble(); }
+        }
+        // bir diyalog: sözler arka arkaya, arada kısa nefes; konuşana herkes döner
+        System.Collections.IEnumerator Play(List<Dialogues.Line> dialog)
+        {
+            talking = true;
+            foreach (var l in dialog)
+            {
+                var who = people.Find(p => p && p.Display == l.who) ?? (people.Count > 0 ? people[0] : null);
+                var clip = Dialogues.Clip(l.id);
+                if (!who || !clip) { Dialogues.Missing++; continue; }
+                Dialogues.Played++; if (Dialogues.Log.Count < 60) Dialogues.Log.Add($"{Time.time:0.0} {topic} {who.Display}: {l.id} ({clip.length:0.0} sn)");
+                foreach (var o in people) if (o && o != who) o.LookAt = who.Head.position;
+                who.Gesture(l.shout ? (topic == "kavga" ? Chars.Person.No : Chars.Person.Talk) : (rng.NextDouble() < .75 ? Chars.Person.Talk : Chars.Person.Ask), Mathf.Max(2f, clip.length));
+                who.SetTalk(1);
+                Sfx.PlayVoice(clip, who.Head ? who.Head.position : who.transform.position + Vector3.up * 1.5f, l.shout);
+                yield return new WaitForSeconds(clip.length + .25f + (float)rng.NextDouble() * .5f);
+                who.SetTalk(0);
+                // dinleyenler arada güler, başını sallar ya da itiraz eder
+                foreach (var o in people) if (o && o != who && rng.NextDouble() < .35) o.Gesture(topic == "kavga" ? Chars.Person.No : rng.NextDouble() < .4 ? Chars.Person.Laugh : Chars.Person.Yes, 2f);
+            }
+            talking = false;
+            next = Time.time + (people.Count > 1 ? 6f : 14f) + (float)rng.NextDouble() * 10f; // diyaloglar arası sessizlik
+        }
+        void Babble()
+        {
             speaker = people.Count == 1 ? 0 : (speaker + 1 + rng.Next(people.Count - 1)) % people.Count;
             var who = people[speaker]; if (!who) return;
             bool shout = Lines.ShoutChance(topic) > rng.NextDouble();
-            string line = Fresh(shout);
-            // yazı yok: kullanıcı isteğiyle konuşmalar yalnızca sesli
-            who.Gesture(shout ? (topic == "kavga" ? Chars.Person.No : Chars.Person.Talk) : (rng.NextDouble() < .7 ? Chars.Person.Talk : Chars.Person.Ask), 3.2f);
+            who.Gesture(Chars.Person.Talk, 3.2f);
             bool high = who.Display.EndsWith("Hanım") || who.Display == "Babaanne" || topic == "cocuk" || who.Display == "Elif";
-            Sfx.Voice(who.Head ? who.Head.position : who.transform.position + Vector3.up * 1.5f, line, Chars.Person.Hash(who.Display), shout, high);
-            // dinleyenler: biraz sonra güler, başını sallar ya da itiraz eder
-            foreach (var o in people) if (o && o != who && rng.NextDouble() < .6) { var oo = o; StartCoroutine(React(oo, topic == "kavga" ? Chars.Person.No : rng.NextDouble() < .35 ? Chars.Person.Laugh : Chars.Person.Yes)); }
+            Sfx.Voice(who.Head ? who.Head.position : who.transform.position + Vector3.up * 1.5f, Lines.Make(topic, shout, rng, new List<string>()), Chars.Person.Hash(who.Display), shout, high);
         }
         bool Game => topic == "okey" || topic == "tavla" || topic == "batak";
-        System.Collections.IEnumerator React(Chars.Person p, int g) { yield return new WaitForSeconds(1.2f + (float)rng.NextDouble()); if (p) p.Gesture(g, 2.4f); }
-        void Clear() { foreach (var b in bubbles.Values) if (b) b.text = ""; }
-        // aynı grup son 12 cümlesini tekrar etmez
-        string Fresh(bool shout)
+    }
+
+    // ---------- seslendirilmiş diyaloglar (Resources/Sesler: diyalog.json + <id>.ogg; tools/voices/seslendir.py üretir) ----------
+    public static class Dialogues
+    {
+        public class Line { public string id, who; public bool shout; }
+        public static int Played, Missing; // denetim: çalınan ve bulunamayan söz sayısı
+        public static readonly List<string> Log = new();
+        static Dictionary<string, List<List<Line>>> all;
+        static readonly Dictionary<string, Queue<int>> bags = new();
+        static readonly Dictionary<string, AudioClip> clips = new();
+        static void Load()
         {
-            for (int tries = 0; tries < 8; tries++)
+            if (all != null) return;
+            all = new();
+            var ta = Resources.Load<TextAsset>("Sesler/diyalog"); if (!ta) return;
+            var root = Newtonsoft.Json.Linq.JObject.Parse(ta.text);
+            foreach (var kv in root)
             {
-                var names = new List<string>(); foreach (var p in people) if (p) names.Add(p.Display);
-                var s = Lines.Make(topic, shout, rng, names);
-                if (recent.Contains(s)) continue;
-                recent.Enqueue(s); if (recent.Count > 12) recent.Dequeue();
-                return s;
+                var list = new List<List<Line>>();
+                foreach (var d in (Newtonsoft.Json.Linq.JArray)kv.Value)
+                {
+                    var lines = new List<Line>();
+                    foreach (var l in (Newtonsoft.Json.Linq.JArray)d) lines.Add(new Line { id = (string)l["id"], who = (string)l["who"], shout = (bool?)l["shout"] == true });
+                    if (lines.Count > 0) list.Add(lines);
+                }
+                all[kv.Key] = list;
             }
-            return Lines.Make(topic, shout, rng, new List<string>());
+        }
+        // karışık sırayla: bütün diyaloglar bir kez oynamadan hiçbiri tekrar etmez
+        public static List<Line> Next(string scene, System.Random rng)
+        {
+            Load();
+            if (!all.TryGetValue(scene, out var list) || list.Count == 0) return null;
+            if (!bags.TryGetValue(scene, out var bag) || bag.Count == 0)
+            {
+                var order = new List<int>(); for (int i = 0; i < list.Count; i++) order.Insert(rng.Next(order.Count + 1), i);
+                bags[scene] = bag = new Queue<int>(order);
+            }
+            return list[bag.Dequeue()];
+        }
+        public static AudioClip Clip(string id)
+        {
+            if (!clips.TryGetValue(id, out var c)) clips[id] = c = Resources.Load<AudioClip>("Sesler/" + id);
+            return c;
+        }
+        // tek söz: kahvecinin "geliyor abi"si, yürüyenin selamı
+        public static void Say(string scene, Chars.Person who, System.Random rng)
+        {
+            if (!who) return;
+            List<Line> d = null;
+            for (int i = 0; i < 12 && (d == null || d[0].who != who.Display); i++) d = Next(scene, rng); // o kişinin sözü
+            if (d == null || d[0].who != who.Display) return;
+            var l = d[0]; var c = Clip(l.id); if (!c) return;
+            who.Gesture(Chars.Person.Talk, Mathf.Max(1.5f, c.length));
+            Sfx.PlayVoice(c, who.Head ? who.Head.position : who.transform.position + Vector3.up * 1.6f, l.shout);
         }
     }
 
     // ---------- kaldırımda gidip gelen ----------
     public class Stroll : MonoBehaviour
     {
-        Chars.Person p; Vector3 a, b; float speed, wait; bool toB = true;
+        Chars.Person p; Vector3 a, b; float speed, wait, greetAt; bool toB = true; readonly System.Random rng = new();
         public void Init(Chars.Person person, Vector3 from, Vector3 to, float s) { p = person; a = from; b = to; speed = s; }
         void Update()
         {
@@ -171,6 +229,8 @@ namespace Alemdar.World
             if (wait > 0) { wait -= Time.deltaTime; p.SetSpeed(0); return; }
             var target = toB ? b : a; var d = target - transform.position; d.y = 0;
             if (d.magnitude < .2f) { toB = !toB; wait = 3 + Random.value * 6; return; } // ucta durur, bakınır, geri döner
+            // yanından geçerken selam verir
+            if (Camera.main && Time.time > greetAt && (Camera.main.transform.position - transform.position).sqrMagnitude < 16) { greetAt = Time.time + 40; Dialogues.Say("yuruyen", p, rng); }
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(d), Time.deltaTime * 4);
             transform.position += d.normalized * speed * Time.deltaTime; p.SetSpeed(speed);
         }

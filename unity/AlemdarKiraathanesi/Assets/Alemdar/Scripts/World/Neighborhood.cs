@@ -365,8 +365,8 @@ namespace Alemdar.World
                 var me = made[i]; var other = made[(i + 1) % made.Count];
                 var dir = other.transform.position - me.transform.position; dir.y = 0;
                 me.transform.parent.rotation = Quaternion.LookRotation(dir.normalized + Vector3.forward * .55f); // komşusuna döner, biraz da sokağa
-                var g = me.gameObject.AddComponent<GossipTalk>(); g.Init(me, other, Lines, i * 2.1f);
             }
+            people.gameObject.AddComponent<Talker>().Init(made, "teyze", bal.floor0 + Vector3.up * 1.5f, 26f); // seslendirilmiş dedikodu
         }
 
         // Yürüme sınırı: mahallenin dışına çıkılmaz.

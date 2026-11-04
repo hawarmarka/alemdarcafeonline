@@ -1,0 +1,74 @@
+@sokak N=Necati Abi S=Selim Bey
+
+N: Selamün aleyküm Selim, hayırlı işler.
+S: Aleyküm selam Necati, nasılsın?
+N: İyiyim, sen nasılsın, hanım nasıl?
+S: Şükür, hepimiz iyiyiz.
+N: Akşam kahvede misin?
+S: İnşallah, bir el okey oynarız.
+
+S: Şu araba kimin, yolu kapatmış.
+N: Erol'un, dün akşamdan beri orada.
+S: Bayram yine kızacak.
+N: Kızar tabii, kapısının önü.
+S: Bu ikisinin kavgası bitmez.
+
+N: Benim aküyü bir baksana, sabah çalışmadı.
+S: Akü bitmiştir, değiştirmen lazım.
+N: Yeni aldım ama, daha bir yıl olmadı.
+S: Işığı açık bırakmışsındır.
+N: Haklısın, hanım açık bırakmış.
+
+S: Hava bozacak gibi.
+N: Radyo yağmur dedi.
+S: Şemsiye almadım, eve gideyim.
+N: Önce bir çay iç, sonra git.
+S: Peki, bir çay içelim.
+
+N: Pazara gidiyorum, bir şey lazım mı?
+S: Bize iki kilo domates al.
+N: Pahalı ama domates.
+S: Olsun, hanım menemen yapacak.
+N: Tamam, akşam getiririm.
+
+S: Oğlan iş buldu, şükür.
+N: Hayırlı olsun, nerede?
+S: Bankada, memur olarak.
+N: İyi iş, maaşı düzenli.
+S: Allah razı olsun, çok aradı.
+
+N: Kira yine arttı.
+S: Ne kadar arttı?
+N: Yüzde elli, ev sahibi acımıyor.
+S: Bizimki de arttırdı, ne yapalım.
+N: Köye mi dönsek acaba?
+
+S: Dün seni maçta gördüm.
+N: Stadyumda mıydın?
+S: Evet, tribünün üst tarafındaydım.
+N: Ne maçtı ama, son dakika golü.
+S: Sesim kısıldı bağırmaktan.
+
+N: Bakkal Hasan'ın yeğenini gördün mü?
+S: Gördüm, kibar bir çocuk.
+N: Veresiye vermiyormuş ama.
+S: Hasan gibi değil o zaman.
+N: Değil, değil.
+
+S: Gel bir çay içelim.
+N: Kahvede mi?
+S: Terasta oturalım, hava güzel.
+N: Peki, ama çayları ben ısmarlıyorum.
+S: Olmaz, bu sefer benden.
+
+N: Bu sokağa yeni bir fırın açılıyor.
+S: Nerede?
+N: Çınar Sokak'ın köşesinde.
+S: Güzel, taze ekmek alırız.
+N: Simit de yapacaklarmış.
+
+S: Elektrik kesilecek yarın, haberin var mı?
+N: Yok, ne zaman?
+S: Sabah dokuzdan öğlene kadar.
+N: Kahve de kapanır mı?
+S: Evdo semaverle çay yapar, kapanmaz.

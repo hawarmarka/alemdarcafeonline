@@ -13,7 +13,7 @@ namespace Alemdar.World
         public static readonly (string id, string name)[] Menu = { ("cay", "Çay"), ("kahve", "Türk kahvesi"), ("oralet", "Oralet"), ("tost", "Kaşarlı tost"), ("simit", "Simit"), ("ayran", "Ayran"), ("su", "Su"), ("nargile", "Nargile") };
         struct Order { public string item; public int table, dir; public bool collect; }
         readonly Queue<Order> queue = new();
-        Hall hall; NavMeshAgent agent; Chars.Person body; bool busy;
+        Hall hall; NavMeshAgent agent; Chars.Person body; bool busy; readonly System.Random rng = new();
 
         public void Init(Hall h)
         {
@@ -62,6 +62,7 @@ namespace Alemdar.World
                     old.SetParent(tray, true); old.localPosition = new Vector3(-.06f, .007f, .03f); old.localRotation = Quaternion.identity;
                     if (old.name == "nargile") old.localPosition = new Vector3(0, -.62f, .12f); // nargile elde, tepsinin altında
                 }
+                if (!o.collect) Dialogues.Say("kahveci", body, rng); // "Buyur abi, afiyet olsun"
                 yield return new WaitForSeconds(.6f);
                 if (old) { yield return Go(hall.WaiterSpot + new Vector3(-.6f, 0, -.35f)); yield return Face(hall.WaiterSpot + new Vector3(-.6f, 1, -1)); body.Serve(); yield return new WaitForSeconds(.8f); }
                 if (tray) Destroy(tray.gameObject); // her siparişte yeni tepsi kurulur; gizli tepsi birikmesin (boşlar tezgaha bırakıldı)

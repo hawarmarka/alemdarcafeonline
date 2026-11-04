@@ -1,0 +1,275 @@
+@okey R=Rıza Dayı H=Hüsnü Abi C=Cemal Usta K=Kâzım Bey
+# Her blok bir diyalog; satır "Harf: söz", bağırarak söylenen "Harf!: söz".
+
+R: Hüsnü, at şu taşı artık, sabah oldu.
+H: Dur be Rıza, düşünüyorum.
+R: Neyi düşünüyorsun, elinde üç taş var!
+H: Üç taş ama hepsi lazım.
+C: Atma o zaman, yanına koy, sakla.
+K: Vallahi sizinle oyun oynamak işkence.
+
+C: Okeyi kim çekti, söyleyin bakayım.
+K: Bende değil, yemin ederim.
+R: Bana bakma, ben açtım zaten.
+H: Benim yüzüm gülüyor mu? Bende de yok.
+C: O zaman yerde, deste bitmeden kimse çekemez.
+K: Ya da Hüsnü yalan söylüyor.
+H!: Ne yalanı be, ayıp oluyor!
+
+K: Gösterge sarı dört, okey sarı beş, unutmayın.
+R: Biliyoruz Kâzım Bey, her el aynı şeyi söylüyorsun.
+K: Geçen el Cemal unuttu, sahte okeyi okey sandı.
+C: Bir kere oldu o, ömür boyu anlatacaksın.
+H: Anlatır anlatır, Kâzım Bey unutmaz.
+
+H: Çifte gidiyorum, haberiniz olsun.
+R: Çifte gidiyorsan yolun açık olsun.
+C: Kaç çiftin var?
+H: Dört tane, biri daha gelirse açarım.
+K: Ben de sana o çifti vermem, merak etme.
+H: Vermezsen desteden gelir.
+
+R: Bu taşı işlek diye mi attın Cemal?
+C: Ne işleği, masada seri yok ki.
+R: Var, bak, kırmızı yedi sekiz dokuz.
+C: Aa, görmemişim, kusura bakma.
+K: Yaz bakalım, yüz bir ceza.
+C!: Yazma be, görmedim dedim!
+
+K: Kahveci, dört çay! Biri açık olsun.
+R: Benimki demli olsun, açık içmem.
+H: Bana da limonlu ver Evdo.
+C: Ben su istiyorum, şekerim yükseldi.
+K: Su da getir, Cemal Usta rahatsız.
+
+H: Bu el benim, iddiaya varım.
+R: Ne iddiası?
+H: Kaybeden çayları öder.
+C: Kabul, zaten her gün ben ödüyorum.
+K: Ben de varım, Hüsnü'nün eli hiç iyi değil.
+H: Görürsün sen, görürsün.
+
+C: Yerden aldım, açmak zorundayım.
+R: Aç bakalım, görelim.
+C: Kırmızı on bir on iki on üç, sarı dörtlü per.
+K: Kaç ediyor?
+C: Yüz beş, açtım!
+R: Helal olsun Usta.
+
+R!: Okeeey! Elden bitti!
+H: Olamaz, daha yeni dağıttık!
+K: Nasıl bitirdin bunu Rıza Dayı?
+R: Usta işi, çaylar sizden.
+C: Hile var bu işte, ben söylüyorum.
+
+H: Rıza, sen saymayı biliyor musun?
+R: Ne oldu yine?
+H: Seri dediğin şeyde iki tane yedi var.
+R: Gözlüğümü evde unuttum, idare et.
+C: Gözlük bahane, eller titriyor.
+R: Titremiyor, soğuktan oluyor.
+
+K: Bir el daha oynayalım, son el.
+C: Son el dediğin dördüncü el bu.
+K: Bu sefer gerçekten son.
+H: Hanım aradı, eve gitmem lazım.
+R: Otur oturduğun yerde, bir el sürmez.
+H: Peki, ama gerçekten son.
+
+C: Deste bitiyor, acele edin.
+R: Kaç taş kaldı?
+C: Dört taş, ondan sonra herkes ceza yer.
+K: Ben açtım, bana bir şey olmaz.
+H: Benim elimde altmış puan var, yandım.
+
+R: Yazıyı kim tutuyor?
+K: Ben tutuyorum, her zaman ben tutarım.
+R: Bir bakayım, doğru mu yazmışsın.
+K: Bana güvenmiyor musun Rıza?
+R: Güveniyorum ama kâğıda da bakayım.
+H: Haklı, geçen hafta toplam yanlıştı.
+
+H: Şu kırmızı on kimde?
+C: Bende yok.
+K: Bende de yok.
+R: Bende iki tane var, birini veririm ama pahalı.
+H: Ne istiyorsun?
+R: Bir çay, bir de simit.
+
+C: Bugün eller çok kötü dağılıyor.
+K: Kim karıştırdı?
+C: Hüsnü karıştırdı.
+H: Ben güzel karıştırdım, şans sizde yok.
+R: Şans da var, el de var, sende ikisi de yok.
+
+K: Elimde okey var ama bir türlü bitmiyor.
+R: Okeyini sakla, belli etme.
+K: Söyledim ya şimdi, belli oldu.
+C: Kâzım Bey, sen poker oynama sakın.
+H: Kâzım Bey'in yüzü kitap gibi, hep okunur.
+
+R!: Hadi be, oyna artık!
+H: Bir dakika, taş çektim, bakıyorum.
+R: Bakıyorsun bakıyorsun, beş dakika oldu.
+H: Sen de acele etme, oyun bu.
+C: Kahve soğudu, oyun bitmedi.
+
+C: Bu taşı nereye işleyeyim?
+K: Mavi seriye koy, sekizin yanına.
+C: Oraya olmaz, dokuz yok.
+K: Hah, o zaman yanlış söyledim.
+R: Kâzım Bey'e danışma, o da bilmez.
+
+H: Geçen gün kahvede kim kazandı biliyor musun?
+R: Kim kazandı?
+H: Bakkal Hasan, dört el üst üste.
+K: Hasan şanslıdır, dükkânda da şanslı.
+C: Şans değil, adam her gün oynuyor.
+
+R: Taşları ters koyma Cemal, görüyorum.
+C: Neyi görüyorsun?
+R: Arkası çizik, o taş bir numara.
+C: Bırak artık, taş taşa benzer.
+K: Haklı, o çizik taş hep Cemal'e geliyor.
+
+K: Ben bu sefer çift açarım.
+H: Kaç çiftin var?
+K: Beş, tam beş çift.
+R: Çift açınca ceza iki kat, biliyorsun.
+K: Biliyorum ama bitirirsem siz yanarsınız.
+
+H!: Yok öyle yağma!
+C: Ne oldu?
+H: Rıza yandan aldı, geri bıraktı!
+R: Bıraktım ama cezasını yazdım.
+H: Yazdın mı? Göster bakayım.
+K: Yazdı yazdı, ben gördüm.
+
+C: Okeyle mi bitireceksin?
+R: Okeyle bitirirsem çift ceza.
+C: Bitir o zaman, korkma.
+R: Bekliyorum, bir taş daha gelsin.
+H: Beklerken deste biter, haberin olsun.
+
+K: Benim zamanımda okey böyle oynanmazdı.
+R: Nasıl oynanırdı Kâzım Bey?
+K: Herkes susardı, kimse konuşmazdı.
+H: Şimdi de susan yok, haklısın.
+C: Sus o zaman Kâzım Bey, oyna.
+
+R: Hüsnü, bu el de sen kaybedersen eve yürüyerek gidersin.
+H: Neden?
+R: Çünkü otobüs paranı çaya verdin.
+H: Daha bitmedi oyun Rıza Dayı.
+C: Bitmedi ama bitecek.
+
+C: Açtım, ama bitiş taşı kalmadı.
+K: Bitiş taşı olmadan bitemezsin.
+C: Biliyorum, bir taş çekmem lazım.
+R: Çek bakalım, kısmetine.
+C: Sarı on iki, işte bitti!
+H: Allah'ım, yine mi?
+
+K: Kahveci Evdo, bizim çaylar nerede kaldı?
+H: Unuttu herhalde.
+R: Evdo unutmaz, demleniyor.
+C: Taze çay demi on beş dakika, sabret.
+K: On beş dakikada bir el biter.
+
+R: Bugün Cemal Usta çok sessiz.
+C: Elim kötü, konuşacak bir şey yok.
+H: Elin kötü olunca sesin çıkmıyor, iyi olunca susmuyorsun.
+C: İnsan hâli bu.
+K: Usta, bir çay iç, açılırsın.
+
+H: Bu sefer elim çok iyi.
+R: Söyleme, uğursuzluk getirir.
+H: Söyledim bir kere.
+C: Şimdi bozuldu el, görürsün.
+H: Bozulmaz, bu el tamam.
+K: Bakalım.
+
+C!: Kim attı bu kırmızı beşi?
+K: Ben attım, ne oldu?
+C: O taş benim serimdi!
+K: Bilmiyordum Usta, kusura bakma.
+R: Bilmediğin çok şey var Kâzım Bey.
+
+R: Ellerinize sağlık, güzel oyundu.
+H: Sana güzel, bize ceza.
+K: Yarın rövanş var, unutmayın.
+C: Yarın gelmem, torunu okula götüreceğim.
+R: Gelirsin gelirsin, hep böyle dersin.
+
+H: Abi, seninle çift açmak zor iş.
+R: Niye?
+H: Bütün çiftleri sen topluyorsun.
+R: Ben toplamıyorum, desteden geliyor.
+C: Desteyi de sen mi karıştırdın?
+
+K: Taşları bir dizeyim, ondan sonra konuşuruz.
+R: Kâzım Bey taş dizerken dünya durur.
+K: Dizmeden oynanmaz, düzen lazım.
+H: Düzenli dizip yine kaybediyorsun ama.
+K: Kaybetsem de düzenli kaybederim.
+
+C: Yandan alırsam açmam lazım, değil mi?
+R: Aynen öyle, açamazsan ceza.
+C: O zaman almıyorum, riske girmem.
+H: Korkak oynuyorsun Usta.
+C: Akıllı oynuyorum.
+
+R: Şu masadaki gençlere bak, nasıl bağırıyorlar.
+K: Batak oynuyorlar, her el kavga.
+H: Biz de bağırıyoruz ama.
+R: Biz bağırmıyoruz, sohbet ediyoruz.
+C!: Rıza, sıra sende!
+
+H: İki el oldu, bir kere açamadım.
+C: Moralini bozma, sıra sana da gelir.
+K: Gelir ama ne zaman?
+H: Emekli olduğum gibi bir gün gelir herhalde.
+R: Sen zaten emeklisin Hüsnü.
+
+K: Okey oyununu kim icat etmiş biliyor musunuz?
+R: Kim etmiş?
+K: Bilmiyorum, sizi düşündürmek istedim.
+C: Kâzım Bey, oynar mısın lütfen?
+H: Felsefe yapma, taş at.
+
+R: Bugün maç var, erken bitirelim.
+H: Saat kaçta?
+R: Sekizde, kahvede izleriz.
+C: Kahvenin televizyonu bozuk değil miydi?
+K: Evdo tamir ettirmiş, gördüm.
+R: O zaman maçı burada izleriz.
+
+C: Elimde dört tane on üç var.
+K: Dört tane mi? Desteden mi geldi hepsi?
+C: Biri yerden, üçü desteden.
+R: Per açarsın o zaman.
+C: Açarım ama yetmiyor, puan lazım.
+
+H: Hanım çay demlemeyi öğren dedi.
+R: Öğrendin mi?
+H: Öğrenmeye gerek var mı, Evdo var.
+K: Evdo seni eve mi götürecek?
+H: Gerekirse götürür.
+
+R!: Kahveciii! Bir çay daha!
+C: Sen kaçıncı çayı içiyorsun?
+R: Yedinci, saymadım.
+K: Saymadıysan nereden bildin?
+R: Bardaklar masada duruyor ya.
+
+K: Benim taşlarım hep aynı renk geliyor.
+H: Hangi renk?
+K: Mavi, hep mavi.
+R: Mavi seri yap o zaman.
+K: Seri olmuyor, hepsi farklı sayı.
+
+C: Son elde ben bitirirsem kim öder?
+R: Kaybeden öder, kural belli.
+C: Kaybeden hep Hüsnü oluyor.
+H: Bugün değil, bugün başka.
+K: Her gün aynı şeyi söylüyorsun.

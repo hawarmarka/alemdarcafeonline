@@ -1,0 +1,6474 @@
+{
+"batak": [
+[
+{
+"id": "batak_000_00",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Beş dedim, kim geçer?"
+},
+{
+"id": "batak_000_01",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Altı."
+},
+{
+"id": "batak_000_02",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Pas."
+},
+{
+"id": "batak_000_03",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Yedi, koz benim."
+},
+{
+"id": "batak_000_04",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Yedi mi? Tahsin, elin o kadar iyi mi?"
+},
+{
+"id": "batak_000_05",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Göreceksin."
+}
+],
+[
+{
+"id": "batak_001_00",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Koz maça, haberiniz olsun."
+},
+{
+"id": "batak_001_01",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Maça mı? Benim elimde iki maça var."
+},
+{
+"id": "batak_001_02",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "İki maçayla ne yapacaksın?"
+},
+{
+"id": "batak_001_03",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Saklarım, son elde çıkarırım."
+},
+{
+"id": "batak_001_04",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Saklama, kozu erken kır."
+}
+],
+[
+{
+"id": "batak_002_00",
+"who": "Tahsin Usta",
+"shout": true,
+"text": "Battın! Battın Nuri!"
+},
+{
+"id": "batak_002_01",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Batmadım, daha bir el var."
+},
+{
+"id": "batak_002_02",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Bir el kaldı, iki el lazım sana."
+},
+{
+"id": "batak_002_03",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Bakalım, son el benim."
+},
+{
+"id": "batak_002_04",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Son eli ben alacağım ama."
+}
+],
+[
+{
+"id": "batak_003_00",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Kupayı kesme Sabri, eşin benim."
+},
+{
+"id": "batak_003_01",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Ne yapayım, kupa yok bende."
+},
+{
+"id": "batak_003_02",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Yoksa koz at, büyüt."
+},
+{
+"id": "batak_003_03",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Büyütemem, küçük koz var."
+},
+{
+"id": "batak_003_04",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Küçük de olsa at."
+}
+],
+[
+{
+"id": "batak_004_00",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Papaz bende, bekle."
+},
+{
+"id": "batak_004_01",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Papaz varsa as da bende."
+},
+{
+"id": "batak_004_02",
+"who": "Nuri Abi",
+"shout": false,
+"text": "As sende mi? Yandım o zaman."
+},
+{
+"id": "batak_004_03",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Çok konuşuyorsunuz, oynayın."
+},
+{
+"id": "batak_004_04",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Herkes elini söyledi, oyunun anlamı kalmadı."
+}
+],
+[
+{
+"id": "batak_005_00",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Pas, ben karışmam bu ele."
+},
+{
+"id": "batak_005_01",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Neden Sabri?"
+},
+{
+"id": "batak_005_02",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Elimde ne koz var ne as."
+},
+{
+"id": "batak_005_03",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Batırırsın kesin, iyi yaptın pas dedin."
+},
+{
+"id": "batak_005_04",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Akıllı adam bilir ne zaman susacağını."
+}
+],
+[
+{
+"id": "batak_006_00",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Dört el aldım, bir el daha lazım."
+},
+{
+"id": "batak_006_01",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Bir el çok o."
+},
+{
+"id": "batak_006_02",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Çok değil, kızı bekliyorum."
+},
+{
+"id": "batak_006_03",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Kız bende, söyleyeyim."
+},
+{
+"id": "batak_006_04",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Söyleme! Şimdi bozdun."
+}
+],
+[
+{
+"id": "batak_007_00",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Koz kırılmadan koz açılmaz, biliyorsun."
+},
+{
+"id": "batak_007_01",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Biliyorum, elimde başka kart yok."
+},
+{
+"id": "batak_007_02",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Hepsi koz mu?"
+},
+{
+"id": "batak_007_03",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Hepsi, on üç el koz."
+},
+{
+"id": "batak_007_04",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Yalan söylüyor, kartlarını göster."
+}
+],
+[
+{
+"id": "batak_008_00",
+"who": "Nuri Abi",
+"shout": true,
+"text": "Hile var bu işte!"
+},
+{
+"id": "batak_008_01",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Ne hilesi?"
+},
+{
+"id": "batak_008_02",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Kartları sen dağıttın, as hep sende!"
+},
+{
+"id": "batak_008_03",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Şans abi, şans."
+},
+{
+"id": "batak_008_04",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Bir dahaki eli ben dağıtırım."
+}
+],
+[
+{
+"id": "batak_009_00",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Kaç ihale dedin Yaşar?"
+},
+{
+"id": "batak_009_01",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Sekiz."
+},
+{
+"id": "batak_009_02",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Sekiz mi? Tek başına?"
+},
+{
+"id": "batak_009_03",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Eşli değil mi bu oyun?"
+},
+{
+"id": "batak_009_04",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Değil Yaşar Bey, ihaleli tek."
+},
+{
+"id": "batak_009_05",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "O zaman yandım."
+}
+],
+[
+{
+"id": "batak_010_00",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Koz kupa olsun."
+},
+{
+"id": "batak_010_01",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Kupa mı? Bende hiç kupa yok."
+},
+{
+"id": "batak_010_02",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "İyi ya, at çöplerini."
+},
+{
+"id": "batak_010_03",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Çöp atmak da bir sanat."
+},
+{
+"id": "batak_010_04",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Nuri'nin bütün eli çöp zaten."
+}
+],
+[
+{
+"id": "batak_011_00",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Bu masada kimse kaybetmeyi bilmiyor."
+},
+{
+"id": "batak_011_01",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Kaybetmeyi biliyoruz, kabul etmeyi bilmiyoruz."
+},
+{
+"id": "batak_011_02",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Doğru söyledin."
+},
+{
+"id": "batak_011_03",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Ben kaybetmeyi de kabul etmeyi de bilirim."
+},
+{
+"id": "batak_011_04",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Çünkü hep kaybediyorsun Tahsin."
+}
+],
+[
+{
+"id": "batak_012_00",
+"who": "Sabri Dayı",
+"shout": true,
+"text": "Kahveciii! Dört çay, çabuk!"
+},
+{
+"id": "batak_012_01",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Sabri, bağırma, Evdo duyuyor."
+},
+{
+"id": "batak_012_02",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Duymuyor, yarım saattir bekliyoruz."
+},
+{
+"id": "batak_012_03",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Evdo okey masasına bakıyor."
+},
+{
+"id": "batak_012_04",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Okeyciler hep önce alıyor çayı."
+}
+],
+[
+{
+"id": "batak_013_00",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Elleri sayalım, kim kaç aldı?"
+},
+{
+"id": "batak_013_01",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Ben beş."
+},
+{
+"id": "batak_013_02",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Ben üç."
+},
+{
+"id": "batak_013_03",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Ben dört."
+},
+{
+"id": "batak_013_04",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Ben bir, ihaleyi tutturamadım."
+}
+],
+[
+{
+"id": "batak_014_00",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Nuri, sen niye hep beş diyorsun?"
+},
+{
+"id": "batak_014_01",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Beş en güvenli ihale."
+},
+{
+"id": "batak_014_02",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Ama tutturamıyorsun."
+},
+{
+"id": "batak_014_03",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Bazen tutturuyorum."
+},
+{
+"id": "batak_014_04",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Ayda bir."
+}
+],
+[
+{
+"id": "batak_015_00",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Eşim kartlarını açtı, bakın."
+},
+{
+"id": "batak_015_01",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Eşin kim senin?"
+},
+{
+"id": "batak_015_02",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Bu oyun eşli değil miydi?"
+},
+{
+"id": "batak_015_03",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Değil Yaşar Bey, kaç kere söyleyeceğiz?"
+},
+{
+"id": "batak_015_04",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Pardon, yaşlandık."
+}
+],
+[
+{
+"id": "batak_016_00",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Kozları say, kaç koz çıktı?"
+},
+{
+"id": "batak_016_01",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Sekiz."
+},
+{
+"id": "batak_016_02",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Demek beş koz kaldı."
+},
+{
+"id": "batak_016_03",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Üçü bende."
+},
+{
+"id": "batak_016_04",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Söyleme dedik!"
+}
+],
+[
+{
+"id": "batak_017_00",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Bu el çok uzun sürdü."
+},
+{
+"id": "batak_017_01",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Uzun sürdü çünkü Nuri düşünüyor."
+},
+{
+"id": "batak_017_02",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Düşünmeden oynanmaz."
+},
+{
+"id": "batak_017_03",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Düşünüp de yanlış atıyorsun."
+},
+{
+"id": "batak_017_04",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Yanlış değil, strateji."
+}
+],
+[
+{
+"id": "batak_018_00",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Batak öğrenmek istiyorum dersen bana gel."
+},
+{
+"id": "batak_018_01",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Sen mi öğreteceksin?"
+},
+{
+"id": "batak_018_02",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Neden olmasın?"
+},
+{
+"id": "batak_018_03",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Önce kendin öğren abi."
+},
+{
+"id": "batak_018_04",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Haklı, önce kendin."
+}
+],
+[
+{
+"id": "batak_019_00",
+"who": "Yaşar Bey",
+"shout": true,
+"text": "Kozu kesti ulan!"
+},
+{
+"id": "batak_019_01",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Ne oldu?"
+},
+{
+"id": "batak_019_02",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Tahsin elimdeki ası kesti!"
+},
+{
+"id": "batak_019_03",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Kupan yoktu, koz attım, kural bu."
+},
+{
+"id": "batak_019_04",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Kural da senin gibi zalim."
+}
+],
+[
+{
+"id": "batak_020_00",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Ben bir sigara molası istiyorum."
+},
+{
+"id": "batak_020_01",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Kahvede içilmiyor, terasa çık."
+},
+{
+"id": "batak_020_02",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Teras soğuk."
+},
+{
+"id": "batak_020_03",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Soğuksa içme."
+},
+{
+"id": "batak_020_04",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Doğru söylüyorsun, bırakmam lazım."
+}
+],
+[
+{
+"id": "batak_021_00",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Yedi aldım, ihale tuttu!"
+},
+{
+"id": "batak_021_01",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Helal olsun Tahsin."
+},
+{
+"id": "batak_021_02",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Bu sefer gerçekten iyi oynadın."
+},
+{
+"id": "batak_021_03",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Hep iyi oynuyorum, siz fark etmiyorsunuz."
+},
+{
+"id": "batak_021_04",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Fark ettik, fark ettik."
+}
+],
+[
+{
+"id": "batak_022_00",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Kartları kim karıştıracak?"
+},
+{
+"id": "batak_022_01",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Sıra Yaşar Bey'de."
+},
+{
+"id": "batak_022_02",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Ben yorgunum, sen karıştır."
+},
+{
+"id": "batak_022_03",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Kural kural, sen karıştır."
+},
+{
+"id": "batak_022_04",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Peki, ama kötü gelirse benim suçum değil."
+}
+],
+[
+{
+"id": "batak_023_00",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Bugün torunum geldi, onunla oynadım."
+},
+{
+"id": "batak_023_01",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Batak mı oynadınız?"
+},
+{
+"id": "batak_023_02",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Yok, telefonda bir oyun, hiç anlamadım."
+},
+{
+"id": "batak_023_03",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Gençler başka oynuyor."
+},
+{
+"id": "batak_023_04",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Bizim zamanımızda kâğıt vardı, o kadar."
+}
+],
+[
+{
+"id": "batak_024_00",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Bir el daha, sonra kalkıyorum."
+},
+{
+"id": "batak_024_01",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Kalkma, şimdi ısındık."
+},
+{
+"id": "batak_024_02",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Hanım yemeğe çağırdı."
+},
+{
+"id": "batak_024_03",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Hanım çağırınca herkes kalkar."
+},
+{
+"id": "batak_024_04",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Biz de yemek yeriz burada, simit söyleriz."
+}
+],
+[
+{
+"id": "batak_025_00",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Elimde dört as var!"
+},
+{
+"id": "batak_025_01",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Dört as mı? İnanmam."
+},
+{
+"id": "batak_025_02",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Bak, maça, kupa, karo, sinek."
+},
+{
+"id": "batak_025_03",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Gösterme be! Oyun bozuldu."
+},
+{
+"id": "batak_025_04",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Zaten kazandı, ne fark eder."
+}
+],
+[
+{
+"id": "batak_026_00",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Bu son eli kazanırsam çaylar benden."
+},
+{
+"id": "batak_026_01",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Kazanırsan biz öderiz."
+},
+{
+"id": "batak_026_02",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Kazanırsam benden dedim."
+},
+{
+"id": "batak_026_03",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Kazanmazsan?"
+},
+{
+"id": "batak_026_04",
+"who": "Nuri Abi",
+"shout": false,
+"text": "O zaman da benden, ne yapalım."
+}
+],
+[
+{
+"id": "batak_027_00",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Bastık mı yine?"
+},
+{
+"id": "batak_027_01",
+"who": "Tahsin Usta",
+"shout": false,
+"text": "Bastın Sabri, eksi altmış."
+},
+{
+"id": "batak_027_02",
+"who": "Sabri Dayı",
+"shout": false,
+"text": "Altmış mı? Daha geçen el artıdaydım."
+},
+{
+"id": "batak_027_03",
+"who": "Yaşar Bey",
+"shout": false,
+"text": "Batak böyle, bir el yükselir bir el düşer."
+},
+{
+"id": "batak_027_04",
+"who": "Nuri Abi",
+"shout": false,
+"text": "Sabri hep düşüyor ama."
+}
+]
+],
+"kavga": [
+[
+{
+"id": "kavga_000_00",
+"who": "Bayram",
+"shout": true,
+"text": "Arabayı oraya park etme dedim sana!"
+},
+{
+"id": "kavga_000_01",
+"who": "Erol",
+"shout": false,
+"text": "Başka yer yok, nereye koyayım?"
+},
+{
+"id": "kavga_000_02",
+"who": "Bayram",
+"shout": false,
+"text": "Kapımın önüne koyma da nereye koyarsan koy!"
+},
+{
+"id": "kavga_000_03",
+"who": "Erol",
+"shout": false,
+"text": "Burası senin malın mı?"
+},
+{
+"id": "kavga_000_04",
+"who": "Bayram",
+"shout": true,
+"text": "Benim kapım, benim yolum!"
+},
+{
+"id": "kavga_000_05",
+"who": "Erol",
+"shout": false,
+"text": "Sakin ol Bayram, beş dakika sürer."
+}
+],
+[
+{
+"id": "kavga_001_00",
+"who": "Erol",
+"shout": true,
+"text": "Sen kime ne diyorsun be!"
+},
+{
+"id": "kavga_001_01",
+"who": "Bayram",
+"shout": false,
+"text": "Sana diyorum, sana!"
+},
+{
+"id": "kavga_001_02",
+"who": "Erol",
+"shout": false,
+"text": "Bir daha bağırma bana."
+},
+{
+"id": "kavga_001_03",
+"who": "Bayram",
+"shout": false,
+"text": "Bağırırım, haklıyım!"
+},
+{
+"id": "kavga_001_04",
+"who": "Erol",
+"shout": false,
+"text": "Herkes duysun, haklı olan bağırmaz."
+}
+],
+[
+{
+"id": "kavga_002_00",
+"who": "Bayram",
+"shout": false,
+"text": "Borcunu ne zaman vereceksin?"
+},
+{
+"id": "kavga_002_01",
+"who": "Erol",
+"shout": false,
+"text": "Ay başında dedim ya."
+},
+{
+"id": "kavga_002_02",
+"who": "Bayram",
+"shout": false,
+"text": "Üç ay başı geçti!"
+},
+{
+"id": "kavga_002_03",
+"who": "Erol",
+"shout": false,
+"text": "Maaş yatmadı, ne yapayım?"
+},
+{
+"id": "kavga_002_04",
+"who": "Bayram",
+"shout": true,
+"text": "Maaş yatmıyor ama araba alıyorsun!"
+},
+{
+"id": "kavga_002_05",
+"who": "Erol",
+"shout": false,
+"text": "Araba taksitli, bilmeden konuşma."
+}
+],
+[
+{
+"id": "kavga_003_00",
+"who": "Erol",
+"shout": false,
+"text": "Bir daha kapımın önüne çöp bırakma!"
+},
+{
+"id": "kavga_003_01",
+"who": "Bayram",
+"shout": false,
+"text": "Ben bırakmadım."
+},
+{
+"id": "kavga_003_02",
+"who": "Erol",
+"shout": false,
+"text": "Senin poşetin, gördüm!"
+},
+{
+"id": "kavga_003_03",
+"who": "Bayram",
+"shout": false,
+"text": "Kedi dağıtmıştır."
+},
+{
+"id": "kavga_003_04",
+"who": "Erol",
+"shout": true,
+"text": "Kedi poşet mi taşıyor?"
+},
+{
+"id": "kavga_003_05",
+"who": "Bayram",
+"shout": false,
+"text": "Taşır, bu mahallenin kedileri her şeyi yapar."
+}
+],
+[
+{
+"id": "kavga_004_00",
+"who": "Bayram",
+"shout": true,
+"text": "Sen benim kim olduğumu biliyor musun?"
+},
+{
+"id": "kavga_004_01",
+"who": "Erol",
+"shout": false,
+"text": "Biliyorum, Bayram, karşı komşu."
+},
+{
+"id": "kavga_004_02",
+"who": "Bayram",
+"shout": false,
+"text": "Bu mahallede kırk yıldır oturuyorum!"
+},
+{
+"id": "kavga_004_03",
+"who": "Erol",
+"shout": false,
+"text": "Ben de otuz yıldır, ne fark eder?"
+},
+{
+"id": "kavga_004_04",
+"who": "Bayram",
+"shout": false,
+"text": "Fark eder, saygı lazım!"
+}
+],
+[
+{
+"id": "kavga_005_00",
+"who": "Erol",
+"shout": false,
+"text": "Bak Bayram, sabrımı taşırma!"
+},
+{
+"id": "kavga_005_01",
+"who": "Bayram",
+"shout": false,
+"text": "Taşırsan ne olur?"
+},
+{
+"id": "kavga_005_02",
+"who": "Erol",
+"shout": false,
+"text": "Gider muhtara şikâyet ederim."
+},
+{
+"id": "kavga_005_03",
+"who": "Bayram",
+"shout": false,
+"text": "Muhtar benim akrabam."
+},
+{
+"id": "kavga_005_04",
+"who": "Erol",
+"shout": true,
+"text": "O yüzden mi hiçbir şey olmuyor!"
+}
+],
+[
+{
+"id": "kavga_006_00",
+"who": "Bayram",
+"shout": false,
+"text": "Kardeşim yanlış anladın."
+},
+{
+"id": "kavga_006_01",
+"who": "Erol",
+"shout": false,
+"text": "Neyi yanlış anladım?"
+},
+{
+"id": "kavga_006_02",
+"who": "Bayram",
+"shout": false,
+"text": "Ben seni kastetmedim, kardeşini dedim."
+},
+{
+"id": "kavga_006_03",
+"who": "Erol",
+"shout": true,
+"text": "Kardeşim de benim, aynı şey!"
+},
+{
+"id": "kavga_006_04",
+"who": "Bayram",
+"shout": false,
+"text": "Tamam, özür dilerim."
+},
+{
+"id": "kavga_006_05",
+"who": "Erol",
+"shout": false,
+"text": "Özrün kabul, ama bir daha olmasın."
+}
+],
+[
+{
+"id": "kavga_007_00",
+"who": "Erol",
+"shout": true,
+"text": "Herkes duysun, haksızlık bu!"
+},
+{
+"id": "kavga_007_01",
+"who": "Bayram",
+"shout": false,
+"text": "Ne haksızlığı?"
+},
+{
+"id": "kavga_007_02",
+"who": "Erol",
+"shout": false,
+"text": "Su faturası hep bana geliyor!"
+},
+{
+"id": "kavga_007_03",
+"who": "Bayram",
+"shout": false,
+"text": "Sayaç senin evde, ne yapayım?"
+},
+{
+"id": "kavga_007_04",
+"who": "Erol",
+"shout": false,
+"text": "Ortak sayaç o, bölüşeceğiz!"
+},
+{
+"id": "kavga_007_05",
+"who": "Bayram",
+"shout": false,
+"text": "Bölüşürüz, bağırma."
+}
+],
+[
+{
+"id": "kavga_008_00",
+"who": "Bayram",
+"shout": true,
+"text": "Git işine be!"
+},
+{
+"id": "kavga_008_01",
+"who": "Erol",
+"shout": false,
+"text": "Gidiyorum, ama bu iş burada bitmedi."
+},
+{
+"id": "kavga_008_02",
+"who": "Bayram",
+"shout": false,
+"text": "Bitti, gitti."
+},
+{
+"id": "kavga_008_03",
+"who": "Erol",
+"shout": false,
+"text": "Akşam kahvede konuşuruz."
+},
+{
+"id": "kavga_008_04",
+"who": "Bayram",
+"shout": false,
+"text": "Kahvede konuşuruz, tamam."
+}
+],
+[
+{
+"id": "kavga_009_00",
+"who": "Erol",
+"shout": false,
+"text": "Ben sana demedim mi?"
+},
+{
+"id": "kavga_009_01",
+"who": "Bayram",
+"shout": false,
+"text": "Neyi?"
+},
+{
+"id": "kavga_009_02",
+"who": "Erol",
+"shout": false,
+"text": "Ağaç kesilecek dedim, sen inanmadın."
+},
+{
+"id": "kavga_009_03",
+"who": "Bayram",
+"shout": false,
+"text": "Belediye kesmezdi o ağacı."
+},
+{
+"id": "kavga_009_04",
+"who": "Erol",
+"shout": false,
+"text": "Kesti işte, bak!"
+},
+{
+"id": "kavga_009_05",
+"who": "Bayram",
+"shout": true,
+"text": "Kim izin verdi buna?"
+}
+],
+[
+{
+"id": "kavga_010_00",
+"who": "Bayram",
+"shout": false,
+"text": "Çocuğun topu yine camıma geldi!"
+},
+{
+"id": "kavga_010_01",
+"who": "Erol",
+"shout": false,
+"text": "Çocuk bu, oynar."
+},
+{
+"id": "kavga_010_02",
+"who": "Bayram",
+"shout": false,
+"text": "Oynasın ama camı kırdı!"
+},
+{
+"id": "kavga_010_03",
+"who": "Erol",
+"shout": false,
+"text": "Ödeyeceğim, bağırma."
+},
+{
+"id": "kavga_010_04",
+"who": "Bayram",
+"shout": false,
+"text": "Geçen sefer de ödeyeceğim dedin."
+},
+{
+"id": "kavga_010_05",
+"who": "Erol",
+"shout": true,
+"text": "Ödedim, makbuzu bile var!"
+}
+],
+[
+{
+"id": "kavga_011_00",
+"who": "Erol",
+"shout": false,
+"text": "Gece köpeğin havladı, uyuyamadım."
+},
+{
+"id": "kavga_011_01",
+"who": "Bayram",
+"shout": false,
+"text": "Köpek değil o, sokak köpeği."
+},
+{
+"id": "kavga_011_02",
+"who": "Erol",
+"shout": false,
+"text": "Senin bahçende yatıyor!"
+},
+{
+"id": "kavga_011_03",
+"who": "Bayram",
+"shout": false,
+"text": "Bahçeme gelince benim mi oldu?"
+},
+{
+"id": "kavga_011_04",
+"who": "Erol",
+"shout": false,
+"text": "Mamasını sen veriyorsun!"
+},
+{
+"id": "kavga_011_05",
+"who": "Bayram",
+"shout": false,
+"text": "Hayvan aç kalmasın diye."
+}
+]
+],
+"okey": [
+[
+{
+"id": "okey_000_00",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Hüsnü, at şu taşı artık, sabah oldu."
+},
+{
+"id": "okey_000_01",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Dur be Rıza, düşünüyorum."
+},
+{
+"id": "okey_000_02",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Neyi düşünüyorsun, elinde üç taş var!"
+},
+{
+"id": "okey_000_03",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Üç taş ama hepsi lazım."
+},
+{
+"id": "okey_000_04",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Atma o zaman, yanına koy, sakla."
+},
+{
+"id": "okey_000_05",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Vallahi sizinle oyun oynamak işkence."
+}
+],
+[
+{
+"id": "okey_001_00",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Okeyi kim çekti, söyleyin bakayım."
+},
+{
+"id": "okey_001_01",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Bende değil, yemin ederim."
+},
+{
+"id": "okey_001_02",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Bana bakma, ben açtım zaten."
+},
+{
+"id": "okey_001_03",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Benim yüzüm gülüyor mu? Bende de yok."
+},
+{
+"id": "okey_001_04",
+"who": "Cemal Usta",
+"shout": false,
+"text": "O zaman yerde, deste bitmeden kimse çekemez."
+},
+{
+"id": "okey_001_05",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Ya da Hüsnü yalan söylüyor."
+},
+{
+"id": "okey_001_06",
+"who": "Hüsnü Abi",
+"shout": true,
+"text": "Ne yalanı be, ayıp oluyor!"
+}
+],
+[
+{
+"id": "okey_002_00",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Gösterge sarı dört, okey sarı beş, unutmayın."
+},
+{
+"id": "okey_002_01",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Biliyoruz Kâzım Bey, her el aynı şeyi söylüyorsun."
+},
+{
+"id": "okey_002_02",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Geçen el Cemal unuttu, sahte okeyi okey sandı."
+},
+{
+"id": "okey_002_03",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Bir kere oldu o, ömür boyu anlatacaksın."
+},
+{
+"id": "okey_002_04",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Anlatır anlatır, Kâzım Bey unutmaz."
+}
+],
+[
+{
+"id": "okey_003_00",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Çifte gidiyorum, haberiniz olsun."
+},
+{
+"id": "okey_003_01",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Çifte gidiyorsan yolun açık olsun."
+},
+{
+"id": "okey_003_02",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Kaç çiftin var?"
+},
+{
+"id": "okey_003_03",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Dört tane, biri daha gelirse açarım."
+},
+{
+"id": "okey_003_04",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Ben de sana o çifti vermem, merak etme."
+},
+{
+"id": "okey_003_05",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Vermezsen desteden gelir."
+}
+],
+[
+{
+"id": "okey_004_00",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Bu taşı işlek diye mi attın Cemal?"
+},
+{
+"id": "okey_004_01",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Ne işleği, masada seri yok ki."
+},
+{
+"id": "okey_004_02",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Var, bak, kırmızı yedi sekiz dokuz."
+},
+{
+"id": "okey_004_03",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Aa, görmemişim, kusura bakma."
+},
+{
+"id": "okey_004_04",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Yaz bakalım, yüz bir ceza."
+},
+{
+"id": "okey_004_05",
+"who": "Cemal Usta",
+"shout": true,
+"text": "Yazma be, görmedim dedim!"
+}
+],
+[
+{
+"id": "okey_005_00",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Kahveci, dört çay! Biri açık olsun."
+},
+{
+"id": "okey_005_01",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Benimki demli olsun, açık içmem."
+},
+{
+"id": "okey_005_02",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Bana da limonlu ver Evdo."
+},
+{
+"id": "okey_005_03",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Ben su istiyorum, şekerim yükseldi."
+},
+{
+"id": "okey_005_04",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Su da getir, Cemal Usta rahatsız."
+}
+],
+[
+{
+"id": "okey_006_00",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Bu el benim, iddiaya varım."
+},
+{
+"id": "okey_006_01",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Ne iddiası?"
+},
+{
+"id": "okey_006_02",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Kaybeden çayları öder."
+},
+{
+"id": "okey_006_03",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Kabul, zaten her gün ben ödüyorum."
+},
+{
+"id": "okey_006_04",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Ben de varım, Hüsnü'nün eli hiç iyi değil."
+},
+{
+"id": "okey_006_05",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Görürsün sen, görürsün."
+}
+],
+[
+{
+"id": "okey_007_00",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Yerden aldım, açmak zorundayım."
+},
+{
+"id": "okey_007_01",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Aç bakalım, görelim."
+},
+{
+"id": "okey_007_02",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Kırmızı on bir on iki on üç, sarı dörtlü per."
+},
+{
+"id": "okey_007_03",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Kaç ediyor?"
+},
+{
+"id": "okey_007_04",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Yüz beş, açtım!"
+},
+{
+"id": "okey_007_05",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Helal olsun Usta."
+}
+],
+[
+{
+"id": "okey_008_00",
+"who": "Rıza Dayı",
+"shout": true,
+"text": "Okeeey! Elden bitti!"
+},
+{
+"id": "okey_008_01",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Olamaz, daha yeni dağıttık!"
+},
+{
+"id": "okey_008_02",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Nasıl bitirdin bunu Rıza Dayı?"
+},
+{
+"id": "okey_008_03",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Usta işi, çaylar sizden."
+},
+{
+"id": "okey_008_04",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Hile var bu işte, ben söylüyorum."
+}
+],
+[
+{
+"id": "okey_009_00",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Rıza, sen saymayı biliyor musun?"
+},
+{
+"id": "okey_009_01",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Ne oldu yine?"
+},
+{
+"id": "okey_009_02",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Seri dediğin şeyde iki tane yedi var."
+},
+{
+"id": "okey_009_03",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Gözlüğümü evde unuttum, idare et."
+},
+{
+"id": "okey_009_04",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Gözlük bahane, eller titriyor."
+},
+{
+"id": "okey_009_05",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Titremiyor, soğuktan oluyor."
+}
+],
+[
+{
+"id": "okey_010_00",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Bir el daha oynayalım, son el."
+},
+{
+"id": "okey_010_01",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Son el dediğin dördüncü el bu."
+},
+{
+"id": "okey_010_02",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Bu sefer gerçekten son."
+},
+{
+"id": "okey_010_03",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Hanım aradı, eve gitmem lazım."
+},
+{
+"id": "okey_010_04",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Otur oturduğun yerde, bir el sürmez."
+},
+{
+"id": "okey_010_05",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Peki, ama gerçekten son."
+}
+],
+[
+{
+"id": "okey_011_00",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Deste bitiyor, acele edin."
+},
+{
+"id": "okey_011_01",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Kaç taş kaldı?"
+},
+{
+"id": "okey_011_02",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Dört taş, ondan sonra herkes ceza yer."
+},
+{
+"id": "okey_011_03",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Ben açtım, bana bir şey olmaz."
+},
+{
+"id": "okey_011_04",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Benim elimde altmış puan var, yandım."
+}
+],
+[
+{
+"id": "okey_012_00",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Yazıyı kim tutuyor?"
+},
+{
+"id": "okey_012_01",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Ben tutuyorum, her zaman ben tutarım."
+},
+{
+"id": "okey_012_02",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Bir bakayım, doğru mu yazmışsın."
+},
+{
+"id": "okey_012_03",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Bana güvenmiyor musun Rıza?"
+},
+{
+"id": "okey_012_04",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Güveniyorum ama kâğıda da bakayım."
+},
+{
+"id": "okey_012_05",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Haklı, geçen hafta toplam yanlıştı."
+}
+],
+[
+{
+"id": "okey_013_00",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Şu kırmızı on kimde?"
+},
+{
+"id": "okey_013_01",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Bende yok."
+},
+{
+"id": "okey_013_02",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Bende de yok."
+},
+{
+"id": "okey_013_03",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Bende iki tane var, birini veririm ama pahalı."
+},
+{
+"id": "okey_013_04",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Ne istiyorsun?"
+},
+{
+"id": "okey_013_05",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Bir çay, bir de simit."
+}
+],
+[
+{
+"id": "okey_014_00",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Bugün eller çok kötü dağılıyor."
+},
+{
+"id": "okey_014_01",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Kim karıştırdı?"
+},
+{
+"id": "okey_014_02",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Hüsnü karıştırdı."
+},
+{
+"id": "okey_014_03",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Ben güzel karıştırdım, şans sizde yok."
+},
+{
+"id": "okey_014_04",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Şans da var, el de var, sende ikisi de yok."
+}
+],
+[
+{
+"id": "okey_015_00",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Elimde okey var ama bir türlü bitmiyor."
+},
+{
+"id": "okey_015_01",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Okeyini sakla, belli etme."
+},
+{
+"id": "okey_015_02",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Söyledim ya şimdi, belli oldu."
+},
+{
+"id": "okey_015_03",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Kâzım Bey, sen poker oynama sakın."
+},
+{
+"id": "okey_015_04",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Kâzım Bey'in yüzü kitap gibi, hep okunur."
+}
+],
+[
+{
+"id": "okey_016_00",
+"who": "Rıza Dayı",
+"shout": true,
+"text": "Hadi be, oyna artık!"
+},
+{
+"id": "okey_016_01",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Bir dakika, taş çektim, bakıyorum."
+},
+{
+"id": "okey_016_02",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Bakıyorsun bakıyorsun, beş dakika oldu."
+},
+{
+"id": "okey_016_03",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Sen de acele etme, oyun bu."
+},
+{
+"id": "okey_016_04",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Kahve soğudu, oyun bitmedi."
+}
+],
+[
+{
+"id": "okey_017_00",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Bu taşı nereye işleyeyim?"
+},
+{
+"id": "okey_017_01",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Mavi seriye koy, sekizin yanına."
+},
+{
+"id": "okey_017_02",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Oraya olmaz, dokuz yok."
+},
+{
+"id": "okey_017_03",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Hah, o zaman yanlış söyledim."
+},
+{
+"id": "okey_017_04",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Kâzım Bey'e danışma, o da bilmez."
+}
+],
+[
+{
+"id": "okey_018_00",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Geçen gün kahvede kim kazandı biliyor musun?"
+},
+{
+"id": "okey_018_01",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Kim kazandı?"
+},
+{
+"id": "okey_018_02",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Bakkal Hasan, dört el üst üste."
+},
+{
+"id": "okey_018_03",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Hasan şanslıdır, dükkânda da şanslı."
+},
+{
+"id": "okey_018_04",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Şans değil, adam her gün oynuyor."
+}
+],
+[
+{
+"id": "okey_019_00",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Taşları ters koyma Cemal, görüyorum."
+},
+{
+"id": "okey_019_01",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Neyi görüyorsun?"
+},
+{
+"id": "okey_019_02",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Arkası çizik, o taş bir numara."
+},
+{
+"id": "okey_019_03",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Bırak artık, taş taşa benzer."
+},
+{
+"id": "okey_019_04",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Haklı, o çizik taş hep Cemal'e geliyor."
+}
+],
+[
+{
+"id": "okey_020_00",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Ben bu sefer çift açarım."
+},
+{
+"id": "okey_020_01",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Kaç çiftin var?"
+},
+{
+"id": "okey_020_02",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Beş, tam beş çift."
+},
+{
+"id": "okey_020_03",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Çift açınca ceza iki kat, biliyorsun."
+},
+{
+"id": "okey_020_04",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Biliyorum ama bitirirsem siz yanarsınız."
+}
+],
+[
+{
+"id": "okey_021_00",
+"who": "Hüsnü Abi",
+"shout": true,
+"text": "Yok öyle yağma!"
+},
+{
+"id": "okey_021_01",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Ne oldu?"
+},
+{
+"id": "okey_021_02",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Rıza yandan aldı, geri bıraktı!"
+},
+{
+"id": "okey_021_03",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Bıraktım ama cezasını yazdım."
+},
+{
+"id": "okey_021_04",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Yazdın mı? Göster bakayım."
+},
+{
+"id": "okey_021_05",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Yazdı yazdı, ben gördüm."
+}
+],
+[
+{
+"id": "okey_022_00",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Okeyle mi bitireceksin?"
+},
+{
+"id": "okey_022_01",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Okeyle bitirirsem çift ceza."
+},
+{
+"id": "okey_022_02",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Bitir o zaman, korkma."
+},
+{
+"id": "okey_022_03",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Bekliyorum, bir taş daha gelsin."
+},
+{
+"id": "okey_022_04",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Beklerken deste biter, haberin olsun."
+}
+],
+[
+{
+"id": "okey_023_00",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Benim zamanımda okey böyle oynanmazdı."
+},
+{
+"id": "okey_023_01",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Nasıl oynanırdı Kâzım Bey?"
+},
+{
+"id": "okey_023_02",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Herkes susardı, kimse konuşmazdı."
+},
+{
+"id": "okey_023_03",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Şimdi de susan yok, haklısın."
+},
+{
+"id": "okey_023_04",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Sus o zaman Kâzım Bey, oyna."
+}
+],
+[
+{
+"id": "okey_024_00",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Hüsnü, bu el de sen kaybedersen eve yürüyerek gidersin."
+},
+{
+"id": "okey_024_01",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Neden?"
+},
+{
+"id": "okey_024_02",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Çünkü otobüs paranı çaya verdin."
+},
+{
+"id": "okey_024_03",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Daha bitmedi oyun Rıza Dayı."
+},
+{
+"id": "okey_024_04",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Bitmedi ama bitecek."
+}
+],
+[
+{
+"id": "okey_025_00",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Açtım, ama bitiş taşı kalmadı."
+},
+{
+"id": "okey_025_01",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Bitiş taşı olmadan bitemezsin."
+},
+{
+"id": "okey_025_02",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Biliyorum, bir taş çekmem lazım."
+},
+{
+"id": "okey_025_03",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Çek bakalım, kısmetine."
+},
+{
+"id": "okey_025_04",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Sarı on iki, işte bitti!"
+},
+{
+"id": "okey_025_05",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Allah'ım, yine mi?"
+}
+],
+[
+{
+"id": "okey_026_00",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Kahveci Evdo, bizim çaylar nerede kaldı?"
+},
+{
+"id": "okey_026_01",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Unuttu herhalde."
+},
+{
+"id": "okey_026_02",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Evdo unutmaz, demleniyor."
+},
+{
+"id": "okey_026_03",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Taze çay demi on beş dakika, sabret."
+},
+{
+"id": "okey_026_04",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "On beş dakikada bir el biter."
+}
+],
+[
+{
+"id": "okey_027_00",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Bugün Cemal Usta çok sessiz."
+},
+{
+"id": "okey_027_01",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Elim kötü, konuşacak bir şey yok."
+},
+{
+"id": "okey_027_02",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Elin kötü olunca sesin çıkmıyor, iyi olunca susmuyorsun."
+},
+{
+"id": "okey_027_03",
+"who": "Cemal Usta",
+"shout": false,
+"text": "İnsan hâli bu."
+},
+{
+"id": "okey_027_04",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Usta, bir çay iç, açılırsın."
+}
+],
+[
+{
+"id": "okey_028_00",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Bu sefer elim çok iyi."
+},
+{
+"id": "okey_028_01",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Söyleme, uğursuzluk getirir."
+},
+{
+"id": "okey_028_02",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Söyledim bir kere."
+},
+{
+"id": "okey_028_03",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Şimdi bozuldu el, görürsün."
+},
+{
+"id": "okey_028_04",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Bozulmaz, bu el tamam."
+},
+{
+"id": "okey_028_05",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Bakalım."
+}
+],
+[
+{
+"id": "okey_029_00",
+"who": "Cemal Usta",
+"shout": true,
+"text": "Kim attı bu kırmızı beşi?"
+},
+{
+"id": "okey_029_01",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Ben attım, ne oldu?"
+},
+{
+"id": "okey_029_02",
+"who": "Cemal Usta",
+"shout": false,
+"text": "O taş benim serimdi!"
+},
+{
+"id": "okey_029_03",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Bilmiyordum Usta, kusura bakma."
+},
+{
+"id": "okey_029_04",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Bilmediğin çok şey var Kâzım Bey."
+}
+],
+[
+{
+"id": "okey_030_00",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Ellerinize sağlık, güzel oyundu."
+},
+{
+"id": "okey_030_01",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Sana güzel, bize ceza."
+},
+{
+"id": "okey_030_02",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Yarın rövanş var, unutmayın."
+},
+{
+"id": "okey_030_03",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Yarın gelmem, torunu okula götüreceğim."
+},
+{
+"id": "okey_030_04",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Gelirsin gelirsin, hep böyle dersin."
+}
+],
+[
+{
+"id": "okey_031_00",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Abi, seninle çift açmak zor iş."
+},
+{
+"id": "okey_031_01",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Niye?"
+},
+{
+"id": "okey_031_02",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Bütün çiftleri sen topluyorsun."
+},
+{
+"id": "okey_031_03",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Ben toplamıyorum, desteden geliyor."
+},
+{
+"id": "okey_031_04",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Desteyi de sen mi karıştırdın?"
+}
+],
+[
+{
+"id": "okey_032_00",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Taşları bir dizeyim, ondan sonra konuşuruz."
+},
+{
+"id": "okey_032_01",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Kâzım Bey taş dizerken dünya durur."
+},
+{
+"id": "okey_032_02",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Dizmeden oynanmaz, düzen lazım."
+},
+{
+"id": "okey_032_03",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Düzenli dizip yine kaybediyorsun ama."
+},
+{
+"id": "okey_032_04",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Kaybetsem de düzenli kaybederim."
+}
+],
+[
+{
+"id": "okey_033_00",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Yandan alırsam açmam lazım, değil mi?"
+},
+{
+"id": "okey_033_01",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Aynen öyle, açamazsan ceza."
+},
+{
+"id": "okey_033_02",
+"who": "Cemal Usta",
+"shout": false,
+"text": "O zaman almıyorum, riske girmem."
+},
+{
+"id": "okey_033_03",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Korkak oynuyorsun Usta."
+},
+{
+"id": "okey_033_04",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Akıllı oynuyorum."
+}
+],
+[
+{
+"id": "okey_034_00",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Şu masadaki gençlere bak, nasıl bağırıyorlar."
+},
+{
+"id": "okey_034_01",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Batak oynuyorlar, her el kavga."
+},
+{
+"id": "okey_034_02",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Biz de bağırıyoruz ama."
+},
+{
+"id": "okey_034_03",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Biz bağırmıyoruz, sohbet ediyoruz."
+},
+{
+"id": "okey_034_04",
+"who": "Cemal Usta",
+"shout": true,
+"text": "Rıza, sıra sende!"
+}
+],
+[
+{
+"id": "okey_035_00",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "İki el oldu, bir kere açamadım."
+},
+{
+"id": "okey_035_01",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Moralini bozma, sıra sana da gelir."
+},
+{
+"id": "okey_035_02",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Gelir ama ne zaman?"
+},
+{
+"id": "okey_035_03",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Emekli olduğum gibi bir gün gelir herhalde."
+},
+{
+"id": "okey_035_04",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Sen zaten emeklisin Hüsnü."
+}
+],
+[
+{
+"id": "okey_036_00",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Okey oyununu kim icat etmiş biliyor musunuz?"
+},
+{
+"id": "okey_036_01",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Kim etmiş?"
+},
+{
+"id": "okey_036_02",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Bilmiyorum, sizi düşündürmek istedim."
+},
+{
+"id": "okey_036_03",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Kâzım Bey, oynar mısın lütfen?"
+},
+{
+"id": "okey_036_04",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Felsefe yapma, taş at."
+}
+],
+[
+{
+"id": "okey_037_00",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Bugün maç var, erken bitirelim."
+},
+{
+"id": "okey_037_01",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Saat kaçta?"
+},
+{
+"id": "okey_037_02",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Sekizde, kahvede izleriz."
+},
+{
+"id": "okey_037_03",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Kahvenin televizyonu bozuk değil miydi?"
+},
+{
+"id": "okey_037_04",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Evdo tamir ettirmiş, gördüm."
+},
+{
+"id": "okey_037_05",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "O zaman maçı burada izleriz."
+}
+],
+[
+{
+"id": "okey_038_00",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Elimde dört tane on üç var."
+},
+{
+"id": "okey_038_01",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Dört tane mi? Desteden mi geldi hepsi?"
+},
+{
+"id": "okey_038_02",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Biri yerden, üçü desteden."
+},
+{
+"id": "okey_038_03",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Per açarsın o zaman."
+},
+{
+"id": "okey_038_04",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Açarım ama yetmiyor, puan lazım."
+}
+],
+[
+{
+"id": "okey_039_00",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Hanım çay demlemeyi öğren dedi."
+},
+{
+"id": "okey_039_01",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Öğrendin mi?"
+},
+{
+"id": "okey_039_02",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Öğrenmeye gerek var mı, Evdo var."
+},
+{
+"id": "okey_039_03",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Evdo seni eve mi götürecek?"
+},
+{
+"id": "okey_039_04",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Gerekirse götürür."
+}
+],
+[
+{
+"id": "okey_040_00",
+"who": "Rıza Dayı",
+"shout": true,
+"text": "Kahveciii! Bir çay daha!"
+},
+{
+"id": "okey_040_01",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Sen kaçıncı çayı içiyorsun?"
+},
+{
+"id": "okey_040_02",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Yedinci, saymadım."
+},
+{
+"id": "okey_040_03",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Saymadıysan nereden bildin?"
+},
+{
+"id": "okey_040_04",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Bardaklar masada duruyor ya."
+}
+],
+[
+{
+"id": "okey_041_00",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Benim taşlarım hep aynı renk geliyor."
+},
+{
+"id": "okey_041_01",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Hangi renk?"
+},
+{
+"id": "okey_041_02",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Mavi, hep mavi."
+},
+{
+"id": "okey_041_03",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Mavi seri yap o zaman."
+},
+{
+"id": "okey_041_04",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Seri olmuyor, hepsi farklı sayı."
+}
+],
+[
+{
+"id": "okey_042_00",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Son elde ben bitirirsem kim öder?"
+},
+{
+"id": "okey_042_01",
+"who": "Rıza Dayı",
+"shout": false,
+"text": "Kaybeden öder, kural belli."
+},
+{
+"id": "okey_042_02",
+"who": "Cemal Usta",
+"shout": false,
+"text": "Kaybeden hep Hüsnü oluyor."
+},
+{
+"id": "okey_042_03",
+"who": "Hüsnü Abi",
+"shout": false,
+"text": "Bugün değil, bugün başka."
+},
+{
+"id": "okey_042_04",
+"who": "Kâzım Bey",
+"shout": false,
+"text": "Her gün aynı şeyi söylüyorsun."
+}
+]
+],
+"piknik": [
+[
+{
+"id": "piknik_000_00",
+"who": "Nermin Hanım",
+"shout": false,
+"text": "Çayı koy Kemal, su kaynadı."
+},
+{
+"id": "piknik_000_01",
+"who": "Kemal Bey",
+"shout": false,
+"text": "Koyuyorum, demlik nerede?"
+},
+{
+"id": "piknik_000_02",
+"who": "Nermin Hanım",
+"shout": false,
+"text": "Sepetin içinde, sağ tarafta."
+},
+{
+"id": "piknik_000_03",
+"who": "Kemal Bey",
+"shout": false,
+"text": "Buldum, demlik de bardaklar da burada."
+},
+{
+"id": "piknik_000_04",
+"who": "Babaanne",
+"shout": false,
+"text": "Bana açık olsun oğlum."
+}
+],
+[
+{
+"id": "piknik_001_00",
+"who": "Kemal Bey",
+"shout": false,
+"text": "Köfteler pişti mi?"
+},
+{
+"id": "piknik_001_01",
+"who": "Nermin Hanım",
+"shout": false,
+"text": "Daha beş dakika var."
+},
+{
+"id": "piknik_001_02",
+"who": "Elif",
+"shout": false,
+"text": "Anne, ben acıktım!"
+},
+{
+"id": "piknik_001_03",
+"who": "Nermin Hanım",
+"shout": false,
+"text": "Az kaldı kızım, sabret."
+},
+{
+"id": "piknik_001_04",
+"who": "Babaanne",
+"shout": false,
+"text": "Gel kuzum, sana börek vereyim."
+}
+],
+[
+{
+"id": "piknik_002_00",
+"who": "Nermin Hanım",
+"shout": false,
+"text": "Çocuklar, uzaklaşmayın!"
+},
+{
+"id": "piknik_002_01",
+"who": "Elif",
+"shout": false,
+"text": "Salıncağa gidebilir miyim?"
+},
+{
+"id": "piknik_002_02",
+"who": "Nermin Hanım",
+"shout": false,
+"text": "Git ama gözümün önünde ol."
+},
+{
+"id": "piknik_002_03",
+"who": "Kemal Bey",
+"shout": false,
+"text": "Ben de gelirim seninle."
+},
+{
+"id": "piknik_002_04",
+"who": "Elif",
+"shout": false,
+"text": "Babaa, beni sallar mısın?"
+}
+],
+[
+{
+"id": "piknik_003_00",
+"who": "Babaanne",
+"shout": false,
+"text": "Şu ağacın gölgesi ne güzel."
+},
+{
+"id": "piknik_003_01",
+"who": "Kemal Bey",
+"shout": false,
+"text": "Ağaç kırk yıllık anne."
+},
+{
+"id": "piknik_003_02",
+"who": "Babaanne",
+"shout": false,
+"text": "Ben gençken buralar tarlaydı."
+},
+{
+"id": "piknik_003_03",
+"who": "Nermin Hanım",
+"shout": false,
+"text": "Gerçekten mi?"
+},
+{
+"id": "piknik_003_04",
+"who": "Babaanne",
+"shout": false,
+"text": "Evet, inekler otlardı burada."
+}
+],
+[
+{
+"id": "piknik_004_00",
+"who": "Nermin Hanım",
+"shout": false,
+"text": "Börekten alsana Kemal."
+},
+{
+"id": "piknik_004_01",
+"who": "Kemal Bey",
+"shout": false,
+"text": "Aldım, çok güzel olmuş."
+},
+{
+"id": "piknik_004_02",
+"who": "Nermin Hanım",
+"shout": false,
+"text": "Peynirli, annenin tarifi."
+},
+{
+"id": "piknik_004_03",
+"who": "Babaanne",
+"shout": false,
+"text": "Benim tarifim, ama biraz tuzlu olmuş."
+},
+{
+"id": "piknik_004_04",
+"who": "Kemal Bey",
+"shout": false,
+"text": "Tam kıvamında anne."
+}
+],
+[
+{
+"id": "piknik_005_00",
+"who": "Kemal Bey",
+"shout": false,
+"text": "Hava da tam piknik havası."
+},
+{
+"id": "piknik_005_01",
+"who": "Nermin Hanım",
+"shout": false,
+"text": "Dün yağmur yağdı, çimen ıslak."
+},
+{
+"id": "piknik_005_02",
+"who": "Kemal Bey",
+"shout": false,
+"text": "Örtüyü iki kat serdik."
+},
+{
+"id": "piknik_005_03",
+"who": "Elif",
+"shout": false,
+"text": "Baba, karınca var!"
+},
+{
+"id": "piknik_005_04",
+"who": "Kemal Bey",
+"shout": false,
+"text": "Karınca bir şey yapmaz kızım."
+}
+],
+[
+{
+"id": "piknik_006_00",
+"who": "Nermin Hanım",
+"shout": false,
+"text": "Elif, kızım, gel bir şey ye."
+},
+{
+"id": "piknik_006_01",
+"who": "Elif",
+"shout": false,
+"text": "Oynuyorum anne!"
+},
+{
+"id": "piknik_006_02",
+"who": "Nermin Hanım",
+"shout": false,
+"text": "Oyun kaçmaz, yemek soğur."
+},
+{
+"id": "piknik_006_03",
+"who": "Babaanne",
+"shout": false,
+"text": "Gel kuzum, babaannen yedirsin."
+},
+{
+"id": "piknik_006_04",
+"who": "Elif",
+"shout": false,
+"text": "Tamam geliyorum!"
+}
+],
+[
+{
+"id": "piknik_007_00",
+"who": "Kemal Bey",
+"shout": false,
+"text": "Karpuzu kim kesecek?"
+},
+{
+"id": "piknik_007_01",
+"who": "Nermin Hanım",
+"shout": false,
+"text": "Sen kes, bıçak sende."
+},
+{
+"id": "piknik_007_02",
+"who": "Kemal Bey",
+"shout": false,
+"text": "Bu karpuz çok büyük."
+},
+{
+"id": "piknik_007_03",
+"who": "Babaanne",
+"shout": false,
+"text": "Kırmızı mı bakalım?"
+},
+{
+"id": "piknik_007_04",
+"who": "Kemal Bey",
+"shout": false,
+"text": "Kıpkırmızı, bal gibi."
+}
+],
+[
+{
+"id": "piknik_008_00",
+"who": "Babaanne",
+"shout": false,
+"text": "Bugün torunlarımla piknik yaptım, çok mutluyum."
+},
+{
+"id": "piknik_008_01",
+"who": "Nermin Hanım",
+"shout": false,
+"text": "Biz de anne, sık sık yapalım."
+},
+{
+"id": "piknik_008_02",
+"who": "Kemal Bey",
+"shout": false,
+"text": "Her hafta sonu gelelim."
+},
+{
+"id": "piknik_008_03",
+"who": "Elif",
+"shout": false,
+"text": "Her gün gelelim!"
+},
+{
+"id": "piknik_008_04",
+"who": "Babaanne",
+"shout": false,
+"text": "Her gün gelirsek okul ne olacak?"
+}
+],
+[
+{
+"id": "piknik_009_00",
+"who": "Elif",
+"shout": false,
+"text": "Babaanne, masal anlatır mısın?"
+},
+{
+"id": "piknik_009_01",
+"who": "Babaanne",
+"shout": false,
+"text": "Anlatırım kuzum, bir varmış bir yokmuş."
+},
+{
+"id": "piknik_009_02",
+"who": "Elif",
+"shout": false,
+"text": "Sonra ne olmuş?"
+},
+{
+"id": "piknik_009_03",
+"who": "Babaanne",
+"shout": false,
+"text": "Evvel zaman içinde, kalbur saman içinde."
+},
+{
+"id": "piknik_009_04",
+"who": "Kemal Bey",
+"shout": false,
+"text": "Anne, o masalı ben de dinlerdim."
+}
+],
+[
+{
+"id": "piknik_010_00",
+"who": "Nermin Hanım",
+"shout": false,
+"text": "Kemal, telefonun çalıyor."
+},
+{
+"id": "piknik_010_01",
+"who": "Kemal Bey",
+"shout": false,
+"text": "Patron arıyor, açmayacağım."
+},
+{
+"id": "piknik_010_02",
+"who": "Nermin Hanım",
+"shout": false,
+"text": "Aç, belki önemlidir."
+},
+{
+"id": "piknik_010_03",
+"who": "Kemal Bey",
+"shout": false,
+"text": "Pazar günü önemli bir şey olmaz."
+},
+{
+"id": "piknik_010_04",
+"who": "Babaanne",
+"shout": false,
+"text": "Haklı oğlum, bugün aile günü."
+}
+]
+],
+"sohbet": [
+[
+{
+"id": "sohbet_000_00",
+"who": "Halil Amca",
+"shout": false,
+"text": "Dün akşam maçı izledin mi Mümtaz?"
+},
+{
+"id": "sohbet_000_01",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "İzledim, ikinci yarı rezaletti."
+},
+{
+"id": "sohbet_000_02",
+"who": "Halil Amca",
+"shout": false,
+"text": "Hakem penaltıyı vermedi, gördün mü?"
+},
+{
+"id": "sohbet_000_03",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Gördüm, apaçık penaltıydı."
+},
+{
+"id": "sohbet_000_04",
+"who": "Halil Amca",
+"shout": false,
+"text": "Bu hakemlerle şampiyon olmak zor."
+}
+],
+[
+{
+"id": "sohbet_001_00",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Ekmeğe yine zam gelmiş."
+},
+{
+"id": "sohbet_001_01",
+"who": "Halil Amca",
+"shout": false,
+"text": "Duydum, fırıncı söyledi."
+},
+{
+"id": "sohbet_001_02",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Emekli maaşı neye yetecek bilmiyorum."
+},
+{
+"id": "sohbet_001_03",
+"who": "Halil Amca",
+"shout": false,
+"text": "Bir çaya, bir simite."
+},
+{
+"id": "sohbet_001_04",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Onlara da zam gelir yakında."
+}
+],
+[
+{
+"id": "sohbet_002_00",
+"who": "Halil Amca",
+"shout": false,
+"text": "Benim oğlan askerden geliyor."
+},
+{
+"id": "sohbet_002_01",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Hayırlısı, ne zaman?"
+},
+{
+"id": "sohbet_002_02",
+"who": "Halil Amca",
+"shout": false,
+"text": "Gelecek hafta, annesi çok heyecanlı."
+},
+{
+"id": "sohbet_002_03",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Dönünce iş bulsun inşallah."
+},
+{
+"id": "sohbet_002_04",
+"who": "Halil Amca",
+"shout": false,
+"text": "İnşallah, bizim bakkal yanına alacakmış."
+}
+],
+[
+{
+"id": "sohbet_003_00",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Bu yaz memlekete gidiyoruz."
+},
+{
+"id": "sohbet_003_01",
+"who": "Halil Amca",
+"shout": false,
+"text": "Neresiydi senin memleket?"
+},
+{
+"id": "sohbet_003_02",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Rize, çayın memleketi."
+},
+{
+"id": "sohbet_003_03",
+"who": "Halil Amca",
+"shout": false,
+"text": "O zaman bize çay getir."
+},
+{
+"id": "sohbet_003_04",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Getiririm, ama Evdo kıskanır."
+}
+],
+[
+{
+"id": "sohbet_004_00",
+"who": "Halil Amca",
+"shout": false,
+"text": "Bizim sokağı yine kazmışlar."
+},
+{
+"id": "sohbet_004_01",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Ne için kazıyorlar?"
+},
+{
+"id": "sohbet_004_02",
+"who": "Halil Amca",
+"shout": false,
+"text": "Su borusu diyorlar, üç ay oldu."
+},
+{
+"id": "sohbet_004_03",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Bitmez o iş, ben bilirim."
+},
+{
+"id": "sohbet_004_04",
+"who": "Halil Amca",
+"shout": false,
+"text": "Kapının önü çamur oldu."
+}
+],
+[
+{
+"id": "sohbet_005_00",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Torun okula başladı maşallah."
+},
+{
+"id": "sohbet_005_01",
+"who": "Halil Amca",
+"shout": false,
+"text": "Hangi okula?"
+},
+{
+"id": "sohbet_005_02",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Mahallenin ilkokuluna."
+},
+{
+"id": "sohbet_005_03",
+"who": "Halil Amca",
+"shout": false,
+"text": "Ben de orada okudum, eski bina hâlâ duruyor mu?"
+},
+{
+"id": "sohbet_005_04",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Yenilediler, çok güzel olmuş."
+}
+],
+[
+{
+"id": "sohbet_006_00",
+"who": "Halil Amca",
+"shout": false,
+"text": "Rahmetli babam derdi ki, kahve sohbetsiz olmaz."
+},
+{
+"id": "sohbet_006_01",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Doğru söylemiş."
+},
+{
+"id": "sohbet_006_02",
+"who": "Halil Amca",
+"shout": false,
+"text": "Sohbet olmazsa çay da içilmez."
+},
+{
+"id": "sohbet_006_03",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Çay bahane, sohbet şahane."
+},
+{
+"id": "sohbet_006_04",
+"who": "Halil Amca",
+"shout": false,
+"text": "Aynen öyle."
+}
+],
+[
+{
+"id": "sohbet_007_00",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Doktor şekeri yasakladı."
+},
+{
+"id": "sohbet_007_01",
+"who": "Halil Amca",
+"shout": false,
+"text": "Çayı şekersiz mi içiyorsun?"
+},
+{
+"id": "sohbet_007_02",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Şekersiz içiyorum ama tadı yok."
+},
+{
+"id": "sohbet_007_03",
+"who": "Halil Amca",
+"shout": false,
+"text": "Bir tane at, bir şey olmaz."
+},
+{
+"id": "sohbet_007_04",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Hanım görürse olur."
+}
+],
+[
+{
+"id": "sohbet_008_00",
+"who": "Halil Amca",
+"shout": false,
+"text": "Bakkal Hasan dükkânı devretmiş, duydun mu?"
+},
+{
+"id": "sohbet_008_01",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Duymadım, kime devretmiş?"
+},
+{
+"id": "sohbet_008_02",
+"who": "Halil Amca",
+"shout": false,
+"text": "Yeğenine, genç bir çocuk."
+},
+{
+"id": "sohbet_008_03",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Hasan olmadan bakkalın tadı olmaz."
+},
+{
+"id": "sohbet_008_04",
+"who": "Halil Amca",
+"shout": false,
+"text": "Veresiye defteri de gitti herhalde."
+}
+],
+[
+{
+"id": "sohbet_009_00",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Bu sene kış erken geldi."
+},
+{
+"id": "sohbet_009_01",
+"who": "Halil Amca",
+"shout": false,
+"text": "Sabah çok soğuktu, eldiven taktım."
+},
+{
+"id": "sohbet_009_02",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Kömür aldın mı?"
+},
+{
+"id": "sohbet_009_03",
+"who": "Halil Amca",
+"shout": false,
+"text": "Doğalgaz geldi artık, kömür yok."
+},
+{
+"id": "sohbet_009_04",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Ben sobayı özledim."
+}
+],
+[
+{
+"id": "sohbet_010_00",
+"who": "Halil Amca",
+"shout": true,
+"text": "Kahveciii, iki çay!"
+},
+{
+"id": "sohbet_010_01",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Halil, demli söyle."
+},
+{
+"id": "sohbet_010_02",
+"who": "Halil Amca",
+"shout": false,
+"text": "Evdo bilir, bizimkiler hep demli."
+},
+{
+"id": "sohbet_010_03",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Evdo her şeyi bilir."
+},
+{
+"id": "sohbet_010_04",
+"who": "Halil Amca",
+"shout": false,
+"text": "Kahvenin hafızası o."
+}
+],
+[
+{
+"id": "sohbet_011_00",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Gazete okudun mu bugün?"
+},
+{
+"id": "sohbet_011_01",
+"who": "Halil Amca",
+"shout": false,
+"text": "Okudum, yine bir şey yok."
+},
+{
+"id": "sohbet_011_02",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Hep aynı haberler."
+},
+{
+"id": "sohbet_011_03",
+"who": "Halil Amca",
+"shout": false,
+"text": "Ben spor sayfasına bakıyorum, gerisi boş."
+},
+{
+"id": "sohbet_011_04",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Spor sayfası da üzüyor ama."
+}
+],
+[
+{
+"id": "sohbet_012_00",
+"who": "Halil Amca",
+"shout": false,
+"text": "Eskiden bu kahve çok kalabalıktı."
+},
+{
+"id": "sohbet_012_01",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Şimdi de kalabalık, bak masalara."
+},
+{
+"id": "sohbet_012_02",
+"who": "Halil Amca",
+"shout": false,
+"text": "O zaman herkes tanıdıktı."
+},
+{
+"id": "sohbet_012_03",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Şimdi de tanıdık, sadece yaşlandık."
+},
+{
+"id": "sohbet_012_04",
+"who": "Halil Amca",
+"shout": false,
+"text": "Haklısın, yaşlandık."
+}
+],
+[
+{
+"id": "sohbet_013_00",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Akşam ne yiyorsunuz?"
+},
+{
+"id": "sohbet_013_01",
+"who": "Halil Amca",
+"shout": false,
+"text": "Hanım kuru fasulye yaptı."
+},
+{
+"id": "sohbet_013_02",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Bizimki de dolma yapıyor."
+},
+{
+"id": "sohbet_013_03",
+"who": "Halil Amca",
+"shout": false,
+"text": "Dolma iyidir, kış yemeği."
+},
+{
+"id": "sohbet_013_04",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Gel sen de, beraber yeriz."
+}
+],
+[
+{
+"id": "sohbet_014_00",
+"who": "Halil Amca",
+"shout": false,
+"text": "Şu gençler hep telefona bakıyor."
+},
+{
+"id": "sohbet_014_01",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Bizim zamanımızda telefon yoktu."
+},
+{
+"id": "sohbet_014_02",
+"who": "Halil Amca",
+"shout": false,
+"text": "Vardı ama evde, duvarda."
+},
+{
+"id": "sohbet_014_03",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Doğru, bir telefon için sıra beklerdik."
+},
+{
+"id": "sohbet_014_04",
+"who": "Halil Amca",
+"shout": false,
+"text": "Şimdi herkesin cebinde."
+}
+],
+[
+{
+"id": "sohbet_015_00",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Elektrik faturası geldi, görsen şaşarsın."
+},
+{
+"id": "sohbet_015_01",
+"who": "Halil Amca",
+"shout": false,
+"text": "Ne kadar geldi?"
+},
+{
+"id": "sohbet_015_02",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Söylemeyeyim, moralin bozulur."
+},
+{
+"id": "sohbet_015_03",
+"who": "Halil Amca",
+"shout": false,
+"text": "Benim de geldi, hiç açmadım."
+},
+{
+"id": "sohbet_015_04",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Açma, en iyisi."
+}
+],
+[
+{
+"id": "sohbet_016_00",
+"who": "Halil Amca",
+"shout": false,
+"text": "Bu kahve kaç yıllık biliyor musun?"
+},
+{
+"id": "sohbet_016_01",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Kırk yıl var mı?"
+},
+{
+"id": "sohbet_016_02",
+"who": "Halil Amca",
+"shout": false,
+"text": "Elli yıl, babam da burada çay içerdi."
+},
+{
+"id": "sohbet_016_03",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "O zaman Evdo'nun babası mı işletiyordu?"
+},
+{
+"id": "sohbet_016_04",
+"who": "Halil Amca",
+"shout": false,
+"text": "Evet, Evdo devraldı."
+}
+],
+[
+{
+"id": "sohbet_017_00",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Bugün hava güzel, terasta oturmak iyi oldu."
+},
+{
+"id": "sohbet_017_01",
+"who": "Halil Amca",
+"shout": false,
+"text": "İçerisi çok bağırıyor zaten."
+},
+{
+"id": "sohbet_017_02",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Okeyciler kavga ediyor."
+},
+{
+"id": "sohbet_017_03",
+"who": "Halil Amca",
+"shout": false,
+"text": "Okeyciler hep kavga eder, sonra sarılır."
+},
+{
+"id": "sohbet_017_04",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Kahvenin adeti bu."
+}
+],
+[
+{
+"id": "sohbet_018_00",
+"who": "Halil Amca",
+"shout": false,
+"text": "Sen bu seçimde kime oy vereceksin?"
+},
+{
+"id": "sohbet_018_01",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Onu konuşmayalım, kavga çıkar."
+},
+{
+"id": "sohbet_018_02",
+"who": "Halil Amca",
+"shout": false,
+"text": "Haklısın, siyaset konuşmayalım."
+},
+{
+"id": "sohbet_018_03",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Hava durumu konuşalım."
+},
+{
+"id": "sohbet_018_04",
+"who": "Halil Amca",
+"shout": false,
+"text": "Yağmur yağacak diyorlar."
+}
+],
+[
+{
+"id": "sohbet_019_00",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Hanım beni pazara yolladı."
+},
+{
+"id": "sohbet_019_01",
+"who": "Halil Amca",
+"shout": false,
+"text": "Gitmedin mi?"
+},
+{
+"id": "sohbet_019_02",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Kahveye uğradım, pazar kaçmaz."
+},
+{
+"id": "sohbet_019_03",
+"who": "Halil Amca",
+"shout": false,
+"text": "Hanım kızacak ama."
+},
+{
+"id": "sohbet_019_04",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Bir çay içer giderim."
+}
+],
+[
+{
+"id": "sohbet_020_00",
+"who": "Halil Amca",
+"shout": false,
+"text": "Gençliğimde çok balık tutardım."
+},
+{
+"id": "sohbet_020_01",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Nerede tutardın?"
+},
+{
+"id": "sohbet_020_02",
+"who": "Halil Amca",
+"shout": false,
+"text": "Boğazda, sabah namazından sonra."
+},
+{
+"id": "sohbet_020_03",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Şimdi gidiyor musun?"
+},
+{
+"id": "sohbet_020_04",
+"who": "Halil Amca",
+"shout": false,
+"text": "Dizler izin vermiyor."
+}
+],
+[
+{
+"id": "sohbet_021_00",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Kızım evleniyor, haberin var mı?"
+},
+{
+"id": "sohbet_021_01",
+"who": "Halil Amca",
+"shout": false,
+"text": "Hayırlı olsun! Ne zaman?"
+},
+{
+"id": "sohbet_021_02",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Baharda, düğüne bekliyorum."
+},
+{
+"id": "sohbet_021_03",
+"who": "Halil Amca",
+"shout": false,
+"text": "Gelirim tabii, kaçırır mıyım."
+},
+{
+"id": "sohbet_021_04",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Kahvedekileri de çağıracağım."
+}
+],
+[
+{
+"id": "sohbet_022_00",
+"who": "Halil Amca",
+"shout": false,
+"text": "Bu çay biraz açık olmuş."
+},
+{
+"id": "sohbet_022_01",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Evdo'ya söyle, değiştirsin."
+},
+{
+"id": "sohbet_022_02",
+"who": "Halil Amca",
+"shout": false,
+"text": "Söylemeyeyim, kırılır."
+},
+{
+"id": "sohbet_022_03",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Kırılmaz, Evdo alışık."
+},
+{
+"id": "sohbet_022_04",
+"who": "Halil Amca",
+"shout": false,
+"text": "Peki, bir dahaki çay demli olsun."
+}
+],
+[
+{
+"id": "sohbet_023_00",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Şu karşıdaki teyzeler ne konuşuyor acaba?"
+},
+{
+"id": "sohbet_023_01",
+"who": "Halil Amca",
+"shout": false,
+"text": "Bizi konuşuyorlardır."
+},
+{
+"id": "sohbet_023_02",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Neden bizi konuşsunlar?"
+},
+{
+"id": "sohbet_023_03",
+"who": "Halil Amca",
+"shout": false,
+"text": "Hep kahvedeyiz diye."
+},
+{
+"id": "sohbet_023_04",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Haklılar galiba."
+}
+],
+[
+{
+"id": "sohbet_024_00",
+"who": "Halil Amca",
+"shout": false,
+"text": "Ben gidiyorum, akşam namazına yetişeyim."
+},
+{
+"id": "sohbet_024_01",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Hadi güle güle, yarın görüşürüz."
+},
+{
+"id": "sohbet_024_02",
+"who": "Halil Amca",
+"shout": false,
+"text": "Yarın erken gel, tavla oynayalım."
+},
+{
+"id": "sohbet_024_03",
+"who": "Mümtaz Bey",
+"shout": false,
+"text": "Gelirim, sen pulları hazırla."
+},
+{
+"id": "sohbet_024_04",
+"who": "Halil Amca",
+"shout": false,
+"text": "Hazır, hep hazır."
+}
+]
+],
+"sokak": [
+[
+{
+"id": "sokak_000_00",
+"who": "Necati Abi",
+"shout": false,
+"text": "Selamün aleyküm Selim, hayırlı işler."
+},
+{
+"id": "sokak_000_01",
+"who": "Selim Bey",
+"shout": false,
+"text": "Aleyküm selam Necati, nasılsın?"
+},
+{
+"id": "sokak_000_02",
+"who": "Necati Abi",
+"shout": false,
+"text": "İyiyim, sen nasılsın, hanım nasıl?"
+},
+{
+"id": "sokak_000_03",
+"who": "Selim Bey",
+"shout": false,
+"text": "Şükür, hepimiz iyiyiz."
+},
+{
+"id": "sokak_000_04",
+"who": "Necati Abi",
+"shout": false,
+"text": "Akşam kahvede misin?"
+},
+{
+"id": "sokak_000_05",
+"who": "Selim Bey",
+"shout": false,
+"text": "İnşallah, bir el okey oynarız."
+}
+],
+[
+{
+"id": "sokak_001_00",
+"who": "Selim Bey",
+"shout": false,
+"text": "Şu araba kimin, yolu kapatmış."
+},
+{
+"id": "sokak_001_01",
+"who": "Necati Abi",
+"shout": false,
+"text": "Erol'un, dün akşamdan beri orada."
+},
+{
+"id": "sokak_001_02",
+"who": "Selim Bey",
+"shout": false,
+"text": "Bayram yine kızacak."
+},
+{
+"id": "sokak_001_03",
+"who": "Necati Abi",
+"shout": false,
+"text": "Kızar tabii, kapısının önü."
+},
+{
+"id": "sokak_001_04",
+"who": "Selim Bey",
+"shout": false,
+"text": "Bu ikisinin kavgası bitmez."
+}
+],
+[
+{
+"id": "sokak_002_00",
+"who": "Necati Abi",
+"shout": false,
+"text": "Benim aküyü bir baksana, sabah çalışmadı."
+},
+{
+"id": "sokak_002_01",
+"who": "Selim Bey",
+"shout": false,
+"text": "Akü bitmiştir, değiştirmen lazım."
+},
+{
+"id": "sokak_002_02",
+"who": "Necati Abi",
+"shout": false,
+"text": "Yeni aldım ama, daha bir yıl olmadı."
+},
+{
+"id": "sokak_002_03",
+"who": "Selim Bey",
+"shout": false,
+"text": "Işığı açık bırakmışsındır."
+},
+{
+"id": "sokak_002_04",
+"who": "Necati Abi",
+"shout": false,
+"text": "Haklısın, hanım açık bırakmış."
+}
+],
+[
+{
+"id": "sokak_003_00",
+"who": "Selim Bey",
+"shout": false,
+"text": "Hava bozacak gibi."
+},
+{
+"id": "sokak_003_01",
+"who": "Necati Abi",
+"shout": false,
+"text": "Radyo yağmur dedi."
+},
+{
+"id": "sokak_003_02",
+"who": "Selim Bey",
+"shout": false,
+"text": "Şemsiye almadım, eve gideyim."
+},
+{
+"id": "sokak_003_03",
+"who": "Necati Abi",
+"shout": false,
+"text": "Önce bir çay iç, sonra git."
+},
+{
+"id": "sokak_003_04",
+"who": "Selim Bey",
+"shout": false,
+"text": "Peki, bir çay içelim."
+}
+],
+[
+{
+"id": "sokak_004_00",
+"who": "Necati Abi",
+"shout": false,
+"text": "Pazara gidiyorum, bir şey lazım mı?"
+},
+{
+"id": "sokak_004_01",
+"who": "Selim Bey",
+"shout": false,
+"text": "Bize iki kilo domates al."
+},
+{
+"id": "sokak_004_02",
+"who": "Necati Abi",
+"shout": false,
+"text": "Pahalı ama domates."
+},
+{
+"id": "sokak_004_03",
+"who": "Selim Bey",
+"shout": false,
+"text": "Olsun, hanım menemen yapacak."
+},
+{
+"id": "sokak_004_04",
+"who": "Necati Abi",
+"shout": false,
+"text": "Tamam, akşam getiririm."
+}
+],
+[
+{
+"id": "sokak_005_00",
+"who": "Selim Bey",
+"shout": false,
+"text": "Oğlan iş buldu, şükür."
+},
+{
+"id": "sokak_005_01",
+"who": "Necati Abi",
+"shout": false,
+"text": "Hayırlı olsun, nerede?"
+},
+{
+"id": "sokak_005_02",
+"who": "Selim Bey",
+"shout": false,
+"text": "Bankada, memur olarak."
+},
+{
+"id": "sokak_005_03",
+"who": "Necati Abi",
+"shout": false,
+"text": "İyi iş, maaşı düzenli."
+},
+{
+"id": "sokak_005_04",
+"who": "Selim Bey",
+"shout": false,
+"text": "Allah razı olsun, çok aradı."
+}
+],
+[
+{
+"id": "sokak_006_00",
+"who": "Necati Abi",
+"shout": false,
+"text": "Kira yine arttı."
+},
+{
+"id": "sokak_006_01",
+"who": "Selim Bey",
+"shout": false,
+"text": "Ne kadar arttı?"
+},
+{
+"id": "sokak_006_02",
+"who": "Necati Abi",
+"shout": false,
+"text": "Yüzde elli, ev sahibi acımıyor."
+},
+{
+"id": "sokak_006_03",
+"who": "Selim Bey",
+"shout": false,
+"text": "Bizimki de arttırdı, ne yapalım."
+},
+{
+"id": "sokak_006_04",
+"who": "Necati Abi",
+"shout": false,
+"text": "Köye mi dönsek acaba?"
+}
+],
+[
+{
+"id": "sokak_007_00",
+"who": "Selim Bey",
+"shout": false,
+"text": "Dün seni maçta gördüm."
+},
+{
+"id": "sokak_007_01",
+"who": "Necati Abi",
+"shout": false,
+"text": "Stadyumda mıydın?"
+},
+{
+"id": "sokak_007_02",
+"who": "Selim Bey",
+"shout": false,
+"text": "Evet, tribünün üst tarafındaydım."
+},
+{
+"id": "sokak_007_03",
+"who": "Necati Abi",
+"shout": false,
+"text": "Ne maçtı ama, son dakika golü."
+},
+{
+"id": "sokak_007_04",
+"who": "Selim Bey",
+"shout": false,
+"text": "Sesim kısıldı bağırmaktan."
+}
+],
+[
+{
+"id": "sokak_008_00",
+"who": "Necati Abi",
+"shout": false,
+"text": "Bakkal Hasan'ın yeğenini gördün mü?"
+},
+{
+"id": "sokak_008_01",
+"who": "Selim Bey",
+"shout": false,
+"text": "Gördüm, kibar bir çocuk."
+},
+{
+"id": "sokak_008_02",
+"who": "Necati Abi",
+"shout": false,
+"text": "Veresiye vermiyormuş ama."
+},
+{
+"id": "sokak_008_03",
+"who": "Selim Bey",
+"shout": false,
+"text": "Hasan gibi değil o zaman."
+},
+{
+"id": "sokak_008_04",
+"who": "Necati Abi",
+"shout": false,
+"text": "Değil, değil."
+}
+],
+[
+{
+"id": "sokak_009_00",
+"who": "Selim Bey",
+"shout": false,
+"text": "Gel bir çay içelim."
+},
+{
+"id": "sokak_009_01",
+"who": "Necati Abi",
+"shout": false,
+"text": "Kahvede mi?"
+},
+{
+"id": "sokak_009_02",
+"who": "Selim Bey",
+"shout": false,
+"text": "Terasta oturalım, hava güzel."
+},
+{
+"id": "sokak_009_03",
+"who": "Necati Abi",
+"shout": false,
+"text": "Peki, ama çayları ben ısmarlıyorum."
+},
+{
+"id": "sokak_009_04",
+"who": "Selim Bey",
+"shout": false,
+"text": "Olmaz, bu sefer benden."
+}
+],
+[
+{
+"id": "sokak_010_00",
+"who": "Necati Abi",
+"shout": false,
+"text": "Bu sokağa yeni bir fırın açılıyor."
+},
+{
+"id": "sokak_010_01",
+"who": "Selim Bey",
+"shout": false,
+"text": "Nerede?"
+},
+{
+"id": "sokak_010_02",
+"who": "Necati Abi",
+"shout": false,
+"text": "Çınar Sokak'ın köşesinde."
+},
+{
+"id": "sokak_010_03",
+"who": "Selim Bey",
+"shout": false,
+"text": "Güzel, taze ekmek alırız."
+},
+{
+"id": "sokak_010_04",
+"who": "Necati Abi",
+"shout": false,
+"text": "Simit de yapacaklarmış."
+}
+],
+[
+{
+"id": "sokak_011_00",
+"who": "Selim Bey",
+"shout": false,
+"text": "Elektrik kesilecek yarın, haberin var mı?"
+},
+{
+"id": "sokak_011_01",
+"who": "Necati Abi",
+"shout": false,
+"text": "Yok, ne zaman?"
+},
+{
+"id": "sokak_011_02",
+"who": "Selim Bey",
+"shout": false,
+"text": "Sabah dokuzdan öğlene kadar."
+},
+{
+"id": "sokak_011_03",
+"who": "Necati Abi",
+"shout": false,
+"text": "Kahve de kapanır mı?"
+},
+{
+"id": "sokak_011_04",
+"who": "Selim Bey",
+"shout": false,
+"text": "Evdo semaverle çay yapar, kapanmaz."
+}
+]
+],
+"tavla": [
+[
+{
+"id": "tavla_000_00",
+"who": "Ziya Amca",
+"shout": true,
+"text": "Düşeeeş!"
+},
+{
+"id": "tavla_000_01",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Yine mi düşeş? Zarı göster bakayım."
+},
+{
+"id": "tavla_000_02",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Al, bak, iki altı."
+},
+{
+"id": "tavla_000_03",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Zar hileli bu, ben söylüyorum."
+},
+{
+"id": "tavla_000_04",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Hile zar değil, el hilesi."
+}
+],
+[
+{
+"id": "tavla_001_00",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Şeşi beş!"
+},
+{
+"id": "tavla_001_01",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Şeşi beşle kapıyı kapattın."
+},
+{
+"id": "tavla_001_02",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Kapattım, çıkış yok sana."
+},
+{
+"id": "tavla_001_03",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Bekleriz, sabırlıyız."
+},
+{
+"id": "tavla_001_04",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Sabırla mars olursun."
+}
+],
+[
+{
+"id": "tavla_002_00",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Pulu kırdın yine."
+},
+{
+"id": "tavla_002_01",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Kırmasam sen kıracaktın."
+},
+{
+"id": "tavla_002_02",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Kırık pul geri gelir, merak etme."
+},
+{
+"id": "tavla_002_03",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Gelir ama kapı kapalı."
+},
+{
+"id": "tavla_002_04",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Açacaksın, başka çaren yok."
+}
+],
+[
+{
+"id": "tavla_003_00",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Mars ediyorum seni Ziya Amca."
+},
+{
+"id": "tavla_003_01",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Daha erken, oyun bitmedi."
+},
+{
+"id": "tavla_003_02",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Bitti sayılır, üç pulun dışarıda."
+},
+{
+"id": "tavla_003_03",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Üç pul ne ki, bir düşeş yeter."
+},
+{
+"id": "tavla_003_04",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Düşeş her zaman gelmez."
+}
+],
+[
+{
+"id": "tavla_004_00",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Zarı adam gibi at Şükrü."
+},
+{
+"id": "tavla_004_01",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Nasıl atayım?"
+},
+{
+"id": "tavla_004_02",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Masaya at, bardağın içine atma."
+},
+{
+"id": "tavla_004_03",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Kaydı elimden."
+},
+{
+"id": "tavla_004_04",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Her seferinde kayıyor."
+}
+],
+[
+{
+"id": "tavla_005_00",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Dubara, hayırlısı."
+},
+{
+"id": "tavla_005_01",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Dubarayla ne yapacaksın?"
+},
+{
+"id": "tavla_005_02",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "İki pulu ileri alırım."
+},
+{
+"id": "tavla_005_03",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Az ama işe yarar."
+},
+{
+"id": "tavla_005_04",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Az olsun benim olsun."
+}
+],
+[
+{
+"id": "tavla_006_00",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Hep yek atıyorum, olmaz ki."
+},
+{
+"id": "tavla_006_01",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Yek de bir sayı."
+},
+{
+"id": "tavla_006_02",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Yekle tavla oynanmaz."
+},
+{
+"id": "tavla_006_03",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Oynanır, sabır lazım."
+},
+{
+"id": "tavla_006_04",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Sabrım kalmadı."
+}
+],
+[
+{
+"id": "tavla_007_00",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Bir el daha, rövanş!"
+},
+{
+"id": "tavla_007_01",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Rövanş istiyorsan çayları sen söyle."
+},
+{
+"id": "tavla_007_02",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Söylerim, ama bu sefer ben kazanacağım."
+},
+{
+"id": "tavla_007_03",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Her seferinde aynı şeyi söylüyorsun."
+},
+{
+"id": "tavla_007_04",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Bu sefer başka."
+}
+],
+[
+{
+"id": "tavla_008_00",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Gençken tavlada bir numaraydım."
+},
+{
+"id": "tavla_008_01",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Şimdi kaç numarasın?"
+},
+{
+"id": "tavla_008_02",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Şimdi de bir numarayım, sen ikisin."
+},
+{
+"id": "tavla_008_03",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Bakalım, oyun bitsin."
+},
+{
+"id": "tavla_008_04",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Bitecek, biter."
+}
+],
+[
+{
+"id": "tavla_009_00",
+"who": "Şükrü Abi",
+"shout": true,
+"text": "Kapıyı aç artık!"
+},
+{
+"id": "tavla_009_01",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Açamam, zar gelmiyor."
+},
+{
+"id": "tavla_009_02",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Hangi zar lazım?"
+},
+{
+"id": "tavla_009_03",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Dört lazım, hep altı geliyor."
+},
+{
+"id": "tavla_009_04",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Altıyla oyna o zaman."
+}
+],
+[
+{
+"id": "tavla_010_00",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Bu tavlayı kim aldı biliyor musun?"
+},
+{
+"id": "tavla_010_01",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Kim aldı?"
+},
+{
+"id": "tavla_010_02",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Rahmetli babam, kırk yıllık."
+},
+{
+"id": "tavla_010_03",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Pulları değişmiş ama."
+},
+{
+"id": "tavla_010_04",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Pullar değişir, tahta kalır."
+}
+],
+[
+{
+"id": "tavla_011_00",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Şeş cihar geldi, ne yapayım?"
+},
+{
+"id": "tavla_011_01",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Altıyla öne al, dörtle kapını kapat."
+},
+{
+"id": "tavla_011_02",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Rakibe akıl veriyorsun ha."
+},
+{
+"id": "tavla_011_03",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Öğren diye veriyorum."
+},
+{
+"id": "tavla_011_04",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Öğrenince yeneceğim seni."
+}
+],
+[
+{
+"id": "tavla_012_00",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Pullar hep aynı yerde toplanıyor."
+},
+{
+"id": "tavla_012_01",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Strateji bu Ziya Amca."
+},
+{
+"id": "tavla_012_02",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Strateji değil, sıkıştın."
+},
+{
+"id": "tavla_012_03",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Sıkışmadım, bekliyorum."
+},
+{
+"id": "tavla_012_04",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Bekle bakalım."
+}
+],
+[
+{
+"id": "tavla_013_00",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Bugün şansım yaver gitmiyor."
+},
+{
+"id": "tavla_013_01",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Şans değil, el bu."
+},
+{
+"id": "tavla_013_02",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "El de şans da yok bende."
+},
+{
+"id": "tavla_013_03",
+"who": "Ziya Amca",
+"shout": false,
+"text": "O zaman çay iç, keyfin yerine gelsin."
+},
+{
+"id": "tavla_013_04",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Kahveci, bir çay!"
+}
+],
+[
+{
+"id": "tavla_014_00",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Penç dü!"
+},
+{
+"id": "tavla_014_01",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Penç dü ne işe yarar?"
+},
+{
+"id": "tavla_014_02",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Pulu kurtarır."
+},
+{
+"id": "tavla_014_03",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Kurtar bakalım."
+},
+{
+"id": "tavla_014_04",
+"who": "Ziya Amca",
+"shout": false,
+"text": "İşte kurtardım."
+}
+],
+[
+{
+"id": "tavla_015_00",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Kaç oyun oldu?"
+},
+{
+"id": "tavla_015_01",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Ben dört sen bir."
+},
+{
+"id": "tavla_015_02",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Bir mi? İki değil miydi?"
+},
+{
+"id": "tavla_015_03",
+"who": "Ziya Amca",
+"shout": false,
+"text": "İkincisini mars oldun, saymadım."
+},
+{
+"id": "tavla_015_04",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Mars da sayılır."
+}
+],
+[
+{
+"id": "tavla_016_00",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Elini çabuk tut, düşünme."
+},
+{
+"id": "tavla_016_01",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Tavlada da mı düşünülmez?"
+},
+{
+"id": "tavla_016_02",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Tavla zar oyunu, düşünmek kâr etmez."
+},
+{
+"id": "tavla_016_03",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "O zaman neden ben hep kaybediyorum?"
+},
+{
+"id": "tavla_016_04",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Çünkü düşünüyorsun."
+}
+],
+[
+{
+"id": "tavla_017_00",
+"who": "Şükrü Abi",
+"shout": true,
+"text": "Mars oldun!"
+},
+{
+"id": "tavla_017_01",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Olmadım, son pul çıktı."
+},
+{
+"id": "tavla_017_02",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Çıkmadı, daha orada duruyor."
+},
+{
+"id": "tavla_017_03",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Gözlüğümü takayım."
+},
+{
+"id": "tavla_017_04",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Taksan da değişmez."
+}
+],
+[
+{
+"id": "tavla_018_00",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Tavla oynamak akıl işi."
+},
+{
+"id": "tavla_018_01",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Sen az önce zar oyunu dedin."
+},
+{
+"id": "tavla_018_02",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Hem zar hem akıl."
+},
+{
+"id": "tavla_018_03",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Her seferinde başka bir şey söylüyorsun."
+},
+{
+"id": "tavla_018_04",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Yaşlılık, kusura bakma."
+}
+],
+[
+{
+"id": "tavla_019_00",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Şu okey masası çok bağırıyor."
+},
+{
+"id": "tavla_019_01",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Okeyciler hep bağırır."
+},
+{
+"id": "tavla_019_02",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Biz bağırmıyoruz ama."
+},
+{
+"id": "tavla_019_03",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Biz tavlacıyız, asil oyun."
+},
+{
+"id": "tavla_019_04",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Asil oyun, mars olunca da asil mi?"
+}
+],
+[
+{
+"id": "tavla_020_00",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Hep beyaz pullarla oynuyorum."
+},
+{
+"id": "tavla_020_01",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Neden?"
+},
+{
+"id": "tavla_020_02",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Uğurlu, gençken de beyazla kazanırdım."
+},
+{
+"id": "tavla_020_03",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Bugün siyahla dene bakalım."
+},
+{
+"id": "tavla_020_04",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Olmaz, uğuru bozma."
+}
+],
+[
+{
+"id": "tavla_021_00",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Bir zar daha atayım mı?"
+},
+{
+"id": "tavla_021_01",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Sıra bende Şükrü."
+},
+{
+"id": "tavla_021_02",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Pardon, kendimi kaptırdım."
+},
+{
+"id": "tavla_021_03",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Kaptırma, oyunu bozuyorsun."
+},
+{
+"id": "tavla_021_04",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Peki peki."
+}
+],
+[
+{
+"id": "tavla_022_00",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Gel, bir el de yarın oynarız."
+},
+{
+"id": "tavla_022_01",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Yarın erken gelirim."
+},
+{
+"id": "tavla_022_02",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Erken gel ki çay taze olsun."
+},
+{
+"id": "tavla_022_03",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Evdo'nun ilk demi en güzeli."
+},
+{
+"id": "tavla_022_04",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Aynen öyle."
+}
+],
+[
+{
+"id": "tavla_023_00",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Hep düşeşle kazanıyorsun."
+},
+{
+"id": "tavla_023_01",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Düşeş Allah'tan."
+},
+{
+"id": "tavla_023_02",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Allah da hep sana veriyor."
+},
+{
+"id": "tavla_023_03",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Ben duamı ediyorum."
+},
+{
+"id": "tavla_023_04",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Ben de edeyim o zaman."
+}
+],
+[
+{
+"id": "tavla_024_00",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Şeşi yek, ne biçim zar bu."
+},
+{
+"id": "tavla_024_01",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "İşte bu sefer ben şanslıyım."
+},
+{
+"id": "tavla_024_02",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Bir el şanslı olursun."
+},
+{
+"id": "tavla_024_03",
+"who": "Şükrü Abi",
+"shout": false,
+"text": "Bir el yeter."
+},
+{
+"id": "tavla_024_04",
+"who": "Ziya Amca",
+"shout": false,
+"text": "Bakalım."
+}
+]
+],
+"anne": [
+[
+{
+"id": "anne_000_00",
+"who": "Ayşe Hanım",
+"shout": true,
+"text": "Ahmet! Eve gel, yemek hazır!"
+}
+],
+[
+{
+"id": "anne_001_00",
+"who": "Ayşe Hanım",
+"shout": true,
+"text": "Zeynep! Salıncaktan in, düşeceksin!"
+}
+],
+[
+{
+"id": "anne_002_00",
+"who": "Ayşe Hanım",
+"shout": false,
+"text": "Akşam oldu çocuklar, hadi eve!"
+}
+],
+[
+{
+"id": "anne_003_00",
+"who": "Ayşe Hanım",
+"shout": false,
+"text": "Ahmet, kardeşine iyi bak!"
+}
+],
+[
+{
+"id": "anne_004_00",
+"who": "Ayşe Hanım",
+"shout": false,
+"text": "Üstünü kirletme Zeynep!"
+}
+],
+[
+{
+"id": "anne_005_00",
+"who": "Ayşe Hanım",
+"shout": false,
+"text": "Beş dakika daha, sonra eve!"
+}
+],
+[
+{
+"id": "anne_006_00",
+"who": "Ayşe Hanım",
+"shout": true,
+"text": "Emre! Montunu giy, hava soğuk!"
+}
+],
+[
+{
+"id": "anne_007_00",
+"who": "Ayşe Hanım",
+"shout": true,
+"text": "Ahmeeet! Duymuyor musun beni?"
+}
+],
+[
+{
+"id": "anne_008_00",
+"who": "Ayşe Hanım",
+"shout": false,
+"text": "Kaydıraktan baş aşağı kayma!"
+}
+],
+[
+{
+"id": "anne_009_00",
+"who": "Ayşe Hanım",
+"shout": true,
+"text": "Zeynep, kuma oturma!"
+}
+],
+[
+{
+"id": "anne_010_00",
+"who": "Ayşe Hanım",
+"shout": false,
+"text": "Hadi bakalım, el yüz yıkanacak."
+}
+],
+[
+{
+"id": "anne_011_00",
+"who": "Ayşe Hanım",
+"shout": true,
+"text": "Babanız gelmeden eve gelin!"
+}
+],
+[
+{
+"id": "anne_012_00",
+"who": "Ayşe Hanım",
+"shout": false,
+"text": "Ahmet, topunu al da gel."
+}
+],
+[
+{
+"id": "anne_013_00",
+"who": "Ayşe Hanım",
+"shout": false,
+"text": "Kim düştü orada? Zeynep sen misin?"
+}
+],
+[
+{
+"id": "anne_014_00",
+"who": "Ayşe Hanım",
+"shout": true,
+"text": "Kavga etmeyin, ayıp!"
+}
+],
+[
+{
+"id": "anne_015_00",
+"who": "Ayşe Hanım",
+"shout": false,
+"text": "Su içmek isteyen var mı?"
+}
+],
+[
+{
+"id": "anne_016_00",
+"who": "Ayşe Hanım",
+"shout": true,
+"text": "Mehmet, kardeşini itme!"
+}
+],
+[
+{
+"id": "anne_017_00",
+"who": "Ayşe Hanım",
+"shout": false,
+"text": "Aferin size, ne güzel oynuyorsunuz."
+}
+],
+[
+{
+"id": "anne_018_00",
+"who": "Ayşe Hanım",
+"shout": false,
+"text": "Bir tur daha, sonra gidiyoruz."
+}
+],
+[
+{
+"id": "anne_019_00",
+"who": "Ayşe Hanım",
+"shout": true,
+"text": "Ahmet! Üçe kadar sayıyorum!"
+}
+],
+[
+{
+"id": "anne_020_00",
+"who": "Ayşe Hanım",
+"shout": false,
+"text": "Bir... iki..."
+}
+],
+[
+{
+"id": "anne_021_00",
+"who": "Ayşe Hanım",
+"shout": false,
+"text": "Hadi gel kuzum, annen yoruldu."
+}
+],
+[
+{
+"id": "anne_022_00",
+"who": "Ayşe Hanım",
+"shout": true,
+"text": "Elif'in topunu geri verin!"
+}
+],
+[
+{
+"id": "anne_023_00",
+"who": "Ayşe Hanım",
+"shout": false,
+"text": "Ellerinizi yıkayın, simit aldım."
+}
+],
+[
+{
+"id": "anne_024_00",
+"who": "Ayşe Hanım",
+"shout": true,
+"text": "Eve gelmeyen akşam televizyon izlemez!"
+}
+]
+],
+"ihtiyar": [
+[
+{
+"id": "ihtiyar_000_00",
+"who": "İhsan Amca",
+"shout": false,
+"text": "Kahvede bugün kalabalık maşallah."
+}
+],
+[
+{
+"id": "ihtiyar_001_00",
+"who": "İhsan Amca",
+"shout": false,
+"text": "Şu okey masası yine bağırıyor."
+}
+],
+[
+{
+"id": "ihtiyar_002_00",
+"who": "İhsan Amca",
+"shout": false,
+"text": "Benim zamanımda burası tarlaydı."
+}
+],
+[
+{
+"id": "ihtiyar_003_00",
+"who": "İhsan Amca",
+"shout": false,
+"text": "Kahveci Evdo'nun çayı bir başka."
+}
+],
+[
+{
+"id": "ihtiyar_004_00",
+"who": "İhsan Amca",
+"shout": false,
+"text": "Akşama ben de inerim kahveye."
+}
+],
+[
+{
+"id": "ihtiyar_005_00",
+"who": "İhsan Amca",
+"shout": true,
+"text": "Gençler, yavaş oynayın!"
+}
+],
+[
+{
+"id": "ihtiyar_006_00",
+"who": "İhsan Amca",
+"shout": false,
+"text": "Rıza yine kazanıyor, belli."
+}
+],
+[
+{
+"id": "ihtiyar_007_00",
+"who": "İhsan Amca",
+"shout": false,
+"text": "Ah dizlerim, olmasa inerdim aşağı."
+}
+],
+[
+{
+"id": "ihtiyar_008_00",
+"who": "İhsan Amca",
+"shout": false,
+"text": "Bu sokak eskiden ne sessizdi."
+}
+],
+[
+{
+"id": "ihtiyar_009_00",
+"who": "İhsan Amca",
+"shout": false,
+"text": "Şu arabalar da hiç bitmiyor."
+}
+],
+[
+{
+"id": "ihtiyar_010_00",
+"who": "İhsan Amca",
+"shout": true,
+"text": "Bayram! Erol! Kavga etmeyin!"
+}
+],
+[
+{
+"id": "ihtiyar_011_00",
+"who": "İhsan Amca",
+"shout": false,
+"text": "Çay soğudu, yenisini koyayım."
+}
+],
+[
+{
+"id": "ihtiyar_012_00",
+"who": "İhsan Amca",
+"shout": false,
+"text": "Hanım, bir çay daha getir bana!"
+}
+],
+[
+{
+"id": "ihtiyar_013_00",
+"who": "İhsan Amca",
+"shout": false,
+"text": "Kuşlar ne güzel ötüyor bugün."
+}
+],
+[
+{
+"id": "ihtiyar_014_00",
+"who": "İhsan Amca",
+"shout": false,
+"text": "Yağmur yağacak, belli oluyor."
+}
+]
+],
+"cocuk": [
+[
+{
+"id": "cocuk_000_00",
+"who": "Ali",
+"shout": true,
+"text": "Anneee! Bak araba geçiyor!"
+}
+],
+[
+{
+"id": "cocuk_001_00",
+"who": "Ali",
+"shout": true,
+"text": "Kediii! Kedi var!"
+}
+],
+[
+{
+"id": "cocuk_002_00",
+"who": "Ali",
+"shout": false,
+"text": "Ben de parka gidicem!"
+}
+],
+[
+{
+"id": "cocuk_003_00",
+"who": "Ali",
+"shout": false,
+"text": "Babam kahvede, gördüm onu!"
+}
+],
+[
+{
+"id": "cocuk_004_00",
+"who": "Ali",
+"shout": true,
+"text": "Dedeee! Bana dondurma al!"
+}
+],
+[
+{
+"id": "cocuk_005_00",
+"who": "Ali",
+"shout": false,
+"text": "Şu kuş ne kadar büyük!"
+}
+],
+[
+{
+"id": "cocuk_006_00",
+"who": "Ali",
+"shout": true,
+"text": "Anne, ben de aşağı inebilir miyim?"
+}
+],
+[
+{
+"id": "cocuk_007_00",
+"who": "Ali",
+"shout": false,
+"text": "Ahmet parkta oynuyor, ben de gideyim."
+}
+],
+[
+{
+"id": "cocuk_008_00",
+"who": "Ali",
+"shout": false,
+"text": "Bak bak, yağmur başladı!"
+}
+],
+[
+{
+"id": "cocuk_009_00",
+"who": "Ali",
+"shout": true,
+"text": "Babaaa! Yukarı gel!"
+}
+]
+],
+"kahveci": [
+[
+{
+"id": "kahveci_000_00",
+"who": "Kahveci Evdo",
+"shout": false,
+"text": "Geliyor abi, hemen!"
+}
+],
+[
+{
+"id": "kahveci_001_00",
+"who": "Kahveci Evdo",
+"shout": false,
+"text": "Çaylar tazeleniyor, birazdan."
+}
+],
+[
+{
+"id": "kahveci_002_00",
+"who": "Kahveci Evdo",
+"shout": false,
+"text": "Buyur abi, afiyet olsun."
+}
+],
+[
+{
+"id": "kahveci_003_00",
+"who": "Kahveci Evdo",
+"shout": false,
+"text": "Demli mi olsun açık mı?"
+}
+],
+[
+{
+"id": "kahveci_004_00",
+"who": "Kahveci Evdo",
+"shout": false,
+"text": "Geldi geldi, sıcak sıcak."
+}
+],
+[
+{
+"id": "kahveci_005_00",
+"who": "Kahveci Evdo",
+"shout": false,
+"text": "Kahve orta şekerli, bildiğin gibi."
+}
+],
+[
+{
+"id": "kahveci_006_00",
+"who": "Kahveci Evdo",
+"shout": false,
+"text": "Tost hazırlanıyor, beş dakika."
+}
+],
+[
+{
+"id": "kahveci_007_00",
+"who": "Kahveci Evdo",
+"shout": false,
+"text": "Buyurun, simitler taze, fırından yeni geldi."
+}
+],
+[
+{
+"id": "kahveci_008_00",
+"who": "Kahveci Evdo",
+"shout": false,
+"text": "Boşları alayım abi."
+}
+],
+[
+{
+"id": "kahveci_009_00",
+"who": "Kahveci Evdo",
+"shout": false,
+"text": "Bir çay daha getireyim mi?"
+}
+],
+[
+{
+"id": "kahveci_010_00",
+"who": "Kahveci Evdo",
+"shout": false,
+"text": "Afiyet olsun, eksik olmasın."
+}
+],
+[
+{
+"id": "kahveci_011_00",
+"who": "Kahveci Evdo",
+"shout": false,
+"text": "Nargilen hazır, közünü de tazeledim."
+}
+],
+[
+{
+"id": "kahveci_012_00",
+"who": "Kahveci Evdo",
+"shout": false,
+"text": "Hemen geliyorum, bir dakika."
+}
+],
+[
+{
+"id": "kahveci_013_00",
+"who": "Kahveci Evdo",
+"shout": false,
+"text": "Ayranlar soğuk, yeni açtım."
+}
+],
+[
+{
+"id": "kahveci_014_00",
+"who": "Kahveci Evdo",
+"shout": false,
+"text": "Su istersen söyle abi."
+}
+],
+[
+{
+"id": "kahveci_015_00",
+"who": "Kahveci Evdo",
+"shout": false,
+"text": "Bugün çay bizden, bayram var."
+}
+],
+[
+{
+"id": "kahveci_016_00",
+"who": "Kahveci Evdo",
+"shout": false,
+"text": "Hesap sonra, siz oynayın."
+}
+],
+[
+{
+"id": "kahveci_017_00",
+"who": "Kahveci Evdo",
+"shout": false,
+"text": "Tepsiye dikkat, sıcak."
+}
+],
+[
+{
+"id": "kahveci_018_00",
+"who": "Kahveci Evdo",
+"shout": false,
+"text": "Masayı silelim, ıslak olmuş."
+}
+],
+[
+{
+"id": "kahveci_019_00",
+"who": "Kahveci Evdo",
+"shout": false,
+"text": "Kimin çayıydı bu? Buyurun."
+}
+]
+],
+"yuruyen": [
+[
+{
+"id": "yuruyen_000_00",
+"who": "Mehmet Efendi",
+"shout": false,
+"text": "Kolay gelsin."
+}
+],
+[
+{
+"id": "yuruyen_001_00",
+"who": "Mehmet Efendi",
+"shout": false,
+"text": "Selamün aleyküm."
+}
+],
+[
+{
+"id": "yuruyen_002_00",
+"who": "Mehmet Efendi",
+"shout": false,
+"text": "Hayırlı akşamlar."
+}
+],
+[
+{
+"id": "yuruyen_003_00",
+"who": "Mehmet Efendi",
+"shout": false,
+"text": "Hava da soğudu."
+}
+],
+[
+{
+"id": "yuruyen_004_00",
+"who": "Mehmet Efendi",
+"shout": false,
+"text": "Ekmek almaya gidiyorum."
+}
+],
+[
+{
+"id": "yuruyen_005_00",
+"who": "Gülsüm Hanım",
+"shout": false,
+"text": "İyi günler."
+}
+],
+[
+{
+"id": "yuruyen_006_00",
+"who": "Gülsüm Hanım",
+"shout": false,
+"text": "Kolay gelsin evladım."
+}
+],
+[
+{
+"id": "yuruyen_007_00",
+"who": "Gülsüm Hanım",
+"shout": false,
+"text": "Pazara yetişeyim."
+}
+],
+[
+{
+"id": "yuruyen_008_00",
+"who": "Gülsüm Hanım",
+"shout": false,
+"text": "Akşam yemeği hazırlayacağım."
+}
+],
+[
+{
+"id": "yuruyen_009_00",
+"who": "Gülsüm Hanım",
+"shout": false,
+"text": "Hayırlı günler."
+}
+]
+],
+"teyze": [
+[
+{
+"id": "teyze_000_00",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Duydun mu kız, karşının oğlan evleniyormuş!"
+},
+{
+"id": "teyze_000_01",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Hangi oğlan? Ayşe'nin oğlu mu?"
+},
+{
+"id": "teyze_000_02",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Evet, mühendis olan."
+},
+{
+"id": "teyze_000_03",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Kızı kimmiş bari?"
+},
+{
+"id": "teyze_000_04",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Ankaralı diyorlar, öğretmenmiş."
+},
+{
+"id": "teyze_000_05",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Hayırlısı olsun, iyi çocuktur."
+}
+],
+[
+{
+"id": "teyze_001_00",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Bakkal yine veresiye defteri açmış."
+},
+{
+"id": "teyze_001_01",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Hasan mı? O zaten hep açık."
+},
+{
+"id": "teyze_001_02",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Yeğeni geldi, o kapatacakmış."
+},
+{
+"id": "teyze_001_03",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Kapatırsa yarı mahalle aç kalır."
+},
+{
+"id": "teyze_001_04",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Doğru söylüyorsun."
+}
+],
+[
+{
+"id": "teyze_002_00",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Bizimki kahveden çıkmıyor ki!"
+},
+{
+"id": "teyze_002_01",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Bizimki de orada, sabahtan beri."
+},
+{
+"id": "teyze_002_02",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Ne yapıyorlar acaba o kadar?"
+},
+{
+"id": "teyze_002_03",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Okey oynuyorlar, çay içiyorlar."
+},
+{
+"id": "teyze_002_04",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Evde çay yok mu sanki?"
+},
+{
+"id": "teyze_002_05",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Evde çay var ama sohbet yok."
+}
+],
+[
+{
+"id": "teyze_003_00",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Bu sene kış çetin geçecek diyorlar."
+},
+{
+"id": "teyze_003_01",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Kömürü erken alalım o zaman."
+},
+{
+"id": "teyze_003_02",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Bizde doğalgaz var artık."
+},
+{
+"id": "teyze_003_03",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Doğalgaz da pahalı, kız."
+},
+{
+"id": "teyze_003_04",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Her şey pahalı, ne yapalım."
+}
+],
+[
+{
+"id": "teyze_004_00",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Aa, şu okey oynayanlara bak!"
+},
+{
+"id": "teyze_004_01",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Bağırışmalarını buradan duyuyorum."
+},
+{
+"id": "teyze_004_02",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Rıza yine kazanmış galiba."
+},
+{
+"id": "teyze_004_03",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Rıza hep kazanır, hileci."
+},
+{
+"id": "teyze_004_04",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Hanımı söyledi, evde de kazanıyormuş."
+}
+],
+[
+{
+"id": "teyze_005_00",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Fiyatlar da ne oldu böyle?"
+},
+{
+"id": "teyze_005_01",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Dün pazara gittim, domatesin kilosuna bak."
+},
+{
+"id": "teyze_005_02",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Ne kadardı?"
+},
+{
+"id": "teyze_005_03",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Söylemeye utanıyorum."
+},
+{
+"id": "teyze_005_04",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Ben de patlıcan alamadım."
+}
+],
+[
+{
+"id": "teyze_006_00",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Komşu kızı üniversiteyi kazanmış, maşallah."
+},
+{
+"id": "teyze_006_01",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Hangi bölüm?"
+},
+{
+"id": "teyze_006_02",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Tıp, doktor olacak."
+},
+{
+"id": "teyze_006_03",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Allah tamamına erdirsin."
+},
+{
+"id": "teyze_006_04",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Annesi çok mutlu, herkese anlatıyor."
+}
+],
+[
+{
+"id": "teyze_007_00",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Çamaşırları aldın mı, yağmur geliyor!"
+},
+{
+"id": "teyze_007_01",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Aldım, sabah astım öğlen topladım."
+},
+{
+"id": "teyze_007_02",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Benimkiler hâlâ ipte, koşayım."
+},
+{
+"id": "teyze_007_03",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Dur, daha yağmadı."
+},
+{
+"id": "teyze_007_04",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Bulutlar kararıyor, belli olmaz."
+}
+],
+[
+{
+"id": "teyze_008_00",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Akşama dolma yapıyorum, gel otur."
+},
+{
+"id": "teyze_008_01",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Yaprak mı biber mi?"
+},
+{
+"id": "teyze_008_02",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "İkisi de, karışık."
+},
+{
+"id": "teyze_008_03",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Gelirim, tatlı da getiririm."
+},
+{
+"id": "teyze_008_04",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Getir getir, revani yap."
+}
+],
+[
+{
+"id": "teyze_009_00",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Dün gece kim bağırıyordu sokakta?"
+},
+{
+"id": "teyze_009_01",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Üst kattaki Bayram ile Erol."
+},
+{
+"id": "teyze_009_02",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Yine mi araba yüzünden?"
+},
+{
+"id": "teyze_009_03",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Yine, park yeri kavgası."
+},
+{
+"id": "teyze_009_04",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Bunlar hiç barışmayacak."
+}
+],
+[
+{
+"id": "teyze_010_00",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Benim torun bugün ilk dişini çıkardı."
+},
+{
+"id": "teyze_010_01",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Maşallah, diş hediği yapacak mısın?"
+},
+{
+"id": "teyze_010_02",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Yapacağım, sen de gel."
+},
+{
+"id": "teyze_010_03",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Gelirim, hediyesini de getiririm."
+},
+{
+"id": "teyze_010_04",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Gel de beraber kaynatalım."
+}
+],
+[
+{
+"id": "teyze_011_00",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Kız, senin perdeler ne güzel olmuş."
+},
+{
+"id": "teyze_011_01",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Yeni astım, kızım aldı."
+},
+{
+"id": "teyze_011_02",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Rengi çok yakışmış."
+},
+{
+"id": "teyze_011_03",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Sağ ol, sende de değiştir artık."
+},
+{
+"id": "teyze_011_04",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Bizimki para vermiyor."
+}
+],
+[
+{
+"id": "teyze_012_00",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Kahveci Evdo evleniyormuş, duydun mu?"
+},
+{
+"id": "teyze_012_01",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Yok canım, kim demiş?"
+},
+{
+"id": "teyze_012_02",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Emine'nin gelini söyledi."
+},
+{
+"id": "teyze_012_03",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Kiminle?"
+},
+{
+"id": "teyze_012_04",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Onu bilmiyorum, araştıracağım."
+},
+{
+"id": "teyze_012_05",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Öğrenince bana da söyle."
+}
+],
+[
+{
+"id": "teyze_013_00",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Şu parktaki çocuklar kimin?"
+},
+{
+"id": "teyze_013_01",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Ayşe'nin çocukları, Ahmet ile Zeynep."
+},
+{
+"id": "teyze_013_02",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Ayşe bağırıyor ama gelmiyorlar."
+},
+{
+"id": "teyze_013_03",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Çocuk bu, oyunu bırakır mı?"
+},
+{
+"id": "teyze_013_04",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Bizim zamanımızda bir bağırınca gelirdik."
+}
+],
+[
+{
+"id": "teyze_014_00",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Bugün çok yoruldum, temizlik yaptım."
+},
+{
+"id": "teyze_014_01",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Bayram mı geliyor?"
+},
+{
+"id": "teyze_014_02",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Yok, misafir gelecek, eşimin kardeşi."
+},
+{
+"id": "teyze_014_03",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Ondan temizlik yapıyorsun."
+},
+{
+"id": "teyze_014_04",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Her köşeye bakar, bilirsin."
+}
+],
+[
+{
+"id": "teyze_015_00",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Senin oğlan ne yapıyor şimdi?"
+},
+{
+"id": "teyze_015_01",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Almanya'da, işçi olarak çalışıyor."
+},
+{
+"id": "teyze_015_02",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Uzak oldu, özlüyor musun?"
+},
+{
+"id": "teyze_015_03",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Hem de çok, telefonda konuşuyoruz."
+},
+{
+"id": "teyze_015_04",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "İnşallah yazın gelir."
+}
+],
+[
+{
+"id": "teyze_016_00",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Bu balkonun duvarını yıksınlar iyi oldu."
+},
+{
+"id": "teyze_016_01",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Ne iyi oldu, şimdi yan yana oturuyoruz."
+},
+{
+"id": "teyze_016_02",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Eskiden pencereden konuşurduk."
+},
+{
+"id": "teyze_016_03",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Boynumuz ağrırdı."
+},
+{
+"id": "teyze_016_04",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Şimdi rahat rahat dedikodu."
+}
+],
+[
+{
+"id": "teyze_017_00",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Şu kahveye kadın da girse ne güzel olur."
+},
+{
+"id": "teyze_017_01",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Girse de oyun oynamazdık."
+},
+{
+"id": "teyze_017_02",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Ben okey bilirim, iyi de oynarım."
+},
+{
+"id": "teyze_017_03",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Sen mi? Hiç söylemedin."
+},
+{
+"id": "teyze_017_04",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Söylesem bizimki kıskanır."
+}
+],
+[
+{
+"id": "teyze_018_00",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Pazar günü kahvaltıya gel."
+},
+{
+"id": "teyze_018_01",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Kimler olacak?"
+},
+{
+"id": "teyze_018_02",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Sen, ben, bir de Emine."
+},
+{
+"id": "teyze_018_03",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Ben menemen yaparım."
+},
+{
+"id": "teyze_018_04",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Yap yap, ben de börek açarım."
+}
+],
+[
+{
+"id": "teyze_019_00",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Kız, gözlerim artık iyi görmüyor."
+},
+{
+"id": "teyze_019_01",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Doktora git, gözlük yazsın."
+},
+{
+"id": "teyze_019_02",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Gittim, hiç beğenmedim gözlükleri."
+},
+{
+"id": "teyze_019_03",
+"who": "Fatma Teyze",
+"shout": false,
+"text": "Güzelliği değil, görmek önemli."
+},
+{
+"id": "teyze_019_04",
+"who": "Hatice Teyze",
+"shout": false,
+"text": "Sen de haklısın."
+}
+]
+]
+}

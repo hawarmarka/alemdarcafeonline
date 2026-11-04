@@ -1,0 +1,124 @@
+@teyze F=Fatma Teyze H=Hatice Teyze
+
+F: Duydun mu kız, karşının oğlan evleniyormuş!
+H: Hangi oğlan? Ayşe'nin oğlu mu?
+F: Evet, mühendis olan.
+H: Kızı kimmiş bari?
+F: Ankaralı diyorlar, öğretmenmiş.
+H: Hayırlısı olsun, iyi çocuktur.
+
+H: Bakkal yine veresiye defteri açmış.
+F: Hasan mı? O zaten hep açık.
+H: Yeğeni geldi, o kapatacakmış.
+F: Kapatırsa yarı mahalle aç kalır.
+H: Doğru söylüyorsun.
+
+F: Bizimki kahveden çıkmıyor ki!
+H: Bizimki de orada, sabahtan beri.
+F: Ne yapıyorlar acaba o kadar?
+H: Okey oynuyorlar, çay içiyorlar.
+F: Evde çay yok mu sanki?
+H: Evde çay var ama sohbet yok.
+
+H: Bu sene kış çetin geçecek diyorlar.
+F: Kömürü erken alalım o zaman.
+H: Bizde doğalgaz var artık.
+F: Doğalgaz da pahalı, kız.
+H: Her şey pahalı, ne yapalım.
+
+F: Aa, şu okey oynayanlara bak!
+H: Bağırışmalarını buradan duyuyorum.
+F: Rıza yine kazanmış galiba.
+H: Rıza hep kazanır, hileci.
+F: Hanımı söyledi, evde de kazanıyormuş.
+
+H: Fiyatlar da ne oldu böyle?
+F: Dün pazara gittim, domatesin kilosuna bak.
+H: Ne kadardı?
+F: Söylemeye utanıyorum.
+H: Ben de patlıcan alamadım.
+
+F: Komşu kızı üniversiteyi kazanmış, maşallah.
+H: Hangi bölüm?
+F: Tıp, doktor olacak.
+H: Allah tamamına erdirsin.
+F: Annesi çok mutlu, herkese anlatıyor.
+
+H: Çamaşırları aldın mı, yağmur geliyor!
+F: Aldım, sabah astım öğlen topladım.
+H: Benimkiler hâlâ ipte, koşayım.
+F: Dur, daha yağmadı.
+H: Bulutlar kararıyor, belli olmaz.
+
+F: Akşama dolma yapıyorum, gel otur.
+H: Yaprak mı biber mi?
+F: İkisi de, karışık.
+H: Gelirim, tatlı da getiririm.
+F: Getir getir, revani yap.
+
+H: Dün gece kim bağırıyordu sokakta?
+F: Üst kattaki Bayram ile Erol.
+H: Yine mi araba yüzünden?
+F: Yine, park yeri kavgası.
+H: Bunlar hiç barışmayacak.
+
+F: Benim torun bugün ilk dişini çıkardı.
+H: Maşallah, diş hediği yapacak mısın?
+F: Yapacağım, sen de gel.
+H: Gelirim, hediyesini de getiririm.
+F: Gel de beraber kaynatalım.
+
+H: Kız, senin perdeler ne güzel olmuş.
+F: Yeni astım, kızım aldı.
+H: Rengi çok yakışmış.
+F: Sağ ol, sende de değiştir artık.
+H: Bizimki para vermiyor.
+
+F: Kahveci Evdo evleniyormuş, duydun mu?
+H: Yok canım, kim demiş?
+F: Emine'nin gelini söyledi.
+H: Kiminle?
+F: Onu bilmiyorum, araştıracağım.
+H: Öğrenince bana da söyle.
+
+H: Şu parktaki çocuklar kimin?
+F: Ayşe'nin çocukları, Ahmet ile Zeynep.
+H: Ayşe bağırıyor ama gelmiyorlar.
+F: Çocuk bu, oyunu bırakır mı?
+H: Bizim zamanımızda bir bağırınca gelirdik.
+
+F: Bugün çok yoruldum, temizlik yaptım.
+H: Bayram mı geliyor?
+F: Yok, misafir gelecek, eşimin kardeşi.
+H: Ondan temizlik yapıyorsun.
+F: Her köşeye bakar, bilirsin.
+
+H: Senin oğlan ne yapıyor şimdi?
+F: Almanya'da, işçi olarak çalışıyor.
+H: Uzak oldu, özlüyor musun?
+F: Hem de çok, telefonda konuşuyoruz.
+H: İnşallah yazın gelir.
+
+F: Bu balkonun duvarını yıksınlar iyi oldu.
+H: Ne iyi oldu, şimdi yan yana oturuyoruz.
+F: Eskiden pencereden konuşurduk.
+H: Boynumuz ağrırdı.
+F: Şimdi rahat rahat dedikodu.
+
+H: Şu kahveye kadın da girse ne güzel olur.
+F: Girse de oyun oynamazdık.
+H: Ben okey bilirim, iyi de oynarım.
+F: Sen mi? Hiç söylemedin.
+H: Söylesem bizimki kıskanır.
+
+F: Pazar günü kahvaltıya gel.
+H: Kimler olacak?
+F: Sen, ben, bir de Emine.
+H: Ben menemen yaparım.
+F: Yap yap, ben de börek açarım.
+
+H: Kız, gözlerim artık iyi görmüyor.
+F: Doktora git, gözlük yazsın.
+H: Gittim, hiç beğenmedim gözlükleri.
+F: Güzelliği değil, görmek önemli.
+H: Sen de haklısın.

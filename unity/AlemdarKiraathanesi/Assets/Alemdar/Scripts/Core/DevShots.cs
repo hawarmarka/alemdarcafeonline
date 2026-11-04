@@ -51,6 +51,10 @@ namespace Alemdar
                 yield return CamShot(dir, "y13_balkon_amca", new Vector3(-12f, 2.5f, 12f), new Vector3(-12f, 4.2f, 5.5f));
                 yield return CamShot(dir, "y14_park_anne", World.Playground.Center + new Vector3(-1f, 2f, -8f), World.Playground.Center + new Vector3(-4.6f, 1f, -3.2f));
                 yield return CamShot(dir, "y15_balkonlar", new Vector3(-12f, 5.5f, 9.5f), new Vector3(-13f, 6.5f, 5f));
+                // konuşmalar: kamerayı okey masasının yanında 40 sn tut, kaç söz çalındı say
+                Camera.main.transform.SetPositionAndRotation(app.Hall.Tables[0] + new Vector3(1.5f, 1.6f, 1.5f), Quaternion.LookRotation(-new Vector3(1.5f, .8f, 1.5f)));
+                yield return new WaitForSeconds(40);
+                System.IO.File.WriteAllText(System.IO.Path.Combine(dir, "konusma.txt"), $"calinan {World.Dialogues.Played}, eksik {World.Dialogues.Missing}\n" + string.Join("\n", World.Dialogues.Log));
                 if (Arg("-kapat") != null) Application.Quit();
                 yield break;
             }

@@ -21,7 +21,7 @@ namespace Alemdar.World
             Volume = PlayerPrefs.GetFloat("ses", 1f);
             AudioListener.volume = Volume;
             // kahvenin içinde sürekli uğultu (uzak sohbet, kaşık şıngırtısı), parkta kuşlar
-            crowd = Loop("ugultu", Murmur(), new Vector3(0, 1.4f, -.5f), .32f, 3, 14);
+            crowd = Loop("ugultu", Murmur(), new Vector3(0, 1.4f, -.5f), .08f, 3, 14);
             Loop("kuslar", Birds(), new Vector3(-6, 4, 30), .55f, 6, 38);
             Loop("kuslar2", Birds(7), new Vector3(16, 4, 36), .45f, 6, 38);
             rain = Loop("yagmur", Noise(6f, .0f, true), Vector3.zero, 0f, 1, 500); rain.spatialBlend = 0;
@@ -50,6 +50,13 @@ namespace Alemdar.World
         }
 
         // ---------- konuşma ----------
+        // Seslendirilmiş söz (Dialogues): kişinin başından gelir; bağırma uzaktan da duyulur.
+        public static void PlayVoice(AudioClip clip, Vector3 pos, bool shout)
+        {
+            if (!root || Volume <= 0 || !clip) return;
+            var s = Source(); s.transform.position = pos; s.clip = clip; s.pitch = 1; s.volume = shout ? 1f : .85f;
+            s.minDistance = shout ? 4f : 1.8f; s.maxDistance = shout ? 45 : 22; s.Play();
+        }
         // seed: kişiye sabit ses tonu; female/child: tiz ses; shout: bağırma. Söz uzunluğu harf sayısından.
         public static void Voice(Vector3 pos, string text, uint seed, bool shout, bool high = false)
         {
