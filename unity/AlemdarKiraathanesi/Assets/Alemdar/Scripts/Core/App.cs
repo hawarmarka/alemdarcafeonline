@@ -48,7 +48,11 @@ namespace Alemdar
         {
             var curtain = Ui.Box(Ui.Canvas.transform, new Color(.05f, .04f, .03f, 1)); Ui.Stretch(curtain.rectTransform); // yükleme perdesi (ısınma turunu gizler)
             var loading = Ui.Label(curtain.transform, "Kıraathane hazırlanıyor…", 30, Ui.Muted, TextAnchor.MiddleCenter);
-            Ui.Stretch(loading.rectTransform);
+            Ui.Stretch(loading.rectTransform); loading.supportRichText = true;
+            // otomatik güncelleme: yeni sürüm varsa indirir, kurar ve oyunu yeniden açar
+            bool updating = false; yield return global::Alemdar.Net.Updater.Check(loading, q => updating = q);
+            if (updating) yield break;
+            loading.text = "Kıraathane hazırlanıyor…";
             var server = gameObject.AddComponent<Net.LocalServer>();
             string url = null;
             yield return server.Run(u => url = u);

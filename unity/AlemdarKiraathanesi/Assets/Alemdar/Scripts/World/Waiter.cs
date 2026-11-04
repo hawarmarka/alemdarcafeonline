@@ -98,11 +98,12 @@ namespace Alemdar.World
             foreach (var r in t.GetComponentsInChildren<Renderer>()) if (r.sharedMaterial == Props.Tea) r.sharedMaterial = m;
         }
         static readonly System.Collections.Generic.Dictionary<Color, Material> tints = new();
+        static Material simitM;
         static Transform Simit(Transform p)
         {
             var root = new GameObject("simit").transform; root.SetParent(p, false);
             Props.Cyl(root, .1f, .01f, Props.White, new Vector3(0, .005f, 0));
-            var m = Props.M(new Color(.62f, .36f, .14f), .25f);
+            simitM ??= Props.M(new Color(.62f, .36f, .14f), .25f); var m = simitM; // tek malzeme
             for (int i = 0; i < 16; i++) { float a = i / 16f * Mathf.PI * 2; var s = GameObject.CreatePrimitive(PrimitiveType.Sphere); Destroy(s.GetComponent<Collider>()); s.transform.SetParent(root, false); s.transform.localPosition = new Vector3(Mathf.Cos(a) * .055f, .025f, Mathf.Sin(a) * .055f); s.transform.localScale = Vector3.one * .035f; s.GetComponent<Renderer>().sharedMaterial = m; }
             return root;
         }

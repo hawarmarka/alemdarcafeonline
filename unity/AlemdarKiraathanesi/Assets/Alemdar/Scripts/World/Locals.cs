@@ -118,7 +118,7 @@ namespace Alemdar.World
                 gameMove = Time.time + 2.2f + (float)rng.NextDouble() * 2.5f;
                 int turn = (int)(Time.time / 5f) % people.Count; var p = people[turn];
                 if (p) { p.Reach(focus + (p.transform.position - focus).normalized * .25f + Vector3.up * .02f, 0, .8f); Sfx.Play(topic == "tavla" ? "zar" : topic == "okey" ? "tas" : "kagit", focus, .6f); }
-                if (!talking) foreach (var o in people) if (o && o != p) o.LookAt = p ? p.Head.position : (Vector3?)null;
+                if (!talking) foreach (var o in people) if (o && o != p) o.LookAt = p ? HeadOf(p) : (Vector3?)null;
             }
             if (talking || Time.time < next) return;
             bool near = (cam - focus).sqrMagnitude < hear * hear;
@@ -137,7 +137,7 @@ namespace Alemdar.World
                 var clip = Dialogues.Clip(l.id);
                 if (!who || !clip) { Dialogues.Missing++; continue; }
                 Dialogues.Played++; if (Dialogues.Log.Count < 60) Dialogues.Log.Add($"{Time.time:0.0} {topic} {who.Display}: {l.id} ({clip.length:0.0} sn)");
-                foreach (var o in people) if (o && o != who) o.LookAt = who.Head.position;
+                foreach (var o in people) if (o && o != who) o.LookAt = HeadOf(who);
                 who.Gesture(l.shout ? (topic == "kavga" ? Chars.Person.No : Chars.Person.Talk) : (rng.NextDouble() < .75 ? Chars.Person.Talk : Chars.Person.Ask), Mathf.Max(2f, clip.length));
                 who.SetTalk(1);
                 Sfx.PlayVoice(clip, who.Head ? who.Head.position : who.transform.position + Vector3.up * 1.5f, l.shout);
@@ -159,6 +159,9 @@ namespace Alemdar.World
             Sfx.Voice(who.Head ? who.Head.position : who.transform.position + Vector3.up * 1.5f, Lines.Make(topic, shout, rng, new List<string>()), Chars.Person.Hash(who.Display), shout, high);
         }
         bool Game => topic == "okey" || topic == "tavla" || topic == "batak";
+        // masaya gerçek oyun gelince dekor (ve bu grup) gizlenir: yarıda kalan konuşma temizlenir, dönünce yine konuşurlar
+        void OnDisable() { StopAllCoroutines(); talking = false; if (people != null) foreach (var p in people) if (p) p.SetTalk(0); next = Time.time + 3f; }
+        static Vector3 HeadOf(Chars.Person p) => p.Head ? p.Head.position : p.transform.position + Vector3.up * 1.5f;
     }
 
     // ---------- seslendirilmiş diyaloglar (Resources/Sesler: diyalog.json + <id>.ogg; tools/voices/seslendir.py üretir) ----------

@@ -713,6 +713,8 @@ function snapshot(room, index) {
         retractPenalty: canRetract(room, index) && !room.turnSnap.states[index].hasOpened && !!game.playerStates[index].hasOpened, drawnFromDiscardTileId: game.playerStates[index].drawnFromDiscardTile?.id || null };
 }
 // İzleyici görüntüsü: masaya 0 numaralı koltuğun yerinden bakar, hiçbir oyuncunun ıstakası gönderilmez.
+// Yancı yalnızca çip yatırılmamış masada yanındakinin elini görür: bahisli masada izleyici bir rakibe taş söyleyip çip kazandırmasın.
+const followSeat = (room, seat) => Number.isInteger(seat) && seat >= 0 && seat < 4 && !room.players.some(p => p.betPaid) ? seat : -1;
 // İzleyici görüntüsü. follow: yancının yanında oturduğu oyuncu (o oyuncunun ıstakası görünür); yoksa 0 numaralı koltuktan, ıstaka boş.
 function spectatorSnapshot(room, follow = -1) {
     const view = snapshot(room, follow >= 0 ? follow : 0);
@@ -929,7 +931,7 @@ function finishRound(room, winnerIndex, result) {
     // Çip sıralamasına yalnızca maç boyunca en az bir kez elini açanlar girer.
     room.openedEver = (room.openedEver || [false, false, false, false]).map((v, i) => v || !!game.playerStates[i]?.hasOpened || i === winnerIndex);
     if (winnerIndex !== null) room.players.forEach((player, i) => {
-        if (!player.accountId) return;
+        if (!player.accountId || player.noAwardRound === room.roundId) return;
         const up = Accounts.award(player.accountId, i === winnerIndex);
         if (up && player.socketId) io.to(player.socketId).emit('levelUp', up); // seviye atladı: çip ödülü
     });
@@ -1091,6 +1093,7 @@ function scheduleSeatTakeover(room, oldToken) {
                 token: `bot-replace-${room.code}-${Date.now()}-${seat}`,
                 socketId: null,
                 name: missing.name,
+                heldAccount: missing.accountId || null, heldBet: !!missing.betPaid,
                 avatar: 'default.svg',
                 frame: 'silver',
                 level: 1,
@@ -1143,6 +1146,7 @@ function playerLeave(socket, deliberate = false) {
             token: `bot-replace-${room.code}-${Date.now()}-${index}`,
             socketId: null,
             name: player.name,
+            heldAccount: player.accountId || null, heldBet: !!player.betPaid, // aynı hesap geri dönerse bahsi geri verilir
             avatar: 'default.svg',
             frame: 'silver',
             level: 1,
@@ -1176,9 +1180,11 @@ function takeBotSeat(socket, room, data, { token, name, account }) {
     const bot = room.players[index];
     const avatar = Avatars.ref(account?.avatar || (Avatars.BUILTIN.includes(data?.avatar) ? data.avatar : 'default.svg'));
     room.players[index] = { token, socketId: socket.id, name, avatar, seat: seatOf(room, bot), frame: account?.frame || 'gold', accountId: account?.id || null,
-        level: Accounts.cleanUser(account)?.level || 1, chips: account ? Accounts.chipsOf(account.id) : null }; // bahis maç başında alındı; yeni gelen pay almaz (betPaid yok)
+        level: Accounts.cleanUser(account)?.level || 1, chips: account ? Accounts.chipsOf(account.id) : null, // bahis maç başında alındı; yeni gelen pay almaz
+        betPaid: !!(account && bot.heldAccount === account.id && bot.heldBet),   // kendi koltuğuna dönen ödediği bahsi kaybetmez
+        noAwardRound: room.started ? room.roundId : null };                       // elin ortasında gelen o elin zaferini/XP'sini almaz
     if (!room.teamMode && bot.name !== name) { room.scores[name] = room.scores[bot.name] || 0; delete room.scores[bot.name]; }
-    if (room.watchers?.delete(socket.id)) { socket.data.watchCode = null; io.to(room.code).emit('watchersUpdate', { count: room.watchers.size }); }
+    if (room.watchers?.delete(socket.id)) { socket.data.watchCode = null; socket.data.followSeat = -1; io.to(room.code).emit('watchersUpdate', { count: room.watchers.size }); }
     socket.join(room.code);
     socket.data.roomCode = room.code;
     socket.data.token = token;
@@ -1357,7 +1363,8 @@ io.on('connection', socket => {
         if (socket.data.roomCode) return issue(socket, 'Masadayken başka masa izlenemez.');
         room.watchers = room.watchers || new Set(); room.watchers.add(socket.id);
         socket.data.watchCode = room.code; socket.join(room.code);
-        socket.data.followSeat = Number.isInteger(data?.seat) && data.seat >= 0 && data.seat < 4 ? data.seat : -1;
+        socket.data.followSeat = followSeat(room, data?.seat);
+        if (Number.isInteger(data?.seat) && socket.data.followSeat < 0) issue(socket, 'Bu masada çip var: yancı oyuncunun elini göremez.');
         socket.emit('chatHistory', room.chatHistory);
         socket.emit('lobbyUpdate', { code: room.code, isPublic: room.isPublic, players: summary(room), teamMode: room.teamMode, started: room.started, spectator: true,
             assisted: room.assisted, stackingMode: room.stackingMode, roundLimit: room.roundLimit, botFillAt: 0, hostIndex: -1, autoBots: !!room.autoBots, bet: room.bet });
@@ -1367,7 +1374,8 @@ io.on('connection', socket => {
     // Yancı başka bir oyuncunun yanına geçti: o oyuncunun ıstakasını görür.
     socket.on('watchFollow', data => {
         const room = rooms.get(socket.data.watchCode); if (!room?.watchers?.has(socket.id)) return;
-        socket.data.followSeat = Number.isInteger(data?.seat) && data.seat >= 0 && data.seat < 4 ? data.seat : -1;
+        socket.data.followSeat = followSeat(room, data?.seat);
+        if (Number.isInteger(data?.seat) && socket.data.followSeat < 0) issue(socket, 'Bu masada çip var: yancı oyuncunun elini göremez.');
         if (room.started && room.game) socket.emit('gameState', spectatorSnapshot(room, socket.data.followSeat));
     });
     const unwatch = () => {

@@ -194,7 +194,7 @@ function install({ io, Accounts, Avatars, Logger }) {
     if (over) {
       const best = Math.max(...room.totals);
       room.winners = [0, 1, 2, 3].filter(i => room.totals[i] === best);
-      for (const [i, p] of room.players.entries()) if (p.accountId && !p.isBot) { try { Accounts.award(p.accountId, room.winners.includes(i)); } catch (_) {} }
+      for (const [i, p] of room.players.entries()) if (p.accountId && !p.isBot && !p.lateJoin) { try { Accounts.award(p.accountId, room.winners.includes(i)); } catch (_) {} }
     } else timer(room, 'nextTimer', NEXT_ROUND_MS, 'yeni el', () => startRound(room));
     emit(room);
   }
@@ -247,6 +247,8 @@ function install({ io, Accounts, Avatars, Logger }) {
     Object.assign(p, { token: String(data.token), socketId: socket.id, name, isBot: false, accountId: account?.id || null,
       avatar: Avatars.ref(account?.avatar || (Avatars.BUILTIN.includes(data?.avatar) ? data.avatar : 'default.svg')), level: Accounts.cleanUser?.(account)?.level || 1 });
     if (!room.hostToken || !room.players.some(q => q.token === room.hostToken && !q.isBot)) room.hostToken = p.token;
+    p.lateJoin = true; // maçın ortasında geldi: maç sonu zaferi/XP'si verilmez
+    if (room.watchers?.delete(socket.id)) socket.data.batakWatch = null;
     socket.data.batakCode = room.code; socket.data.batakToken = p.token;
     socket.emit('batak:joined', { code: room.code, seat: p.seat });
     room.notice = `${name} masaya oturdu, botun yerine oynuyor.`;

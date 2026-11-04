@@ -97,6 +97,13 @@ assert.deepEqual(w.last('gameState').tiles.map(t => t.id).sort(), room.game.play
 const w2 = new FakeSocket(fakeIO);
 w2.receive('watchGame', { roomCode: room.code });
 assert.equal(w2.last('gameState').tiles.length, 0);
+// 8) Çip yatırılmış masada yancı el göremez (bahisli masada hile olmasın).
+room.players[3].betPaid = true;
+const w3 = new FakeSocket(fakeIO);
+w3.receive('watchGame', { roomCode: room.code, seat: 2 });
+assert.equal(w3.last('gameState').tiles.length, 0, 'çipli masada yancıya el gitmez');
+assert.match(w3.last('gameError').message, /çip/);
+room.players[3].betPaid = false;
 console.log('v38Seats: koltuk devri (dönen oyuncu, botun yerine oturma) geçti');
 console.log('v38Seats: koltuk seçimi, dolu koltuk, koltuk değiştirme, koltuk sırasına dizilme ve başlayanın yalnızca taş atması geçti');
 process.exit(0);

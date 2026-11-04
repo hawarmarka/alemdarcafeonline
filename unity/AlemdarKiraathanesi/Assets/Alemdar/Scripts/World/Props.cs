@@ -24,6 +24,8 @@ namespace Alemdar.World
             m.SetTexture("_BumpMap", nor); m.SetTextureScale("_BumpMap", tiling); m.SetFloat("_BumpScale", bump); m.EnableKeyword("_NORMALMAP");
             return m;
         }
+        static readonly System.Collections.Generic.Dictionary<string, Material> cache = new();
+        static Material Cached(string key, System.Func<Material> make) { if (!cache.TryGetValue(key, out var m) || !m) cache[key] = m = make(); return m; }
         public static Material Transparent(Color c, float smooth = .95f) => From(Lib.I.transparent, c, smooth, 0, null, null);
         public static Material Cutout(Texture t) => From(Lib.I.cutout, Color.white, .3f, 0, t, null);
         public static Material Emissive(Color c, float power = 1.5f) { var m = From(Lib.I.emissive, c, .5f, 0, null, null); m.SetColor("_EmissionColor", c * power); return m; }
@@ -144,7 +146,7 @@ namespace Alemdar.World
             var root = new GameObject("kahve").transform; root.SetParent(p, false); root.localPosition = pos;
             MeshGo(root, saucerMesh ?? Lathe(new[] { new Vector2(0, 0), new Vector2(.04f, 0), new Vector2(.052f, .012f) }), White, Vector3.zero);
             MeshGo(root, Lathe(new[] { new Vector2(.017f, 0), new Vector2(.024f, .01f), new Vector2(.027f, .05f), new Vector2(.028f, .055f) }), White, new Vector3(0, .01f, 0));
-            Cyl(root, .025f, .002f, M(new Color(.2f, .11f, .06f), .4f), new Vector3(0, .058f, 0)).name = "sivi";
+            Cyl(root, .025f, .002f, Cached("kahve", () => M(new Color(.2f, .11f, .06f), .4f)), new Vector3(0, .058f, 0)).name = "sivi";
             return root;
         }
         public static Transform Toast(Transform p, Vector3 pos) // tabakta kaşarlı tost
@@ -173,13 +175,13 @@ namespace Alemdar.World
         public static Transform Ashtray(Transform parent, Vector3 at, bool smoking)
         {
             var p = new GameObject("kulluk").transform; p.SetParent(parent, false); p.localPosition = at; var pos = Vector3.zero; // tek parça: kahveci alıp götürebilsin
-            var glass = Transparent(new Color(.25f, .22f, .2f, .75f), .9f); glass.color = new Color(.25f, .22f, .2f, .75f);
+            var glass = Cached("kulluk", () => { var g = Transparent(new Color(.25f, .22f, .2f, .75f), .9f); g.color = new Color(.25f, .22f, .2f, .75f); return g; });
             MeshGo(p, Lathe(new[] { new Vector2(0, 0), new Vector2(.05f, 0), new Vector2(.055f, .02f), new Vector2(.045f, .022f), new Vector2(.035f, .01f), new Vector2(0, .01f) }, 20), glass, pos);
             if (!smoking) return p;
             var cig = Box(p, new Vector3(.007f, .007f, .06f), White, pos + new Vector3(.02f, .025f, 0), 30, false, false); cig.transform.localRotation = Quaternion.Euler(-8, 30, 0);
-            Box(cig.transform, new Vector3(1, 1, .3f), M(new Color(.75f, .5f, .2f), .3f), new Vector3(0, 0, -.35f), 0, false, false);
+            Box(cig.transform, new Vector3(1, 1, .3f), Cached("filtre", () => M(new Color(.75f, .5f, .2f), .3f)), new Vector3(0, 0, -.35f), 0, false, false);
             var ember = cig.transform.TransformPoint(new Vector3(0, 0, .5f));
-            Box(p, new Vector3(.008f, .008f, .006f), Emissive(new Color(1f, .35f, .05f), 3f), p.InverseTransformPoint(ember), 30, false, false);
+            Box(p, new Vector3(.008f, .008f, .006f), Cached("koz", () => Emissive(new Color(1f, .35f, .05f), 3f)), p.InverseTransformPoint(ember), 30, false, false);
             Smoke(p, p.InverseTransformPoint(ember), .45f);
             return p;
         }
@@ -188,15 +190,15 @@ namespace Alemdar.World
         public static Transform Nargile(Transform p, Vector3 pos, float ry) // hortumun ağızlığı yerel (+.4, .65, 0)
         {
             var g = new GameObject("nargile").transform; g.SetParent(p, false); g.localPosition = pos; g.localRotation = Quaternion.Euler(0, ry, 0);
-            var vase = Transparent(new Color(.2f, .45f, .5f, .55f), .95f); vase.color = new Color(.2f, .45f, .5f, .55f);
+            var vase = Cached("nargileCam", () => { var v = Transparent(new Color(.2f, .45f, .5f, .55f), .95f); v.color = new Color(.2f, .45f, .5f, .55f); return v; });
             MeshGo(g, Lathe(new[] { new Vector2(0, 0), new Vector2(.08f, 0), new Vector2(.11f, .08f), new Vector2(.1f, .18f), new Vector2(.04f, .26f), new Vector2(.025f, .3f) }, 24), vase, Vector3.zero);
-            var brass = M(new Color(.75f, .55f, .25f), .7f, .9f);
+            var brass = Cached("pirinc", () => M(new Color(.75f, .55f, .25f), .7f, .9f));
             Cyl(g, .012f, .42f, brass, new Vector3(0, .5f, 0));
             MeshGo(g, Lathe(new[] { new Vector2(.02f, 0), new Vector2(.09f, .01f), new Vector2(.09f, .015f), new Vector2(.02f, .02f) }, 24), brass, new Vector3(0, .62f, 0)); // tabla
-            MeshGo(g, Lathe(new[] { new Vector2(.015f, 0), new Vector2(.04f, .05f), new Vector2(.045f, .07f) }, 18), M(new Color(.55f, .25f, .15f), .4f), new Vector3(0, .64f, 0)); // lüle
-            for (int i = 0; i < 3; i++) Box(g, new Vector3(.025f, .015f, .025f), Emissive(new Color(1f, .3f, .05f), 2.2f), new Vector3(-.015f + i * .015f, .715f, (i % 2) * .01f), i * 30, false, false); // köz
+            MeshGo(g, Lathe(new[] { new Vector2(.015f, 0), new Vector2(.04f, .05f), new Vector2(.045f, .07f) }, 18), Cached("lule", () => M(new Color(.55f, .25f, .15f), .4f)), new Vector3(0, .64f, 0)); // lüle
+            for (int i = 0; i < 3; i++) Box(g, new Vector3(.025f, .015f, .025f), Cached("nargileKoz", () => Emissive(new Color(1f, .3f, .05f), 2.2f)), new Vector3(-.015f + i * .015f, .715f, (i % 2) * .01f), i * 30, false, false); // köz
             // hortum: yere doğru sarkan kavis
-            var hose = M(new Color(.12f, .1f, .09f), .5f);
+            var hose = Cached("hortum", () => M(new Color(.12f, .1f, .09f), .5f));
             for (int i = 0; i < 14; i++)
             {
                 float t = i / 13f; var a = new Vector3(.05f + t * .35f, .45f - Mathf.Sin(t * Mathf.PI) * .38f + t * .2f, 0);
@@ -229,7 +231,7 @@ namespace Alemdar.World
             col.color = grad;
             var noise = ps.noise; noise.enabled = true; noise.strength = .06f; noise.frequency = .6f; noise.scrollSpeed = .3f;
             var rot = ps.rotationOverLifetime; rot.enabled = true; rot.z = new ParticleSystem.MinMaxCurve(-.4f, .4f);
-            var r = go.GetComponent<ParticleSystemRenderer>(); r.sharedMaterial = new Material(Lib.I.smoke) { mainTexture = puff }; r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            var r = go.GetComponent<ParticleSystemRenderer>(); r.sharedMaterial = Cached("duman", () => new Material(Lib.I.smoke) { mainTexture = puff }); r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             ps.Play();
             return ps;
         }
@@ -251,8 +253,8 @@ namespace Alemdar.World
         {
             var t = new GameObject("sigara").transform;
             Box(t, new Vector3(.006f, .006f, .07f), White, Vector3.zero, 0, false, false);
-            Box(t, new Vector3(.0062f, .0062f, .02f), M(new Color(.78f, .52f, .22f), .3f), new Vector3(0, 0, -.025f), 0, false, false);
-            Box(t, new Vector3(.0064f, .0064f, .006f), Emissive(new Color(1f, .35f, .05f), 3f), new Vector3(0, 0, .036f), 0, false, false);
+            Box(t, new Vector3(.0062f, .0062f, .02f), Cached("filtre2", () => M(new Color(.78f, .52f, .22f), .3f)), new Vector3(0, 0, -.025f), 0, false, false);
+            Box(t, new Vector3(.0064f, .0064f, .006f), Cached("koz", () => Emissive(new Color(1f, .35f, .05f), 3f)), new Vector3(0, 0, .036f), 0, false, false);
             Smoke(t, new Vector3(0, 0, .04f), .3f);
             return t;
         }

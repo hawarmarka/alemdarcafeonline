@@ -302,6 +302,7 @@ namespace Alemdar.EditorTools
         public static void Windows()
         {
             Setup();
+            PlayerSettings.bundleVersion = Alemdar.Net.Updater.Version; // otomatik güncelleme bu numarayı karşılaştırır
             string outDir = Path.Combine(Repo, "unity", "Build"), exe = Path.Combine(outDir, "AlemdarKiraathanesi.exe");
             var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions { scenes = new[] { ScenePath }, locationPathName = exe, target = BuildTarget.StandaloneWindows64, options = BuildOptions.None });
             if (report.summary.result != UnityEditor.Build.Reporting.BuildResult.Succeeded) throw new System.Exception("Derleme başarısız: " + report.summary.result);

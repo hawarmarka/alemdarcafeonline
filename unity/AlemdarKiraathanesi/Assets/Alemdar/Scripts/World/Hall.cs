@@ -16,6 +16,7 @@ namespace Alemdar.World
         public void SetDecor(int table, bool on) { if (table >= 0 && table < Decor.Count && Decor[table]) Decor[table].SetActive(on); }
         public Vector3 WaiterSpot { get; private set; }
         public Transform Root { get; private set; }
+        public Transform Loose { get; private set; } // birleştirilmeyen, hareket eden eşyalar
 
         public static Quaternion SeatRot(int dir) => Quaternion.Euler(0, dir * 90, 0);
         public Vector3 Seat(int table, int dir, float extra = 0) => Tables[table] + SeatRot(dir) * new Vector3(0, 0, SeatDist + extra);
@@ -28,6 +29,7 @@ namespace Alemdar.World
         {
             Props.Init();
             Root = new GameObject("Salon").transform; Root.SetParent(transform, false);
+            Loose = new GameObject("HareketliEsyalar").transform; Loose.SetParent(transform, false); // StaticBatching dışında (TableService oynatır)
             foreach (float z in new[] { -3f, 0f, 3f }) foreach (float x in new[] { -4.2f, 0f, 4.2f }) Tables.Add(new Vector3(x, 0, z));
             Tables.Add(new Vector3(-4.2f, 0, 6.6f)); Tables.Add(new Vector3(4.2f, 0, 6.6f));
             Shell(); Storefront(); Windows(); Counter(); Toilet(); Terrace();
@@ -58,8 +60,8 @@ namespace Alemdar.World
                 }
                 // köşe bardaklıklarında yarım çay ve küllük (bazılarında sigara tüter). TableService bunları masadaki ikram sayar:
                 // o köşeye sipariş gelince kahveci eskisini tepsiye alır (üst üste binmez), bekleyen çaylar zamanla toplanır.
-                CornerItems.Add((i, 0, Props.TeaGlass(Root, Corner(i, 0)), "cay")); CornerItems.Add((i, 2, Props.TeaGlass(Root, Corner(i, 2)), "cay"));
-                CornerItems.Add((i, 1, Props.Ashtray(Root, Corner(i, 1), i % 3 == 0), "kul"));
+                CornerItems.Add((i, 0, Props.TeaGlass(Loose, Corner(i, 0)), "cay")); CornerItems.Add((i, 2, Props.TeaGlass(Loose, Corner(i, 2)), "cay"));
+                CornerItems.Add((i, 1, Props.Ashtray(Loose, Corner(i, 1), i % 3 == 0), "kul"));
             }
             // nargileler: iki masanın yanında, közü tüter
             Props.Nargile(Root, Tables[0] + new Vector3(.95f, 0, -.35f), 20);

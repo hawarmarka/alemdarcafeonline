@@ -78,8 +78,9 @@ function create({ io, prefix }) {
     });
     // Yancı: izleyen, yanında oturduğu oyuncunun elini görür (kıraathanede masanın yanına oturan gibi). Hamle yapamaz.
     socket.on(ev('follow'), data => {
-      const room = rooms.get(socket.data[key]); if (!room) return;
-      socket.data[`${prefix}Follow`] = followSeat(data?.seat); emitAll(room);
+      const room = rooms.get(socket.data[key]); if (!room?.watchers?.has(socket.id)) return;
+      socket.data[`${prefix}Follow`] = followSeat(data?.seat);
+      socket.emit(ev('state'), view(room, snapshot, socket.data[`${prefix}Follow`])); // yalnızca bu izleyiciye
     });
     socket.on(ev('unwatch'), unwatch);
     socket.on('disconnect', unwatch);
@@ -90,11 +91,13 @@ function create({ io, prefix }) {
     const views = new Map();
     for (const id of room.watchers) {
       const seat = io.sockets?.sockets?.get(id)?.data?.[`${prefix}Follow`] ?? -1;
-      if (!views.has(seat)) views.set(seat, seat < 0 ? snapshot(room, -1) : { ...snapshot(room, seat), spectator: true, legal: [] });
+      if (!views.has(seat)) views.set(seat, view(room, snapshot, seat));
       io.to(id).emit(ev('state'), views.get(seat));
     }
   }
-  const followSeat = v => (Number.isInteger(v) && v >= 0 && v < 4 ? v : -1);
+  // Yancı (yanındakinin elini görme) yalnızca Batak'ta; Pişti'de blöf kartı, İsim Şehir'de yazılan cevaplar izleyiciye gitmemeli.
+  const followSeat = v => (prefix === 'batak' && Number.isInteger(v) && v >= 0 && v < 4 ? v : -1);
+  const view = (room, snapshot, seat) => seat < 0 ? snapshot(room, -1) : { ...snapshot(room, seat), spectator: true, legal: [] };
   return { attach, voiceBroadcast, attachWatch, emitWatchers };
 }
 module.exports = { create, TREATS };

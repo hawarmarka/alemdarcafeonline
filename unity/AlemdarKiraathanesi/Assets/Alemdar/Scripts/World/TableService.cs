@@ -40,7 +40,7 @@ namespace Alemdar.World
         {
             var map = kind == "nargile" ? hookahs : cups;
             map.TryGetValue((table, dir), out var old);
-            item.SetParent(hall.Root, true);
+            item.SetParent(hall.Loose, true);
             if (kind == "nargile")
             {
                 var seat = hall.Seat(table, dir); var fw = (hall.Tables[table] - seat).normalized; var right = Vector3.Cross(Vector3.up, fw);
@@ -72,7 +72,9 @@ namespace Alemdar.World
                 bool empty = it.left <= 0 && Time.time - it.emptyAt > 6f, stale = Time.time - it.servedAt > 480f; // biten 6 sn sonra, dokunulmayan 8 dk sonra
                 if (empty || stale) { it.collecting = true; waiter.Collect(it.table, it.dir); }
             }
-            foreach (var kv in held) if (kv.Key && kv.Value.cig) Hold(kv.Key, kv.Value.cig);
+            gone.Clear();
+            foreach (var kv in held) { if (kv.Key && kv.Value.cig) Hold(kv.Key, kv.Value.cig); else gone.Add(kv.Key); }
+            foreach (var k in gone) { if (held[k].cig) Destroy(held[k].cig.gameObject); held.Remove(k); } // kişi salondan ayrıldı
             if (myCig) HoldFirstPerson(myCig, myPuffing);
         }
 
@@ -127,6 +129,7 @@ namespace Alemdar.World
         // ---------- sigara (G) ve nargile (H) ----------
         readonly Dictionary<Chars.Person, (Transform cig, int puffs)> held = new();
         Transform myCig; int myPuffs; bool myPuffing;
+        readonly List<Chars.Person> gone = new();
         public void SmokeMine()
         {
             var s = Self();
@@ -145,6 +148,7 @@ namespace Alemdar.World
         public void Remote(string name, string act, int table, int dir)
         {
             var p = PersonNamed?.Invoke(name);
+            if (p && table >= 0 && table < hall.Tables.Count && (p.transform.position - hall.Tables[table]).sqrMagnitude > 3f * 3f) return; // o masada değil: sahte hareket
             if (act == "sip") { if (table >= 0 && dir >= 0 && cups.TryGetValue((table, dir), out var it) && it.left > 0 && !it.busy && !it.collecting) StartCoroutine(Sip(it, p, false)); }
             else if (p && act == "smoke") StartCoroutine(Puff(p, false));
             else if (p && act == "nargile") StartCoroutine(Puff(p, true));
